@@ -1,0 +1,161 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { skills, skillCategories } from '../data/agents-new';
+---
+
+<Layout 
+  title="AI Agent Skills Directory | Mission Freedom"
+  description="Complete directory of AI agent skills at Mission Freedom. SEO, content automation, social media management, and multi-agent orchestration capabilities.">
+  
+  <!-- Hero -->
+  <section class="relative pt-32 pb-16 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient"></div>
+    <div class="grid-overlay"></div>
+    
+    <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-brand-amber/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-brand-emerald/10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-amber/10 border border-brand-amber/30 text-brand-amber text-sm font-medium mb-6">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        {skills.length}+ Skills
+      </span>
+      
+      <h1 class="display-heading mb-6">
+        Skills <br/>
+        <span class="text-gradient">Directory</span>
+      </h1>
+      
+      <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+        Browse all <span class="text-brand-gold">AI agent skills</span> available across our multi-agent orchestration system. 
+        From SEO to content creation, web development to social media.
+      </p>
+      
+      
+      <!-- Search Box -->
+      <div class="max-w-xl mx-auto mt-8">
+        <div class="relative">
+          <svg class="w-5 h-5 text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input 
+            type="text" 
+            id="skillSearch"
+            placeholder="Search skills..."
+            class="w-full pl-12 pr-4 py-4 bg-brand-card border border-brand-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors"
+          >
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Skills by Category -->
+  <section class="relative py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-3 gap-8">
+        {skillCategories.map((category) => (
+          <div class="skill-category">
+            <div class="flex items-center gap-3 mb-6">
+              <div class={`w-3 h-3 rounded-full bg-${category.color}-400`}></div>
+              <h2 class="text-2xl font-bold text-white">{category.name}</h2>
+              <span class="ml-auto px-3 py-1 rounded-full bg-white/5 text-gray-400 text-sm">{category.skills.length} skills</span>
+            </div>
+            
+            <div class="space-y-3">
+              {category.skills.map((skill) => (
+                <div class="skill-item glass-card rounded-xl p-4 hover:bg-white/5 transition-colors group cursor-pointer"
+                  data-skill={skill.name.toLowerCase()}
+                >
+                  <div class="flex items-start gap-4">
+                    <div class={`w-10 h-10 rounded-lg bg-${category.color}-500/10 border border-${category.color}-500/30 flex items-center justify-center shrink-0`}>
+                      <svg class={`w-5 h-5 text-${category.color}-400`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <Fragment set:html={skill.icon} />
+                      </svg>
+                    </div>
+                    
+                    <div class="flex-1">
+                      <h3 class="font-semibold text-white group-hover:text-brand-gold transition-colors">{skill.name}</h3>
+                      <p class="text-gray-400 text-sm mt-1">{skill.description}</p>
+                      
+                      <div class="flex items-center gap-2 mt-2">
+                        <span class="text-xs text-gray-500">Used by:</span>
+                        {skill.agents.map((agent) => (
+                          <span class="text-xs text-brand-gold/70">{agent}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+  
+  <!-- Technical Stack -->
+  <section class="relative py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="glass-card rounded-3xl p-8 md:p-12">
+        <div class="text-center mb-12">
+          <span class="inline-block px-4 py-1.5 rounded-full bg-brand-purple/10 border border-brand-purple/30 text-brand-purple text-sm font-medium mb-4">
+            Technology
+          </span>
+          <h2 class="section-heading text-white">
+            Technical <span class="text-gradient-cool">Stack</span>
+          </h2>
+        </div>
+        
+        <div class="grid md:grid-cols-4 gap-8 text-center">
+          {[
+            { name: 'Astro', desc: 'Static Site Generator', icon: '🚀' },
+            { name: 'TypeScript', desc: 'Type-Safe Development', icon: '<⚡>' },
+            { name: 'Cloudflare', desc: 'Edge Deployment', icon: '☁️' },
+            { name: 'Obsidian', desc: 'Knowledge Management', icon: '📚' },
+            { name: 'Claude', desc: 'AI Foundation Model', icon: '🤖' },
+            { name: 'Buttondown', desc: 'Email Automation', icon: '📧' },
+            { name: 'Etsy API', desc: 'E-commerce Platform', icon: '🛒' },
+            { name: 'GitHub', desc: 'Code & Workflows', icon: '</>' }
+          ].map((tech) => (
+            <div class="p-4">
+              <div class="text-3xl mb-2">{tech.icon}</div>
+              <h3 class="font-semibold text-white mb-1">{tech.name}</h3>
+              <p class="text-gray-400 text-sm">{tech.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <script>
+    // Simple search functionality
+    const searchInput = document.getElementById('skillSearch');
+    const skillItems = document.querySelectorAll('.skill-item');
+    
+    searchInput?.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      
+      skillItems.forEach(item => {
+        const skillName = item.getAttribute('data-skill');
+        const parent = item.closest('.skill-category');
+        
+        if (skillName?.includes(term)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+        
+        // Check if category has any visible items
+        const visibleItems = parent?.querySelectorAll('.skill-item[style*="block"], .skill-item:not([style*="none"])');
+        if (parent) {
+          parent.style.display = visibleItems?.length ? 'block' : 'none';
+        }
+      });
+    });
+  </script>
+
+</Layout>

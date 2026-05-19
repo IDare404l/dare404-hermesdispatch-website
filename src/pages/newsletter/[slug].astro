@@ -1,0 +1,86 @@
+---
+import { type GetStaticPaths } from 'astro';
+import Layout from '../../layouts/Layout.astro';
+import { newsletters, getNewsletterBySlug } from '../../data/newsletters';
+
+export const getStaticPaths = (async () => {
+  return newsletters
+    .filter(n => n.published)
+    .map(issue => ({
+      params: { slug: issue.slug },
+      props: { issue },
+    }));
+}) satisfies GetStaticPaths;
+
+const { issue } = Astro.props;
+---
+
+<Layout title={`${issue.title} - Mission Freedom Newsletter`}
+  description={issue.excerpt}>
+  
+  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <header class="mb-10">
+      <div class="flex items-center gap-4 mb-4 text-sm text-gray-500">
+        <time>{new Date(issue.date).toLocaleDateString('en-US', { 
+          month: 'long', 
+          day: 'numeric', 
+          year: 'numeric' 
+        })}  </time>
+        <span>•</span>
+        <span>{issue.readTime}</span>
+        <span>•</span>
+        <span>{issue.tags.join(', ')}</span>
+      </div>
+      <h1 class="text-4xl font-bold mb-4">{issue.title}</h1>
+      <p class="text-xl text-gray-400">{issue.excerpt}</p>
+    </header>
+    
+    <div class="prose prose-invert prose-lg max-w-none">
+      {issue.content.split('\n').map((line, i) => {
+        if (line.startsWith('# ')) {
+          return <h1 key={i} class="text-3xl font-bold mt-8 mb-4">{line.slice(2)}</h1>;
+        }
+        if (line.startsWith('## ')) {
+          return <h2 key={i} class="text-2xl font-semibold mt-8 mb-4">{line.slice(3)}</h2>;
+        }
+        if (line.startsWith('### ')) {
+          return <h3 key={i} class="text-xl font-semibold mt-6 mb-3">{line.slice(4)}</h3>;
+        }
+        if (line.startsWith('- **')) {
+          const match = line.match(/- \*\*(.+?)\*\*:(?:(.+))?/);
+          if (match) {
+            return (
+              <li key={i} class="mb-2">
+                <strong class="text-brand-gold">{match[1]}</strong>: {match[2] || ''}
+              </li>
+            );
+          }
+        }
+        if (line.startsWith('- ')) {
+          return <li key={i} class="mb-2 ml-4">{line.slice(2)}</li>;
+        }
+        if (line.startsWith('**') && line.endsWith('**')) {
+          return <p key={i} class="font-semibold text-brand-gold">{line.slice(2, -2)}</p>;
+        }
+        if (line === '---') {
+          return <hr key={i} class="border-gray-800 my-8" />;
+        }
+        if (line.trim() === '') {
+          return <div key={i} class="h-4" />;
+        }
+        return <p key={i} class="mb-4">{line}</p>;
+      })}
+    </div>
+    
+    <footer class="mt-12 pt-8 border-t border-gray-800">
+      <div class="flex items-center justify-between">
+        <a href="/newsletter" class="text-gray-400 hover:text-brand-gold transition">
+          ← Back to Newsletter
+        </a>
+        <a href="/newsletter" class="px-4 py-2 border border-gray-700 rounded-lg hover:border-brand-gold transition">
+          Subscribe
+        </a>
+      </div>
+    </footer>
+  </article>
+</Layout>
