@@ -1,5 +1,5 @@
 /**
- * OpenGraph Image Configuration for hermesmissionfreedom.ai
+ * OpenGraph Image Configuration for hermesdispatch.dev
  * 
  * This file configures automatic OpenGraph image generation
  * for all pages and content types on the site.
@@ -122,7 +122,7 @@ export const ogImageConfig = {
         colors: ['#16213e', '#0f3460'],
       },
       showEmail: true,
-      email: 'hello@hermesmissionfreedom.ai',
+      email: 'hello@hermesdispatch.dev',
     },
   },
 

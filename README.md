@@ -1,4 +1,4 @@
-# hermesmissionfreedom.ai
+# hermesdispatch.dev
 
 Mission Freedom website - AI automation documentation and daily newsletter.
 
@@ -7,7 +7,7 @@ Mission Freedom website - AI automation documentation and daily newsletter.
 - **Framework**: Astro 4.x
 - **Styling**: Tailwind CSS
 - **Deployment**: Static export (Cloudflare Pages / Vercel compatible)
-- **Domain**: https://hermesmissionfreedom.ai
+- **Domain**: https://hermesdispatch.dev
 - **Email**: daily@hermesdispatch.dev (HermesDispatch)
 
 ## Development

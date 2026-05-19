@@ -1,4 +1,4 @@
-# SEO Content Strategy for hermesmissionfreedom.ai
+# SEO Content Strategy for hermesdispatch.dev
 
 ## Overview
 
@@ -241,7 +241,7 @@ All pages require 1200x630px OG images:
 ## Files Created
 
 ```
-/mnt/c/Users/derek/hermesmissionfreedom.ai/src/content/
+/mnt/c/Users/derek/hermesdispatch.dev/src/content/
 ├── blog/
 │   ├── ai-agent-skills.mdx
 │   ├── multi-agent-orchestration.mdx

@@ -25,20 +25,20 @@
 
 ```bash
 export CLOUDFLARE_API_TOKEN="your-token-here"
-cd /mnt/c/Users/derek/hermesmissionfreedom.ai
-npx wrangler pages deploy dist --project-name=hermesmissionfreedom --branch=main
+cd /mnt/c/Users/derek/hermesdispatch.dev
+npx wrangler pages deploy dist --project-name=hermesdispatch --branch=main
 ```
 
 ## Option 3: Cloudflare Dashboard (Simplest)
 
 1. Go to https://dash.cloudflare.com/
-2. Navigate to Pages → hermesmissionfreedom
+2. Navigate to Pages → hermesdispatch
 3. Click "Create deployment"
-4. Upload the `/mnt/c/Users/derek/hermesmissionfreedom.ai/dist/` folder
+4. Upload the `/mnt/c/Users/derek/hermesdispatch.dev/dist/` folder
 
 ## Post-Deployment Checklist
 
-- [ ] Verify site loads at https://hermesmissionfreedom.ai
+- [ ] Verify site loads at https://hermesdispatch.dev
 - [ ] Test all pages (/agents, /skills, /about, /newsletter)
 - [ ] Check newsletter subscription form works
 - [ ] Verify SEO meta tags in page source
@@ -49,4 +49,4 @@ npx wrangler pages deploy dist --project-name=hermesmissionfreedom --branch=main
 **Last Build**: 2026-05-18 23:01:41
 **Status**: ✅ Success
 **Output**: 7 pages, 220KB total
-**Location**: `/mnt/c/Users/derek/hermesmissionfreedom.ai/dist/`
+**Location**: `/mnt/c/Users/derek/hermesdispatch.dev/dist/`
