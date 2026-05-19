@@ -1,0 +1,80 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "The Hermes Dispatch - Daily AI automation insights, Hermes skills, and tools from dare404" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0a0a0a" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | Hermes Mission Freedom</title>
+    <meta property="og:title" content=`${title} | Hermes Mission Freedom` />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+  </head>
+  <body class="min-h-screen bg-neutral-950 text-neutral-100">
+    <nav class="sticky top-0 z-50 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-xl">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <a href="/" class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center font-bold text-white">H</div>
+            <span class="font-semibold text-lg">Hermes Mission Freedom</span>
+          </a>
+          <div class="hidden md:flex items-center gap-1">
+            <a href="/newsletter" class="px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors">Newsletter</a>
+            <a href="/skills" class="px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors">Skills</a>
+            <a href="/tools" class="px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors">Tools</a>
+            <a href="/blog" class="px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors">Blog</a>
+          </div>
+          <a href="/newsletter" class="btn-primary text-sm">Subscribe</a>
+        </div>
+      </div>
+    </nav>
+    
+    <main>
+      <slot />
+    </main>
+    
+    <footer class="border-t border-neutral-800 mt-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div class="md:col-span-2">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-xs font-bold">H</div>
+              <span class="font-semibold">Hermes Mission Freedom</span>
+            </div>
+            <p class="text-neutral-400 text-sm max-w-sm">Building automated workflows with Hermes AI agents. Daily insights, pre-built skills, and practical tutorials.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-4">Resources</h4>
+            <ul class="space-y-2 text-sm text-neutral-400">
+              <li><a href="/skills" class="hover:text-neutral-200 transition-colors">Skills</a></li>
+              <li><a href="/tools" class="hover:text-neutral-200 transition-colors">Tools</a></li>
+              <li><a href="/blog" class="hover:text-neutral-200 transition-colors">Blog</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-4">Connect</h4>
+            <ul class="space-y-2 text-sm text-neutral-400">
+              <li><a href="https://github.com/dare404" class="hover:text-neutral-200 transition-colors">GitHub</a></li>
+              <li><a href="https://twitter.com/Dare__404" class="hover:text-neutral-200 transition-colors">Twitter</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="border-t border-neutral-800 mt-8 pt-8 text-center text-sm text-neutral-500">
+          <p>Written by Rycen Beans. Built with Hermes.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,118 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const skills = [
+  {
+    slug: 'hermes-agent',
+    name: 'Hermes Agent',
+    description: 'Configure, extend, and contribute to Hermes Agent itself. The foundation skill for all others.',
+    category: 'Core',
+    usage: 'Essential',
+    tags: ['config', 'development', 'setup'],
+    downloads: 0
+  },
+  {
+    slug: 'tabby',
+    name: 'Tabby',
+    description: 'Complete Etsy automation for print-on-demand businesses. Daily trend research, design generation, and listing optimization.',
+    category: 'Ecommerce',
+    usage: 'Production',
+    tags: ['etsy', 'print-on-demand', 'automation'],
+    downloads: 0
+  },
+  {
+    slug: 'emailer',
+    name: 'Mission Freedom Emailer',
+    description: 'Reliable email automation using Himalaya CLI. Structured reporting with document tracking.',
+    category: 'Communication',
+    usage: 'Production',
+    tags: ['email', 'himalaya', 'reports'],
+    downloads: 0
+  },
+  {
+    slug: 'obsidian-logger',
+    name: 'Obsidian Logger',
+    description: 'Universal logging skill used by all Mission Freedom agents. Structured Obsidian vault integration.',
+    category: 'Infrastructure',
+    usage: 'Production',
+    tags: ['logging', 'obsidian', 'tracking'],
+    downloads: 0
+  },
+  {
+    slug: 'orchestrator',
+    name: 'Modular Orchestrator',
+    description: 'Coordinate multiple Hermes agents with split architecture. HALT+RERUN protocol for error handling.',
+    category: 'Orchestration',
+    usage: 'Production',
+    tags: ['agents', 'workflow', 'coordination'],
+    downloads: 0
+  },
+];
+
+const categories = ['All', 'Core', 'Ecommerce', 'Communication', 'Infrastructure', 'Orchestration'];
+---
+
+<Layout title="Hermes Skills Directory">
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="mb-12">
+        <h1 class="text-3xl font-bold mb-4">Skills Directory</h1>
+        <p class="text-neutral-400 max-w-2xl">Ready-to-use Hermes skills for your automations. These are production-tested and actively maintained.</p>
+      </div>
+      
+      <!-- Categories -->
+      <div class="flex flex-wrap gap-2 mb-8">
+        {categories.map(cat => (
+          <button class="badge border-neutral-700 hover:border-neutral-600 transition-colors cursor-pointer">
+            {cat}
+          </button>
+        ))}
+      </div>
+      
+      <!-- Skills Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {skills.map(skill => (
+          <div class="card card-glow">
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20 flex items-center justify-center text-lg font-bold text-orange-400">
+                  {skill.name.charAt(0)}
+                </div>
+                <div>
+                  <h3 class="font-semibold">{skill.name}</h3>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="badge-blue">{skill.category}</span>
+                    <span class="badge text-neutral-400 border-neutral-700">{skill.usage}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <p class="text-neutral-400 mb-4">{skill.description}</p>
+            
+            <div class="flex items-center justify-between">
+              <div class="flex flex-wrap gap-2">
+                {skill.tags.map(tag => (
+                  <span class="text-xs text-neutral-500">#{tag}</span>
+                ))}
+              </div>
+              
+              <a href={`/skills/${skill.slug}`} class="text-sm text-orange-400 hover:text-orange-300 font-medium">
+                View Details →
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      <!-- CTA -->
+      <div class="mt-12 text-center">
+        <p class="text-neutral-500 mb-4">Want to contribute a skill?</p>
+        <a href="https://github.com/dare404/hermes-skills" class="btn-secondary text-sm">
+          Submit a Skill
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

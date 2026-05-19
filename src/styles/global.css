@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #171717;
+  --bg-tertiary: #262626;
+  --text-primary: #fafafa;
+  --text-secondary: #a3a3a3;
+  --text-tertiary: #737373;
+  --accent: #f97316;
+  --accent-hover: #ea580c;
+  --border: #404040;
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #ef4444;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-neutral-950 text-neutral-100 font-sans antialiased;
+    background: var(--bg-primary);
+  }
+  
+  ::selection {
+    @apply bg-orange-500/30 text-orange-100;
+  }
+}
+
+@layer components {
+  .prose-invert h1,
+  .prose-invert h2,
+  .prose-invert h3,
+  .prose-invert h4 {
+    @apply text-white;
+  }
+  .prose-invert p {
+    @apply text-neutral-300;
+  }
+  .prose-invert a {
+    @apply text-orange-400;
+  }
+  .prose-invert strong {
+    @apply text-white;
+  }
+  
+  .glass {
+    @apply bg-neutral-900/50 backdrop-blur-xl border border-neutral-800;
+  }
+  
+  .glow {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.15), 0 0 40px rgba(249, 115, 22, 0.1);
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-orange-400 to-amber-500 bg-clip-text text-transparent;
+  }
+  
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white font-medium rounded-lg transition-all duration-200 border border-neutral-700;
+  }
+  
+  .card {
+    @apply bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 hover:border-neutral-700 transition-all duration-300;
+  }
+  
+  .card-glow:hover {
+    @apply border-orange-500/50;
+    box-shadow: 0 0 30px rgba(249, 115, 22, 0.1);
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .badge-orange {
+    @apply badge bg-orange-500/10 text-orange-400 border border-orange-500/20;
+  }
+  
+  .badge-green {
+    @apply badge bg-green-500/10 text-green-400 border border-green-500/20;
+  }
+  
+  .badge-blue {
+    @apply badge bg-blue-500/10 text-blue-400 border border-blue-500/20;
+  }
+  
+  .terminal {
+    @apply font-mono text-sm bg-neutral-900 rounded-lg p-4 border border-neutral-800 overflow-x-auto;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .dot-pattern {
+    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}

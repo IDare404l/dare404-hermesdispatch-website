@@ -1,0 +1,165 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+
+const issue = {
+  number: 1,
+  title: "How I Built an Automated Etsy Business with Hermes",
+  date: "May 20, 2026",
+  author: "Rycen Beans",
+  readTime: "8 min"
+};
+---
+
+<Layout title={`Issue #${issue.number}: ${issue.title}`}>
+  <section class="py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <header class="mb-12">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="badge-orange">Issue #{issue.number}</span>
+          <span class="text-sm text-neutral-500">{issue.date}</span>
+        </div>
+        
+        <h1 class="text-3xl font-bold mb-4">{issue.title}</h1>
+        
+        <div class="flex items-center gap-3 text-neutral-400">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-xs font-bold text-white">R</div>
+          <span>{issue.author}</span>
+          <span>·</span>
+          <span>{issue.readTime} read</span>
+        </div>
+      </header>
+      
+      <article class="prose prose-invert max-w-none">
+        
+        <p class="lead text-xl text-neutral-300 mb-8">
+          Four months ago, I was manually researching Etsy trends, creating designs in Canva, and writing listing descriptions. Today, a Hermes agent does all of that daily while I sleep. Here's the complete breakdown.
+        </p>
+        
+        <h2>The Problem</h2>
+        
+        <p>I run TheTrendingTabby, an Etsy shop selling cat-themed apparel via Printful. The workflow was killing me:</p>
+        
+        <ul>
+          <li>Wake up at 6 AM to check competitor prices</li>
+          <li>Research trending cat designs on Pinterest/Etsy (1 hour)</li>
+          <li>Create 3 designs in Canva (2-3 hours)</li>
+          <li>Write SEO-optimized titles, descriptions, tags (1 hour)</li>
+          <li>Upload to Etsy with Printful integration (30 minutes)</li>
+          <li>Post to social media (45 minutes)</li>
+        </ul>
+        
+        <p><strong>Daily time investment: 6-7 hours.</strong> For a side project, this was unsustainable.</p>
+        
+        <h2>The Solution: Tabby</h2>
+        
+        <p>I built Tabby, a Hermes agent that automates the entire workflow:</p>
+        
+        <div class="terminal my-6">
+          <div class="text-neutral-400 mb-2"># Tabby runs daily at 07:00 AM MST</div>
+          $ hermes agent run tabby --schedule="0 7 * * *"
+          <br/><br/>
+          <span class="text-green-400">✓</span> Competitor research complete (4 queries)
+          <br/>
+          <span class="text-green-400">✓</span> Trend analysis complete (3 themes validated)
+          <br/>
+          <span class="text-green-400">✓</span> 3 designs generated with Midjourney prompts
+          <br/>
+          <span class="text-green-400">✓</span> SEO packages created (titles, tags, descriptions)
+          <br/>
+          <span class="text-green-400">✓</span> Report delivered to derekkosakura@gmail.com
+          <br/>
+          
+          <div class="mt-4 text-neutral-400">Total execution time: ~12 minutes</div>
+        </div>
+        
+        <h2>How It Works</h2>
+        
+        <p>Tabby is split into modular blocks, each handled by a specialized sub-agent:</p>
+        
+        <h3>Block 1: Research</h3>
+        
+        <p>The Research Agent browses Etsy directly (using the browser tool) and analyzes:</p>
+        
+        <ul>
+          <li>Top 10 listings per search query</li>
+          <li>Prices, review counts, design styles</li>
+          <li>Themes that appear 3+ times with 100+ reviews</li>
+        </ul>
+        
+        <h3>Block 2: Design Generation</h3>
+        
+        <p>The Design Agent creates complete design concepts including:</p>
+        
+        <ul>
+          <li>Detailed visual descriptions</li>
+          <li>Color palettes with hex codes</li>
+          <li>Midjourney prompts (with --ar 1:1 --style raw --v 6)</li>
+          <li>Pricing tier recommendations</li>
+        </ul>
+        
+        <h3>Block 3: SEO Package</h3>
+        
+        <p>The SEO Agent generates:</p>
+        
+        <ul>
+          <li>Etsy-optimized titles (140 chars max)</li>
+          <li>13 tags per listing</li>
+          <li>Full descriptions with keywords</li>
+          <li>Alt text for images</li>
+          <li>Social media captions</li>
+        </ul>
+        
+        <h2>The Results</h2>
+        
+        <p>After 30 days of Tabby running daily:</p>
+        
+        <ul>
+          <li><strong>Time invested:</strong> 30 minutes/week (reviewing reports, approving designs)</li>
+          <li><strong>Active listings:</strong> 30 new products</li>
+          <li><strong>Revenue:</strong> $X/month (exact numbers in subscriber-only updates)</li>
+          <li><strong>SEO scores:</strong> All listings score 90+ on eRank</li>
+        </ul>
+        
+        <h2>What's Next</h2>
+        
+        <p>Tabby is now integrated with The Hermes Dispatch. Each daily report feeds into the newsletter content, creating a flywheel:</p>
+        
+        <ol>
+          <li>Tabby researches and generates</li>
+          <li>I review and approve</li>
+          <li>Insights get shared in the newsletter</li>
+          <li>Readers get free skills and workflows</li>
+          <li>Everyone builds better automations</li>
+        </ol>
+        
+        <h2>Get The Skill</h2>
+        
+        <p>The Tabby skill is available in our <a href="/skills/tabby">Skills Directory</a>. It's production-tested and actively maintained.</p>
+        
+        <p>Next issue: How I built this newsletter automation with Buttondown and Hermes.</p>
+        
+      </article>
+      
+      <footer class="mt-16 pt-8 border-t border-neutral-800">
+        
+        <p class="text-neutral-400 mb-6">Questions? Reply to this email — I read every response.</p>
+        
+        <div class="flex flex-wrap gap-4 mb-8">
+          <a href="https://twitter.com/intent/tweet?text=Issue%20%231%3A%20How%20I%20Built%20an%20Automated%20Etsy%20Business%20with%20Hermes" target="_blank" rel="noopener" class="btn-secondary text-sm">
+            Share on Twitter
+          </a>
+          <a href="/newsletter" class="btn-primary text-sm">
+            Subscribe Free
+          </a>
+        </div>
+        
+        <p class="text-sm text-neutral-500">
+          © 2026 Rycen Beans · Hermes Mission Freedom · Boise, ID
+        </p>
+        
+      </footer>
+      
+    </div>
+  </section>
+</Layout>

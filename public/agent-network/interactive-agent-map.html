@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Freedom - Interactive Agent Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            background: #020617;
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .bg-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(30, 41, 59, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            background: rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+        
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        
+        .pulse-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: #34d399;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+        }
+        
+        .header h1 {
+            font-size: 16px; font-weight: 600;
+            color: #f8fafc;
+            letter-spacing: -0.5px;
+        }
+        
+        .header h1 span { color: #94a3b8; font-weight: 400; }
+        
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        
+        .status-badge {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 12px;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 6px;
+            font-size: 11px;
+            color: #34d399;
+        }
+        
+        .last-updated { font-size: 11px; color: #64748b; }
+        
+        .legend {
+            position: fixed;
+            bottom: 24px; left: 24px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+            z-index: 100;
+        }
+        
+        .legend-title { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px; }
+        
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; }
+        
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .legend-dot.active { background: #34d399; }
+        .legend-dot.inactive { background: #94a3b8; }
+        
+        .filters {
+            position: fixed;
+            top: 80px; right: 24px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+            z-index: 100;
+            width: 200px;
+        }
+        
+        .filter-title { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px; }
+        
+        .filter-btn {
+            display: block; width: 100%; padding: 8px 12px; margin-bottom: 6px;
+            background: transparent; border: 1px solid #1e293b;
+            border-radius: 6px; color: #94a3b8;
+            font-size: 12px; font-family: inherit;
+            cursor: pointer; transition: all 0.2s;
+        }
+        
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(148, 163, 184, 0.1);
+            border-color: #64748b;
+            color: #e2e8f0;
+        }
+        
+        #viz-container {
+            position: fixed;
+            top: 60px; left: 0; right: 0; bottom: 0;
+            z-index: 1;
+        }
+        
+        svg { width: 100%; height: 100%; }
+        
+        .node { cursor: pointer; }
+        .node:hover { filter: brightness(1.2); }
+        
+        .link {
+            fill: none; stroke: #334155;
+            stroke-width: 2; opacity: 0.6;
+        }
+        
+        .link.highlight {
+            stroke: #64748b;
+            stroke-width: 3;
+            opacity: 1;
+        }
+        
+        .node-label {
+            font-size: 12px; fill: #e2e8f0;
+            text-anchor: middle;
+            pointer-events: none;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+        
+        .node-icon {
+            font-size: 20px; text-anchor: middle;
+            pointer-events: none;
+        }
+        
+        .node-version {
+            font-size: 9px; fill: #64748b;
+            text-anchor: middle;
+        }
+        
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; transition: opacity 0.3s;
+        }
+        
+        .modal-overlay.show { display: flex; opacity: 1; }
+        
+        .modal {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            width: 90%; max-width: 600px;
+            max-height: 90vh; overflow: hidden;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+        
+        .modal-overlay.show .modal { transform: scale(1); }
+        
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        
+        .modal-icon {
+            width: 56px; height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        
+        .modal-title { flex: 1; }
+        .modal-title h2 { font-size: 20px; font-weight: 600; color: #f8fafc; margin-bottom: 4px; }
+        
+        .modal-meta { display: flex; gap: 12px; font-size: 12px; color: #64748b; }
+        
+        .modal-close {
+            width: 32px; height: 32px; border-radius: 8px;
+            border: 1px solid #334155; background: transparent;
+            color: #94a3b8; font-size: 18px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        
+        .modal-close:hover { background: #1e293b; color: #e2e8f0; }
+        
+        .modal-body { padding: 24px; overflow-y: auto; max-height: calc(90vh - 120px); }
+        
+        .modal-section { margin-bottom: 24px; }
+        .modal-section:last-child { margin-bottom: 0; }
+        
+        .section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 12px; }
+        .section-body { font-size: 14px; line-height: 1.6; color: #cbd5e1; }
+        
+        .skills-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        
+        .skill-tag {
+            padding: 6px 12px;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 20px;
+            font-size: 12px; color: #34d399;
+        }
+        
+        .related-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        
+        .related-tag {
+            padding: 6px 12px;
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 20px;
+            font-size: 12px; color: #94a3b8;
+            cursor: pointer; transition: all 0.2s;
+        }
+        
+        .related-tag:hover { background: rgba(148, 163, 184, 0.2); border-color: #94a3b8; }
+        
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+        
+        .metric-card {
+            padding: 16px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid #1e293b;
+            border-radius: 8px; text-align: center;
+        }
+        
+        .metric-value { font-size: 24px; font-weight: 600; color: #34d399; margin-bottom: 4px; }
+        .metric-label { font-size: 11px; color: #64748b; text-transform: uppercase; }
+        
+        .schedule-info {
+            display: flex; align-items: center; gap: 8px;
+            padding: 12px; background: rgba(30, 41, 59, 0.3);
+            border-radius: 8px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            padding: 8px 12px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-size: 12px; color: #e2e8f0;
+            pointer-events: none;
+            opacity: 0; transition: opacity 0.2s;
+            z-index: 50;
+        }
+        
+        .tooltip.show { opacity: 1; }
+        
+        .zoom-controls {
+            position: fixed; bottom: 24px; right: 24px;
+            display: flex; flex-direction: column; gap: 8px;
+            z-index: 100;
+        }
+        
+        .zoom-btn {
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: rgba(15, 23, 42, 0.95);
+            color: #94a3b8; font-size: 20px;
+            cursor: pointer; transition: all 0.2s;
+        }
+        
+        .zoom-btn:hover { background: #1e293b; color: #e2e8f0; }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    
+    <header class="header">
+        <div class="header-left">
+            <div class="pulse-dot"></div>
+            <h1>Mission Freedom <span>// Agent Network Map</span></h1>
+        </div>
+        <div class="header-right">
+            <div class="status-badge">
+                <span id="active-count">Loading...</span> Active
+            </div>
+            <div class="last-updated">Updated: <span id="update-time">--</span></div>
+        </div>
+    </header>
+    
+    <div class="filters">
+        <div class="filter-title">Filter by Category</div>
+        <button class="filter-btn active" data-filter="all">All Agents</button>
+        <button class="filter-btn" data-filter="ecommerce-pod-workflow">E-Commerce</button>
+        <button class="filter-btn" data-filter="social-media">Social Media</button>
+        <button class="filter-btn" data-filter="orchestration">Orchestration</button>
+        <button class="filter-btn" data-filter="marketing">Marketing</button>
+        <button class="filter-btn" data-filter="creative">Creative</button>
+        <button class="filter-btn" data-filter="archived">Archived</button>
+    </div>
+    
+    <div class="legend">
+        <div class="legend-title">Status</div>
+        <div class="legend-item"><div class="legend-dot active"></div><span>Active</span></div>
+        <div class="legend-item"><div class="legend-dot inactive"></div><span>Archived</span></div>
+        <div class="legend-title" style="margin-top: 16px;">Click nodes to view details</div>
+    </div>
+    
+    <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomIn()">+</button>
+        <button class="zoom-btn" onclick="zoomOut()">-</button>
+        <button class="zoom-btn" onclick="resetZoom()">⌂</button>
+    </div>
+    
+    <div id="viz-container"></div>
+    <div class="tooltip" id="tooltip"></div>
+    
+    <div class="modal-overlay" id="modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon" id="modal-icon">🤖</div>
+                <div class="modal-title">
+                    <h2 id="modal-title">Agent Name</h2>
+                    <div class="modal-meta">
+                        <span id="modal-category">Category</span>
+                        <span id="modal-status">● Active</span>
+                        <span id="modal-version">v1.0</span>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <script>
+        // Agent data
+        const AGENTS_DATA = [
+  {
+    "id": "affiliate",
+    "name": "Affiliate Marketing Agent",
+    "version": "2.0",
+    "description": "Professional affiliate marketing agent. Researches high-ranking affiliate products, generates content, tracks YouTube trends.",
+    "category": "marketing",
+    "status": "active",
+    "last_run": "2026-05-19T08:00:00MST",
+    "schedule": "0 */6 * * *",
+    "skills": [
+      "affiliate-marketing-agent",
+      "affiliate-marketing-agent-v2",
+      "affiliate-learner",
+      "affiliate-video-searcher",
+      "affiliate-transcript-fetcher",
+      "unified-learning-agent"
+    ],
+    "related_agents": [
+      "tabby",
+      "youtube-transcriber",
+      "igor"
+    ],
+    "metrics": {
+      "content_generated": "80+",
+      "products_tracked": "200+",
+      "mastery_level": "85%"
+    },
+    "color": "#fbbf24",
+    "icon": "🔗"
+  },
+  {
+    "id": "brand",
+    "name": "Branding Agent",
+    "version": "1.5",
+    "description": "Professional brand identity creator. Learns logo design, color theory, typography, and brand positioning.",
+    "category": "creative",
+    "status": "active",
+    "last_run": "2026-05-18T14:00:00MST",
+    "schedule": "0 */12 * * *",
+    "skills": [
+      "branding-agent",
+      "branding-learner"
+    ],
+    "related_agents": [
+      "tabby",
+      "visualization",
+      "website-builder"
+    ],
+    "metrics": {
+      "brand_guides_created": "15",
+      "mastery_level": "100%"
+    },
+    "color": "#fb7185",
+    "icon": "🎨"
+  },
+  {
+    "id": "igor",
+    "name": "IGOR - Unified Orchestrator",
+    "version": "4.0",
+    "description": "Multi-agent orchestration system with absorbed Librarian functions. Central coordinator, error handler, and auto-optimizer for Mission Freedom.",
+    "category": "orchestration",
+    "status": "active",
+    "last_run": "2026-05-19T02:00:00MST",
+    "schedule": "0 */1 * * *",
+    "skills": [
+      "igor-unified-orchestrator",
+      "igor-auto-optimizer",
+      "igor-learner",
+      "orchestrator-monitor",
+      "predictive-error-handler",
+      "skill-pattern-recognizer",
+      "learning-system-manager",
+      "dual-sync-workflow"
+    ],
+    "related_agents": [
+      "tabby",
+      "twatter",
+      "affiliate",
+      "skill-trainer"
+    ],
+    "metrics": {
+      "agents_orchestrated": "11",
+      "auto_fixes_applied": "50+",
+      "mastery_level": "90%"
+    },
+    "color": "#a78bfa",
+    "icon": "🧠"
+  },
+  {
+    "id": "librarian",
+    "name": "Librarian (Archived)",
+    "version": "1.0",
+    "description": "Previously managed Obsidian vault organization and knowledge curation. Functions absorbed into IGOR v4.0.",
+    "category": "archived",
+    "status": "archived",
+    "last_run": "2026-05-10T19:17:38MST",
+    "schedule": "N/A - Archived",
+    "skills": [
+      "librarian",
+      "librarian-learner",
+      "dual-sync-workflow"
+    ],
+    "related_agents": [
+      "igor"
+    ],
+    "metrics": {
+      "executions_logged": "500+",
+      "note": "Functions absorbed"
+    },
+    "color": "#94a3b8",
+    "icon": "📚"
+  },
+  {
+    "id": "newsletter",
+    "name": "Newsletter Agent",
+    "version": "1.2",
+    "description": "Creates daily newsletter content in Rycen Beans' voice. Writes engaging content, manages distribution.",
+    "category": "marketing",
+    "status": "active",
+    "last_run": "2026-05-19T06:00:00MST",
+    "schedule": "0 6 * * *",
+    "skills": [
+      "newsletter-writer",
+      "newsletter-learner",
+      "newsletter-website-setup"
+    ],
+    "related_agents": [
+      "tabby",
+      "website-builder"
+    ],
+    "metrics": {
+      "newsletters_sent": "60+",
+      "mastery_level": "75%"
+    },
+    "color": "#34d399",
+    "icon": "📧"
+  },
+  {
+    "id": "skill-trainer",
+    "name": "Skill Trainer",
+    "version": "1.0",
+    "description": "Meta-learning specialist that analyzes, optimizes, and accelerates skill creation across Mission Freedom.",
+    "category": "ai-agents",
+    "status": "active",
+    "last_run": "2026-05-18T02:00:00MST",
+    "schedule": "0 2 * * *",
+    "skills": [
+      "skill-trainer",
+      "max-velocity-learning",
+      "unified-learning-agent",
+      "token-fallback-framework"
+    ],
+    "related_agents": [
+      "igor",
+      "learning-system-manager"
+    ],
+    "metrics": {
+      "skills_optimized": "25",
+      "mastery_level": "70%"
+    },
+    "color": "#fbbf24",
+    "icon": "🏋️"
+  },
+  {
+    "id": "spotify",
+    "name": "Music Agent",
+    "version": "1.0",
+    "description": "Spotify playback and playlist management for Mission Freedom workspace.",
+    "category": "media",
+    "status": "active",
+    "last_run": "On-demand",
+    "schedule": "On-demand",
+    "skills": [
+      "spotify"
+    ],
+    "related_agents": [],
+    "metrics": {
+      "playlists_managed": "5",
+      "mastery_level": "100%"
+    },
+    "color": "#1db954",
+    "icon": "🎵"
+  },
+  {
+    "id": "tabby",
+    "name": "The Trending Tabby",
+    "version": "3.2",
+    "description": "Master SEO Agent for Etsy + Twitter/X + Instagram. Complete daily design report workflow with trend research and competitor analysis.",
+    "category": "ecommerce-pod-workflow",
+    "status": "active",
+    "last_run": "2026-05-19T07:00:00MST",
+    "schedule": "0 7 * * 1-5",
+    "skills": [
+      "tabby",
+      "trend-hunter",
+      "etsy-trend-analyzer",
+      "etsy-competitor-intelligence",
+      "tabby-listing-optimizer",
+      "obsidian-logger",
+      "emailer",
+      "social-content-creator"
+    ],
+    "related_agents": [
+      "twatter",
+      "affiliate",
+      "igor",
+      "visualization"
+    ],
+    "metrics": {
+      "shop_listings": "150+",
+      "daily_reports_sent": "120+",
+      "mastery_level": "100%"
+    },
+    "color": "#34d399",
+    "icon": "🐱"
+  },
+  {
+    "id": "twatter",
+    "name": "Twatter",
+    "version": "2.1",
+    "description": "Unified Twitter/X engagement agent for Mission Freedom. Auto like/RT/reply on trending cat content for @Dare__404 and @itsmeserena_k.",
+    "category": "social-media",
+    "status": "active",
+    "last_run": "2026-05-19T15:00:00MST",
+    "schedule": "0 */1 * * *",
+    "skills": [
+      "twatter",
+      "twatter-engagement-sweep",
+      "twatter-cross-promo-monitor",
+      "xurl",
+      "xengagement-report"
+    ],
+    "related_agents": [
+      "tabby",
+      "social-media-manager",
+      "igor"
+    ],
+    "metrics": {
+      "auto_likes_hourly": "50+",
+      "accounts_managed": "2",
+      "mastery_level": "95%"
+    },
+    "color": "#22d3ee",
+    "icon": "🐦"
+  },
+  {
+    "id": "visualization",
+    "name": "Visualization Agent",
+    "version": "1.0",
+    "description": "Creates diagrams, flowcharts, architecture diagrams, and visual representations for Mission Freedom systems.",
+    "category": "creative",
+    "status": "active",
+    "last_run": "2026-05-18T05:00:00MST",
+    "schedule": "0 5 * * 0",
+    "skills": [
+      "visualization-agent",
+      "architecture-diagram",
+      "excalidraw",
+      "claude-design",
+      "popular-web-designs"
+    ],
+    "related_agents": [
+      "tabby",
+      "igor",
+      "website-builder"
+    ],
+    "metrics": {
+      "diagrams_created": "40+",
+      "mastery_level": "85%"
+    },
+    "color": "#a78bfa",
+    "icon": "📊"
+  },
+  {
+    "id": "website-builder",
+    "name": "Website Builder Agent",
+    "version": "1.3",
+    "description": "Specialized website creation agent. Learns best practices, SEO, Astro framework, and responsive design.",
+    "category": "dev",
+    "status": "active",
+    "last_run": "2026-05-18T16:00:00MST",
+    "schedule": "On-demand",
+    "skills": [
+      "website-builder-agent",
+      "website-builder-learner"
+    ],
+    "related_agents": [
+      "tabby",
+      "newsletter",
+      "visualization"
+    ],
+    "metrics": {
+      "sites_deployed": "3",
+      "mastery_level": "80%"
+    },
+    "color": "#22d3ee",
+    "icon": "🌐"
+  }
+];
+        
+        let selectedAgent = null;
+        
+        const width = window.innerWidth;
+        const height = window.innerHeight - 60;
+        const container = d3.select("#viz-container");
+        
+        let currentFilter = 'all';
+        let transform = d3.zoomIdentity;
+        
+        const svg = container.append("svg").attr("width", width).attr("height", height);
+        const g = svg.append("g");
+        
+        const zoom = d3.zoom()
+            .scaleExtent([0.3, 3])
+            .on("zoom", (event) => { transform = event.transform; g.attr("transform", event.transform); });
+        
+        svg.call(zoom);
+        
+        const defs = svg.append("defs");
+        defs.append("marker")
+            .attr("id", "arrowhead")
+            .attr("viewBox", "0 -5 10 10")
+            .attr("refX", 25).attr("refY", 0)
+            .attr("markerWidth", 6).attr("markerHeight", 6)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M0,-5L10,0L0,5")
+            .attr("fill", "#334155");
+        
+        function prepareData(filter = 'all') {
+            const filtered = filter === 'all' 
+                ? AGENTS_DATA 
+                : AGENTS_DATA.filter(a => a.category === filter || (filter === 'archived' && a.status === 'archived'));
+            
+            const nodes = filtered.map(a => ({...a, radius: a.status === 'archived' ? 25 : 35}));
+            const links = [];
+            const nodeIds = new Set(nodes.map(n => n.id));
+            
+            nodes.forEach(source => {
+                if (source.related_agents) {
+                    source.related_agents.forEach(targetId => {
+                        if (nodeIds.has(targetId)) {
+                            links.push({source: source.id, target: targetId});
+                        }
+                    });
+                }
+            });
+            
+            return {nodes, links};
+        }
+        
+        let simulation, linkElements, nodeElements;
+        
+        function initVisualization() {
+            const data = prepareData(currentFilter);
+            
+            const activeCount = AGENTS_DATA.filter(a => a.status === 'active').length;
+            document.getElementById('active-count').textContent = activeCount;
+            document.getElementById('update-time').textContent = new Date().toLocaleDateString();
+            
+            g.selectAll("*").remove();
+            
+            linkElements = g.append("g").selectAll("line")
+                .data(data.links).enter().append("line")
+                .attr("class", "link").attr("marker-end", "url(#arrowhead)");
+            
+            const nodeGroup = g.append("g").selectAll("g")
+                .data(data.nodes).enter().append("g")
+                .attr("class", d => `node ${d.status}`)
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+            
+            nodeGroup.append("circle")
+                .attr("r", d => d.radius)
+                .attr("fill", d => d.color + '40')
+                .attr("stroke", d => d.color)
+                .attr("stroke-width", 2)
+                .style("filter", d => d.status === 'archived' ? 'none' : `drop-shadow(0 0 10px ${d.color}80)`);
+            
+            nodeGroup.append("text").attr("class", "node-icon").attr("dy", -5).text(d => d.icon);
+            nodeGroup.append("text").attr("class", "node-label").attr("dy", d => d.radius + 15).text(d => d.name.split(' ')[0]);
+            nodeGroup.append("text").attr("class", "node-version").attr("dy", d => d.radius + 28).text(d => d.version);
+            
+            nodeGroup.on("click", (event, d) => { showModal(d); highlightConnections(d); })
+                .on("mouseover", (event, d) => showTooltip(event, d))
+                .on("mouseout", hideTooltip);
+            
+            nodeElements = nodeGroup;
+            
+            simulation = d3.forceSimulation(data.nodes)
+                .force("link", d3.forceLink(data.links).id(d => d.id).distance(150))
+                .force("charge", d3.forceManyBody().strength(-800))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .force("collision", d3.forceCollide().radius(d => d.radius + 20))
+                .on("tick", ticked);
+        }
+        
+        function highlightConnections(agent) {
+            // Reset all links
+            linkElements.classed("highlight", false);
+            
+            // Highlight connections to/from selected agent
+            linkElements.classed("highlight", d => d.source.id === agent.id || d.target.id === agent.id);
+        }
+        
+        function ticked() {
+            linkElements
+                .attr("x1", d => d.source.x).attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x).attr("y2", d => d.target.y);
+            nodeElements.attr("transform", d => `translate(${d.x},${d.y})`);
+        }
+        
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x; d.fy = d.y;
+        }
+        
+        function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
+        
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null; d.fy = null;
+        }
+        
+        function showTooltip(event, d) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.innerHTML = `<strong>${d.name}</strong><br>${d.description.substring(0, 60)}...`;
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+            tooltip.classList.add('show');
+        }
+        
+        function hideTooltip() { document.getElementById('tooltip').classList.remove('show'); }
+        
+        function showModal(agent) {
+            selectedAgent = agent;
+            const modal = document.getElementById('modal');
+            document.getElementById('modal-icon').textContent = agent.icon;
+            document.getElementById('modal-icon').style.background = agent.color + '20';
+            document.getElementById('modal-icon').style.border = `2px solid ${agent.color}`;
+            document.getElementById('modal-title').textContent = agent.name;
+            document.getElementById('modal-category').textContent = agent.category;
+            document.getElementById('modal-status').innerHTML = `<span style="color: ${agent.status === 'active' ? '#34d399' : '#94a3b8'}">● ${agent.status}</span>`;
+            document.getElementById('modal-version').textContent = 'v' + agent.version;
+            
+            let body = '';
+            body += '<div class="modal-section"><div class="section-title">Description</div><div class="section-body">' + agent.description + '</div></div>';
+            body += '<div class="modal-section"><div class="section-title">Schedule</div><div class="schedule-info"><span>🕐</span><span>' + agent.schedule + '</span></div></div>';
+            
+            if (agent.skills && agent.skills.length > 0) {
+                body += '<div class="modal-section"><div class="section-title">Skills (' + agent.skills.length + ')</div><div class="skills-list">' + 
+                    agent.skills.map(s => '<span class="skill-tag">' + s + '</span>').join('') + '</div></div>';
+            }
+            
+            if (agent.metrics) {
+                body += '<div class="modal-section"><div class="section-title">Metrics</div><div class="metrics-grid">' + 
+                    Object.entries(agent.metrics).map(([k,v]) => '<div class="metric-card"><div class="metric-value">' + v + '</div><div class="metric-label">' + k.replace(/_/g, ' ') + '</div></div>').join('') + '</div></div>';
+            }
+            
+            if (agent.related_agents && agent.related_agents.length > 0) {
+                body += '<div class="modal-section"><div class="section-title">Related Agents</div><div class="related-list">' + 
+                    agent.related_agents.map(rid => {
+                        const related = AGENTS_DATA.find(a => a.id === rid);
+                        return related ? '<span class="related-tag" onclick="showRelated(&quot;' + rid + '&quot;)">' + related.icon + ' ' + related.name.split(' ')[0] + '</span>' : '';
+                    }).join('') + '</div></div>';
+            }
+            
+            document.getElementById('modal-body').innerHTML = body;
+            modal.classList.add('show');
+        }
+        
+        function showRelated(agentId) {
+            const agent = AGENTS_DATA.find(a => a.id === agentId);
+            if (agent) showModal(agent);
+        }
+        
+        function closeModal() { 
+            document.getElementById('modal').classList.remove('show');
+            linkElements.classed("highlight", false);
+        }
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                initVisualization();
+            });
+        });
+        
+        function zoomIn() { svg.transition().duration(300).call(zoom.scaleBy, 1.3); }
+        function zoomOut() { svg.transition().duration(300).call(zoom.scaleBy, 0.7); }
+        function resetZoom() { svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity); }
+        
+        document.getElementById('modal').addEventListener('click', (e) => { if(e.target === document.getElementById('modal')) closeModal(); });
+        document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeModal(); });
+        
+        initVisualization();
+        
+        window.addEventListener('resize', () => {
+            const newWidth = window.innerWidth;
+            const newHeight = window.innerHeight - 60;
+            svg.attr("width", newWidth).attr("height", newHeight);
+            simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
+            simulation.alpha(0.3).restart();
+        });
+    </script>
+</body>
+</html>
