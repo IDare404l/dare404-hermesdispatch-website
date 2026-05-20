@@ -1,0 +1,66 @@
+---
+interface Props {
+  icon: string;
+  title: string;
+  description: string;
+  tags: string[];
+  color: string;
+}
+
+const { icon, title, description, tags, color } = Astro.props;
+
+const colorMap: Record<string, { bg: string; border: string; text: string; glow: string }> = {
+  cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400', glow: 'shadow-cyan-500/20' },
+  rose: { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-400', glow: 'shadow-rose-500/20' },
+  amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400', glow: 'shadow-amber-500/20' },
+  purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400', glow: 'shadow-purple-500/20' },
+  emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', glow: 'shadow-emerald-500/20' },
+  gold: { bg: 'bg-brand-gold/10', border: 'border-brand-gold/30', text: 'text-brand-gold', glow: 'shadow-brand-gold/20' }
+};
+
+const colors = colorMap[color] || colorMap.gold;
+---
+
+<div class={`feature-card group shine ${colors.glow} shadow-lg`}>
+  <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-current to-transparent opacity-5 rounded-full blur-xl"></div>
+  
+  <div class="relative z-10">
+    <div class={`w-14 h-14 rounded-2xl ${colors.bg} ${colors.border} border-2 flex items-center justify-center text-3xl mb-5 group-hover:scale-110 transition-transform`}>
+      {icon}
+    </div>
+    
+    <h3 class="text-xl font-bold text-white mb-3">{title}</h3>
+    
+    <p class="text-gray-400 mb-5 leading-relaxed">{description}</p>
+    
+    <div class="flex flex-wrap gap-2">
+      {tags.map((tag) => (
+        <span class={`px-3 py-1 rounded-full ${colors.bg} ${colors.text} text-xs font-medium`}>
+          {tag}
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Cursor tracking effect for glow */
+  .feature-card {
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+  }
+  
+  .feature-card:hover {
+    box-shadow: 0 0 30px var(--glow-color, rgba(212, 175, 55, 0.15));
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.feature-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+      card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    });
+  });
+</script>
