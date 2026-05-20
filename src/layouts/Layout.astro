@@ -8,9 +8,10 @@ interface Props {
 }
 
 const { title, description = "The Hermes Dispatch - Daily AI automation insights, Hermes skills, and tools from dare404" } = Astro.props;
-const buildTime = new Date().toISOString().slice(0,19).replace('T',' ');
-const commitHash = versionData.commit?.slice(0,7) || 'local';
-const buildNum = versionData.build || 'DEV';
+const buildTime = new Date().toISOString().slice(0,19).replace('T',' ') + ' UTC';
+const commitHash = versionData?.commit?.slice(0,7) || 'local';
+const buildNum = versionData?.build || 'DEV';
+const fullCommit = versionData?.commit || 'local';
 ---
 
 <!DOCTYPE html>
@@ -77,8 +78,8 @@ const buildNum = versionData.build || 'DEV';
         </div>
         <div class="border-t border-neutral-800 mt-8 pt-8 text-center text-sm text-neutral-400">
           <p>Written by Rycen Beans. Built with Hermes.</p>
-          <p class="mt-2 font-mono text-xs text-neutral-500" title={`Full commit: ${versionData.commit || 'local'}`}>
-            Build #{buildNum} • {buildTime} UTC • {commitHash}
+          <p class="mt-2 font-mono text-xs text-neutral-500" title={`Full commit: ${fullCommit}`}>
+            Build #{buildNum} • {buildTime} • {commitHash}
           </p>
         </div>
       </div>
