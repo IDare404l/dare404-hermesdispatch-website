@@ -33,6 +33,17 @@ jobs:
           mkdir -p dist/agent-network
           cp -r public/agent-network/* dist/agent-network/ 2>/dev/null || echo "No public/agent-network"
 
+      - name: Update version.json
+        run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          RUN_NUM="${GITHUB_RUN_NUMBER}"
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S')
+          echo "{\"build\":\"${RUN_NUM}\",\"commit\":\"${GITHUB_SHA}\",\"short_sha\":\"${SHORT_SHA}\",\"timestamp\":\"${TIMESTAMP}\"}" > src/config/version.json
+          echo "Version: Build #${RUN_NUM} • ${SHORT_SHA} • ${TIMESTAMP}"
+
+      - name: Rebuild with version info
+        run: npm run build
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
