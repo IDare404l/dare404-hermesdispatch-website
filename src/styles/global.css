@@ -248,7 +248,9 @@
 
 /* Prose customization for content */
 .prose-invert {
-  @apply prose prose-invert prose-lg max-w-none;
+  /* Basic inverted prose styles - typography plugin not installed */
+  color: #d1d5db;
+  line-height: 1.75;
 }
 
 .prose-invert strong {
