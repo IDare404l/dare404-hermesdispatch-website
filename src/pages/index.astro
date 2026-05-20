@@ -2,91 +2,99 @@
 import Layout from '../layouts/Layout.astro';
 import ParticleBackground from '../components/ParticleBackground.astro';
 import FeatureCard from '../components/FeatureCard.astro';
-import StatsSection from '../components/StatsSection.astro';
 import NewsletterCTA from '../components/NewsletterCTA.astro';
+import StatsSection from '../components/StatsSection.astro';
+import { SkillsList } from '../components/SkillsList';
+import { ToolsList } from '../components/ToolsList';
+
+const skills = [
+  { name: 'Hermes Agent', desc: 'Core configuration and extension', tag: 'Core', href: '/skills/hermes-agent' },
+  { name: 'Tabby', desc: 'Etsy automation for print-on-demand', tag: 'Ecommerce', href: '/skills/tabby' },
+  { name: 'Emailer', desc: 'Reliable email automation system', tag: 'Communication', href: '/skills/emailer' },
+  { name: 'Obsidian Logger', desc: 'Universal logging for all agents', tag: 'Infrastructure', href: '/skills/obsidian-logger' },
+  { name: 'Orchestrator', desc: 'Multi-agent workflow coordination', tag: 'Orchestration', href: '/skills/orchestrator' },
+];
+
+const tools = [
+  { name: 'Claude', desc: 'Anthropic AI coding assistant', category: 'AI Model', href: 'https://claude.ai' },
+  { name: 'GitHub', desc: 'Code hosting and actions', category: 'Dev', href: 'https://github.com' },
+  { name: 'Cloudflare', desc: 'Edge deployment and DNS', category: 'Dev', href: 'https://cloudflare.com' },
+  { name: 'Astro', desc: 'Fast static site generator', category: 'Dev', href: 'https://astro.build' },
+];
+
+const features = [
+  { icon: '🤖', title: 'IGOR Orchestrator', desc: 'Multi-agent orchestration system managing daily workflows', tags: ['Orchestration', 'AI Skills'], color: 'cyan' },
+  { icon: '🐱', title: 'The Trending Tabby', desc: 'AI-powered Etsy SEO for cat-themed print-on-demand', tags: ['Etsy SEO', 'POD'], color: 'rose' },
+  { icon: '⚡', title: 'Daily Automation', desc: 'End-to-end automated systems: trend research to deployment', tags: ['Automation', 'Daily Flow'], color: 'amber' },
+];
+
+const processSteps = [
+  { num: '01', title: 'Research', desc: 'Agents scan trends, competitors, and opportunities across Etsy and social.' },
+  { num: '02', title: 'Analyze', desc: 'IGOR coordinates SEO scoring, design potential, and market fit evaluation.' },
+  { num: '03', title: 'Create', desc: 'Design generation, content creation, and listing optimization happen automatically.' },
+  { num: '04', title: 'Deploy', desc: 'Across all channels: Etsy, Twitter, Instagram, Pinterest, and Newsletter.' }
+];
 ---
 
 <Layout 
   title="Mission Freedom | AI Agent Skills & Multi-Agent Orchestration"
-  description="Build at Velocity with Mission Freedom. AI agent automation, multi-agent orchestration, affiliate marketing automation, and print on demand AI for digital entrepreneurs.">
+  description="Build at Velocity with Mission Freedom. AI agent automation, multi-agent orchestration, affiliate marketing automation, and print on demand AI.">
   
   <!-- Hero Section -->
   <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-    <!-- Animated Background -->
-    <div class="absolute inset-0 animated-gradient"></div>
-    <!-- Grid Overlay -->
-    <div class="grid-overlay"></div>
-    
-    <!-- Particle Background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-accent/20"></div>
+    <div class="absolute inset-0 dot-pattern opacity-30"></div>
     <ParticleBackground />
     
-    <!-- Glow Effects -->
-    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-gold/10 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-accent/10 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-accent/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-gold/10 rounded-full blur-3xl"></div>
     
-    <!-- Hero Content -->
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <!-- Badge -->
-      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-gold/10 border border-brand-gold/30 mb-8 animate-fade-in">
-        <span class="w-2 h-2 bg-brand-gold rounded-full animate-pulse"></span>
-        <span class="text-brand-gold text-sm font-medium">9 AI Agents & 18 Active Skills</span>
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-8 animate-fade-in">
+        <span class="w-2 h-2 bg-brand-accent rounded-full animate-pulse"></span>
+        <span class="text-brand-accent text-sm font-medium">1 Unified Agent (IGOR) + 40+ Modular Skills</span>
       </div>
       
-      <!-- Headline -->
-      <h1 class="display-heading mb-6 leading-tight">
+      <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
         <span class="text-white">Build at</span><br />
-        <span class="text-gradient">Velocity</span>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-brand-gold">Velocity</span>
       </h1>
       
-      <!-- Subheadline -->
-      <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-10 leading-relaxed">
-        Mission Freedom documents the journey of building <span class="text-brand-gold">AI agent automation systems</span> for digital entrepreneurship. Multi-agent orchestration, real results, <span class="text-brand-gold">Mission Freedom daily</span>.
+      <p class="text-xl md:text-2xl text-text-secondary max-w-3xl mx-auto mb-10 leading-relaxed">
+        Mission Freedom documents the journey of building <span class="text-brand-accent">AI agent automation systems</span> for digital entrepreneurship. Multi-agent orchestration, real results, <span class="text-brand-gold">Mission Freedom daily</span>.
       </p>
       
-      <!-- CTA Buttons -->
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-        <a href="/newsletter" class="btn-primary flex items-center gap-2 group">
+        <a href="#skills" class="px-8 py-4 bg-brand-accent text-brand-dark font-semibold rounded-xl hover:bg-brand-accent-bright transition-colors flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Browse Skills
+        </a>
+        
+        <a href="/newsletter" class="px-8 py-4 border-2 border-brand-accent text-brand-accent font-semibold rounded-xl hover:bg-brand-accent/10 transition-colors flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
           Get Daily Insights
         </a>
-        
-        <a href="/agents" class="btn-secondary flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Meet the Agents
-        </a>
       </div>
       
-      <!-- Social Proof -->
       <div class="flex flex-col items-center gap-4">
-        <div class="flex items-center gap-4 text-gray-500 text-sm">
-          <div class="flex -space-x-2">
-            {['🤖', '🐱', '📧', '🐦', '📚'].map((emoji) => (
-              <span class="w-8 h-8 rounded-full bg-brand-card border-2 border-brand-dark flex items-center justify-center text-sm">
-                {emoji}
-              </span>
-            ))}
-          </div>
-          <span>9 AI agents working 24/7</span>
-        </div>
-        
-        <div class="flex flex-wrap items-center justify-center gap-6 text-gray-500">
-          <span class="flex items-center gap-2 text-sm">
+        <div class="flex items-center gap-4 text-text-muted text-sm">
+          <span class="flex items-center gap-2">
             <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
             Etsy SEO Boise
           </span>
-          <span class="flex items-center gap-2 text-sm">
+          <span class="flex items-center gap-2">
             <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
             Multi-Agent Orchestration
           </span>
-          <span class="flex items-center gap-2 text-sm">
+          <span class="flex items-center gap-2">
             <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
@@ -96,10 +104,9 @@ import NewsletterCTA from '../components/NewsletterCTA.astro';
       </div>
     </div>
     
-    <!-- Scroll indicator -->
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2">
-      <div class="w-6 h-10 rounded-full border-2 border-white/20 flex items-start justify-center p-2">
-        <div class="w-1 h-2 bg-brand-gold rounded-full animate-bounce"></div>
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <div class="w-6 h-10 rounded-full border-2 border-brand-accent/30 flex items-start justify-center p-2">
+        <div class="w-1 h-2 bg-brand-accent rounded-full"></div>
       </div>
     </div>
   </section>
@@ -108,211 +115,170 @@ import NewsletterCTA from '../components/NewsletterCTA.astro';
   <StatsSection />
   
   <!-- What We're Building Section -->
-  <section class="relative py-24 overflow-hidden">
+  <section id="systems" class="relative py-24 overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16">
         <span class="inline-block px-4 py-1.5 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-brand-accent text-sm font-medium mb-4">
           Our Systems
         </span>
-        <h2 class="section-heading text-white mb-4">
-          What We're <span class="text-gradient-cool">Building</span>
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+          What We're <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-cyan-400">Building</span>
         </h2>
-        <p class="text-gray-400 max-w-2xl mx-auto text-lg">
-          Three interconnected systems powered by <span class="text-brand-cyan">Hermes agent automation</span> and orchestrated by IGOR, our central intelligence.
+        <p class="text-text-secondary max-w-2xl mx-auto text-lg">
+          Three interconnected systems powered by <span class="text-brand-accent">Hermes agent automation</span>.
         </p>
       </div>
       
       <div class="grid md:grid-cols-3 gap-8">
-        <FeatureCard
-          icon="🤖"
-          title="IGOR Orchestrator"
-          description="Multi-agent orchestration system managing daily workflows across SEO, social media, and learning agents. The brain of Mission Freedom."
-          tags={['Orchestration', 'AI Skills']}
-          color="cyan"
-        />
-        
-        <FeatureCard
-          icon="🐱"
-          title="The Trending Tabby"
-          description="AI-powered Etsy SEO and design intelligence for cat-themed print-on-demand clothing. Automated trend research to listing optimization."
-          tags={['Etsy SEO', 'Print on Demand AI']}
-          color="rose"
-        />
-        
-        <FeatureCard
-          icon="⚡"
-          title="Daily Automation"
-          description="End-to-end automated systems: trend research → SEO analysis → social content → reporting. Mission Freedom daily, delivered."
-          tags={['Automation', 'Daily Workflow']}
-          color="amber"
-        />
-      </div>
-    </div>
-  </section>
-  
-  <!-- Features Grid Section -->
-  <section class="relative py-24 overflow-hidden">
-    <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-gold/30 to-transparent"></div>
-    
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-16">
-        <span class="inline-block px-4 py-1.5 rounded-full bg-brand-amber/10 border border-brand-amber/30 text-brand-amber text-sm font-medium mb-4">
-          Agent Skills
-        </span>
-        <h2 class="section-heading text-white mb-4">
-          Powered by <span class="text-gradient">AI Agent Skills</span>
-        </h2>
-        <p class="text-gray-400 max-w-2xl mx-auto text-lg">
-          Our agents combine 18+ specialized skills to automate your digital entrepreneurship journey.
-        </p>
-      </div>
-      
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          {
-            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>',
-            title: 'Etsy SEO Optimization',
-            desc: 'Automated keyword research and listing optimization for maximum visibility.',
-            keywords: 'Etsy SEO Boise'
-          },
-          {
-            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>',
-            title: 'Content Automation',
-            desc: 'Daily newsletters, social posts, and threads generated and scheduled automatically.',
-            keywords: 'Mission Freedom daily'
-          },
-          {
-            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>',
-            title: 'Multi-Agent Orchestration',
-            desc: 'Coordinate multiple AI agents working together seamlessly on complex tasks.',
-            keywords: 'Multi-agent orchestration'
-          },
-          {
-            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>',
-            title: 'Affiliate Marketing',
-            desc: 'Niche research, brand strategy, and product recommendations across channels.',
-            keywords: 'Affiliate marketing automation'
-          },
-          {
-            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>',
-            title: 'Design Intelligence',
-            desc: 'Trend-driven design generation and optimization for print on demand products.',
-            keywords: 'Print on demand AI'
-          },
-          {
-            icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>',
-            title: 'SEO Mastery',
-            desc: 'Comprehensive SEO strategy across Etsy, websites, and social platforms.',
-            keywords: 'Etsy SEO'
-          }
-        ].map((feature) => (
-          <div class="glass-card rounded-2xl p-6 hover-lift group">
-            <div class="w-12 h-12 rounded-xl bg-brand-gold/10 border border-brand-gold/30 flex items-center justify-center text-brand-gold mb-4 group-hover:scale-110 transition-transform">
-              <Fragment set:html={feature.icon} />
+        {features.map((feat) => (
+          <div class="glass-card rounded-2xl p-6 hover-lift group border-l-4 border-brand-accent">
+            <div class="text-4xl mb-4">{feat.icon}</div>
+            <h3 class="text-xl font-semibold text-white mb-2">{feat.title}</h3>
+            <p class="text-text-secondary text-sm mb-3">{feat.desc}</p>
+            <div class="flex flex-wrap gap-2">
+              {feat.tags.map((tag) => (
+                <span class="px-2 py-1 rounded-full bg-brand-dark border border-brand-accent/30 text-xs text-brand-accent">{tag}</span>
+              ))}
             </div>
-            <h3 class="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-            <p class="text-gray-400 text-sm mb-3">{feature.desc}</p>
-            <span class="text-xs text-brand-gold/70">{feature.keywords}</span>
           </div>
         ))}
       </div>
     </div>
   </section>
   
-  <!-- How It Works Section -->
-  <section class="relative py-24 overflow-hidden">
+  <!-- Skills Directory Section -->
+  <section id="skills" class="relative py-24 overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-b from-transparent via-brand-accent/5 to-transparent"></div>
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
       <div class="text-center mb-16">
-        <span class="inline-block px-4 py-1.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan text-sm font-medium mb-4">
-          Process
+        <span class="inline-block px-4 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-sm font-medium mb-4">
+          Skills Library
         </span>
-        <h2 class="section-heading text-white mb-4">
-          How <span class="text-gradient-cool">It Works</span>
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+          Powered by <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-gold to-brand-accent">Hermes Skills</span>
         </h2>
-        <p class="text-gray-400 max-w-2xl mx-auto text-lg">
-          Our multi-agent orchestration system handles everything, 24/7.
+        <p class="text-text-secondary max-w-2xl mx-auto text-lg">
+          40+ specialized skills to automate your digital entrepreneurship journey.
         </p>
-      </div>
-      
-      <div class="grid md:grid-cols-4 gap-6">
-        {[
-          { num: '01', title: 'Research', desc: 'Agents scan trends, competitors, and opportunities across Etsy, social media, and web search.' },
-          { num: '02', title: 'Analyze', desc: 'IGOR coordinates analysis: SEO scoring, design potential, and market fit evaluation.' },
-          { num: '03', title: 'Create', desc: 'Design generation, content creation, and listing optimization happen automatically.' },
-          { num: '04', title: 'Deploy', desc: 'Across all channels simultaneously: Etsy, Twitter, Instagram, Pinterest, and Newsletter.' }
-        ].map((step, i) => (
-          <div class="relative">
-            {i < 3 && (
-              <div class="hidden md:block absolute top-12 left-full w-full h-px bg-gradient-to-r from-brand-gold/50 to-transparent">
-                <div class="absolute right-0 -top-1 w-2 h-2 rounded-full bg-brand-gold"></div>
-              </div>
-            )}
-            <div class="glass-card rounded-2xl p-6 relative group">
-              <span class="text-5xl font-bold text-brand-gold/20 absolute top-4 right-4">{step.num}</span>
-              <h3 class="text-xl font-semibold text-white mb-3 relative z-10">{step.title}</h3>
-              <p class="text-gray-400 text-sm relative z-10">{step.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-  
-  <!-- Newsletter CTA Section -->
-  <NewsletterCTA />
-  
-  <!-- Latest Updates Section -->
-  <section class="relative py-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
-        <div>
-          <span class="inline-block px-4 py-1.5 rounded-full bg-brand-purple/10 border border-brand-purple/30 text-brand-purple text-sm font-medium mb-4">
-            Updates
-          </span>
-          <h2 class="section-heading text-white">
-            Mission Freedom <span class="text-gradient-cool">Daily</span>
-          </h2>
-        </div>
-        
-        <a href="/newsletter" class="mt-4 md:mt-0 inline-flex items-center gap-2 text-brand-gold hover:text-brand-gold-light transition-colors">
-          View All Issues
+        <a href="/skills" class="inline-flex items-center gap-2 mt-4 text-brand-gold hover:text-brand-gold-light transition-colors">
+          Explore IGOR + Skills
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
         </a>
       </div>
       
-      <div class="glass-card rounded-2xl p-8">
-        <div class="flex flex-col md:flex-row gap-6 items-start">
-          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber flex items-center justify-center text-brand-dark text-2xl shrink-0">
-            📧
-          </div>
-          
-          <div class="flex-1">
-            <h3 class="text-2xl font-semibold text-white mb-2">The Hermes Dispatch</h3>
-            <p class="text-gray-400 mb-4">
-              Get daily insights on AI agent automation, multi-agent orchestration, and digital entrepreneurship tactics. 
-              Every weekday at 6:00 AM MST.
-            </p>
-            
-            <div class="flex flex-wrap gap-2 mb-4">
-              {['AI Agents', 'SEO Strategy', 'Print on Demand', 'Automation', 'Side Hustles'].map((tag) => (
-                <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-gray-400 text-sm">{tag}</span>
-              ))}
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {skills.map((skill) => (
+          <a href={skill.href} class="glass-card rounded-2xl p-6 hover-lift group block">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-white group-hover:text-brand-accent transition-colors">{skill.name}</h3>
+              <span class="px-2 py-1 rounded-full bg-brand-dark border border-brand-accent/30 text-xs text-brand-accent">{skill.tag}</span>
             </div>
-            
-            <a href="/newsletter" class="inline-flex items-center gap-2 text-brand-gold font-medium hover:text-white transition-colors">
-              Start Reading
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <p class="text-text-secondary text-sm">{skill.desc}</p>
+            <div class="mt-4 flex items-center gap-2 text-brand-gold text-sm">
+              Learn more
+              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
-            </a>
-          </div>
-        </div>
+            </div>
+          </a>
+        ))}
       </div>
     </div>
   </section>
-
+  
+  <!-- Process Section -->
+  <section class="relative py-24 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <span class="inline-block px-4 py-1.5 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-brand-accent text-sm font-medium mb-4">
+          Process
+        </span>
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+          How <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-cyan-400">It Works</span>
+        </h2>
+        <p class="text-text-secondary max-w-2xl mx-auto text-lg">
+          Our multi-agent orchestration system handles everything, 24/7.
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-4 gap-6">
+        {processSteps.map((step) => (
+          <div class="glass-card rounded-2xl p-6 relative">
+            <span class="text-5xl font-bold text-brand-gold/20 absolute top-4 right-4">{step.num}</span>
+            <h3 class="text-xl font-semibold text-white mb-3 relative z-10">{step.title}</h3>
+            <p class="text-text-secondary text-sm relative z-10">{step.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+  
+  <!-- Tools Section -->
+  <section class="relative py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <span class="inline-block px-4 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-sm font-medium mb-4">
+          Tech Stack
+        </span>
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+          Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-gold to-brand-accent">Toolkit</span>
+        </h2>
+        <p class="text-text-secondary max-w-2xl mx-auto text-lg">
+          Reliable tools for building reliable systems.
+        </p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {tools.map((tool) => (
+          <a href={tool.href} target="_blank" rel="noopener noreferrer" class="glass-card rounded-2xl p-6 hover-lift group block text-center">
+            <h3 class="text-lg font-semibold text-white mb-1 group-hover:text-brand-gold transition-colors">{tool.name}</h3>
+            <p class="text-brand-accent text-sm mb-2">{tool.category}</p>
+            <p class="text-text-secondary text-xs">{tool.desc}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+  
+  <!-- Newsletter CTA -->
+  <NewsletterCTA />
+  
 </Layout>
+
+<style>
+  .dot-pattern {
+    background-image: radial-gradient(circle, rgb(var(--accent)) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  
+  .glass-card {
+    background: rgba(45, 55, 72, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--accent), 0.3);
+  }
+  
+  .glass-card:hover {
+    border-color: rgba(var(--accent), 0.5);
+    box-shadow: 0 0 30px rgba(var(--accent), 0.1);
+  }
+  
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.8s ease forwards;
+  }
+</style>
