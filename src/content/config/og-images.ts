@@ -96,7 +96,7 @@ export const ogImageConfig = {
         image: '/images/about-bg.jpg',
       },
       showLocation: true,
-      location: 'Boise, Idaho',
+      location: 'United States',
     },
 
     // Blog index
@@ -277,14 +277,14 @@ export const ogImageConfig = {
     },
   },
 
-  // Local SEO pages (Boise)
+  // Local SEO pages
   local: {
     boise: {
       title: 'AI Agent Services',
-      description: 'Boise, Idaho',
+      description: 'United States',
       template: 'local',
-      location: 'Boise, ID',
-      state: 'Idaho',
+      location: 'US',
+      state: '',
       background: {
         type: 'gradient',
         colors: ['#1a1a2e', '#0f3460'],

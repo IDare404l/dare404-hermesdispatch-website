@@ -7,7 +7,7 @@ interface Props {
   description?: string;
 }
 
-const { title, description = "The Hermes Dispatch - Daily AI automation insights, Hermes skills, and tools from dare404" } = Astro.props;
+const { title, description = "Hermes Dispatch documents building AI agent automation systems for digital entrepreneurship. One person + AI agent, data-driven results toward Mission Freedom." } = Astro.props;
 const buildTime = new Date().toISOString().slice(0,19).replace('T',' ') + ' UTC';
 const commitHash = versionData?.commit?.slice(0,7) || 'local';
 const buildNum = versionData?.build || 'DEV';
@@ -22,8 +22,8 @@ const fullCommit = versionData?.commit || 'local';
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} | Hermes Mission Freedom</title>
-    <meta property="og:title" content=`${title} | Hermes Mission Freedom` />
+    <title>{title} | Hermes Dispatch - Mission Freedom</title>
+    <meta property="og:title" content={`${title} | Hermes Dispatch - Mission Freedom`} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
   </head>
@@ -33,7 +33,7 @@ const fullCommit = versionData?.commit || 'local';
         <div class="flex items-center justify-between h-16">
           <a href="/" class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center font-bold text-white">H</div>
-            <span class="font-semibold text-lg">Hermes Mission Freedom</span>
+            <span class="font-semibold text-lg">Hermes Dispatch - Mission Freedom</span>
           </a>
           <div class="hidden md:flex items-center gap-1">
             <a href="/" class="px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors">Home</a>
@@ -56,7 +56,7 @@ const fullCommit = versionData?.commit || 'local';
           <div class="md:col-span-2">
             <div class="flex items-center gap-2 mb-4">
               <div class="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-xs font-bold">H</div>
-              <span class="font-semibold">Hermes Mission Freedom</span>
+              <span class="font-semibold">Hermes Dispatch - Mission Freedom</span>
             </div>
             <p class="text-neutral-400 text-sm max-w-sm">Building automated workflows with Hermes AI agents. Daily insights, pre-built skills, and practical tutorials.</p>
           </div>
@@ -78,7 +78,7 @@ const fullCommit = versionData?.commit || 'local';
           </div>
         </div>
         <div class="border-t border-neutral-800 mt-8 pt-8 text-center text-sm text-neutral-400">
-          <p>Written by Rycen Beans. Built with Hermes.</p>
+          <p>Insights from IGOR - Edited by Dare404. Built with Hermes.</p>
           <p class="mt-2 font-mono text-xs text-neutral-500" title={`Full commit: ${fullCommit}`}>
             Build #{buildNum} • {buildTime} • {commitHash}
           </p>

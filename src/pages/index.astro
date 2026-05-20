@@ -1,11 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { SITE_CONFIG } from '../config/site';
 import ParticleBackground from '../components/ParticleBackground.astro';
 import FeatureCard from '../components/FeatureCard.astro';
 import NewsletterCTA from '../components/NewsletterCTA.astro';
 import StatsSection from '../components/StatsSection.astro';
 import { SkillsList } from '../components/SkillsList';
 import { ToolsList } from '../components/ToolsList';
+
+const { stats, brand } = SITE_CONFIG;
 
 const skills = [
   { name: 'Hermes Agent', desc: 'Core configuration and extension', tag: 'Core', href: '/skills/hermes-agent' },
@@ -37,8 +40,8 @@ const processSteps = [
 ---
 
 <Layout 
-  title="Mission Freedom | AI Agent Skills & Multi-Agent Orchestration"
-  description="Build at Velocity with Mission Freedom. AI agent automation, multi-agent orchestration, affiliate marketing automation, and print on demand AI.">
+  title="Hermes Dispatch | AI Agent Skills & Multi-Agent Orchestration"
+  description="Build at Velocity with Hermes Dispatch. One person + AI agent automation for digital entrepreneurship. Data-driven results, multi-agent orchestration, affiliate marketing automation, and print-on-demand AI.">
   
   <!-- Hero Section -->
   <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -52,7 +55,7 @@ const processSteps = [
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-8 animate-fade-in">
         <span class="w-2 h-2 bg-brand-accent rounded-full animate-pulse"></span>
-        <span class="text-brand-accent text-sm font-medium">1 Unified Agent (IGOR) + 40+ Modular Skills</span>
+        <span class="text-brand-accent text-sm font-medium">{stats.agentsDisplay} Unified Agent (IGOR) + {stats.skillsDisplay} Modular Skills</span>
       </div>
       
       <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
@@ -61,7 +64,7 @@ const processSteps = [
       </h1>
       
       <p class="text-xl md:text-2xl text-text-secondary max-w-3xl mx-auto mb-10 leading-relaxed">
-        Mission Freedom documents the journey of building <span class="text-brand-accent">AI agent automation systems</span> for digital entrepreneurship. Multi-agent orchestration, real results, <span class="text-brand-gold">Mission Freedom daily</span>.
+        Hermes Dispatch documents the journey of building <span class="text-brand-accent">AI agent automation systems</span> for digital entrepreneurship, working daily toward Mission Freedom. One person, one AI agent, data-driven results.
       </p>
       
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -86,7 +89,7 @@ const processSteps = [
             <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
-            Etsy SEO Boise
+            Etsy SEO
           </span>
           <span class="flex items-center gap-2">
             <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">

@@ -1,5 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { SITE_CONFIG } from '../config/site';
+
+const { stats, brand } = SITE_CONFIG;
 
 const responsibilities = [
   {
@@ -69,10 +72,10 @@ const responsibilities = [
 ];
 
 const igorStats = [
-  { label: 'Skills Managed', value: '70+', sub: 'across 15 categories' },
+  { label: 'Skills Managed', value: stats.skillsDisplay, sub: `across ${stats.categoriesDisplay} categories` },
   { label: 'Daily Operations', value: '24/7', sub: 'automated workflows' },
   { label: 'Architecture', value: 'Solo', sub: 'unified execution' },
-  { label: 'Since', value: '2024', sub: 'continuous learning' }
+  { label: 'Since', value: stats.since, sub: 'continuous learning' }
 ];
 
 const workflow = [

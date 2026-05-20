@@ -1,5 +1,8 @@
 ---
-// Newsletter CTA Component
+// Newsletter CTA Component - Hermes Dispatch
+import { SITE_CONFIG } from '../config/site';
+
+const { brand } = SITE_CONFIG;
 ---
 
 <section class="relative py-24 overflow-hidden">
@@ -10,31 +13,42 @@
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
     <div class="glass-card rounded-3xl p-8 md:p-12 text-center border border-brand-gold/20">
       <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-8 flex items-center justify-center text-4xl shadow-lg shadow-brand-gold/30">
-        📧
+        📬
       </div>
       
       <h2 class="section-heading text-white mb-4">
-        Ready to <span class="text-gradient">Build</span>?
+        Join the <span class="text-gradient">Dispatch</span>
       </h2>
       
       <p class="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
-        Join <span class="text-brand-gold">Mission Freedom Daily</span> - get tactical insights on AI agent automation, 
-        multi-agent orchestration, and digital entrepreneurship delivered to your inbox every weekday.
+        Get first access to <span class="text-brand-gold">{brand.name}</span> — tactical intelligence on 
+        <span class="text-brand-accent">AI agent automation</span>, 
+        <span class="text-rose-400">multi-agent systems</span>, and 
+        <span class="text-cyan-400">autonomous entrepreneurship</span> 
+        that doesn't exist anywhere else.
       </p>
       
-      <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-6">
+      <form 
+        action="https://buttondown.com/api/emails/embed-subscribe/HermesDispatch" 
+        method="post" 
+        target="popupwindow"
+        onsubmit="window.open('https://buttondown.com/HermesDispatch', 'popupwindow')"
+        class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-6"
+      >
         <input 
           type="email" 
+          name="email"
           placeholder="Enter your email"
+          required
           class="flex-1 px-6 py-4 bg-brand-card border border-brand-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors"
         >
         <button type="submit" class="btn-primary whitespace-nowrap">
-          Get Daily Insights
+          Join the Waitlist
         </button>
       </form>
       
       <p class="text-gray-500 text-sm">
-        Join hundreds of builders. Unsubscribe anytime.
+        Limited spots each week. Unsubscribe anytime.
       </p>
       
       <div class="flex flex-wrap items-center justify-center gap-6 mt-8 text-gray-400 text-sm">
@@ -42,21 +56,21 @@
           <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
-          AI agent skills
+          AI agent systems
         </span>
         
         <span class="flex items-center gap-2">
           <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
-          Automation tactics
+          Automation playbooks
         </span>
         
         <span class="flex items-center gap-2">
           <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
           </svg>
-          No spam, ever
+          No noise, no fluff
         </span>
       </div>
     </div>

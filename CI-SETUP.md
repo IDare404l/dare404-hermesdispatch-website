@@ -1,6 +1,6 @@
 # GitHub Actions Auto-Deployment Setup
 
-To enable automatic deployment to Cloudflare Pages on every push:
+hermesdispatch.dev uses **Git-based auto-deployment** via Cloudflare Pages Git integration. The site automatically deploys when you push to `master`.
 
 ## Step 1: Create GitHub Repository
 
