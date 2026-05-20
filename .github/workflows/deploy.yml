@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Build and Deploy
 
 on:
   push:
@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -31,7 +29,6 @@ jobs:
           TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
           echo '{"build": "'"${RUN_NUM}"'", "commit": "'"${GITHUB_SHA}"'", "timestamp": "'"${TIMESTAMP}"'"}' > src/config/version.json
           echo "Version: Build #${RUN_NUM} | ${SHORT_SHA} | ${TIMESTAMP}"
-          cat src/config/version.json
 
       - name: Install dependencies
         run: npm ci
@@ -43,12 +40,13 @@ jobs:
         run: |
           mkdir -p dist/agent-network
           cp -r public/agent-network/* dist/agent-network/ 2>/dev/null || true
-          cp public/interactive-agent-map.html dist/ 2>/dev/null || true
+          echo "Contents of dist:"
           ls -la dist/
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3.14.1
+        uses: cloudflare/pages-action@v1
         with:
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages deploy dist --project-name hermesdispatch --branch production
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: hermesdispatch
+          directory: dist
