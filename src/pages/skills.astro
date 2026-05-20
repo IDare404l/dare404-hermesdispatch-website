@@ -1,118 +1,278 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-const skills = [
-  {
-    slug: 'hermes-agent',
-    name: 'Hermes Agent',
-    description: 'Configure, extend, and contribute to Hermes Agent itself. The foundation skill for all others.',
-    category: 'Core',
-    usage: 'Essential',
-    tags: ['config', 'development', 'setup'],
-    downloads: 0
-  },
-  {
-    slug: 'tabby',
-    name: 'Tabby',
-    description: 'Complete Etsy automation for print-on-demand businesses. Daily trend research, design generation, and listing optimization.',
-    category: 'Ecommerce',
-    usage: 'Production',
-    tags: ['etsy', 'print-on-demand', 'automation'],
-    downloads: 0
-  },
-  {
-    slug: 'emailer',
-    name: 'Mission Freedom Emailer',
-    description: 'Reliable email automation using Himalaya CLI. Structured reporting with document tracking.',
-    category: 'Communication',
-    usage: 'Production',
-    tags: ['email', 'himalaya', 'reports'],
-    downloads: 0
-  },
-  {
-    slug: 'obsidian-logger',
-    name: 'Obsidian Logger',
-    description: 'Universal logging skill used by all Mission Freedom agents. Structured Obsidian vault integration.',
-    category: 'Infrastructure',
-    usage: 'Production',
-    tags: ['logging', 'obsidian', 'tracking'],
-    downloads: 0
-  },
-  {
-    slug: 'orchestrator',
-    name: 'Modular Orchestrator',
-    description: 'Coordinate multiple Hermes agents with split architecture. HALT+RERUN protocol for error handling.',
-    category: 'Orchestration',
-    usage: 'Production',
-    tags: ['agents', 'workflow', 'coordination'],
-    downloads: 0
-  },
-];
+// Mission Freedom Custom Skills Only (built during our sessions)
+// Excludes default Hermes library skills
 
-const categories = ['All', 'Core', 'Ecommerce', 'Communication', 'Infrastructure', 'Orchestration'];
+const categories = {
+  'Orchestration': {
+    icon: '🎯',
+    description: 'Core IGOR infrastructure and unified execution',
+    skills: [
+      { name: 'igor-unified-orchestrator', desc: 'Solo orchestrator replacing 9-agent chaos with unified execution context.', details: 'Pattern: Load skill block → Execute → Log → Done. No subagent delegation. Achieves ~60-70% token savings, unified context, simpler debugging. All Mission Freedom operations flow through this single orchestration point.' },
+      { name: 'learning-system-manager', desc: 'Central controller for Mission Freedom\'s learning ecosystem.', details: 'ASSIGN - learning priorities, SUGGEST - knowledge gaps, IMPLEMENT - curriculum updates, IMPROVE - continuous system optimization. Runs overnight at 02:00 MST.' },
+      { name: 'dual-sync-workflow', desc: 'Automatically keeps website + Obsidian in sync after system changes.', details: 'Triggered on every significant edit. IGOR-absorbed Librarian function. Ensures documentation and web presence stay aligned without manual intervention.' }
+    ]
+  },
+  'AI Agents': {
+    icon: '🤖',
+    description: 'Specialized agent capabilities and learning systems',
+    skills: [
+      { name: 'autofix-monitor', desc: 'Autonomous error detection and repair for all MF operations.', details: 'Replaces 3 separate monitoring agents (Igor Auto-Fix, IGOR Monitor, Pre-Execution). HALT+RERUN protocol. Attempts auto-resolution for provider issues, tool hallucinations, credential failures.' },
+      { name: 'unified-learning-agent', desc: 'Single skill replaces 6 individual learner agents.', details: 'Parameterized learning for Affiliate, Branding, Newsletter, Twatter, Website-Builder, and Web-Research. Handles transcript extraction, guide creation, progress tracking.' },
+      { name: 'modular-agent-workflows', desc: 'Design systems with reusable, composable skill blocks.', details: 'Each module handles one phase (research, generation, synthesis) with clear inputs/outputs. Tasks decomposed into blocks that can be orchestrated or used independently.' },
+      { name: 'ollama-token-conserver', desc: 'Tracks token usage and auto-saves state at thresholds.', details: 'Monitors 90%, 95%, 99% thresholds. Prevents workflow loss during budget constraints. Critical for self-hosted Ollama operations.' },
+      { name: 'token-fallback-framework', desc: 'Fallback mode during token conservation periods.', details: 'Ensures minimal viable output when full execution isn\'t possible. Graceful degradation for all MF skills.' },
+      { name: 'skill-trainer', desc: 'Meta-learning specialist for accelerating skill acquisition.', details: 'Sole responsibility: improving how agents learn and the quality of their knowledge. Analyzes learning patterns, optimizes curriculum delivery.' },
+      { name: 'affiliate-learner', desc: 'Web research learning for Affiliate Agent.', details: 'Niche selection, platform evaluation, commission models, YMYL compliance. Creates comprehensive guides from YouTube transcripts.' },
+      { name: 'branding-learner', desc: 'Web research across 8 branding categories.', details: 'Logo design, color psychology, typography, visual identity, brand guidelines, brand voice, Canva Pro, social media templates. 6000-17000 word guides.' },
+      { name: 'newsletter-learner', desc: 'Newsletter optimization and growth strategies.', details: 'SEO, directory setup, funnels, affiliate marketing integration, monetization strategies. Focus on Mission Freedom newsletter growth.' },
+      { name: 'tabby-learner', desc: 'Etsy and Print on Demand trend research.', details: 'Design trends, seasonal patterns, competitor analysis, listing optimization strategies. Feeds into Tabby daily reports.' },
+      { name: 'twatter-learner', desc: 'Twitter/X algorithm and viral content research.', details: 'Timing strategies, hashtag performance, engagement patterns, thread optimization. Keeps Twatter on top of platform changes.' },
+      { name: 'website-builder-learner', desc: 'Web development platform research.', details: 'WordPress, Webflow, Shopify, SEO best practices, hosting comparisons, performance optimization.' },
+      { name: 'librarian-learner', desc: 'Obsidian and PKM system research.', details: 'Vault organization, note-taking workflows, linking strategies, knowledge management patterns.' }
+    ]
+  },
+  'Social Media': {
+    icon: '𝕏',
+    description: 'Twitter/X automation and engagement',
+    skills: [
+      { name: 'twatter', desc: 'Unified Twatter agent for Mission Freedom.', details: 'v4.1.1 - Uses category format (02-Operations/) for all outputs. Reports to Librarian. Cross-promotion and email fallback patterns. Daily mandatory post at 15:00 MST, hourly engagement slots.' },
+      { name: 'unified-twatter', desc: 'Single parameterized skill replaces 3 separate agent jobs.', details: 'Modes: standard (hourly engagement), max (high-velocity), cross-promo (team monitoring). Consolidated from twatter, twatter-max-engagement, twatter-cross-promotion-monitor.' }
+    ]
+  },
+  'E-Commerce': {
+    icon: '🛍️',
+    description: 'Print-on-demand and Etsy automation',
+    skills: [
+      { name: 'tabby', desc: 'Master SEO Agent for Etsy + social media.', details: 'The Trending Tabby - Daily 07:00 report with 3 designs + social content. Cat-themed POD clothing. Competitor intelligence, trend analysis, design generation, listing optimization.' },
+      { name: 'ecommerce-pod-workflow', desc: 'End-to-end print-on-demand automation.', details: 'Multi-agent system covering design research, trend analysis, original concept creation, listing optimization. Copyright-safe design inspiration, POD platform integration, product launch pipeline.' },
+      { name: 'base-block-research-fetcher', desc: 'Gather raw data from any source.', details: 'Single responsibility: retrieve data from Etsy, web, API. Returns structured results. Used by Tabby, Affiliate, and other research workflows.' },
+      { name: 'base-block-trend-analyzer', desc: 'Extract patterns from structured data.', details: 'Single responsibility: identify themes, patterns, actionable insights. Feeds design generation and strategic decisions.' },
+      { name: 'base-block-design-generator', desc: 'Transform trends into complete deliverables.', details: 'Single responsibility: create designs, copy, SEO packages from trend analysis. Production-ready output for immediate use.' }
+    ]
+  },
+  'Email': {
+    icon: '📧',
+    description: 'Mission Freedom communication infrastructure',
+    skills: [
+      { name: 'unified-email-system', desc: 'One skill replaces 5 email-related systems.', details: 'Consolidates Himalaya CLI, Gmail SMTP, AgentMail, and transactional patterns. PREFERRED over individual methods due to reliability and token efficiency.' },
+      { name: 'mission-freedom-himalaya-emailer', desc: 'Default MF email using Himalaya CLI.', details: 'Replaces broken Gmail SMTP and AgentMail. Reliable IMAP/SMTP from terminal. Configured for derekkosakura@gmail.com.' },
+      { name: 'emailer', desc: 'Himalaya CLI backend for all MF communications.', details: 'Simple, reliable, no auth issues. Preferred method over complex REST APIs that fail unpredictably.' },
+      { name: 'reliable-agent-email', desc: 'Email patterns that cannot fail.', details: 'SMTP fallbacks, transactional API patterns, auth recovery. Used when automated delivery is mission-critical.' }
+    ]
+  },
+  'Newsletter': {
+    icon: '📰',
+    description: 'HermesDispatch content and delivery',
+    skills: [
+      { name: 'weekly-newsletter-generator', desc: 'Generate newsletter from activity logs.', details: 'Automatic sanitization of internal data. Creates public-ready content from Mission Freedom operations. Weekly delivery Monday 3 PM EST.' },
+      { name: 'newsletter-writer', desc: 'Daily content in Rycen Beans\' voice.', details: 'Boise-based AI automation insights, block-style skill breakdowns, workflow deep-dives. Action-first, no fluff. Built to ship.' },
+      { name: 'newsletter-content-business', desc: 'Newsletter monetization strategies.', details: 'Digital products, sponsorships, owned audience growth. AI/Hermes expertise sharing business models.' },
+      { name: 'daily-report', desc: 'Unified daily report generator.', details: 'Combines Twitter daily, mission-freedom-daily-report. Single skill replaces multiple daily report agents. Morning summary for stakeholders.' }
+    ]
+  },
+  'Base Blocks': {
+    icon: '🧱',
+    description: 'Modular reusable components for all MF agents',
+    skills: [
+      { name: 'web-research-engine', desc: 'Unified web research with source validation.', details: 'Reusable across all MF agents. Handles search, extraction, verification, structured output. BASE_BLOCK pattern.' },
+      { name: 'report-compiler', desc: 'Multi-source report assembly.', details: 'Aggregates data from multiple agents into cohesive reports. Standardized formatting, consistent voice.' },
+      { name: 'seo-package-generator', desc: 'Complete SEO packages from any data source.', details: 'Reusable across all MF agents. Titles, descriptions, tags, alt text. Optimized for Etsy and web content.' },
+      { name: 'design-concept-creator', desc: 'Generate design concepts from trends.', details: 'Creates design-ready specifications. Trend input → complete concept with prompts, specs, implementation notes.' },
+      { name: 'vault-writer', desc: 'Intelligent Obsidian vault writing.', details: 'All agents report to Librarian for vault writes. Category-compliant paths, proper formatting, index updates.' },
+      { name: 'email-dispatcher', desc: 'Structured email dispatch.', details: 'Category system compliant (02-Operations/). Confirms delivery to tracking logs. Enforced by Igor.' }
+    ]
+  },
+  'DevOps': {
+    icon: '⚙️',
+    description: 'Infrastructure, monitoring, and automation',
+    skills: [
+      { name: 'mission-freedom-infrastructure', desc: 'Complete MF automation infrastructure.', details: 'Health monitoring, auto-fix, dashboard systems. Centralized logging, error tracking, performance metrics.' },
+      { name: 'centralized-logging-architecture', desc: 'Single source of truth pattern.', details: 'One agent maintains logs; others report to it. Prevents write conflicts, ensures data integrity.' },
+      { name: 'cron-auto-fix', desc: 'Cron job detection and repair.', details: 'Provider/model issues, tool hallucinations, execution failures. Automated recovery without human intervention.' }
+    ]
+  },
+  'Note-Taking': {
+    icon: '📝',
+    description: 'Obsidian vault management',
+    skills: [
+      { name: 'obsidian-logger', desc: 'Agents log successes; IGOR logs failures.', details: 'Post-execution summary format for all MF agents. Category-compliant paths (02-Operations/, 03-Intelligence/).' },
+      { name: 'obsidian-compact', desc: 'Vault compaction skill.', details: 'Replaces 4 separate Librarian compaction jobs. Daily, weekly, monthly, quarterly archival. Keeps active workspace clean.' }
+    ]
+  },
+  'Marketing': {
+    icon: '📈',
+    description: 'Growth and monetization systems',
+    skills: [
+      { name: 'affiliate-marketing-agent-v2', desc: 'MF-focused affiliate agent.', details: 'No longer does YouTube research directly. Receives curated learning from YouTube Transcriber. Focuses on Mission Freedom brand partnerships.' },
+      { name: 'trend-hunter', desc: 'Multi-platform trend research.', details: 'Google Trends, Twitter viral content, Etsy cat trends. Runs autonomously, reports to IGOR. Feeds insights to design and content systems.' }
+    ]
+  },
+  'Orchestration': {
+    icon: '🎛️',
+    description: 'Workflow and system coordination',
+    skills: [
+      { name: 'modular-agent-orchestration', desc: 'Build systems with BASE_BLOCK architecture.', details: 'Multi-agent patterns, naming conventions, documentation workflows, cloud model assignments. Foundation for MF agent design.' }
+    ]
+  }
+};
+
+const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.skills.length, 0);
 ---
 
-<Layout title="Hermes Skills Directory">
-  <section class="py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<Layout title="IGOR + Skills | Mission Freedom">
+  <section class="py-12 md:py-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <div class="mb-12">
-        <h1 class="text-3xl font-bold mb-4">Skills Directory</h1>
-        <p class="text-neutral-400 max-w-2xl">Ready-to-use Hermes skills for your automations. These are production-tested and actively maintained.</p>
+      {/* Header */}
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/30 mb-6">
+          <span class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></span>
+          <span class="text-orange-400 text-sm font-medium">Mission Freedom Arsenal</span>
+        </div>
+        
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">IGOR + Skills</span>
+        </h1>
+        
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto mb-6">
+          One orchestrator. {totalSkills} custom-built skills. Zero subagents.
+        </p>
+        
+        <div class="flex flex-wrap justify-center gap-4 text-sm">
+          <span class="px-3 py-1 rounded-full bg-neutral-800 text-neutral-300">{totalSkills} Active Skills</span>
+          <span class="px-3 py-1 rounded-full bg-neutral-800 text-neutral-300">{Object.keys(categories).length} Categories</span>
+          <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">60-70% Token Savings</span>
+        </div>
       </div>
-      
-      <!-- Categories -->
-      <div class="flex flex-wrap gap-2 mb-8">
-        {categories.map(cat => (
-          <button class="badge border-neutral-700 hover:border-neutral-600 transition-colors cursor-pointer">
-            {cat}
-          </button>
-        ))}
+
+      {/* Architecture Note */}
+      <div class="mb-12 p-6 bg-gradient-to-r from-neutral-900 to-neutral-800 border border-neutral-700 rounded-xl">
+        <div class="flex items-start gap-4">
+          <div class="text-3xl">🏗️</div>
+          <div>
+            <h2 class="font-semibold text-lg mb-2">Unified Architecture</h2>
+            <p class="text-neutral-400 text-sm leading-relaxed">
+              These are the <strong>Mission Freedom custom skills</strong> we built together — not the default Hermes library. 
+              Formerly 9 separate agents, now consolidated into IGOR + modular skill blocks. 
+              Pattern: Load skill → Execute → Log → Done. No context duplication, no handoff waste.
+            </p>
+          </div>
+        </div>
       </div>
-      
-      <!-- Skills Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {skills.map(skill => (
-          <div class="card card-glow">
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500/20 to-amber-500/20 flex items-center justify-center text-lg font-bold text-orange-400">
-                  {skill.name.charAt(0)}
-                </div>
-                <div>
-                  <h3 class="font-semibold">{skill.name}</h3>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="badge-blue">{skill.category}</span>
-                    <span class="badge text-neutral-400 border-neutral-700">{skill.usage}</span>
-                  </div>
-                </div>
+
+      {/* Search */}
+      <div class="mb-8">
+        <input 
+          type="text" 
+          id="skillSearch"
+          placeholder="Search skills..."
+          class="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition-colors"
+        />
+      </div>
+
+      {/* Skills by Category */}
+      <div class="space-y-8">
+        {Object.entries(categories).map(([catName, catData]) => (
+          <div class="category-section" data-category={catName.toLowerCase()}>
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-2xl">{catData.icon}</span>
+              <div>
+                <h2 class="text-xl font-semibold">{catName}</h2>
+                <p class="text-sm text-neutral-500">{catData.description}</p>
               </div>
+              <span class="ml-auto px-3 py-1 text-xs rounded-full bg-neutral-800 text-neutral-400">
+                {catData.skills.length} skills
+              </span>
             </div>
             
-            <p class="text-neutral-400 mb-4">{skill.description}</p>
-            
-            <div class="flex items-center justify-between">
-              <div class="flex flex-wrap gap-2">
-                {skill.tags.map(tag => (
-                  <span class="text-xs text-neutral-500">#{tag}</span>
-                ))}
-              </div>
-              
-              <a href={`/skills/${skill.slug}`} class="text-sm text-orange-400 hover:text-orange-300 font-medium">
-                View Details →
-              </a>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {catData.skills.map(skill => (
+                <div 
+                  class="skill-card group p-4 bg-neutral-900 border border-neutral-800 rounded-xl cursor-pointer hover:border-orange-500/50 transition-all"
+                  data-name={skill.name.toLowerCase()}
+                  data-desc={skill.desc.toLowerCase()}
+                >
+                  <div class="flex items-start justify-between mb-2">
+                    <h3 class="font-medium text-orange-400 group-hover:text-orange-300 transition-colors">{skill.name}</h3>
+                    <svg class="w-5 h-5 text-neutral-600 group-hover:text-orange-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                  <p class="text-sm text-neutral-400 mb-2">{skill.desc}</p>
+                  <div class="skill-details hidden mt-3 pt-3 border-t border-neutral-800">
+                    <p class="text-sm text-neutral-500 leading-relaxed">{skill.details}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
       </div>
-      
-      <!-- CTA -->
-      <div class="mt-12 text-center">
-        <p class="text-neutral-500 mb-4">Want to contribute a skill?</p>
-        <a href="https://github.com/dare404/hermes-skills" class="btn-secondary text-sm">
-          Submit a Skill
-        </a>
+
+      {/* Stats */}
+      <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
+          <div class="text-3xl font-bold text-orange-400">1</div>
+          <div class="text-sm text-neutral-500">Orchestrator</div>
+        </div>
+        <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
+          <div class="text-3xl font-bold text-orange-400">{totalSkills}</div>
+          <div class="text-sm text-neutral-500">Custom Skills</div>
+        </div>
+        <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
+          <div class="text-3xl font-bold text-orange-400">0</div>
+          <div class="text-sm text-neutral-500">Subagents</div>
+        </div>
+        <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
+          <div class="text-3xl font-bold text-orange-400">∞</div>
+          <div class="text-sm text-neutral-500">Possibilities</div>
+        </div>
       </div>
+
     </div>
   </section>
+
+  <script>
+    // Search functionality
+    const searchInput = document.getElementById('skillSearch');
+    const skillCards = document.querySelectorAll('.skill-card');
+    const categorySections = document.querySelectorAll('.category-section');
+
+    searchInput?.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      
+      skillCards.forEach(card => {
+        const name = card.dataset.name;
+        const desc = card.dataset.desc;
+        const matches = name?.includes(query) || desc?.includes(query);
+        card.style.display = matches ? 'block' : 'none';
+      });
+
+      // Hide empty categories
+      categorySections.forEach(section => {
+        const visibleCards = section.querySelectorAll('.skill-card[style*="block"], .skill-card:not([style*="none"])');
+        section.style.display = visibleCards.length > 0 ? 'block' : 'none';
+      });
+    });
+
+    // Click to expand skill details
+    skillCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const details = card.querySelector('.skill-details');
+        const arrow = card.querySelector('svg');
+        
+        if (details?.classList.contains('hidden')) {
+          details.classList.remove('hidden');
+          arrow?.classList.add('rotate-180');
+          card.classList.add('border-orange-500/30');
+        } else {
+          details?.classList.add('hidden');
+          arrow?.classList.remove('rotate-180');
+          card.classList.remove('border-orange-500/30');
+        }
+      });
+    });
+  </script>
 </Layout>
