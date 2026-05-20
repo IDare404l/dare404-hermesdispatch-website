@@ -2,7 +2,7 @@ name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches: [main, master]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,7 +30,7 @@ jobs:
           RUN_NUM="${GITHUB_RUN_NUMBER}"
           TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
           echo '{"build": "'"${RUN_NUM}"'", "commit": "'"${GITHUB_SHA}"'", "timestamp": "'"${TIMESTAMP}"'"}' > src/config/version.json
-          echo "Version: Build #${RUN_NUM} • ${SHORT_SHA} • ${TIMESTAMP}"
+          echo "Version: Build #${RUN_NUM} | ${SHORT_SHA} | ${TIMESTAMP}"
           cat src/config/version.json
 
       - name: Install dependencies
@@ -40,8 +42,8 @@ jobs:
       - name: Copy public assets
         run: |
           mkdir -p dist/agent-network
-          cp -r public/agent-network/* dist/agent-network/ 2>/dev/null || echo "No public/agent-network"
-          cp public/interactive-agent-map.html dist/ 2>/dev/null || echo "interactive-agent-map.html not found"
+          cp -r public/agent-network/* dist/agent-network/ 2>/dev/null || true
+          cp public/interactive-agent-map.html dist/ 2>/dev/null || true
           ls -la dist/
 
       - name: Deploy to Cloudflare Pages
@@ -50,15 +52,3 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: pages deploy dist --project-name hermesdispatch --branch production
-
-      - name: Comment deployment URL
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data: comment } = await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: '🚀 Deployed to Cloudflare Pages!'
-            });
