@@ -2,11 +2,12 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
-  site: 'https://hermesmissionfreedom.ai',
+  site: 'https://www.hermesdispatch.dev',
   output: 'static',
   integrations: [tailwind()],
-  trailingSlash: 'always',
-  build: {
-    format: 'directory'
-  }
+  vite: {
+    build: {
+      minify: true,
+    },
+  },
 });

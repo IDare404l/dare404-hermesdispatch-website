@@ -1,0 +1,151 @@
+---
+// Learning Mastery Dashboard Component
+// Shows skill progress bars, trends, and status
+---
+
+<script>
+  import { formatDate } from '../utils/dates';
+  
+  // Load mastery data
+  const masteryData = await fetch('/data/learning-mastery.json')
+    .then(r => r.json())
+    .catch(() => ({ skills: [], summary: { avgMastery: 0 } }));
+  
+  const skills = masteryData.skills || [];
+  
+  function getColorClass(mastery: number): string {
+    if (mastery >= 95) return 'text-emerald-400 bg-emerald-500/20';
+    if (mastery >= 70) return 'text-amber-400 bg-amber-500/20';
+    return 'text-rose-400 bg-rose-500/20';
+  }
+  
+  function getProgressGradient(mastery: number): string {
+    if (mastery >= 95) return 'from-emerald-500 to-emerald-400';
+    if (mastery >= 70) return 'from-amber-500 to-amber-400';
+    return 'from-rose-500 to-rose-400';
+  }
+  
+  function getTrendArrow(trend: number[]): string {
+    if (trend.length < 2) return '→';
+    const last = trend[trend.length - 1];
+    const prev = trend[trend.length - 2];
+    if (last > prev) return '↗';
+    if (last < prev) return '↘';
+    return '→';
+  }
+  
+  function getModeBadge(mode: string, mastery: number): { text: string; class: string } {
+    if (mastery >= 95) {
+      return { 
+        text: 'RETENTION', 
+        class: 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/50' 
+      };
+    }
+    if (mode === 'active-learning') {
+      return { 
+        text: 'LEARNING', 
+        class: 'bg-brand-cyan/30 text-brand-cyan border border-brand-cyan/50' 
+      };
+    }
+    return { 
+      text: 'DAILY', 
+      class: 'bg-brand-purple/30 text-brand-purple border border-brand-purple/50' 
+    };
+  }
+</script>
+
+<section class="py-16 bg-brand-card/30 border-y border-brand-border/50">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold bg-gradient-to-r from-brand-gold to-brand-cyan bg-clip-text text-transparent mb-3">
+        Learning Mastery
+      </h2>
+      <p class="text-neutral-400 text-sm font-mono">
+        Daily learning • Adaptive frequency • Retention at 95%
+      </p>
+      <div class="mt-4 flex items-center justify-center gap-2 text-sm">
+        <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">✅ Mastery</span>
+        <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">🔄 Active</span>
+        <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400">📝 Needs Work</span>
+      </div>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      {#each skills as skill}
+        <div class="group relative bg-brand-card border border-brand-border rounded-lg p-4 hover:border-brand-cyan/50 transition-all">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">{skill.icon}</span>
+              <div>
+                <h3 class="font-semibold text-neutral-100 text-sm">{skill.name}</h3>
+                <p class="text-xs text-neutral-500 font-mono">
+                  {skill.categoriesComplete}/{skill.categoriesTotal} categories
+                </p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-2xl font-bold {getColorClass(skill.mastery).split(' ')[0]}">
+                {skill.mastery}%
+              </span>
+              <span class="text-xl ml-1">{getTrendArrow(skill.trend)}</span>
+            </div>
+          </div>
+          
+          <!-- Progress bar -->
+          <div class="h-2 bg-brand-dark rounded-full overflow-hidden mb-3">
+            <div 
+              class="h-full bg-gradient-to-r {getProgressGradient(skill.mastery)} transition-all duration-500"
+              style="width: {skill.mastery}%"
+            />
+          </div>
+          
+          <!-- Meta info -->
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase {getModeBadge(skill.mode, skill.mastery).class}">
+                {getModeBadge(skill.mode, skill.mastery).text}
+              </span>
+              {#if skill.frequency === 'daily'}
+                <span class="text-brand-cyan">● Daily</span>
+              {:else}
+                <span class="text-neutral-500">○ Weekly</span>
+              {/if}
+            </div>
+            <div class="text-neutral-500 font-mono">
+              {#if skill.lastLearned}
+                Last: {formatDate(skill.lastLearned)}
+              {:else}
+                <span class="text-rose-400">Not started</span>
+              {/if}
+            </div>
+          </div>
+          
+          <!-- Hover tooltip -->
+          <div class="absolute inset-0 bg-brand-dark/95 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs text-center p-4">
+            <div>
+              <p class="text-neutral-400 mb-1">Next review:</p>
+              <p class="text-brand-gold font-mono">{skill.nextReview}</p>
+              {#if skill.confidenceRate}
+                <p class="mt-2">
+                  <span class="text-neutral-500">Confidence:</span>
+                  <span class={skill.confidenceRate >= 0.95 ? 'text-emerald-400' : 'text-neutral-300'}>
+                    {Math.round(skill.confidenceRate * 100)}%
+                  </span>
+                </p>
+              {/if}
+            </div>
+          </div>
+        </div>
+      {/each}
+    </div>
+    
+    <!-- Summary footer -->
+    <div class="mt-8 pt-6 border-t border-brand-border/50 text-center text-sm text-neutral-500">
+      <span class="font-mono">Average Mastery: <span class="text-brand-cyan">{masteryData.summary?.avgMastery || 0}%</span></span>
+      <span class="mx-4">|</span>
+      <span class="font-mono">Target: <span class="text-brand-gold">95%</span></span>
+      <span class="mx-4">|</span>
+      <span class="font-mono">Last Updated: {masteryData.lastUpdated}</span>
+    </div>
+  </div>
+</section>
