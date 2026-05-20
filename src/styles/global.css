@@ -1,118 +1,275 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
+/* Global styles for Mission Freedom */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #171717;
-  --bg-tertiary: #262626;
-  --text-primary: #fafafa;
-  --text-secondary: #a3a3a3;
-  --text-tertiary: #737373;
-  --accent: #f97316;
-  --accent-hover: #ea580c;
-  --border: #404040;
-  --success: #22c55e;
-  --warning: #eab308;
-  --error: #ef4444;
-}
+/* Custom font loading */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
+/* Base styles */
 @layer base {
   html {
     scroll-behavior: smooth;
   }
   
   body {
-    @apply bg-neutral-950 text-neutral-100 font-sans antialiased;
-    background: var(--bg-primary);
+    @apply bg-brand-dark text-gray-100 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
   
   ::selection {
-    @apply bg-orange-500/30 text-orange-100;
+    @apply bg-brand-gold/30 text-white;
   }
 }
 
-@layer components {
-  .prose-invert h1,
-  .prose-invert h2,
-  .prose-invert h3,
-  .prose-invert h4 {
-    @apply text-white;
-  }
-  .prose-invert p {
-    @apply text-neutral-300;
-  }
-  .prose-invert a {
-    @apply text-orange-400;
-  }
-  .prose-invert strong {
-    @apply text-white;
-  }
-  
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2d2d3d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3d3d4d;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid #d4af37;
+  outline-offset: 2px;
+}
+
+/* Glass morphism utilities */
+@layer utilities {
   .glass {
-    @apply bg-neutral-900/50 backdrop-blur-xl border border-neutral-800;
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
   }
   
-  .glow {
-    box-shadow: 0 0 20px rgba(249, 115, 22, 0.15), 0 0 40px rgba(249, 115, 22, 0.1);
+  .glass-dark {
+    @apply bg-black/20 backdrop-blur-xl border border-white/5;
+  }
+  
+  .glass-card {
+    @apply bg-brand-card/80 backdrop-blur-xl border border-brand-border;
   }
   
   .text-gradient {
-    @apply bg-gradient-to-r from-orange-400 to-amber-500 bg-clip-text text-transparent;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-gold via-brand-amber to-brand-gold;
   }
   
-  .btn-primary {
-    @apply inline-flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30;
+  .text-gradient-cool {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-cyan via-brand-accent to-brand-purple;
   }
   
-  .btn-secondary {
-    @apply inline-flex items-center gap-2 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white font-medium rounded-lg transition-all duration-200 border border-neutral-700;
+  .glow-gold {
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.15), 0 0 60px rgba(212, 175, 55, 0.05);
   }
   
-  .card {
-    @apply bg-neutral-900/50 border border-neutral-800 rounded-xl p-6 hover:border-neutral-700 transition-all duration-300;
+  .glow-cyan {
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.15), 0 0 60px rgba(6, 182, 212, 0.05);
   }
   
-  .card-glow:hover {
-    @apply border-orange-500/50;
-    box-shadow: 0 0 30px rgba(249, 115, 22, 0.1);
+  .glow-purple {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.15), 0 0 60px rgba(139, 92, 246, 0.05);
   }
   
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl;
   }
   
-  .badge-orange {
-    @apply badge bg-orange-500/10 text-orange-400 border border-orange-500/20;
+  .shine {
+    position: relative;
+    overflow: hidden;
   }
   
-  .badge-green {
-    @apply badge bg-green-500/10 text-green-400 border border-green-500/20;
+  .shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    transition: left 0.7s;
   }
   
-  .badge-blue {
-    @apply badge bg-blue-500/10 text-blue-400 border border-blue-500/20;
-  }
-  
-  .terminal {
-    @apply font-mono text-sm bg-neutral-900 rounded-lg p-4 border border-neutral-800 overflow-x-auto;
+  .shine:hover::before {
+    left: 100%;
   }
 }
 
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out;
+/* Animated gradient background */
+.animated-gradient {
+  background: linear-gradient(-45deg, #0a0a0f, #111118, #1a1a25, #0f0f15);
+  background-size: 400% 400%;
+  animation: gradient-xy 15s ease infinite;
+}
+
+/* Particle container */
+.particles-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(212, 175, 55, 0.5);
+  border-radius: 50%;
+  animation: float-particle 15s infinite;
+}
+
+@keyframes float-particle {
+  0%, 100% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
   }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  10% {
+    opacity: 1;
   }
-  
-  .dot-pattern {
-    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
-    background-size: 24px 24px;
+  90% {
+    opacity: 1;
   }
+  100% {
+    transform: translateY(-100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-8 py-4 bg-gradient-to-r from-brand-gold to-brand-amber text-brand-dark font-semibold rounded-xl 
+         transition-all duration-300 hover:shadow-lg hover:shadow-brand-gold/25 hover:scale-105
+         active:scale-95 shine;
+}
+
+.btn-secondary {
+  @apply px-8 py-4 border border-brand-border bg-white/5 text-white font-semibold rounded-xl 
+         transition-all duration-300 hover:bg-white/10 hover:border-brand-gold/50
+         active:scale-95;
+}
+
+.btn-ghost {
+  @apply px-6 py-3 text-gray-400 font-medium transition-all duration-300 
+         hover:text-brand-gold hover:bg-brand-gold/5 rounded-lg;
+}
+
+/* Card styles */
+.feature-card {
+  @apply glass-card rounded-2xl p-6 hover-lift relative overflow-hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+    rgba(212, 175, 55, 0.06), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.feature-card:hover::before {
+  opacity: 1;
+}
+
+/* Grid pattern overlay */
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+/* Dot pattern */
+.dot-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(212, 175, 55, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+/* Noise texture */
+.noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
+}
+
+/* Status badges */
+.status-badge {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium;
+}
+
+.status-active {
+  @apply bg-emerald-500/15 text-emerald-400 border border-emerald-500/30;
+}
+
+.status-learning {
+  @apply bg-amber-500/15 text-amber-400 border border-amber-500/30;
+}
+
+.status-planning {
+  @apply bg-blue-500/15 text-blue-400 border border-blue-500/30;
+}
+
+/* Typography enhancements */
+.display-heading {
+  @apply text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight;
+  letter-spacing: -0.03em;
+}
+
+.section-heading {
+  @apply text-3xl md:text-4xl font-bold tracking-tight;
+  letter-spacing: -0.02em;
+}
+
+/* Prose customization for content - avoiding @apply with prose classes */
+.prose-invert {
+  color: #e5e7eb;
+}
+
+.prose-invert strong {
+  color: #d4af37;
+}
+
+.prose-invert a {
+  color: #d4af37;
+  transition: color 0.2s;
+}
+
+.prose-invert a:hover {
+  color: #e5c158;
+}
+
+/* Loading skeleton */
+.skeleton {
+  @apply animate-pulse bg-brand-border rounded;
+}
+
+/* Responsive container */
+.container-prose {
+  @apply max-w-3xl mx-auto px-4 sm:px-6;
 }

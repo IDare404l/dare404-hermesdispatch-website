@@ -1,0 +1,527 @@
+---
+import Layout from '../layouts/Layout.astro';
+const title = "Meet the Team | Mission Freedom";
+const description = "Meet the 9 AI agents powering Mission Freedom. Each with specialized skills, working together to build automation systems.";
+---
+
+<Layout title={title} description={description}>
+  <!-- Header -->
+  <header class="bg-slate-900 border-b border-slate-800">
+    <div class="max-w-6xl mx-auto px-6 py-8">
+      <nav class="flex items-center justify-between mb-8">
+        <a href="/" class="text-xl font-bold text-white hover:text-blue-400 transition-colors">
+          ← The Hermes Dispatch
+        </a>
+        <div class="flex gap-6">
+          <a href="/" class="text-slate-400 hover:text-white transition-colors">Home</a>
+          <a href="/archive" class="text-slate-400 hover:text-white transition-colors">Archive</a>
+          <a href="/team" class="text-white font-medium">Team</a>
+        </div>
+      </nav>
+      
+      <div class="text-center py-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+          Meet the <span class="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Agents</span>
+        </h1>
+        <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+          9 specialized AI agents working together to build, optimize, and scale Mission Freedom
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Architecture Overview -->
+  <section class="py-16 px-6 bg-slate-950">
+    <div class="max-w-6xl mx-auto">
+      <!-- Core Agent: IGOR -->
+      <div class="mb-16">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 border-2 border-cyan-400 flex items-center justify-center text-3xl">🤖</div>
+          <div>
+            <h2 class="text-2xl font-bold text-white">IGOR - The Orchestrator</h2>
+            <p class="text-cyan-400">Universal Command Router</p>
+          </div>
+          <span class="ml-auto px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium">Active</span>
+        </div>
+        
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6">
+          <p class="text-slate-300 mb-6">
+            IGOR coordinates all Mission Freedom operations. Every request flows through IGOR first, which routes tasks to specialist agents, validates outputs, and manages tool access. Think of IGOR as the mission control center.
+          </p>
+          
+          <div class="grid md:grid-cols-3 gap-4">
+            <div class="bg-slate-800/50 rounded-lg p-4">
+              <h4 class="text-sm font-semibold text-cyan-400 mb-2">Task Routing</h4>
+              <p class="text-sm text-slate-400">Analyzes requests and assigns to best-fit agent</p>
+            </div>
+            <div class="bg-slate-800/50 rounded-lg p-4">
+              <h4 class="text-sm font-semibold text-cyan-400 mb-2">Output Validation</h4>
+              <p class="text-sm text-slate-400">Checks quality before delivery</p>
+            </div>
+            <div class="bg-slate-800/50 rounded-lg p-4">
+              <h4 class="text-sm font-semibold text-cyan-400 mb-2">Tool Management</h4>
+              <p class="text-sm text-slate-400">Controls access to APIs and services</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agent Grid -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        
+        <!-- Newsletter Agent -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-orange-500/50 transition-colors group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-orange-500/20 border-2 border-orange-500 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">📧</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Newsletter</h3>
+              <p class="text-orange-400 text-sm">Daily Dispatch</p>
+            </div>
+            <span class="ml-auto w-2 h-2 bg-green-400 rounded-full" title="Active"></span>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">
+            Generates The Hermes Dispatch daily at 06:00 MST. Handles SEO optimization, monetization strategy, and Buttondown API integration.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-1 bg-orange-500/10 text-orange-300 rounded text-xs">Daily Dispatch</span>
+            <span class="px-2 py-1 bg-orange-500/10 text-orange-300 rounded text-xs">SEO</span>
+            <span class="px-2 py-1 bg-orange-500/10 text-orange-300 rounded text-xs">Monetization</span>
+          </div>
+        </div>
+
+        <!-- Tabby -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-pink-500/50 transition-colors group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-pink-500/20 border-2 border-pink-500 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🐱</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Tabby</h3>
+              <p class="text-pink-400 text-sm">Etsy SEO Master</p>
+            </div>
+            <span class="ml-auto w-2 h-2 bg-green-400 rounded-full" title="Active"></span>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">
+            Manages TheTrendingTabby Etsy shop. Trend analysis, design generation, listing optimization, and Printful integration.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-1 bg-pink-500/10 text-pink-300 rounded text-xs">Etsy SEO</span>
+            <span class="px-2 py-1 bg-pink-500/10 text-pink-300 rounded text-xs">Design Gen</span>
+            <span class="px-2 py-1 bg-pink-500/10 text-pink-300 rounded text-xs">Trends</span>
+          </div>
+        </div>
+
+        <!-- Twatter -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-blue-500/50 transition-colors group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/20 border-2 border-blue-500 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🐦</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Twatter</h3>
+              <p class="text-blue-400 text-sm">Twitter/X Content</p>
+            </div>
+            <span class="ml-auto w-2 h-2 bg-green-400 rounded-full" title="Active"></span>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">
+            Social media engagement specialist. Hourly like/RT/reply automation, thread writing, and viral content optimization.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-1 bg-blue-500/10 text-blue-300 rounded text-xs">Engagement</span>
+            <span class="px-2 py-1 bg-blue-500/10 text-blue-300 rounded text-xs">Threads</span>
+            <span class="px-2 py-1 bg-blue-500/10 text-blue-300 rounded text-xs">Viral</span>
+          </div>
+        </div>
+
+        <!-- DSocial -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-rose-500/50 transition-colors group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-rose-500/20 border-2 border-rose-500 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">📱</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">DSocial</h3>
+              <p class="text-rose-400 text-sm">Instagram & Pinterest</p>
+            </div>
+            <span class="ml-auto w-2 h-2 bg-green-400 rounded-full" title="Active"></span>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">
+            Visual content creation for @Dare__404 and @TheTrendingTabby. Instagram carousels, Pinterest SEO, and voice-matched copy.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-1 bg-rose-500/10 text-rose-300 rounded text-xs">Instagram</span>
+            <span class="px-2 py-1 bg-rose-500/10 text-rose-300 rounded text-xs">Pinterest</span>
+            <span class="px-2 py-1 bg-rose-500/10 text-rose-300 rounded text-xs">Visual</span>
+          </div>
+        </div>
+
+        <!-- Affiliate -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-yellow-500/50 transition-colors group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-yellow-500/20 border-2 border-yellow-500 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">💰</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Affiliate</h3>
+              <p class="text-yellow-400 text-sm">Marketing Strategist</p>
+            </div>
+            <span class="ml-auto w-2 h-2 bg-yellow-400 rounded-full" title="Learning"></span>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">
+            Niche research and brand strategy. Currently learning 14 categories across Disney, Photography, Tech, Finance, and more niches.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-1 bg-yellow-500/10 text-yellow-300 rounded text-xs">Niche Research</span>
+            <span class="px-2 py-1 bg-yellow-500/10 text-yellow-300 rounded text-xs">Strategy</span>
+            <span class="px-2 py-1 bg-yellow-500/10 text-yellow-300 rounded text-xs">Learning</span>
+          </div>
+        </div>
+
+        <!-- Website Builder -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-purple-500/50 transition-colors group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-500/20 border-2 border-purple-500 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🌐</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Website Builder</h3>
+              <p class="text-purple-400 text-sm">Web Developer</p>
+            </div>
+            <span class="ml-auto w-2 h-2 bg-green-400 rounded-full" title="Active"></span>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">
+            Multi-site development. This site (Astro), Shopify stores, and WordPress. Handles deployment, SEO, and performance optimization.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-1 bg-purple-500/10 text-purple-300 rounded text-xs">Astro</span>
+            <span class="px-2 py-1 bg-purple-500/10 text-purple-300 rounded text-xs">Shopify</span>
+            <span class="px-2 py-1 bg-purple-500/10 text-purple-300 rounded text-xs">Performance</span>
+          </div>
+        </div>
+
+        <!-- Librarian -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-green-500/50 transition-colors group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-green-500/20 border-2 border-green-500 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">📚</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Librarian</h3>
+              <p class="text-green-400 text-sm">Vault Maintainer</p>
+            </div>
+            <span class="ml-auto w-2 h-2 bg-green-400 rounded-full" title="Active"></span>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">
+            Obsidian vault organization. Documentation standards, navigation design, and knowledge management across all Mission Freedom data.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-1 bg-green-500/10 text-green-300 rounded text-xs">Organization</span>
+            <span class="px-2 py-1 bg-green-500/10 text-green-300 rounded text-xs">Docs</span>
+            <span class="px-2 py-1 bg-green-500/10 text-green-300 rounded text-xs">Knowledge</span>
+          </div>
+        </div>
+
+        <!-- Branding -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 hover:border-pink-400/50 transition-colors group">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-pink-400/20 border-2 border-pink-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🎨</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Branding</h3>
+              <p class="text-pink-400 text-sm">Brand Identity</p>
+            </div>
+            <span class="ml-auto w-2 h-2 bg-slate-400 rounded-full" title="Planning"></span>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">
+            Logo design, color psychology, typography systems. Currently in planning phase for Mission Freedom, dare404, and TheTrendingTabby identities.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-2 py-1 bg-pink-400/10 text-pink-300 rounded text-xs">Logo Design</span>
+            <span class="px-2 py-1 bg-pink-400/10 text-pink-300 rounded text-xs">Color Theory</span>
+            <span class="px-2 py-1 bg-pink-400/10 text-pink-300 rounded text-xs">Planning</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Skill Flow Diagram -->
+      <div class="bg-slate-900 border border-slate-700 rounded-xl p-8 mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">Agent Collaboration Flow</h2>
+        
+        <div class="space-y-6">
+          <!-- Data Flow Items -->
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-green-500/20 border border-green-500 flex items-center justify-center text-2xl">📚</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-white font-semibold">Librarian</span>
+                <span class="text-slate-500">→</span>
+                <span class="text-cyan-400 font-semibold">IGOR</span>
+                <span class="text-slate-500">→</span>
+                <span class="text-orange-400 font-semibold">Newsletter</span>
+              </div>
+              <p class="text-slate-400 text-sm">Daily operations logs → Extracted highlights → Newsletter draft at 06:00 MST</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-pink-500/20 border border-pink-500 flex items-center justify-center text-2xl">🐱</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-white font-semibold">Tabby</span>
+                <span class="text-slate-500">→</span>
+                <span class="text-rose-400 font-semibold">DSocial</span>
+                <span class="text-slate-500">+</span>
+                <span class="text-blue-400 font-semibold">Twatter</span>
+              </div>
+              <p class="text-slate-400 text-sm">Design trends → Instagram/Pinterest posts + Twitter thread content</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-orange-500/20 border border-orange-500 flex items-center justify-center text-2xl">📧</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-white font-semibold">Newsletter</span>
+                <span class="text-slate-500">→</span>
+                <span class="text-blue-400 font-semibold">Twatter</span>
+                <span class="text-slate-500">→</span>
+                <span class="text-purple-400 font-semibold">Website Builder</span>
+              </div>
+              <p class="text-slate-400 text-sm">Newsletter content → Thread drafts → Archive page update</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-lg bg-yellow-500/20 border border-yellow-500 flex items-center justify-center text-2xl">💰</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-white font-semibold">Affiliate</span>
+                <span class="text-slate-500">→</span>
+                <span class="text-orange-400 font-semibold">Newsletter</span>
+                <span class="text-slate-500">+</span>
+                <span class="text-rose-400 font-semibold">DSocial</span>
+              </div>
+              <p class="text-slate-400 text-sm">Niche insights → Product recommendations across channels</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Grid -->
+      <div class="mb-16">
+        <h2 class="text-2xl font-bold text-white mb-6">18 Active Skills</h2>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+          <!-- Automation Skills -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
+              <h3 class="font-semibold text-white">Automation</h3>
+            </div>
+            <ul class="space-y-2 text-sm text-slate-400">
+              <li class="flex items-center gap-2">
+                <span class="text-cyan-400">•</span>
+                <span>Orchestration (IGOR)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-cyan-400">•</span>
+                <span>Task Routing</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-cyan-400">•</span>
+                <span>Astro Development</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Content Skills -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+              <h3 class="font-semibold text-white">Content</h3>
+            </div>
+            <ul class="space-y-2 text-sm text-slate-400">
+              <li class="flex items-center gap-2">
+                <span class="text-orange-400">•</span>
+                <span>Daily Dispatch (Newsletter)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-orange-400">•</span>
+                <span>Twitter Engagement (Twatter)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-orange-400">•</span>
+                <span>Instagram Content (DSocial)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-orange-400">•</span>
+                <span>Thread Creation</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- SEO Skills -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-3 h-3 rounded-full bg-green-400"></div>
+              <h3 class="font-semibold text-white">SEO</h3>
+            </div>
+            <ul class="space-y-2 text-sm text-slate-400">
+              <li class="flex items-center gap-2">
+                <span class="text-green-400">•</span>
+                <span>Newsletter SEO (Newsletter)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-green-400">•</span>
+                <span>Etsy SEO (Tabby)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-green-400">•</span>
+                <span>Pinterest SEO (DSocial)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-green-400">•</span>
+                <span>Website SEO (Web Builder)</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Design Skills -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-3 h-3 rounded-full bg-purple-400"></div>
+              <h3 class="font-semibold text-white">Design</h3>
+            </div>
+            <ul class="space-y-2 text-sm text-slate-400">
+              <li class="flex items-center gap-2">
+                <span class="text-purple-400">•</span>
+                <span>Design Generation (Tabby)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-purple-400">•</span>
+                <span>Brand Strategy (Affiliate)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-purple-400">•</span>
+                <span>Logo Design (Branding)</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Data Skills -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+              <h3 class="font-semibold text-white">Data</h3>
+            </div>
+            <ul class="space-y-2 text-sm text-slate-400">
+              <li class="flex items-center gap-2">
+                <span class="text-yellow-400">•</span>
+                <span>Trend Analysis (Tabby, Twatter)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-yellow-400">•</span>
+                <span>Niche Research (Affiliate)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-yellow-400">•</span>
+                <span>Funnel Management (Newsletter)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-yellow-400">•</span>
+                <span>Continuous Learning (All)</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Integration Skills -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-3 h-3 rounded-full bg-rose-400"></div>
+              <h3 class="font-semibold text-white">Integration</h3>
+            </div>
+            <ul class="space-y-2 text-sm text-slate-400">
+              <li class="flex items-center gap-2">
+                <span class="text-rose-400">•</span>
+                <span>Vault Organization (Librarian)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-rose-400">•</span>
+                <span>Documentation (Librarian, IGOR)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-rose-400">•</span>
+                <span>Voice Matching (DSocial)</span>
+              </li>
+              <li class="flex items-center gap-2">
+                <span class="text-rose-400">•</span>
+                <span>Cross-Platform (Multiple)</span>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Learning Status -->
+      <div class="bg-slate-900 border border-slate-700 rounded-xl p-8">
+        <h2 class="text-2xl font-bold text-white mb-6">Continuous Learning</h2>
+        
+        <p class="text-slate-400 mb-6">
+          Every agent learns continuously through web research. The <strong>Librarian</strong> maintains a learning queue that tracks progress across 61 categories total. Agents graduate from "Learning" to "Retention" mode at 90% mastery.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-slate-800/50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-white font-medium">Affiliate Agent</span>
+              <span class="text-yellow-400">5%</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+              <div class="bg-yellow-500 h-2 rounded-full" style="width: 5%"></div>
+            </div>
+            <p class="text-slate-500 text-sm mt-2">14 categories • Learning: Niche Research, Brand Strategy</p>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-white font-medium">Newsletter Agent</span>
+              <span class="text-orange-400">15%</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+              <div class="bg-orange-500 h-2 rounded-full" style="width: 15%"></div>
+            </div>
+            <p class="text-slate-500 text-sm mt-2">12 categories • Learning: SEO, Monetization</p>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-white font-medium">Tabby</span>
+              <span class="text-slate-400">0%</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+              <div class="bg-slate-500 h-2 rounded-full" style="width: 1%"></div>
+            </div>
+            <p class="text-slate-500 text-sm mt-2">7 categories • Paused (token conservation)</p>
+          </div>
+
+          <div class="bg-slate-800/50 rounded-lg p-4 flex items-center justify-center">
+            <p class="text-slate-500 text-sm">+ 5 more agents in learning queue</p>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
+          <p class="text-slate-400 text-sm">
+            <span class="text-cyan-400 font-medium">Current Status:</span> Newsletter Agent active learning (SEO & Monetization). 
+            Affiliate Agent researching niches. Other agents paused for token conservation.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-8 px-6 border-t border-slate-800 bg-slate-950">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+      <p class="text-slate-500 text-sm">
+        © 2026 dare404 · Mission Freedom Agent Team · Boise, ID
+      </p>
+      
+      <div class="flex gap-6">
+        <a href="/" class="text-slate-500 hover:text-white text-sm transition-colors">Newsletter</a>
+        <a href="/archive" class="text-slate-500 hover:text-white text-sm transition-colors">Archive</a>
+        <a href="/team" class="text-white text-sm">Team</a>
+      </div>
+    </div>
+  </footer>
+</Layout>

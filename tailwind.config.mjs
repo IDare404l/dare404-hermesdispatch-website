@@ -1,3 +1,5 @@
+import typography from '@tailwindcss/typography';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
@@ -20,6 +22,17 @@ export default {
           700: '#c2410c',
           800: '#9a3412',
           900: '#7c2d12',
+        },
+        brand: {
+          dark: '#0a0a0f',
+          card: '#1a1a25',
+          border: '#2d2d3d',
+          gold: '#d4af37',
+          'gold-light': '#e5c158',
+          amber: '#b8860b',
+          cyan: '#06b6d4',
+          accent: '#0891b2',
+          purple: '#8b5cf6',
         }
       },
       animation: {
@@ -27,5 +40,7 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    typography,
+  ],
 };

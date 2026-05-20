@@ -1,0 +1,248 @@
+# Meta Descriptions Configuration
+# hermesdispatch.dev - SEO-Optimized Meta Descriptions
+
+# Home Page
+home:
+  title: "Hermes Mission Freedom | AI Agents for Automation"
+  description: "Build powerful AI agents with Hermes. Automate SEO, content creation, affiliate marketing, and print-on-demand with multi-agent orchestration. Start scaling today."
+  keywords:
+    - Hermes agent
+    - Hermes AI agent
+    - AI agents
+    - multi-agent orchestration
+    - automation platform
+    - AI skills
+
+# Features Page
+features:
+  title: "Hermes AI Features | Multi-Agent Orchestration & AI Skills"
+  description: "Explore Hermes AI features: visual workflow builder, 50+ integrations, multi-agent orchestration, custom AI skills, and enterprise-grade automation."
+  keywords:
+    - AI agent features
+    - multi-agent system
+    - agent skills
+    - automation features
+    - AI workflow builder
+
+# Pricing Page
+pricing:
+  title: "Hermes Pricing | AI Agent Plans & Packages"
+  description: "Flexible pricing for Hermes AI agents. Plans from $49/month. Start with a 14-day free trial. Scale your automation with unlimited agents."
+  keywords:
+    - Hermes pricing
+    - AI agent pricing
+    - automation pricing
+    - multi-agent pricing
+
+# About Page
+about:
+  title: "About Hermes Mission Freedom | Boise AI Company"
+  description: "Learn about Hermes Mission Freedom, a Boise-based AI company building the future of autonomous agents and multi-agent orchestration."
+  keywords:
+    - Hermes company
+    - AI agent company
+    - Boise SEO
+    - AI automation company
+
+# Blog Index
+blog:
+  title: "Hermes Blog | AI Agents, SEO Automation & Multi-Agent Systems"
+  description: "Expert insights on AI agents, SEO automation, multi-agent orchestration, affiliate marketing, and print-on-demand. Learn how to scale with AI."
+  keywords:
+    - AI agent blog
+    - SEO automation blog
+    - multi-agent orchestration
+    - AI automation tips
+
+# Blog Post: AI Agent Skills
+blog_ai_agent_skills:
+  title: "Building AI Agent Skills: Complete Guide | Hermes"
+  description: "Learn how to build powerful AI agent skills with Hermes. Master multi-agent orchestration, skill development patterns, and best practices."
+  keywords:
+    - Hermes agent
+    - Hermes AI agent
+    - AI skills
+    - agent skills
+    - multi-agent orchestration
+
+# Blog Post: Multi-Agent Orchestration
+blog_multi_agent:
+  title: "Multi-Agent Orchestration: Scalable AI Architecture | Hermes"
+  description: "Master multi-agent orchestration patterns. Build scalable AI systems with proven coordination strategies and best practices with Hermes."
+  keywords:
+    - multi-agent orchestration
+    - AI agent architecture
+    - agent coordination
+    - distributed AI systems
+    - Hermes AI agent
+
+# Blog Post: Etsy SEO Automation
+blog_etsy_seo:
+  title: "Etsy SEO Automation: Scale Your POD Business | Hermes"
+  description: "Master Etsy SEO automation with AI. Optimize listings, automate keyword research, and scale your print-on-demand business with Hermes agents."
+  keywords:
+    - Etsy SEO automation
+    - AI print on demand
+    - POD automation
+    - Etsy AI tools
+    - automated SEO
+
+# Blog Post: Affiliate Marketing
+blog_affiliate:
+  title: "Affiliate Marketing Automation with AI Agents | Hermes"
+  description: "Automate affiliate marketing with AI agents. Learn content automation, scaling strategies, and revenue optimization with Hermes."
+  keywords:
+    - automated affiliate marketing
+    - affiliate marketing AI
+    - AI affiliate automation
+    - affiliate content automation
+
+# Blog Post: POD Automation
+blog_pod:
+  title: "Print-on-Demand Automation: AI-Powered Scaling | Hermes"
+  description: "Master print-on-demand automation with AI. Automate design generation, listings, and fulfillment for scalable POD businesses."
+  keywords:
+    - print on demand automation
+    - POD automation
+    - AI print on demand
+    - automated POD business
+    - Hermes POD
+
+# Product: SEO Agent
+product_seo_agent:
+  title: "Hermes SEO Agent | Automated SEO & Content Optimization"
+  description: "Automate SEO with Hermes AI. Keyword research, content optimization, and ranking improvements powered by multi-agent orchestration."
+  keywords:
+    - SEO AI agent
+    - automated SEO
+    - SEO automation tool
+    - SEO content optimization
+
+# Product: Content Agent
+product_content_agent:
+  title: "Hermes Content Agent | AI Content Creation & Automation"
+  description: "Scale content creation with AI. Generate SEO-optimized articles, social posts, and marketing copy with Hermes content agents."
+  keywords:
+    - AI content creation
+    - content automation
+    - SEO content writer
+    - AI copywriting
+
+# Product: E-commerce Agent
+product_ecommerce_agent:
+  title: "Hermes E-commerce Agent | Automated Store Management"
+  description: "Automate e-commerce operations with AI. Manage listings, pricing, and fulfillment across multiple platforms with Hermes agents."
+  keywords:
+    - e-commerce automation
+    - store automation
+    - AI e-commerce
+    - automated store management
+
+# Product: Affiliate Agent
+product_affiliate_agent:
+  title: "Hermes Affiliate Agent | Automated Affiliate Marketing System"
+  description: "Build passive income with automated affiliate marketing. Content creation, link optimization, and multi-channel distribution."
+  keywords:
+    - affiliate automation
+    - automated affiliate marketing
+    - AI affiliate system
+    - affiliate content automation
+
+# Documentation
+docs:
+  title: "Hermes Documentation | AI Agent Development & Guides"
+  description: "Complete documentation for Hermes AI agents. Getting started guides, API reference, skill development tutorials, and best practices."
+  keywords:
+    - Hermes documentation
+    - AI agent guide
+    - multi-agent documentation
+    - API documentation
+
+# FAQ Page
+faq:
+  title: "Hermes FAQ | AI Agent Questions & Support"
+  description: "Find answers about Hermes AI agents, multi-agent orchestration, features, pricing, and support. Get help getting started today."
+  keywords:
+    - Hermes FAQ
+    - AI agent FAQ
+    - Hermes questions
+    - automation FAQ
+
+# Contact
+test_contact:
+  title: "Contact Hermes Mission Freedom | Boise AI Support"
+  description: "Get in touch with Hermes Mission Freedom. Support, sales inquiries, and partnership opportunities. Based in Boise, Idaho."
+  keywords:
+    - contact Hermes
+    - Hermes support
+    - AI agent support
+    - Boise AI company
+
+# Demo Page
+demo:
+  title: "Hermes Demo | See AI Agents in Action"
+  description: "Book a personalized demo of Hermes AI agents. See multi-agent orchestration, automation workflows, and SEO optimization live."
+  keywords:
+    - Hermes demo
+    - AI agent demo
+    - automation demo
+    - book demo
+
+# Signup Page
+signup:
+  title: "Start Free Trial | Hermes AI Agent Platform"
+  description: "Start your 14-day free trial of Hermes AI agents. No credit card required. Automate SEO, content, and e-commerce with multi-agent orchestration."
+  keywords:
+    - Hermes free trial
+    - AI agent trial
+    - start free trial
+    - automation free trial
+
+# Integration Pages
+integra_integrations:
+  etsy:
+    title: "Hermes Etsy Integration | AI-Powered Store Automation"
+    description: "Automate your Etsy store with AI agents. SEO optimization, listing automation, and print-on-demand integration with Hermes."
+    keywords:
+      - Etsy automation
+      - Etsy AI tools
+      - Etsy SEO automation
+      - Etsy plugin
+
+  shopify:
+    title: "Hermes Shopify Integration | AI Store Automation"
+    description: "Scale your Shopify store with AI agents. Product automation, SEO optimization, and multi-channel management with Hermes."
+    keywords:
+      - Shopify automation
+      - Shopify AI
+      - Shopify SEO
+      - Shopify plugin
+
+  amazon:
+    title: "Hermes Amazon Integration | AI Listing Optimization"
+    description: "Optimize Amazon listings with AI agents. Automated product descriptions, keyword research, and PPC management with Hermes."
+    keywords:
+      - Amazon automation
+      - Amazon SEO
+      - Amazon listing optimization
+      - Amazon AI
+
+  wordpress:
+    title: "Hermes WordPress Integration | AI Content Automation"
+    description: "Automate WordPress content with AI agents. SEO-optimized posts, bulk publishing, and content optimization with Hermes."
+    keywords:
+      - WordPress automation
+      - WordPress AI
+      - WordPress content
+      - WordPress SEO
+
+# Local SEO Pages
+local_seo:
+  ai_agent_boise:
+    title: "AI Agent Boise | Hermes Mission Freedom - Local AI Solutions"
+    description: "Boise's premier AI agent company. Multi-agent orchestration, automation solutions, and SEO for local Boise businesses."
+    keywords:
+      - AI agent Boise
+      - AI automation Boise
+      - Boise AI company
+      - local AI solutions Boise
