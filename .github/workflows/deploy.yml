@@ -43,10 +43,5 @@ jobs:
           echo "Contents of dist:"
           ls -la dist/
 
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: hermesdispatch
-          directory: dist
+      - name: Build Complete
+        run: echo "✅ Build complete - Cloudflare Pages auto-deploys via Git integration"
