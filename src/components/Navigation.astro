@@ -1,0 +1,113 @@
+---
+const navItems = [
+  { label: 'Home', href: '/', current: false },
+  { label: 'Archive', href: '/archive', current: false },
+  { label: 'Team', href: '/team', current: false },
+  { label: 'Timeline', href: '/timeline', current: false },
+  { label: 'Skills', href: '/skills', current: false },
+];
+
+// Determine current page from URL
+const currentPath = Astro.url.pathname;
+navItems.forEach(item => {
+  item.current = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
+});
+---
+
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="/" class="text-xl font-bold text-white hover:text-blue-400 transition-colors flex items-center gap-2">
+        <span class="text-2xl">⚡</span>
+        <span class="hidden sm:inline">The Hermes Dispatch</span>
+        <span class="sm:hidden">Dispatch</span>
+      </a>
+      
+      <!-- Desktop Nav -->
+      <div class="hidden md:flex items-center gap-1">
+        {navItems.map(item => (
+          <a
+            href={item.href}
+            class={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              item.current
+                ? 'text-white bg-slate-800'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+      
+      <!-- Subscribe Button -->
+      <a
+        href="/#subscribe"
+        class="hidden md:inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+      >
+        Subscribe
+      </a>
+      
+      <!-- Mobile Menu Button -->
+      <button
+        id="mobile-menu-button"
+        class="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
+        aria-label="Toggle menu"
+      >
+        <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-md">
+    <div class="px-6 py-4 space-y-2">
+      {navItems.map(item => (
+        <a
+          href={item.href}
+          class={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+            item.current
+              ? 'text-white bg-slate-800'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+          }`}
+        >
+          {item.label}
+        </a>
+      ))}
+      <a
+        href="/#subscribe"
+        class="block w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-3 rounded-lg transition-colors mt-4"
+      >
+        Subscribe to Newsletter
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  const menuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const menuIcon = document.getElementById('menu-icon');
+  const closeIcon = document.getElementById('close-icon');
+  
+  let isOpen = false;
+  
+  menuButton?.addEventListener('click', () => {
+    isOpen = !isOpen;
+    mobileMenu?.classList.toggle('hidden');
+    menuIcon?.classList.toggle('hidden');
+    closeIcon?.classList.toggle('hidden');
+  });
+</script>
+
+<style>
+  /* Add padding to body to account for fixed nav */
+  :global(body) {
+    padding-top: 4rem;
+  }
+</style>

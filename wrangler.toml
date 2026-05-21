@@ -1,7 +1,14 @@
-# Cloudflare Pages Configuration for Main Site
 name = "hermesdispatch"
 compatibility_date = "2024-01-01"
 
-[build]
-command = "npm run build"
-publish = "dist"
+# Pages Functions configuration
+pages_build_output_dir = "dist"
+
+# KV namespace for subscribers
+[[kv_namespaces]]
+binding = "SUBSCRIBERS"
+id = "b3d5d6e2d8a64b0e9f1c2a3b4d5e6f7g"
+
+[vars]
+# These can be set via wrangler secret
+# RESEND_API_KEY = (set via: wrangler secret put RESEND_API_KEY)

@@ -1,17 +1,18 @@
-name: Build and Deploy
+name: Deploy to Cloudflare Pages
 
 on:
   push:
-    branches: [master]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  deployments: write
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,30 +23,30 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Update version.json
-        run: |
-          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
-          RUN_NUM="${GITHUB_RUN_NUMBER}"
-          TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-          echo '{"build": "'"${RUN_NUM}"'", "commit": "'"${GITHUB_SHA}"'", "timestamp": "'"${TIMESTAMP}"'"}' > src/config/version.json
-          echo "Version: Build #${RUN_NUM} | ${SHORT_SHA} | ${TIMESTAMP}"
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build site
         run: npm run build
-
-      - name: Copy public assets
-        run: |
-          mkdir -p dist/agent-network
-          cp -r public/agent-network/* dist/agent-network/ 2>/dev/null || true
-          echo "Contents of dist:"
-          ls -la dist/
+        env:
+          # Build-time secrets (if needed)
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=dare404-hermesdispatch-website
+          command: pages deploy dist --project-name=hermesdispatch
+
+      - name: Comment deployment URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 Deployed to Cloudflare Pages!'
+            })

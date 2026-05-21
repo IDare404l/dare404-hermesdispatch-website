@@ -1,0 +1,219 @@
+---
+const newsletters = [
+  // Template - copy this block and fill in for each published newsletter
+  // {
+  //   date: '2026-05-15',
+  //   title: 'Cycle 026: Error Handling Mastery',
+  //   excerpt: 'Production-ready retry patterns, HALF-OPEN circuit breakers, and full jitter strategies for resilient automation.',
+  //   link: '/archive/cycle-026-error-handling',
+  //   tags: ['Cycle-026', 'Tenacity', 'Circuit-Breakers'],
+  //   readTime: '4 min'
+  // },
+  {
+    date: '2026-05-15',
+    title: 'The Hermes Dispatch Launch',
+    excerpt: 'Building workflows that build themselves. Daily automation dispatches from Boise, ID starting now.',
+    link: '#welcome',
+    tags: ['Launch', 'Mission-Freedom'],
+    readTime: '2 min',
+    featured: true
+  }
+];
+
+const months = [...new Set(newsletters.map(n => n.date.slice(0, 7)))].sort().reverse();
+---
+
+<div class="newsletter-timeline">
+  {months.map(month => {
+    const monthNewsletters = newsletters.filter(n => n.date.startsWith(month));
+    const [year, mon] = month.split('-');
+    const monthName = new Date(`${year}-${mon}-01`).toLocaleDateString('en-US', { month: 'long' });
+    
+    return (
+      <div class="timeline-month">
+        <h3 class="month-header">
+          <span class="month-name">{monthName}</span>
+          <span class="month-year">{year}</span>
+        </h3>
+        <div class="month-issues">
+          {monthNewsletters.map(issue => (
+            <article class={`timeline-card ${issue.featured ? 'featured' : ''}`}>
+              <div class="card-meta">
+                <time class="card-date">
+                  {new Date(issue.date).toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </time>
+                <span class="read-time">{issue.readTime}</span>
+              </div>
+              <h4 class="card-title">
+                <a href={issue.link}>{issue.title}</a>
+              </h4>
+              <p class="card-excerpt">{issue.excerpt}</p>
+              <div class="card-tags">
+                {issue.tags.map(tag => (
+                  <span class="tag">{tag}</span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+<style>
+  .newsletter-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .timeline-month {
+    position: relative;
+  }
+
+  .month-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .month-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  .month-year {
+    font-size: 1rem;
+    color: #888;
+    font-weight: 400;
+  }
+
+  .month-issues {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .timeline-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+  }
+
+  .timeline-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .timeline-card.featured {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+    border-color: rgba(99, 102, 241, 0.3);
+    position: relative;
+  }
+
+  .timeline-card.featured::before {
+    content: '★ Featured';
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0 11px 0 11px;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  .card-date {
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .read-time {
+    color: #555;
+  }
+
+  .read-time::before {
+    content: '•';
+    margin-right: 0.5rem;
+    color: #444;
+  }
+
+  .card-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .card-title a {
+    color: #e2e2e2;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .card-title a:hover {
+    color: #6366f1;
+  }
+
+  .card-excerpt {
+    margin: 0 0 1rem 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #999;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    color: #888;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  @media (min-width: 768px) {
+    .month-issues {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .timeline-card.featured {
+      grid-column: span 2;
+    }
+  }
+</style>

@@ -1,351 +1,184 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { newsletters } from '../../data/newsletters';
-import ParticleBackground from '../../components/ParticleBackground.astro';
-import NewsletterCTA from '../../components/NewsletterCTA.astro';
+import { getPublishedNewsletters, getLatestNewsletter } from '../../data/newsletters';
 
-const publishedNewsletters = newsletters.filter(n => n.published).reverse();
-const featured = publishedNewsletters.find(n => n.featured) || publishedNewsletters[0];
-const archive = publishedNewsletters.filter(n => n !== featured);
-
-const title = "Newsletter | Mission Freedom";
-const description = "Daily insights on AI agent automation, multi-agent orchestration, and digital entrepreneurship. Mission Freedom Daily, delivered at 06:00 MST.";
+const newsletters = getPublishedNewsletters();
+const latest = getLatestNewsletter();
 ---
 
-<Layout title={title} description={description}>
-  
+<Layout 
+  title="Newsletter — The Hermes Dispatch"
+  description="Building workflows that build themselves. Newsletter on AI agents, automation, and self-improving systems."
+>
   <!-- Hero -->
-  <section class="relative pt-32 pb-16 overflow-hidden">
-    <div class="absolute inset-0 animated-gradient"></div>
-    <div class="grid-overlay"></div>
-    <ParticleBackground />
-    
-    <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-brand-gold/10 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-brand-accent/10 rounded-full blur-3xl"></div>
-    
-    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-8 flex items-center justify-center text-4xl shadow-lg shadow-brand-gold/30">
-        📧
+  <section class="py-16 px-6 border-b border-slate-800">
+    <div class="max-w-4xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm mb-6">
+        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+        Active Newsletter
       </div>
       
-      <h1 class="display-heading mb-6">
-        Mission Freedom<br/>
-        <span class="text-gradient">Daily</span>
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+        The Hermes Dispatch
       </h1>
       
-      <p class="text-xl text-gray-400 max-w-2xl mx-auto">
-        Daily insights on <span class="text-brand-gold">AI agent automation</span>, multi-agent orchestration, 
-        and digital entrepreneurship. Delivered at 06:00 MST.
+      <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-8">
+        Building workflows that build themselves. Inside Mission Freedom's AI agent team — 
+        what's working, what's breaking, and the patterns that scale.
+      </p>
+
+      {latest && (
+        <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-left max-w-2xl mx-auto">
+          <div class="flex items-center gap-2 text-blue-400 text-sm mb-2">
+            <span>Latest Issue</span>
+            <span>•</span>
+            <span>{latest.date}</span>
+          </div>
+          <h2 class="text-xl font-semibold text-white mb-2">{latest.title}</h2>
+          <p class="text-slate-400 mb-4">{latest.excerpt}</p>
+          <a 
+            href={`/newsletter/${latest.slug}`}
+            class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+          >
+            Read Issue
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          </a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Subscribe -->
+  <section class="py-16 px-6 border-b border-slate-800">
+    <div class="max-w-xl mx-auto text-center">
+      <h2 class="text-2xl font-bold text-white mb-4">Subscribe</h2>
+      <p class="text-slate-400 mb-8">New issues delivered. No spam. Unsubscribe anytime.</p>
+      
+      <form 
+        id="subscribe-form"
+        class="flex flex-col sm:flex-row gap-3"
+      >
+        <input 
+          type="email" 
+          name="email" 
+          placeholder="you@example.com" 
+          required
+          class="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+        />
+        <button 
+          type="submit"
+          class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors"
+        >
+          Subscribe
+        </button>
+      </form>
+      
+      <p class="text-slate-600 text-sm mt-4">
+        Self-hosted on AWS SES. <a href="/privacy" class="text-slate-500 hover:text-slate-400">Privacy Policy</a>
       </p>
     </div>
   </section>
-  
-  <!-- Subscribe Section -->
-  <section class="relative py-16">
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="glass-card rounded-2xl p-8 text-center border border-brand-gold/20">
-        <h3 class="text-2xl font-bold mb-4 text-white"><span class="text-brand-gold">Subscribe</span></h3>
-        
-        <p class="text-gray-400 mb-6">
-          Get <span class="text-brand-gold">The Hermes Dispatch</span> — daily insights on AI agent automation for digital entrepreneurship.
-        </p>
-        
-        <form id="subscribe-form" class="flex flex-col sm:flex-row gap-4 mb-4">
-          <input 
-            type="email" 
-            name="email" 
-            placeholder="your@email.com" 
-            required 
-            class="flex-1 px-6 py-4 bg-brand-card border border-brand-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors"
-          />
-          <button type="submit" class="btn-primary whitespace-nowrap">
-            Subscribe
-          </button>
-        </form>
-        
-        <p id="subscribe-message" class="text-sm text-gray-500 hidden"></p>
-        
-        <div class="flex flex-wrap items-center justify-center gap-4 mt-6 text-gray-500 text-sm">
-          <span class="flex items-center gap-1">
-            <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            No spam
-          </span>
-          <span>•</span>
-          <span class="flex items-center gap-1">
-            <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            Unsubscribe anytime
-          </span>
-        </div>
-      </div>
-    </div>
-  </section>
-  
-  <!-- Featured Issue -->
-  {featured && (
-    <section class="relative py-16">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-sm font-medium mb-6">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-          Featured Issue
-        </span>
-        
-        <a href={`/newsletter/${featured.slug}`} class="block group">
-          <article class="glass-card rounded-2xl p-8 hover:border-brand-gold/50 transition-all">
-            <div class="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-400">
-              <time>
-                {new Date(featured.date).toLocaleDateString('en-US', { 
-                  month: 'long', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })}
-              </time>
-              <span>•</span>
-              <span>{featured.readTime}</span>
-              <span>•</span>
-              <div class="flex flex-wrap gap-2">
-                {featured.tags.map((tag) => (
-                  <span class="px-2 py-0.5 rounded-full bg-white/5 text-gray-300 text-xs">{tag}</span>
-                ))}
-              </div>
-            </div>
-            
-            <h2 class="text-2xl md:text-3xl font-bold text-white mb-3 group-hover:text-brand-gold transition-colors">
-              {featured.title}
-            </h2>
-            
-            <p class="text-gray-400 text-lg mb-6">{featured.excerpt}</p>
-            
-            <span class="inline-flex items-center gap-2 text-brand-gold font-medium group-hover:gap-3 transition-all">
-              Read Issue
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </span>
-          </article>
-        </a>
-      </div>
-    </section>
-  )}
-  
+
   <!-- Archive -->
-  {archive.length > 0 && (
-    <section class="relative py-16">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <span class="inline-block px-4 py-1.5 rounded-full bg-brand-card border border-brand-border text-gray-400 text-sm font-medium mb-6">
-          Archive
-        </span>
-        
-        <div class="space-y-4">
-          {archive.map(issue => (
-            <a href={`/newsletter/${issue.slug}`} class="block group">
-              <article class="flex items-center justify-between glass-card rounded-xl p-5 hover:border-brand-gold/30 transition-all">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3 mb-1">
-                    <span class="text-sm text-gray-500">
-                      {new Date(issue.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </span>
-                    <span class="text-gray-600">•</span>
-                    <span class="text-sm text-gray-500">{issue.readTime}</span>
-                  </div>
-                  
-                  <h3 class="text-lg font-semibold text-white group-hover:text-brand-gold transition-colors">
-                    {issue.title}
-                  </h3>
+  <section class="py-16 px-6">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-2xl font-bold text-white mb-8">Archive</h2>
+      
+      <div class="space-y-6">
+        {newsletters.map((issue) => (
+          <article class="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 hover:border-slate-600 transition-colors">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
+              <div>
+                <div class="flex items-center gap-2 text-slate-500 text-sm mb-2">
+                  <span>{issue.date}</span>
+                  <span>•</span>
+                  <span>{issue.readTime} read</span>
                 </div>
-                
-                <svg class="w-5 h-5 text-gray-600 group-hover:text-brand-gold transition-colors ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </article>
-            </a>
-          ))}
-        </div>
+                <h3 class="text-lg font-semibold text-white">
+                  <a href={`/newsletter/${issue.slug}`} class="hover:text-blue-400 transition-colors">
+                    {issue.title}
+                  </a>
+                </h3>
+              </div>
+              {issue.featured && (
+                <span class="self-start px-2 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs rounded">
+                  Featured
+                </span>
+              )}
+            </div>
+            
+            <p class="text-slate-400 mb-4">{issue.excerpt}</p>
+            
+            <div class="flex flex-wrap gap-2">
+              {issue.tags.map(tag => (
+                <span class="px-2 py-1 bg-slate-800 text-slate-400 text-xs rounded">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </article>
+        ))}
       </div>
-    </section>
-  )}
-
-  <!-- What's Next / Monetization Roadmap -->
-  <section class="relative py-16 border-t border-brand-border">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-brand-accent text-sm font-medium mb-6">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
-        What's Coming
-      </span>
-
-      <h2 class="text-2xl font-bold text-white mb-6">The Roadmap</h2>
-
-      <div class="grid md:grid-cols-3 gap-6">
-        <!-- Phase 1 -->
-        <div class="glass-card rounded-xl p-6 border-l-4 border-brand-gold">
-          <div class="flex items-center gap-3 mb-4">
-            <span class="text-2xl">📧</span>
-            <div>
-              <h3 class="font-semibold text-white">Phase 1: Newsletter</h3>
-              <p class="text-xs text-brand-gold">Now — Month 1</p>
-            </div>
-          </div>
-          <ul class="space-y-2 text-sm text-gray-400">
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              Daily automated issues
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              100+ subscribers
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              Skills showcase
-            </li>
-          </ul>
-        </div>
-
-        <!-- Phase 2 -->
-        <div class="glass-card rounded-xl p-6 border-l-4 border-brand-accent">
-          <div class="flex items-center gap-3 mb-4">
-            <span class="text-2xl">💎</span>
-            <div>
-              <h3 class="font-semibold text-white">Phase 2: Monetization</h3>
-              <p class="text-xs text-brand-accent">Month 2-3</p>
-            </div>
-          </div>
-          
-          <ul class="space-y-2 text-sm text-gray-400">
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-brand-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Paid tier launch ($10/mo)
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-brand-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Skill Pack #1 ($29)
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-brand-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Automation Playbook ($49)
-            </li>
-          </ul>
-        </div>
-
-        <!-- Phase 3 -->
-        <div class="glass-card rounded-xl p-6 border-l-4 border-neutral-500">
-          <div class="flex items-center gap-3 mb-4">
-            <span class="text-2xl">🚀</span>
-            <div>
-              <h3 class="font-semibold text-white">Phase 3: Scale</h3>
-              <p class="text-xs text-neutral-400">Month 6+</p>
-            </div>
-          </div>
-          
-          <ul class="space-y-2 text-sm text-gray-400">
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-neutral-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Sponsor slots ($200/issue)
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-neutral-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Consulting services
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-neutral-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Advanced course ($499)
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="mt-8 p-6 glass-card rounded-xl border border-brand-border">
-        <h3 class="font-semibold text-white mb-3 flex items-center gap-2">
-          <svg class="w-5 h-5 text-brand-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-          </svg>
-          Affiliate & Recommendation Strategy
-        </h3>
-        <p class="text-gray-400 text-sm mb-4">
-          Every tool, skill, and resource mentioned in The Hermes Dispatch is something I've personally used and tested. 
-          When you see a link to a tool or service, it may be an affiliate link—meaning I earn a commission if you decide to purchase, 
-          at no extra cost to you. This helps fund the continued development of free Hermes skills and newsletters.
+      
+      {newsletters.length === 0 && (
+        <p class="text-slate-500 text-center py-12">
+          No issues published yet. Coming soon.
         </p>
-
-        <div class="flex flex-wrap gap-3">
-          <span class="px-3 py-1 rounded-full bg-brand-card border border-brand-border text-xs text-gray-400">
-            Hermes Agent
-          </span>
-          <span class="px-3 py-1 rounded-full bg-brand-card border border-brand-border text-xs text-gray-400">
-            Buttondown
-          </span>
-          <span class="px-3 py-1 rounded-full bg-brand-card border border-brand-border text-xs text-gray-400">
-            Cloudflare
-          </span>
-          <span class="px-3 py-1 rounded-full bg-brand-card border border-brand-border text-xs text-gray-400">
-            Printify
-          </span>
-          <span class="px-3 py-1 rounded-full bg-brand-card border border-brand-border text-xs text-gray-400">
-            Midjourney
-          </span>
-          <span class="px-3 py-1 rounded-full bg-brand-card border border-brand-border text-xs text-gray-400">
-            + more
-          </span>
-        </div>
-      </div>
+      )}
     </div>
   </section>
 
-</script>
+  <!-- Footer -->
+  <footer class="py-8 px-6 border-t border-slate-800">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+      <p class="text-slate-500 text-sm">
+        © 2026 dare404 · The Hermes Dispatch · Self-hosted
+      </p>
+      <div class="flex gap-4 text-sm">
+        <a href="/" class="text-slate-500 hover:text-slate-300 transition-colors">Home</a>
+        <a href="/archive" class="text-slate-500 hover:text-slate-300 transition-colors">Archive</a>
+      </div>
+    </div>
+  </footer>
+
   <script>
-    const form = document.getElementById('subscribe-form');
-    const message = document.getElementById('subscribe-message');
+    // Local API endpoint for newsletter subscriptions
+    const API_URL = '/api/subscribe';
     
+    const form = document.getElementById('subscribe-form');
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const formData = new FormData(form);
-      const email = formData.get('email');
+      const email = form.querySelector('input[name="email"]')?.value;
+      const button = form.querySelector('button[type="submit"]');
       
-      const button = form.querySelector('button');
-      if (button) {
-        button.textContent = 'Subscribing...';
-        button.disabled = true;
-      }
+      if (!email || !button) return;
+      
+      button.textContent = 'Subscribing...';
+      button.disabled = true;
       
       try {
-        message.textContent = `Thanks! ${email} will be added to the newsletter.`;
-        message.classList.remove('hidden', 'text-red-400');
-        message.classList.add('text-emerald-400');
-        form.reset();
-      } catch (error) {
-        message.textContent = 'Something went wrong. Please try again.';
-        message.classList.remove('hidden', 'text-emerald-400');
-        message.classList.add('text-red-400');
-      } finally {
-        if (button) {
-          button.textContent = 'Subscribe';
-          button.disabled = false;
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+          button.textContent = '✓ Subscribed!';
+          button.classList.remove('bg-blue-600', 'hover:bg-blue-500');
+          button.classList.add('bg-green-600');
+          form.querySelector('input').value = '';
+        } else {
+          throw new Error(data.message);
         }
+      } catch (err) {
+        button.textContent = 'Failed - try again';
+        button.disabled = false;
+        console.error(err);
       }
     });
   </script>

@@ -1,13 +1,11 @@
+// astro.config.mjs
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  site: 'https://www.hermesdispatch.dev',
-  output: 'static',
-  integrations: [tailwind()],
   vite: {
-    build: {
-      minify: true,
-    },
+    plugins: [tailwindcss()]
   },
+  site: 'https://hermesmissionfreedom.ai',
+  output: 'static'
 });

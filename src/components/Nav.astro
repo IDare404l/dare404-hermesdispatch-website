@@ -1,0 +1,108 @@
+---
+export interface Props {
+  logoText?: string;
+  logoEmoji?: string;
+  ctaText?: string;
+  ctaHref?: string;
+}
+
+const { 
+  logoText = "The Hermes Dispatch",
+  logoEmoji = "⚡",
+  ctaText = "Subscribe",
+  ctaHref = "/#subscribe"
+} = Astro.props;
+
+const navItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Archive', href: '/archive' },
+  { label: 'Team', href: '/team' },
+  { label: 'Timeline', href: '/timeline' },
+  { label: 'Skills', href: '/skills' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50 transition-all duration-300" id="main-nav">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex items-center justify-between h-16">
+      <a href="/" class="flex items-center gap-2 text-xl font-bold text-white hover:text-amber-400 transition-colors">
+        <span class="text-2xl">{logoEmoji}</span>
+        <span class="hidden sm:inline">{logoText}</span>
+        <span class="sm:hidden">Dispatch</span>
+      </a>
+      
+      <div class="hidden md:flex items-center gap-1">
+        {navItems.map((item) => {
+          const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
+          return (
+            <a
+              href={item.href}
+              class={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                isCurrent
+                  ? 'text-amber-400 bg-amber-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+              }`}
+            >
+              {item.label}
+            </a>
+          );
+        })}
+      </div>
+      
+      <div class="flex items-center gap-4">
+        <a
+          href={ctaHref}
+          class="hidden md:inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-bold px-5 py-2.5 rounded-lg transition-all"
+        >
+          {ctaText}
+        </a>
+        
+        <button
+          type="button"
+          id="mobile-menu-btn"
+          class="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
+          aria-label="Toggle menu"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-950/95">
+    <div class="px-6 py-4 space-y-2">
+      {navItems.map((item) => {
+        const isCurrent = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
+        return (
+          <a
+            href={item.href}
+            class={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+              isCurrent
+                ? 'text-amber-400 bg-amber-500/10'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            }`}
+          >
+            {item.label}
+          </a>
+        );
+      })}
+      
+      <a
+        href={ctaHref}
+        class="block w-full text-center bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 py-3 rounded-lg transition-colors mt-4"
+      >
+        {ctaText}
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  btn?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+</script>
