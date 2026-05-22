@@ -29,15 +29,10 @@ jobs:
       - name: Build site
         run: npm run build
         env:
-          # Build-time secrets (if needed)
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=hermesdispatch
+        run: npx wrangler pages deploy dist --project-name=hermesdispatch --branch=master
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
