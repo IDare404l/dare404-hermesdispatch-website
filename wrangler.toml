@@ -5,9 +5,9 @@ compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
 
 # KV namespace for subscribers
-[[kv_namespaces]]
-binding = "SUBSCRIBERS"
-id = "b3d5d6e2d8a64b0e9f1c2a3b4d5e6f7g"
+# [[kv_namespaces]]
+# binding = "SUBSCRIBERS"
+# id = "YOUR_ACTUAL_KV_NAMESPACE_ID"  # Get this from Cloudflare Dashboard
 
 [vars]
 # These can be set via wrangler secret
