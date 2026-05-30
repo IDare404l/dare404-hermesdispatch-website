@@ -20,10 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Update version.json
         run: |
-          mkdir -p src/config
           SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
           RUN_NUM="${GITHUB_RUN_NUMBER}"
           TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
@@ -40,10 +40,10 @@ jobs:
 
       - name: Copy public assets
         run: |
-          mkdir -p dist/agent-network 2>/dev/null || true
+          mkdir -p dist/agent-network
           cp -r public/agent-network/* dist/agent-network/ 2>/dev/null || true
           echo "Contents of dist:"
-          ls -la dist/ 2>/dev/null || echo "dist not accessible"
+          ls -la dist/
 
       - name: Build Complete
         run: echo "✅ Build complete - Cloudflare Pages auto-deploys via Git integration"
