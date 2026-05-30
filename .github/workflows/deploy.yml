@@ -20,10 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Update version.json
         run: |
+          mkdir -p src/config
           SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
           RUN_NUM="${GITHUB_RUN_NUMBER}"
           TIMESTAMP=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
