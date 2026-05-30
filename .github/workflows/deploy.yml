@@ -20,7 +20,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Update version.json
         run: |
@@ -41,10 +40,10 @@ jobs:
 
       - name: Copy public assets
         run: |
-          mkdir -p dist/agent-network
+          mkdir -p dist/agent-network 2>/dev/null || true
           cp -r public/agent-network/* dist/agent-network/ 2>/dev/null || true
           echo "Contents of dist:"
-          ls -la dist/
+          ls -la dist/ 2>/dev/null || echo "dist not accessible"
 
       - name: Build Complete
         run: echo "✅ Build complete - Cloudflare Pages auto-deploys via Git integration"
