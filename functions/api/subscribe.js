@@ -1,5 +1,6 @@
-// Cloudflare Pages Function for Resend newsletter subscription
-// Stores subscribers in memory (KV can be added later via dashboard)
+// Cloudflare Pages Function for Resend + Google Sheets newsletter subscription
+// Sends to Resend + stores in Google Sheets
+
 const subscribers = new Set();
 
 export async function onRequestPost(context) {
@@ -7,7 +8,6 @@ export async function onRequestPost(context) {
   const url = new URL(request.url);
   const origin = request.headers.get('origin') || url.origin;
   
-  // Allowed origins
   const allowedOrigins = [
     'https://hermesdispatch.dev',
     'https://hermesmissionfreedom.ai',
@@ -20,15 +20,17 @@ export async function onRequestPost(context) {
 
   try {
     let email;
+    let referrer = 'direct';
     
-    // Parse request body
     const contentType = request.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
       const body = await request.json();
       email = body.email?.toString().toLowerCase().trim();
+      referrer = body.referrer || referrer;
     } else {
       const formData = await request.formData();
       email = formData.get('email')?.toString().toLowerCase().trim();
+      referrer = formData.get('referrer') || referrer;
     }
     
     if (!email || !email.includes('@')) {
@@ -44,15 +46,13 @@ export async function onRequestPost(context) {
       });
     }
     
-    // Check if already subscribed (memory + KV)
+    // Check if already subscribed
     const SUBSCRIBERS = context.env?.SUBSCRIBERS;
     let alreadySubscribed = subscribers.has(email);
     
     if (SUBSCRIBERS && !alreadySubscribed) {
       const existing = await SUBSCRIBERS.get(`sub:${email}`);
-      if (existing) {
-        alreadySubscribed = true;
-      }
+      if (existing) alreadySubscribed = true;
     }
     
     if (alreadySubscribed) {
@@ -67,16 +67,41 @@ export async function onRequestPost(context) {
       });
     }
     
-    // Add to memory
+    // Generate subscriber ID
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const subscriberId = `MF-${timestamp.toString(36).toUpperCase()}-${randomId}`;
+    
+    // Save to memory set
     subscribers.add(email);
     
-    // Add subscriber to KV if available
+    // Save to KV if available
     if (SUBSCRIBERS) {
       await SUBSCRIBERS.put(`sub:${email}`, JSON.stringify({
         email,
         subscribedAt: new Date().toISOString(),
         confirmed: true
       }));
+    }
+    
+    // Save to Google Sheets
+    try {
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaXVuFndQuBE5ubC6_vKqkMvt-aUqStPO5o9wL9-W_EdsC8tS6R3_9JBJ3MMc21XA/exec';
+      
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          source: 'hermesdispatch.dev',
+          referrer: referrer,
+          timestamp: new Date().toISOString(),
+          status: 'active',
+          subscriberId: subscriberId
+        })
+      });
+    } catch (e) {
+      console.error('Google Sheets save failed:', e);
     }
     
     // Send to Resend audience
@@ -98,7 +123,6 @@ export async function onRequestPost(context) {
         });
       } catch (resendError) {
         console.error('[Newsletter] Resend API error:', resendError);
-        // Continue - subscriber is saved even if Resend fails
       }
     }
     
@@ -127,6 +151,7 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Subscribed successfully!',
+      id: subscriberId
     }), {
       headers: { 
         'Content-Type': 'application/json',
@@ -149,7 +174,6 @@ export async function onRequestPost(context) {
   }
 }
 
-// Handle preflight OPTIONS requests
 export async function onRequestOptions(context) {
   const request = context.request;
   const origin = request.headers.get('origin') || '*';
