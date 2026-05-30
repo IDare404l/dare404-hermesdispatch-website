@@ -9,6 +9,10 @@ const {
   brandDescription = "AI automation insights from Boise, ID. Working workflows, block-style skills, and self-improving automation."
 } = Astro.props;
 
+// Import version info
+import versionData from '../config/version.json';
+const version = versionData;
+
 const footerLinks = {
   product: [
     { label: "Features", href: "#" },
@@ -132,9 +136,14 @@ const socialLinks = [
     
     <!-- Bottom Bar -->
     <div class="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <p class="text-slate-500 text-sm">
-        {new Date().getFullYear()} {brandName}. All rights reserved.
-      </p>
+      <div class="flex flex-col gap-1">
+        <p class="text-slate-500 text-sm">
+          {new Date().getFullYear()} {brandName}. All rights reserved.
+        </p>
+        <p class="text-slate-600 text-xs font-mono">
+          Build #{version.build} | {version.commit} | {version.timestamp}
+        </p>
+      </div>
       
       <a href="/#subscribe" class="inline-flex items-center gap-2 px-6 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-400 text-sm font-medium rounded-lg transition-all">
         Subscribe to Newsletter
