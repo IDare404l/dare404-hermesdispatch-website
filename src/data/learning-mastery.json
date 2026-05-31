@@ -1,0 +1,23 @@
+{
+  "skills": [
+    {"id": "newsletter", "name": "Newsletter", "mastery": 0, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.1}},
+    {"id": "twatter", "name": "Twatter", "mastery": 0, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.1}},
+    {"id": "obsidian-knowledge", "name": "Obsidian Knowledge", "mastery": 0, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.1}},
+    {"id": "ai-intelligence", "name": "AI Intelligence", "mastery": 4, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.2}},
+    {"id": "hermes-platform", "name": "Hermes Platform", "mastery": 6, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.2}},
+    {"id": "affiliate-marketing", "name": "Affiliate Marketing", "mastery": 28, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.3}},
+    {"id": "website-builder", "name": "Website Builder", "mastery": 35, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.3}},
+    {"id": "tabby", "name": "Tabby Etsy", "mastery": 35, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.3}},
+    {"id": "web-research", "name": "Web Research", "mastery": 60, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.5}},
+    {"id": "etsy-helper", "name": "Etsy Helper", "mastery": 72, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.6}},
+    {"id": "branding", "name": "Branding", "mastery": 74, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.7}},
+    {"id": "daily-newsletter-creator", "name": "Daily Newsletter Creator", "mastery": 88, "mode": "continuous-learning", "lastLearned": "2026-05-30", "integration": {"researchToUsageRatio": 0.8}}
+  ],
+  "summary": {
+    "integrationMetrics": {
+      "totalResearchSessions": 0,
+      "totalTaskApplications": 0,
+      "averageResearchToUsageRatio": 0.0
+    }
+  }
+}

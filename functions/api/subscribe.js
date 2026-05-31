@@ -1,5 +1,5 @@
-// Cloudflare Pages Function for Resend + Google Sheets newsletter subscription
-// Sends to Resend + stores in Google Sheets
+// Cloudflare Pages Function for API-free newsletter subscription
+// Writes to KV + Google Sheets; welcome emails handled locally via queue sync
 
 const subscribers = new Set();
 
@@ -46,16 +46,32 @@ export async function onRequestPost(context) {
       });
     }
     
-    // Check if already subscribed
+    // Check subscription status
     const SUBSCRIBERS = context.env?.SUBSCRIBERS;
-    let alreadySubscribed = subscribers.has(email);
+    let existingData = null;
+    let isResubscription = false;
     
-    if (SUBSCRIBERS && !alreadySubscribed) {
+    if (SUBSCRIBERS) {
       const existing = await SUBSCRIBERS.get(`sub:${email}`);
-      if (existing) alreadySubscribed = true;
-    }
-    
-    if (alreadySubscribed) {
+      if (existing) {
+        existingData = JSON.parse(existing);
+        // Check if previously unsubscribed (needs welcome again)
+        if (existingData.unsubscribed === true || existingData.confirmed === false) {
+          isResubscription = true;
+        } else {
+          // Already active subscriber
+          return new Response(JSON.stringify({ 
+            success: true, 
+            message: 'Already subscribed'
+          }), {
+            headers: { 
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': corsOrigin
+            }
+          });
+        }
+      }
+    } else if (subscribers.has(email)) {
       return new Response(JSON.stringify({ 
         success: true, 
         message: 'Already subscribed'
@@ -75,12 +91,25 @@ export async function onRequestPost(context) {
     // Save to memory set
     subscribers.add(email);
     
-    // Save to KV if available
+    // Save to KV with welcome queue flag
     if (SUBSCRIBERS) {
-      await SUBSCRIBERS.put(`sub:${email}`, JSON.stringify({
+      const kvData = {
         email,
         subscribedAt: new Date().toISOString(),
-        confirmed: true
+        confirmed: true,
+        unsubscribed: false,
+        needsWelcome: true,  // Flag for welcome email
+        isResubscription: isResubscription
+      };
+      await SUBSCRIBERS.put(`sub:${email}`, JSON.stringify(kvData));
+      
+      // Also add to welcome queue list
+      await SUBSCRIBERS.put(`welcome_queue:${email}`, JSON.stringify({
+        email,
+        source: 'hermesdispatch.dev',
+        referrer: referrer,
+        isResubscription: isResubscription,
+        queuedAt: new Date().toISOString()
       }));
     }
     
@@ -97,61 +126,23 @@ export async function onRequestPost(context) {
           referrer: referrer,
           timestamp: new Date().toISOString(),
           status: 'active',
-          subscriberId: subscriberId
+          subscriberId: subscriberId,
+          isResubscription: isResubscription
         })
       });
     } catch (e) {
       console.error('Google Sheets save failed:', e);
     }
     
-    // Send to Resend audience
-    const RESEND_API_KEY = context.env?.RESEND_API_KEY;
-    if (RESEND_API_KEY) {
-      try {
-        await fetch('https://api.resend.com/audiences/2c8cb9cc-4e5d-4a5b-9a5f-7f8c3a6c5e7f/contacts', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${RESEND_API_KEY}`
-          },
-          body: JSON.stringify({
-            email,
-            first_name: null,
-            last_name: null,
-            unsubscribed: false
-          })
-        });
-      } catch (resendError) {
-        console.error('[Newsletter] Resend API error:', resendError);
-      }
-    }
-    
-    // Send welcome email
-    if (RESEND_API_KEY) {
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${RESEND_API_KEY}`
-          },
-          body: JSON.stringify({
-            from: 'daily@hermesdispatch.dev',
-            to: email,
-            subject: 'Welcome to The Hermes Dispatch',
-            text: "You're subscribed! Look out for daily AI automation insights at 3pm EST.",
-            reply_to: 'dare404@hermesdispatch.dev'
-          })
-        });
-      } catch (emailError) {
-        console.error('[Newsletter] Welcome email failed:', emailError);
-      }
-    }
-    
+    // API-FREE: No Resend welcome email here
+    // Welcome emails are handled by local cronjob via KV sync
+    console.log('[Newsletter] Welcome queued for:', email, isResubscription ? '(resubscription)' : '(new)');
+        
     return new Response(JSON.stringify({ 
       success: true, 
-      message: 'Subscribed successfully!',
-      id: subscriberId
+      message: isResubscription ? 'Welcome back! You are resubscribed.' : 'Subscribed successfully!',
+      id: subscriberId,
+      resubscribed: isResubscription
     }), {
       headers: { 
         'Content-Type': 'application/json',
