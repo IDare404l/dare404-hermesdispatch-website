@@ -144,8 +144,8 @@ const latest = getLatestNewsletter();
   </footer>
 
   <script>
-    // Local API endpoint for newsletter subscriptions
-    const API_URL = '/api/subscribe';
+    // Google Apps Script Web App for newsletter subscriptions
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyaXVuFndQuBE5ubC6_vKqkMvt-aUqStPO5o9wL9-W_EdsC8tS6R3_9JBJ3MMc21XA/exec';
     
     const form = document.getElementById('subscribe-form');
     form?.addEventListener('submit', async (e) => {
@@ -162,7 +162,7 @@ const latest = getLatestNewsletter();
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ email, referrer: document.referrer || 'direct', source: 'hermesdispatch.dev' })
         });
         
         const data = await res.json();

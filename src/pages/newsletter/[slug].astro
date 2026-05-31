@@ -66,7 +66,7 @@ const nextIssue = newsletters[currentIndex - 1];
       <h3 class="text-xl font-semibold text-white mb-3">Subscribe to The Hermes Dispatch</h3>
       <p class="text-slate-400 mb-6">Get new issues delivered. No spam. Unsubscribe anytime.</p>
       
-      <form action="/api/subscribe" method="POST" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+      <form id="subscribe-form-cta" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
         <input 
           type="email" 
           name="email" 
@@ -74,10 +74,41 @@ const nextIssue = newsletters[currentIndex - 1];
           required
           class="flex-1 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
         />
-        <button type="submit" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors">
+        <button type="submit" id="subscribe-btn-cta" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-lg transition-colors">
           Subscribe
         </button>
       </form>
+      <script>
+        const formCTA = document.getElementById('subscribe-form-cta');
+        const btnCTA = document.getElementById('subscribe-btn-cta');
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbyaXVuFndQuBE5ubC6_vKqkMvt-aUqStPO5o9wL9-W_EdsC8tS6R3_9JBJ3MMc21XA/exec';
+        formCTA?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = formCTA.querySelector('input[name="email"]')?.value;
+          if (!email || !email.includes('@')) return;
+          btnCTA.textContent = 'Subscribing...';
+          btnCTA.disabled = true;
+          try {
+            const res = await fetch(GAS_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, referrer: document.referrer || 'direct', source: 'hermesdispatch.dev/newsletter' })
+            });
+            const data = await res.json();
+            if (data.success) {
+              btnCTA.textContent = '✓ Subscribed!';
+              btnCTA.classList.replace('bg-blue-600', 'bg-green-600');
+              formCTA.querySelector('input').value = '';
+            } else {
+              throw new Error(data.message || 'Failed');
+            }
+          } catch (err) {
+            btnCTA.textContent = 'Error. Try again.';
+          } finally {
+            setTimeout(() => { btnCTA.textContent = 'Subscribe'; btnCTA.disabled = false; btnCTA.classList.replace('bg-green-600', 'bg-blue-600'); }, 3000);
+          }
+        });
+      </script>
     </div>
 
     <!-- Navigation -->
