@@ -94,7 +94,7 @@ const description = "AI automation insights from Boise, ID. Working workflows, b
               const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydgpOqjKmLruuBkOR61UBILAVZAeUJUc8nWYRM1hYMc-u0rqiWbKtkxHM1CDpO8FZO/exec';
               const response = await fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify({ email, referrer: document.referrer || 'direct', source: 'hermesdispatch.dev' })
               });
               
