@@ -45,12 +45,10 @@ const {
           {description}
         </p>
 
-        <!-- Newsletter Form - Direct Resend API -->
+        <!-- Newsletter Form - Google Apps Script Web App -->
         <form
           id="newsletter-form"
           class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto"
-          action="https://api.resend.com/audiences/2c8cb9cc-4e5d-4a5b-9a5f-7f8c3a6c5e7f/contacts"
-          method="POST"
         >
           <div class="flex-1 relative">
             <input
@@ -179,13 +177,14 @@ const {
     }
 
     try {
-      // Call Cloudflare Function
-      const response = await fetch('/api/subscribe', {
+      // Call Google Apps Script Web App
+      const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaXVuFndQuBE5ubC6_vKqkMvt-aUqStPO5o9wL9-W_EdsC8tS6R3_9JBJ3MMc21XA/exec';
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, referrer: document.referrer || 'direct' }),
+        body: JSON.stringify({ email, referrer: document.referrer || 'direct', source: 'hermesdispatch.dev' }),
       });
 
       let data;
