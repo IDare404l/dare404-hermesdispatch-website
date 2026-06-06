@@ -26,6 +26,39 @@ const fullCommit = versionData?.commit || 'local';
     <meta property="og:title" content=`${title} | Hermes Mission Freedom` />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    
+    <!-- Organization Schema (AEO) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Mission Freedom - The Hermes Dispatch",
+      "url": "https://hermesdispatch.dev",
+      "logo": "https://hermesdispatch.dev/favicon.svg",
+      "founder": {
+        "@type": "Person",
+        "name": "dare404"
+      },
+      "description": "AI agent automation systems for digital entrepreneurship. One person + 7 coordinated AI agents.",
+      "sameAs": [
+        "https://twitter.com/Dare__404"
+      ]
+    }
+    </script>
+    <!-- WebSite Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "The Hermes Dispatch",
+      "url": "https://hermesdispatch.dev",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://hermesdispatch.dev/skills?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body class="min-h-screen bg-neutral-950 text-neutral-100">
     <nav class="sticky top-0 z-50 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-xl">
@@ -33,7 +66,7 @@ const fullCommit = versionData?.commit || 'local';
         <div class="flex items-center justify-between h-16">
           <a href="/" class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center font-bold text-white">H</div>
-            <span class="font-semibold text-lg">Hermes Mission Freedom</span>
+            <span class="font-semibold text-lg">HermesDispatch</span>
           </a>
           <div class="hidden md:flex items-center gap-1">
             <a href="/" class="px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors">Home</a>
@@ -56,9 +89,9 @@ const fullCommit = versionData?.commit || 'local';
           <div class="md:col-span-2">
             <div class="flex items-center gap-2 mb-4">
               <div class="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-xs font-bold">H</div>
-              <span class="font-semibold">Hermes Mission Freedom</span>
+              <span class="font-semibold">HermesDispatch</span>
             </div>
-            <p class="text-neutral-400 text-sm max-w-sm">Building automated workflows with Hermes AI agents. Daily insights, pre-built skills, and practical tutorials.</p>
+            <p class="text-neutral-400 text-sm max-w-sm">Documenting the journey of building AI agent automation systems. One person + AI skills toward Mission Freedom.</p>
           </div>
           <div>
             <h4 class="font-semibold mb-4">Resources</h4>
@@ -78,7 +111,7 @@ const fullCommit = versionData?.commit || 'local';
           </div>
         </div>
         <div class="border-t border-neutral-800 mt-8 pt-8 text-center text-sm text-neutral-400">
-          <p>Written by Rycen Beans. Built with Hermes.</p>
+          <p>Insights from IGOR • Edited by dare404</p>
           <p class="mt-2 font-mono text-xs text-neutral-500" title={`Full commit: ${fullCommit}`}>
             Build #{buildNum} • {buildTime} • {commitHash}
           </p>

@@ -2,42 +2,58 @@ export const agents = [
   {
     name: "IGOR",
     emoji: "🤖",
-    description: "Main orchestrator agent. Coordinates all other agents and manages system-wide operations.",
+    description: "Universal Command Router / Orchestrator. Coordinates all other agents and manages system-wide operations.",
     category: "Orchestration",
     status: "active",
-    color: "blue"
+    color: "cyan"
   },
   {
-    name: "Tabby",
-    emoji: "🐱",
-    description: "Etsy SEO and trend research specialist. Focuses on cat-themed apparel trending analysis.",
-    category: "E-commerce",
+    name: "EDUCATOR",
+    emoji: "🎓",
+    description: "System Auditor \u0026 Learning Curator. Manages documentation, knowledge organization, and continuous learning.",
+    category: "Knowledge",
     status: "active",
-    color: "purple"
+    color: "emerald"
   },
   {
-    name: "Twatter",
-    emoji: "🐦",
-    description: "Twitter/X social media agent. Handles engagement, content creation, and social growth.",
-    category: "Social Media",
-    status: "active",
-    color: "sky"
-  },
-  {
-    name: "Newsletter",
+    name: "Newsletter Writer",
     emoji: "✉️",
-    description: "Email newsletter management agent. Sends Mission Freedom Daily updates to subscribers.",
+    description: "Daily dispatch generation, approval workflow, and subscriber management via Buttondown.",
     category: "Content",
     status: "active",
     color: "amber"
   },
   {
-    name: "Learner",
-    emoji: "📚",
-    description: "Research agent. Continuously learns from web sources and updates knowledge base.",
-    category: "Learning",
+    name: "Social Media Writer",
+    emoji: "📱",
+    description: "X/Twitter content creation, engagement automation, and cross-promotion across social platforms.",
+    category: "Social Media",
     status: "active",
-    color: "emerald"
+    color: "sky"
+  },
+  {
+    name: "Web Developer",
+    emoji: "🌐",
+    description: "Website deployment, Cloudflare Pages hosting, landing pages, and multi-site development.",
+    category: "Development",
+    status: "active",
+    color: "purple"
+  },
+  {
+    name: "POD Manager",
+    emoji: "🎨",
+    description: "Print-on-demand operations, Etsy shop management, design generation, and Printful integration.",
+    category: "E-commerce",
+    status: "active",
+    color: "rose"
+  },
+  {
+    name: "SENTINEL",
+    emoji: "🛡️",
+    description: "Security audit, credential management, permission monitoring, and system hardening.",
+    category: "Security",
+    status: "active",
+    color: "slate"
   }
 ];
 
@@ -45,9 +61,16 @@ export const skills = [
   "Astro web development",
   "TypeScript programming",
   "Etsy SEO optimization",
-  "Social media engagement",
+  "Twitter/X engagement",
   "Email newsletter automation",
-  "Web research and analysis",
   "Cloudflare deployment",
-  "GitHub workflows"
+  "GitHub workflows",
+  "Multi-agent orchestration",
+  "Print on demand design",
+  "Obsidian vault management",
+  "Security auditing",
+  "Credential management",
+  "SEO strategy",
+  "Content marketing",
+  "Landing page design"
 ];

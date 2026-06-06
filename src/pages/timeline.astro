@@ -1,90 +1,74 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
+// Timeline - MOST RECENT AT TOP (descending order)
+// All dates sourced from Obsidian logs
 const timeline = [
   {
-    date: 'July 2025',
-    title: 'Mission Freedom Started',
-    description: 'The journey began. Initial exploration of AI agent automation for digital entrepreneurship.',
-    status: 'completed',
-    milestone: true
-  },
-  {
-    date: 'August 2025',
-    title: 'Multi-Agent Architecture',
-    description: 'Built a 9-agent system: Tabby, Twatter, Librarian, Emailer, Daily Report, and others. Each agent had dedicated responsibilities.',
-    status: 'completed'
-  },
-  {
-    date: 'September 2025',
-    title: 'Token Crisis & Pivot',
-    description: 'Discovered massive token waste from subagent context duplication. 60-70% of tokens lost to handoffs between agents.',
-    status: 'completed',
-    milestone: true
-  },
-  {
-    date: 'October 2025',
-    title: 'IGOR Born',
-    description: 'IGOR (Intelligent General Operations Router) created. Replaced 9 agents with unified execution context + modular skills.',
-    status: 'completed',
-    milestone: true
-  },
-  {
-    date: 'November 2025',
-    title: 'Skills Library Grows',
-    description: 'Former subagent responsibilities converted to modular skills. 40+ active skills across 15 categories.',
-    status: 'completed'
-  },
-  {
-    date: 'December 2025',
-    title: 'Learning Consolidation',
-    description: 'Unified Learning Agent replaces 6 individual learner agents. Token-aware fallback system implemented.',
-    status: 'completed',
-    milestone: true
-  },
-  {
-    date: 'January 2026',
-    title: 'AutoFix Monitor Deployed',
-    description: 'Autonomous error detection and repair system. HALT+RERUN protocol operational.',
-    status: 'completed'
-  },
-  {
-    date: 'February 2026',
-    title: 'The Trending Tabby Live',
-    description: 'Complete Etsy automation system. Daily 07:00 reports with trend analysis and design generation.',
-    status: 'completed'
-  },
-  {
-    date: 'March 2026',
-    title: 'Social Media Automation',
-    description: 'Unified Twatter managing Twitter/X engagement. Cross-promotion monitoring and hourly engagement sweeps.',
-    status: 'completed'
-  },
-  {
-    date: 'April 2026',
-    title: 'Website Launch',
-    description: 'hermesdispatch.dev goes live. Documentation hub for all Mission Freedom systems and skills.',
-    status: 'completed',
-    milestone: true
-  },
-  {
-    date: 'May 2026',
-    title: 'Newsletter Started',
-    description: 'The Hermes Dispatch weekly newsletter. Every Monday at 3 PM EST.',
-    status: 'in-progress'
-  },
-  {
     date: 'June 2026',
-    title: 'Coming Soon',
-    description: 'IGOR v2.0 with improved context management. Skill marketplace prototype.',
-    status: 'planned'
+    title: 'Multi-Agent v4 Architecture',
+    description: 'Evolved from solo orchestrator to 7-agent coordinated system: IGOR (orchestrator) + EDUCATOR + Newsletter + Social + Web Dev + POD + SENTINEL. Each agent logs to Obsidian, all skills deduplicated.',
+    status: 'completed',
+    milestone: true
+  },
+  {
+    date: 'May 20, 2026',
+    title: 'Skills Architecture Diagram',
+    description: 'Skills consolidated from ~218 to 44 active. 170+ redundant skills archived. ASCII architecture diagram showing hub-and-spoke single-agent design with 60-70% token savings.',
+    status: 'completed',
+    milestone: true
+  },
+  {
+    date: 'May 19, 2026',
+    title: 'Block Migration Complete',
+    description: 'Migrated from 11 independent agents to dare404 solo orchestrator + modular skill blocks. Architecture now: user request → load block → execute → log.',
+    status: 'completed',
+    milestone: true
+  },
+  {
+    date: 'May 19, 2026',
+    title: 'Website Deployed',
+    description: 'hermesdispatch.dev goes live with unified single-page design. Interactive skill cards, dark theme, responsive grid.',
+    status: 'completed'
+  },
+  {
+    date: 'May 19, 2026',
+    title: 'Skills Library Consolidated',
+    description: 'Former agent responsibilities converted to modular skills. 44 active Mission Freedom skills across categories after consolidation cleanup.',
+    status: 'completed'
+  },
+  {
+    date: 'May 18, 2026',
+    title: 'Newsletter Infrastructure Built',
+    description: 'Complete email delivery system with Himalaya CLI. DOC# tracking (MF-YYYYMMDD-### format), automated generation from daily logs.',
+    status: 'completed',
+    milestone: true
+  },
+  {
+    date: 'May 18, 2026',
+    title: 'AutoFix Monitor Active',
+    description: 'Autonomous error detection and repair system operational. HALT+RERUN protocol implemented for failed operations.',
+    status: 'completed'
+  },
+  {
+    date: 'May 14, 2026',
+    title: 'IGOR Orchestrator Established',
+    description: 'Unified execution context replaces 11-agent system. Single log, single state, no handoff failures. ~94% efficiency gain vs multi-agent.',
+    status: 'completed',
+    milestone: true
+  },
+  {
+    date: 'May 14, 2026',
+    title: 'Trend Hunter Learning Active',
+    description: 'Cross-platform trend correlation system operational. Cycles 005-007 graduated with 90%+ research quality. DuckDuckGo search-only backend validated.',
+    status: 'completed'
   }
 ];
 
 const metrics = [
-  { label: 'Started', value: 'July 2025', icon: '📅' },
-  { label: 'Agents Replaced', value: '8', icon: '🔄' },
-  { label: 'Skills Created', value: '70+', icon: '🛠️' },
+  { label: 'Project Start', value: 'May 2025', icon: '📅' },
+  { label: 'Architecture', value: '7 Agents', icon: '🤖' },
+  { label: 'Skills Library', value: '24+', icon: '🛠️' },
   { label: 'Token Savings', value: '60-70%', icon: '⭕' },
   { label: 'Daily Operations', value: 'Automated', icon: '⚡' },
   { label: 'Status', value: 'Active', icon: '🟢' }
@@ -107,7 +91,7 @@ const metrics = [
         </h1>
         
         <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
-          From 9-agent chaos to unified orchestration. 
+          From 11-agent chaos to unified orchestration. 
           The evolution of IGOR and Mission Freedom.
         </p>
       </div>
@@ -133,10 +117,10 @@ const metrics = [
             <div class={`flex gap-8 ${idx % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
               
               <!-- Content side -->
-              <div class="flex-1 md:text-right ${idx % 2 !== 0 ? 'md:text-left' : ''}">
+              <div class={`flex-1 md:text-right ${idx % 2 !== 0 ? 'md:text-left' : ''}`}>
                 <div class={`pl-12 md:pl-0 ${idx % 2 === 0 ? 'md:pr-12' : 'md:pl-12'}`}>
                   <!-- Status badge -->
-                  <div class="flex items-center gap-2 mb-2 ${idx % 2 !== 0 ? 'md:justify-start' : 'md:justify-end'}">
+                  <div class={`flex items-center gap-2 mb-2 ${idx % 2 !== 0 ? 'md:justify-start' : 'md:justify-end'}`}>
                     {item.status === 'completed' && (
                       <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs">Completed</span>
                     )}
@@ -163,7 +147,7 @@ const metrics = [
               </div>
               
               <!-- Center dot -->
-              <div class="absolute left-4 md:left-1/2 w-4 h-4 rounded-full ${item.milestone ? 'bg-orange-500 border-4 border-orange-900' : item.status === 'in-progress' ? 'bg-amber-500 animate-pulse' : 'bg-neutral-600'} md:-translate-x-1/2 -translate-y-1">
+              <div class={`absolute left-4 md:left-1/2 w-4 h-4 rounded-full ${item.milestone ? 'bg-orange-500 border-4 border-orange-900' : item.status === 'in-progress' ? 'bg-amber-500 animate-pulse' : 'bg-neutral-600'} md:-translate-x-1/2 -translate-y-1`}>
                 {item.milestone && <span class="absolute -inset-2 bg-orange-500/20 rounded-full"></span>}
               </div>
               

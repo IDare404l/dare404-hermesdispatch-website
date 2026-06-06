@@ -8,11 +8,12 @@ import { SkillsList } from '../components/SkillsList';
 import { ToolsList } from '../components/ToolsList';
 
 const skills = [
-  { name: 'Hermes Agent', desc: 'Core configuration and extension', tag: 'Core', href: '/skills/hermes-agent' },
-  { name: 'Tabby', desc: 'Etsy automation for print-on-demand', tag: 'Ecommerce', href: '/skills/tabby' },
-  { name: 'Emailer', desc: 'Reliable email automation system', tag: 'Communication', href: '/skills/emailer' },
-  { name: 'Obsidian Logger', desc: 'Universal logging for all agents', tag: 'Infrastructure', href: '/skills/obsidian-logger' },
-  { name: 'Orchestrator', desc: 'Multi-agent workflow coordination', tag: 'Orchestration', href: '/skills/orchestrator' },
+  { name: 'IGOR Orchestrator', desc: 'Unified multi-agent orchestration', tag: 'Core', href: '/skills/orchestrator' },
+  { name: 'Newsletter System', desc: 'Daily dispatch + approval workflow', tag: 'Content', href: '/skills/newsletter' },
+  { name: 'Social Media Engine', desc: 'X/Twitter content + engagement', tag: 'Social', href: '/skills/social' },
+  { name: 'Emailer', desc: 'Reliable Himalaya CLI delivery', tag: 'Communication', href: '/skills/emailer' },
+  { name: 'Obsidian Logger', desc: 'Universal agent execution logging', tag: 'Infrastructure', href: '/skills/obsidian-logger' },
+  { name: 'Security Audit', desc: 'Credential management + hardening', tag: 'Security', href: '/skills/security' },
 ];
 
 const tools = [
@@ -23,22 +24,22 @@ const tools = [
 ];
 
 const features = [
-  { icon: '🤖', title: 'IGOR Orchestrator', desc: 'Multi-agent orchestration system managing daily workflows', tags: ['Orchestration', 'AI Skills'], color: 'cyan' },
-  { icon: '🐱', title: 'The Trending Tabby', desc: 'AI-powered Etsy SEO for cat-themed print-on-demand', tags: ['Etsy SEO', 'POD'], color: 'rose' },
-  { icon: '⚡', title: 'Daily Automation', desc: 'End-to-end automated systems: trend research to deployment', tags: ['Automation', 'Daily Flow'], color: 'amber' },
+  { icon: '🤖', title: 'IGOR Orchestrates', desc: 'Universal Command Router managing 7 specialist agents. No bloat. No subagent overhead.', tags: ['Orchestration', '7 Agents'], color: 'cyan' },
+  { icon: '🎓', title: 'EDUCATOR Audits', desc: 'System-wide documentation audits, knowledge curation, and weekly learning briefs.', tags: ['Learning', 'Audits'], color: 'emerald' },
+  { icon: '⚡', title: 'SENTINEL Protects', desc: 'Credential management, permission monitoring, and security hardening across all agents.', tags: ['Security', 'Hardening'], color: 'slate' },
 ];
 
 const processSteps = [
-  { num: '01', title: 'Research', desc: 'Agents scan trends, competitors, and opportunities across Etsy and social.' },
-  { num: '02', title: 'Analyze', desc: 'IGOR coordinates SEO scoring, design potential, and market fit evaluation.' },
-  { num: '03', title: 'Create', desc: 'Design generation, content creation, and listing optimization happen automatically.' },
-  { num: '04', title: 'Deploy', desc: 'Across all channels: Etsy, Twitter, Instagram, Pinterest, and Newsletter.' }
+  { num: '01', title: 'Research', desc: 'Agents scan trends, news, and opportunities via Jina AI + direct sources.' },
+  { num: '02', title: 'Analyze', desc: 'IGOR coordinates SEO scoring, security checks, and market fit evaluation.' },
+  { num: '03', title: 'Create', desc: 'Newsletter drafts, social threads, designs, and code happen in parallel.' },
+  { num: '04', title: 'Deploy', desc: 'Manual approval for newsletters. Auto-deploy for social + site updates.' }
 ];
 ---
 
 <Layout 
-  title="Mission Freedom | AI Agent Skills & Multi-Agent Orchestration"
-  description="Build at Velocity with Mission Freedom. AI agent automation, multi-agent orchestration, affiliate marketing automation, and print on demand AI.">
+  title="HermesDispatch | AI Automation Newsletter by dare404"
+  description="HermesDispatch documents building AI agent automation systems for digital entrepreneurship. One person + AI skills, Mission Freedom daily.">
   
   <!-- Hero Section -->
   <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -52,16 +53,16 @@ const processSteps = [
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-8 animate-fade-in">
         <span class="w-2 h-2 bg-brand-accent rounded-full animate-pulse"></span>
-        <span class="text-brand-accent text-sm font-medium">1 Unified Agent (IGOR) + 40+ Modular Skills</span>
+        <span class="text-brand-accent text-sm font-medium">7 Agents + Modular Skills + AEO-First</span>
       </div>
       
       <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-        <span class="text-white">Build at</span><br />
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-brand-gold">Velocity</span>
+        <span class="text-white">Hermes</span>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-brand-gold">Dispatch</span>
       </h1>
       
       <p class="text-xl md:text-2xl text-text-secondary max-w-3xl mx-auto mb-10 leading-relaxed">
-        Mission Freedom documents the journey of building <span class="text-brand-accent">AI agent automation systems</span> for digital entrepreneurship. Multi-agent orchestration, real results, <span class="text-brand-gold">Mission Freedom daily</span>.
+        Documenting the journey of building <span class="text-brand-accent">AI agent automation systems</span> for digital entrepreneurship. One person + AI skills, <span class="text-brand-gold">Mission Freedom</span> daily.
       </p>
       
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
@@ -86,19 +87,19 @@ const processSteps = [
             <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
-            Etsy SEO Boise
-          </span>
-          <span class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
             Multi-Agent Orchestration
           </span>
           <span class="flex items-center gap-2">
             <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
-            Print on Demand AI
+            AEO-Optimized Content
+          </span>
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Manual Approval Workflows
           </span>
         </div>
       </div>
@@ -159,13 +160,10 @@ const processSteps = [
           Powered by <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-gold to-brand-accent">Hermes Skills</span>
         </h2>
         <p class="text-text-secondary max-w-2xl mx-auto text-lg">
-          40+ specialized skills to automate your digital entrepreneurship journey.
+          Specialized skills to automate your digital entrepreneurship journey.
         </p>
         <a href="/skills" class="inline-flex items-center gap-2 mt-4 text-brand-gold hover:text-brand-gold-light transition-colors">
           Explore IGOR + Skills
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
         </a>
       </div>
       
@@ -200,7 +198,7 @@ const processSteps = [
           How <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-cyan-400">It Works</span>
         </h2>
         <p class="text-text-secondary max-w-2xl mx-auto text-lg">
-          Our multi-agent orchestration system handles everything, 24/7.
+          IGOR executes skill blocks 24/7. Research → Analyze → Create → Deploy.
         </p>
       </div>
       
@@ -246,6 +244,47 @@ const processSteps = [
   <!-- Newsletter CTA -->
   <NewsletterCTA />
   
+  <!-- FAQ Schema (AEO) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Mission Freedom?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Mission Freedom is dare404's AI agent automation system. IGOR orchestrates 7 specialist domain agents — EDUCATOR, Newsletter Writer, Social Media Writer, Web Developer, POD Manager, and SENTINEL — each with dedicated skills, logging to a shared Obsidian vault."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does IGOR coordinate the agents?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "IGOR acts as the Universal Command Router. Every request flows through IGOR first, which routes to the best-fit specialist agent, validates outputs, and manages tool access. All agents log execution to Obsidian for full auditability."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are Hermes skills?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Hermes skills are specialized, reusable automation modules that agents load and execute. They cover orchestration, security, content, development, e-commerce, learning, and infrastructure. All skills are canonical — zero duplicates."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is The Hermes Dispatch newsletter?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Hermes Dispatch is a daily AI automation newsletter written by the Newsletter Writer agent. It covers new AI models, agent architecture, SEO/AEO strategy, and Mission Freedom progress. Manual approval required before every send."
+        }
+      }
+    ]
+  }
+  </script>
 </Layout>
 
 <style>

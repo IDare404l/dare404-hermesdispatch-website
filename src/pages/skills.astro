@@ -1,119 +1,72 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-// Mission Freedom Custom Skills Only (built during our sessions)
-// Excludes default Hermes library skills
+// Mission Freedom v4 Skills — Canonical active skills only
+// Excludes archived skills and duplicates
 
 const categories = {
   'Orchestration': {
     icon: '🎯',
-    description: 'Core IGOR infrastructure and unified execution',
+    description: 'IGOR core infrastructure and multi-agent coordination',
     skills: [
-      { name: 'igor-unified-orchestrator', desc: 'Solo orchestrator replacing 9-agent chaos with unified execution context.', details: 'Pattern: Load skill block → Execute → Log → Done. No subagent delegation. Achieves ~60-70% token savings, unified context, simpler debugging. All Mission Freedom operations flow through this single orchestration point.' },
-      { name: 'learning-system-manager', desc: 'Central controller for Mission Freedom\'s learning ecosystem.', details: 'ASSIGN - learning priorities, SUGGEST - knowledge gaps, IMPLEMENT - curriculum updates, IMPROVE - continuous system optimization. Runs overnight at 02:00 MST.' },
-      { name: 'dual-sync-workflow', desc: 'Automatically keeps website + Obsidian in sync after system changes.', details: 'Triggered on every significant edit. IGOR-absorbed Librarian function. Ensures documentation and web presence stay aligned without manual intervention.' }
+      { name: 'agent-fleet-management', desc: 'Manage the lifecycle of multi-agent domain agents.', details: 'v4 architecture: spawn, monitor, retire domain agents. Tracks execution logs, audits, and skill health across all 7 agents.' },
+      { name: 'learning-system-manager', desc: 'Central controller for Mission Freedom\'s learning ecosystem.', details: 'ASSIGN learning priorities, SUGGEST knowledge gaps, IMPLEMENT curriculum updates, IMPROVE continuous system optimization. EDUCATOR runs this nightly.' },
+      { name: 'kanban-orchestrator', desc: 'Decomposition playbook for multi-agent task orchestration.', details: 'Breaks complex projects into bite-sized tasks, assigns to domain agents, tracks completion. Anti-temptation rules prevent scope creep.' },
+      { name: 'cron-pipeline-reliability', desc: 'Design and harden multi-stage cron pipelines.', details: 'Stage isolation, retry logic, dead-letter queues, alerting. Built from the newsletter pipeline failures of 2026-06-01.' }
     ]
   },
-  'AI Agents': {
-    icon: '🤖',
-    description: 'Specialized agent capabilities and learning systems',
+  'Security \u0026 Audit': {
+    icon: '🛡️',
+    description: 'SENTINEL domain — credential hygiene and system hardening',
     skills: [
-      { name: 'autofix-monitor', desc: 'Autonomous error detection and repair for all MF operations.', details: 'Replaces 3 separate monitoring agents (Igor Auto-Fix, IGOR Monitor, Pre-Execution). HALT+RERUN protocol. Attempts auto-resolution for provider issues, tool hallucinations, credential failures.' },
-      { name: 'unified-learning-agent', desc: 'Single skill replaces 6 individual learner agents.', details: 'Parameterized learning for Affiliate, Branding, Newsletter, Twatter, Website-Builder, and Web-Research. Handles transcript extraction, guide creation, progress tracking.' },
-      { name: 'modular-agent-workflows', desc: 'Design systems with reusable, composable skill blocks.', details: 'Each module handles one phase (research, generation, synthesis) with clear inputs/outputs. Tasks decomposed into blocks that can be orchestrated or used independently.' },
-      { name: 'ollama-token-conserver', desc: 'Tracks token usage and auto-saves state at thresholds.', details: 'Monitors 90%, 95%, 99% thresholds. Prevents workflow loss during budget constraints. Critical for self-hosted Ollama operations.' },
-      { name: 'token-fallback-framework', desc: 'Fallback mode during token conservation periods.', details: 'Ensures minimal viable output when full execution isn\'t possible. Graceful degradation for all MF skills.' },
-      { name: 'skill-trainer', desc: 'Meta-learning specialist for accelerating skill acquisition.', details: 'Sole responsibility: improving how agents learn and the quality of their knowledge. Analyzes learning patterns, optimizes curriculum delivery.' },
-      { name: 'affiliate-learner', desc: 'Web research learning for Affiliate Agent.', details: 'Niche selection, platform evaluation, commission models, YMYL compliance. Creates comprehensive guides from YouTube transcripts.' },
-      { name: 'branding-learner', desc: 'Web research across 8 branding categories.', details: 'Logo design, color psychology, typography, visual identity, brand guidelines, brand voice, Canva Pro, social media templates. 6000-17000 word guides.' },
-      { name: 'newsletter-learner', desc: 'Newsletter optimization and growth strategies.', details: 'SEO, directory setup, funnels, affiliate marketing integration, monetization strategies. Focus on Mission Freedom newsletter growth.' },
-      { name: 'tabby-learner', desc: 'Etsy and Print on Demand trend research.', details: 'Design trends, seasonal patterns, competitor analysis, listing optimization strategies. Feeds into Tabby daily reports.' },
-      { name: 'twatter-learner', desc: 'Twitter/X algorithm and viral content research.', details: 'Timing strategies, hashtag performance, engagement patterns, thread optimization. Keeps Twatter on top of platform changes.' },
-      { name: 'website-builder-learner', desc: 'Web development platform research.', details: 'WordPress, Webflow, Shopify, SEO best practices, hosting comparisons, performance optimization.' },
-      { name: 'librarian-learner', desc: 'Obsidian and PKM system research.', details: 'Vault organization, note-taking workflows, linking strategies, knowledge management patterns.' }
+      { name: 'security-agent-management', desc: 'Manage credential hygiene, file permissions, and security policies.', details: 'Centralized .credentials/ directory, credential_manager.py, get_credential() access controls. Full audit trail for all secret access.' },
+      { name: 'credential-manager', desc: 'Centralized secret handling for all agents.', details: 'Replaced plaintext .env secrets. All agents pull credentials through get_credential() instead of direct environment reads. File permission monitoring included.' }
     ]
   },
-  'Social Media': {
-    icon: '𝕏',
-    description: 'Twitter/X automation and engagement',
+  'Content \u0026 Social': {
+    icon: '📰',
+    description: 'Newsletter and X/Twitter automation',
     skills: [
-      { name: 'twatter', desc: 'Unified Twatter agent for Mission Freedom.', details: 'v4.1.1 - Uses category format (02-Operations/) for all outputs. Reports to Librarian. Cross-promotion and email fallback patterns. Daily mandatory post at 15:00 MST, hourly engagement slots.' },
-      { name: 'unified-twatter', desc: 'Single parameterized skill replaces 3 separate agent jobs.', details: 'Modes: standard (hourly engagement), max (high-velocity), cross-promo (team monitoring). Consolidated from twatter, twatter-max-engagement, twatter-cross-promotion-monitor.' }
+      { name: 'newsletter-writer', desc: 'Daily dispatch in Rycen Beans\' voice.', details: 'Boise-based AI automation insights. Action-first, no fluff. Two-stage pipeline: agent researches at 17:00, script emails at 17:15. Manual approval mandatory.' },
+      { name: 'newsletter-writing-mastery', desc: 'Dedicated mastery tracker for newsletter quality.', details: '6-category scoring: Structure, Voice, Content, Engagement, SEO, Deliverability. Currently at 72% targeting 95%.' },
+      { name: 'x-creator', desc: 'Content creation specialist for X/Twitter.', details: 'Viral hooks, thread frameworks, engagement timing. Cross-promotes newsletter and shop content.' },
+      { name: 'x-helper', desc: 'Twitter/X SEO specialist for @Dare__404.', details: 'Masters X algorithm, hashtag performance, reply strategies. Growth-focused with data-backed timing.' }
+    ]
+  },
+  'Development': {
+    icon: '💻',
+    description: 'Web Developer domain — Astro, Cloudflare, deployment',
+    skills: [
+      { name: 'website-builder-agent', desc: 'Specialized website creation agent.', details: 'Learns best practices from real design systems. Astro + Cloudflare Pages. AEO-first architecture (FAQ, HowTo, Organization schema).' },
+      { name: 'cloudflare-pages-deployment', desc: 'Deploy static sites to Cloudflare Pages.', details: 'Two paths: Git-based (CI/CD) or direct (Wrangler CLI). Domain management, preview deployments, rollbacks.' },
+      { name: 'claude-design', desc: 'Design one-off HTML artifacts.', details: 'Landing pages, decks, prototypes. Rapid iteration for newsletter CTAs and campaign pages.' }
     ]
   },
   'E-Commerce': {
     icon: '🛍️',
-    description: 'Print-on-demand and Etsy automation',
+    description: 'POD Manager domain — Etsy and print-on-demand',
     skills: [
-      { name: 'tabby', desc: 'Master SEO Agent for Etsy + social media.', details: 'The Trending Tabby - Daily 07:00 report with 3 designs + social content. Cat-themed POD clothing. Competitor intelligence, trend analysis, design generation, listing optimization.' },
-      { name: 'ecommerce-pod-workflow', desc: 'End-to-end print-on-demand automation.', details: 'Multi-agent system covering design research, trend analysis, original concept creation, listing optimization. Copyright-safe design inspiration, POD platform integration, product launch pipeline.' },
-      { name: 'base-block-research-fetcher', desc: 'Gather raw data from any source.', details: 'Single responsibility: retrieve data from Etsy, web, API. Returns structured results. Used by Tabby, Affiliate, and other research workflows.' },
-      { name: 'base-block-trend-analyzer', desc: 'Extract patterns from structured data.', details: 'Single responsibility: identify themes, patterns, actionable insights. Feeds design generation and strategic decisions.' },
-      { name: 'base-block-design-generator', desc: 'Transform trends into complete deliverables.', details: 'Single responsibility: create designs, copy, SEO packages from trend analysis. Production-ready output for immediate use.' }
+      { name: 'etsy-seo-researcher', desc: 'Etsy SEO and competitor research.', details: 'Cat-themed POD clothing. Trend analysis, listing optimization, competitor intelligence. Feeds into design generation pipeline.' },
+      { name: 'etsy-designer', desc: 'Cloud-based AI design agent.', details: 'Transforms SEO research into complete design concepts with prompts, specs, and implementation notes.' },
+      { name: 'etsy-pod-orchestrator', desc: 'Master orchestrator for Etsy operations.', details: 'Coordinates SEO research, design generation, listing creation, and social promotion across agents.' }
     ]
   },
-  'Email': {
-    icon: '📧',
-    description: 'Mission Freedom communication infrastructure',
+  'Learning': {
+    icon: '🎓',
+    description: 'EDUCATOR domain — continuous learning and knowledge curation',
     skills: [
-      { name: 'unified-email-system', desc: 'One skill replaces 5 email-related systems.', details: 'Consolidates Himalaya CLI, Gmail SMTP, AgentMail, and transactional patterns. PREFERRED over individual methods due to reliability and token efficiency.' },
-      { name: 'mission-freedom-himalaya-emailer', desc: 'Default MF email using Himalaya CLI.', details: 'Replaces broken Gmail SMTP and AgentMail. Reliable IMAP/SMTP from terminal. Configured for derekkosakura@gmail.com.' },
-      { name: 'emailer', desc: 'Himalaya CLI backend for all MF communications.', details: 'Simple, reliable, no auth issues. Preferred method over complex REST APIs that fail unpredictably.' },
-      { name: 'reliable-agent-email', desc: 'Email patterns that cannot fail.', details: 'SMTP fallbacks, transactional API patterns, auth recovery. Used when automated delivery is mission-critical.' }
+      { name: 'educator', desc: 'Tracks and guides learning for all content creators.', details: 'School domain runtime. Daily learning scripts across 6 domains. Weekly briefs every Sunday at 09:00.' },
+      { name: 'arxiv', desc: 'Search arXiv papers by keyword, author, or ID.', details: 'Academic research integration for AI/ML developments. Feeds into newsletter "Quick Bites" and internal briefs.' },
+      { name: 'trend-hunter', desc: 'Multi-platform trend research agent.', details: 'Google Trends, Twitter viral, Etsy patterns. Runs autonomously, reports to IGOR. Feeds design and content systems.' }
     ]
   },
-  'Newsletter': {
-    icon: '📰',
-    description: 'HermesDispatch content and delivery',
-    skills: [
-      { name: 'weekly-newsletter-generator', desc: 'Generate newsletter from activity logs.', details: 'Automatic sanitization of internal data. Creates public-ready content from Mission Freedom operations. Weekly delivery Monday 3 PM EST.' },
-      { name: 'newsletter-writer', desc: 'Daily content in Rycen Beans\' voice.', details: 'Boise-based AI automation insights, block-style skill breakdowns, workflow deep-dives. Action-first, no fluff. Built to ship.' },
-      { name: 'newsletter-content-business', desc: 'Newsletter monetization strategies.', details: 'Digital products, sponsorships, owned audience growth. AI/Hermes expertise sharing business models.' },
-      { name: 'daily-report', desc: 'Unified daily report generator.', details: 'Combines Twitter daily, mission-freedom-daily-report. Single skill replaces multiple daily report agents. Morning summary for stakeholders.' }
-    ]
-  },
-  'Base Blocks': {
-    icon: '🧱',
-    description: 'Modular reusable components for all MF agents',
-    skills: [
-      { name: 'web-research-engine', desc: 'Unified web research with source validation.', details: 'Reusable across all MF agents. Handles search, extraction, verification, structured output. BASE_BLOCK pattern.' },
-      { name: 'report-compiler', desc: 'Multi-source report assembly.', details: 'Aggregates data from multiple agents into cohesive reports. Standardized formatting, consistent voice.' },
-      { name: 'seo-package-generator', desc: 'Complete SEO packages from any data source.', details: 'Reusable across all MF agents. Titles, descriptions, tags, alt text. Optimized for Etsy and web content.' },
-      { name: 'design-concept-creator', desc: 'Generate design concepts from trends.', details: 'Creates design-ready specifications. Trend input → complete concept with prompts, specs, implementation notes.' },
-      { name: 'vault-writer', desc: 'Intelligent Obsidian vault writing.', details: 'All agents report to Librarian for vault writes. Category-compliant paths, proper formatting, index updates.' },
-      { name: 'email-dispatcher', desc: 'Structured email dispatch.', details: 'Category system compliant (02-Operations/). Confirms delivery to tracking logs. Enforced by Igor.' }
-    ]
-  },
-  'DevOps': {
+  'Infrastructure': {
     icon: '⚙️',
-    description: 'Infrastructure, monitoring, and automation',
+    description: 'Core tooling and operational systems',
     skills: [
-      { name: 'mission-freedom-infrastructure', desc: 'Complete MF automation infrastructure.', details: 'Health monitoring, auto-fix, dashboard systems. Centralized logging, error tracking, performance metrics.' },
-      { name: 'centralized-logging-architecture', desc: 'Single source of truth pattern.', details: 'One agent maintains logs; others report to it. Prevents write conflicts, ensures data integrity.' },
-      { name: 'cron-auto-fix', desc: 'Cron job detection and repair.', details: 'Provider/model issues, tool hallucinations, execution failures. Automated recovery without human intervention.' }
-    ]
-  },
-  'Note-Taking': {
-    icon: '📝',
-    description: 'Obsidian vault management',
-    skills: [
-      { name: 'obsidian-logger', desc: 'Agents log successes; IGOR logs failures.', details: 'Post-execution summary format for all MF agents. Category-compliant paths (02-Operations/, 03-Intelligence/).' },
-      { name: 'obsidian-compact', desc: 'Vault compaction skill.', details: 'Replaces 4 separate Librarian compaction jobs. Daily, weekly, monthly, quarterly archival. Keeps active workspace clean.' }
-    ]
-  },
-  'Marketing': {
-    icon: '📈',
-    description: 'Growth and monetization systems',
-    skills: [
-      { name: 'affiliate-marketing-agent-v2', desc: 'MF-focused affiliate agent.', details: 'No longer does YouTube research directly. Receives curated learning from YouTube Transcriber. Focuses on Mission Freedom brand partnerships.' },
-      { name: 'trend-hunter', desc: 'Multi-platform trend research.', details: 'Google Trends, Twitter viral content, Etsy cat trends. Runs autonomously, reports to IGOR. Feeds insights to design and content systems.' }
-    ]
-  },
-  'Orchestration': {
-    icon: '🎛️',
-    description: 'Workflow and system coordination',
-    skills: [
-      { name: 'modular-agent-orchestration', desc: 'Build systems with BASE_BLOCK architecture.', details: 'Multi-agent patterns, naming conventions, documentation workflows, cloud model assignments. Foundation for MF agent design.' }
+      { name: 'hermes-agent', desc: 'Configure, extend, or contribute to Hermes Agent.', details: 'CLI, config, models, providers, tools, skills, cron. The tool you use to improve the tools.' },
+      { name: 'himalaya', desc: 'Himalaya CLI for IMAP/SMTP email.', details: 'Replaces Gmail SMTP and AgentMail. Reliable terminal-based email. Used by all MF communication workflows.' },
+      { name: 'obsidian', desc: 'Obsidian knowledge management mastery.', details: 'Vault organization, linking strategies, daily compaction. All agents log to 03-Intelligence/Agents/[domain]/' }
     ]
   }
 };
@@ -121,15 +74,15 @@ const categories = {
 const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.skills.length, 0);
 ---
 
-<Layout title="IGOR + Skills | Mission Freedom">
+<Layout title="Skills | Mission Freedom - v4 Agent Arsenal">
   <section class="py-12 md:py-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      {/* Header */}
+      <!-- Header -->
       <div class="text-center mb-12">
         <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/30 mb-6">
           <span class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></span>
-          <span class="text-orange-400 text-sm font-medium">Mission Freedom Arsenal</span>
+          <span class="text-orange-400 text-sm font-medium">Mission Freedom v4 Arsenal</span>
         </div>
         
         <h1 class="text-4xl md:text-5xl font-bold mb-4">
@@ -137,32 +90,35 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
         </h1>
         
         <p class="text-xl text-neutral-400 max-w-2xl mx-auto mb-6">
-          One orchestrator. {totalSkills} custom-built skills. Zero subagents.
+          7 domain agents. {totalSkills} canonical skills. Zero duplicates.
         </p>
         
         <div class="flex flex-wrap justify-center gap-4 text-sm">
           <span class="px-3 py-1 rounded-full bg-neutral-800 text-neutral-300">{totalSkills} Active Skills</span>
           <span class="px-3 py-1 rounded-full bg-neutral-800 text-neutral-300">{Object.keys(categories).length} Categories</span>
-          <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">60-70% Token Savings</span>
+          <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">7 Domain Agents</span>
+          <span class="px-3 py-1 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30">AEO-First</span>
         </div>
       </div>
 
-      {/* Architecture Note */}
+      <!-- Architecture Note -->
       <div class="mb-12 p-6 bg-gradient-to-r from-neutral-900 to-neutral-800 border border-neutral-700 rounded-xl">
         <div class="flex items-start gap-4">
           <div class="text-3xl">🏗️</div>
           <div>
-            <h2 class="font-semibold text-lg mb-2">Unified Architecture</h2>
+            <h2 class="font-semibold text-lg mb-2">v4 Multi-Agent Architecture</h2>
             <p class="text-neutral-400 text-sm leading-relaxed">
-              These are the <strong>Mission Freedom custom skills</strong> we built together — not the default Hermes library. 
-              Formerly 9 separate agents, now consolidated into IGOR + modular skill blocks. 
-              Pattern: Load skill → Execute → Log → Done. No context duplication, no handoff waste.
+              IGOR orchestrates 7 specialist domain agents: <strong>EDUCATOR</strong> (learning/audits), 
+              <strong>Newsletter Writer</strong> (daily dispatch), <strong>Social Media Writer</strong> (X/Twitter), 
+              <strong>Web Developer</strong> (sites/deploy), <strong>POD Manager</strong> (Etsy/print-on-demand), 
+              and <strong>SENTINEL</strong> (security/hardening). Each agent loads skills, executes, logs to Obsidian.
+              No solo orchestrator — coordinated specialization.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Search */}
+      <!-- Search -->
       <div class="mb-8">
         <input 
           type="text" 
@@ -172,7 +128,7 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
         />
       </div>
 
-      {/* Skills by Category */}
+      <!-- Skills by Category -->
       <div class="space-y-8">
         {Object.entries(categories).map(([catName, catData]) => (
           <div class="category-section" data-category={catName.toLowerCase()}>
@@ -211,19 +167,19 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
         ))}
       </div>
 
-      {/* Stats */}
+      <!-- Stats -->
       <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
-          <div class="text-3xl font-bold text-orange-400">1</div>
-          <div class="text-sm text-neutral-500">Orchestrator</div>
+          <div class="text-3xl font-bold text-orange-400">7</div>
+          <div class="text-sm text-neutral-500">Domain Agents</div>
         </div>
         <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
           <div class="text-3xl font-bold text-orange-400">{totalSkills}</div>
-          <div class="text-sm text-neutral-500">Custom Skills</div>
+          <div class="text-sm text-neutral-500">Canonical Skills</div>
         </div>
         <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
-          <div class="text-3xl font-bold text-orange-400">0</div>
-          <div class="text-sm text-neutral-500">Subagents</div>
+          <div class="text-3xl font-bold text-orange-400">1</div>
+          <div class="text-sm text-neutral-500">Orchestrator (IGOR)</div>
         </div>
         <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
           <div class="text-3xl font-bold text-orange-400">∞</div>
@@ -274,5 +230,40 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
         }
       });
     });
+  </script>
+  <!-- HowTo Schema (AEO) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Build an AI Agent Automation System",
+    "description": "Step-by-step guide to building a multi-agent automation system with Hermes, IGOR orchestration, and modular skills.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "Set up IGOR Orchestrator",
+        "text": "Configure the Universal Command Router to analyze requests and route to specialist agents. Establish the shared Obsidian logging vault."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "Create Domain Agents",
+        "text": "Spawn specialist agents for each domain: EDUCATOR for learning, Newsletter for content, Social Media for engagement, Web Developer for sites, POD Manager for e-commerce, SENTINEL for security."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Install Canonical Skills",
+        "text": "Load only the skills each agent needs. Deduplicate overlapping skills. Log all execution to the shared Obsidian vault for auditability."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Automate Daily Workflows",
+        "text": "Schedule cron jobs for each agent: EDUCATOR audits nightly, Newsletter researches at 17:00, Social posts hourly. Use manual approval gates for newsletters."
+      }
+    ]
+  }
   </script>
 </Layout>
