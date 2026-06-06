@@ -1,7 +1,6 @@
 ---
-// Newsletter CTA Component v4 — Direct Google Apps Script Integration
-// No server-side worker needed. Form POSTs directly to Google Apps Script.
-// Requires PUBLIC_GAS_URL env variable (deployed Apps Script Web App URL)
+// Newsletter CTA Component v4 — API-Free Mailto Subscribe
+// No server-side worker needed. Opens user's email client with pre-filled subscribe request.
 ---
 
 <section class="relative py-24 overflow-hidden">
@@ -20,38 +19,23 @@
 
       <p class="text-gray-400 text-lg max-w-2xl mx-auto mb-8">
         Get <span class="text-brand-gold">Hermes Dispatch</span> — tactical insights on AI agent automation,
-        multi-agent orchestration, and building autonomous systems. Delivered daily at 3 PM EST.
+        multi-agent orchestration, and building autonomous systems. Delivered daily at 3 PM MST.
       </p>
 
-      <form
-        id="newsletter-form"
-        class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-6"
+      <a 
+        href="mailto:derekkosakura@gmail.com?subject=Subscribe&body=Please%20subscribe%20me%20to%20the%20Mission%20Freedom%20Dispatch.%0A%0AEmail%3A%20"
+        class="btn-primary inline-block whitespace-nowrap"
+        id="subscribe-btn"
       >
-        <input
-          type="email"
-          id="email-input"
-          name="email"
-          required
-          placeholder="Enter your email"
-          class="flex-1 px-6 py-4 bg-brand-card border border-brand-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition-colors"
-        />
-        <button 
-          type="submit" 
-          id="submit-btn"
-          class="btn-primary whitespace-nowrap flex items-center justify-center"
-        >
-          <span id="btn-text">Join the Dispatch</span>
-          <svg id="btn-spinner" class="animate-spin h-5 w-5 ml-2 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </button>
-      </form>
+        Join the Dispatch
+      </a>
+
+      <div class="mt-8 space-y-3 text-sm text-gray-400">
+        <p>Or manually: send an email to <code class="bg-brand-card px-2 py-1 rounded text-brand-gold">derekkosakura@gmail.com</code> with subject <code class="bg-brand-card px-2 py-1 rounded text-brand-gold">Subscribe</code></p>
+      </div>
       
-      <div id="form-message" class="hidden mb-4"></div>
-      
-      <p class="text-gray-500 text-sm">
-        Join hundreds of builders. Unsubscribe anytime via email footer.
+      <p class="text-gray-500 text-sm mt-6">
+        API-free. No external services. Your email client handles the request.
       </p>
       
       <div class="flex flex-wrap items-center justify-center gap-6 mt-8 text-gray-500 text-xs">
@@ -67,6 +51,12 @@
           </svg>
           One-click unsubscribe
         </span>
+        <span class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          Privacy-first (no tracking)
+        </span>
       </div>
       
     </div>
@@ -74,106 +64,9 @@
 </section>
 
 <script>
-  const form = document.getElementById('newsletter-form');
-  const emailInput = document.getElementById('email-input');
-  const submitBtn = document.getElementById('submit-btn');
-  const btnText = document.getElementById('btn-text');
-  const btnSpinner = document.getElementById('btn-spinner');
-  const messageEl = document.getElementById('form-message');
-  
-  // Google Apps Script Web App URL (public endpoint)
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbztRQ-8XTH8XkiNBMGz-QQd2ECE5fjT0IDX-Im9HclhLTuvpp0H8N6gcUPKTVmP4D7l/exec';
-  
-  function isValidEmail(email) {
-    return email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-  
-  function setLoading(loading) {
-    if (loading) {
-      submitBtn.disabled = true;
-      btnText.textContent = 'Joining...';
-      btnSpinner.classList.remove('hidden');
-    } else {
-      submitBtn.disabled = false;
-      btnText.textContent = 'Join the Dispatch';
-      btnSpinner.classList.add('hidden');
-    }
-  }
-  
-  function showMessage(text, type) {
-    messageEl.textContent = text;
-    messageEl.className = type === 'success' 
-      ? 'mb-4 p-4 rounded-xl bg-emerald-900/50 text-emerald-300 border border-emerald-500/30'
-      : type === 'info'
-      ? 'mb-4 p-4 rounded-xl bg-blue-900/50 text-blue-300 border border-blue-500/30'
-      : 'mb-4 p-4 rounded-xl bg-red-900/50 text-red-300 border border-red-500/30';
-    messageEl.classList.remove('hidden');
-    
-    setTimeout(() => {
-      messageEl.classList.add('hidden');
-    }, 6000);
-  }
-  
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const email = emailInput.value.trim().toLowerCase();
-    
-    if (!isValidEmail(email)) {
-      showMessage('Please enter a valid email address.', 'error');
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      // Send as text/plain to avoid CORS preflight (GAS doesn't handle OPTIONS)
-      const response = await fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({
-          email: email,
-          source: 'hermesdispatch.dev',
-          referrer: document.referrer || 'direct'
-        })
-      });
-      
-      // GAS may return HTML on error, so handle carefully
-      let data;
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        // Try to extract JSON from text response
-        try { data = JSON.parse(text); } catch { data = { success: response.ok, message: text }; }
-      }
-      
-      if (response.ok && data.success) {
-        const msg = data.message || (data.existing ? "You're already subscribed!" : "Welcome to The Dispatch!");
-        showMessage(msg, data.existing ? 'info' : 'success');
-        form.reset();
-        if (data.new || data.resubscribed) {
-          localStorage.setItem('hermes-subscribed', Date.now());
-        }
-      } else {
-        throw new Error(data.error || 'Subscription failed');
-      }
-      
-    } catch (error) {
-      console.error('Subscription error:', error);
-      showMessage('Something went wrong. Please try again in a moment.', 'error');
-    } finally {
-      setLoading(false);
-    }
+  // Track clicks for analytics (localStorage only, no external services)
+  document.getElementById('subscribe-btn')?.addEventListener('click', () => {
+    const clicks = parseInt(localStorage.getItem('dispatch-subscribe-clicks') || '0');
+    localStorage.setItem('dispatch-subscribe-clicks', (clicks + 1).toString());
   });
-  
-  // Show existing subscriber state
-  if (localStorage.getItem('hermes-subscribed')) {
-    const existingMsg = document.createElement('div');
-    existingMsg.className = 'mb-4 p-4 rounded-xl bg-gray-800/50 text-gray-300 border border-gray-600/30';
-    existingMsg.innerHTML = 'You are already subscribed to The Dispatch.';
-    form.parentNode.insertBefore(existingMsg, form);
-    form.style.display = 'none';
-  }
 </script>
