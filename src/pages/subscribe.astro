@@ -32,15 +32,24 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
           multi-agent orchestration, and building autonomous systems.
         </p>
         
-        <form id="sub-form" class="max-w-md mx-auto space-y-4">
+        <!-- Formspree — clean, no mailto -->
+        <form 
+          id="sub-form" 
+          action="https://formspree.io/f/xnqkvnoy" 
+          method="POST"
+          class="max-w-md mx-auto space-y-4"
+        >
           <div class="relative">
             <input 
               type="email" 
+              name="email"
               id="email-input"
               placeholder="you@example.com"
               required
               class="w-full px-6 py-4 rounded-xl bg-brand-card border border-brand-border text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
             />
+            <!-- Honeypot field for spam bots -->
+            <input type="text" name="_gotcha" style="display:none" />
           </div>
           
           <button 
@@ -53,7 +62,7 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
         </form>
         
         <p class="text-gray-500 text-sm mt-6">
-          API-free. No external services. Privacy-first (no tracking).
+          No spam. One-click unsubscribe. Your email stays private.
         </p>
         
         <div class="flex flex-wrap items-center justify-center gap-6 mt-8 text-gray-500 text-xs">
@@ -87,27 +96,19 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
         </p>
         
         <div class="bg-brand-card rounded-xl p-6 mb-6 text-left">
-          <p class="text-sm text-gray-400 mb-2">To complete your subscription, send an email with this subject:</p>
-          <div class="flex items-center gap-2 bg-black/30 rounded-lg p-3 mb-4">
-            <code id="success-subject" class="text-brand-gold text-sm flex-1">Subscribe</code>
-            <button id="copy-btn" class="text-xs text-gray-400 hover:text-white transition-colors px-2 py-1 rounded border border-gray-700">
-              Copy
-            </button>
-          </div>
-          
-          <p class="text-sm text-gray-400 mb-2">Send to:</p>
-          <div class="flex items-center gap-2 bg-black/30 rounded-lg p-3">
-            <code class="text-brand-gold text-sm flex-1">derekkosakura@gmail.com</code>
-          </div>
+          <p class="text-sm text-gray-400 mb-2">You'll receive:</p>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li class="flex items-center gap-2">
+              <span class="text-brand-gold">📦</span> The Rig — AI hardware benchmarks
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-brand-accent">⛏️</span> The Mine — Crypto mining insights
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-purple-400">💰</span> The Ledger — Trading tools & finance
+            </li>
+          </ul>
         </div>
-        
-        <a 
-          id="mailto-link"
-          href="mailto:derekkosakura@gmail.com?subject=Subscribe"
-          class="btn-primary inline-block mb-4"
-        >
-          Open Email Client
-        </a>
         
         <div class="space-y-3 text-sm text-gray-400 bg-brand-card rounded-xl p-4">
           <p class="flex items-center justify-center gap-2">
@@ -122,12 +123,6 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
             </svg>
             Reply "Unsubscribe" anytime to stop
-          </p>
-          <p class="flex items-center justify-center gap-2">
-            <svg class="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-            </svg>
-            You'll be added within 24 hours
           </p>
         </div>
         
@@ -147,23 +142,13 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
         </h1>
         
         <p class="text-gray-300 text-lg mb-4" id="error-message">
-          We couldn't validate your email right now.
-        </p>
-        
-        <p class="text-gray-400 mb-8">
-          Don't worry — you can still join manually. Send an email to <code class="bg-brand-card px-2 py-1 rounded text-brand-gold">derekkosakura@gmail.com</code> with subject <code class="bg-brand-card px-2 py-1 rounded text-brand-gold">Subscribe</code>.
+          We couldn't save your subscription right now.
         </p>
         
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <a 
-            href="mailto:derekkosakura@gmail.com?subject=Subscribe"
-            class="btn-primary inline-block"
-          >
-            Subscribe via Email
-          </a>
           <button 
             id="retry-btn"
-            class="btn-secondary inline-block"
+            class="btn-primary inline-block"
           >
             Try Again
           </button>
@@ -182,32 +167,18 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
   const successState = document.getElementById('success-state');
   const errorState = document.getElementById('error-state');
   const errorMessage = document.getElementById('error-message');
-  const mailtoLink = document.getElementById('mailto-link');
-  const copyBtn = document.getElementById('copy-btn');
   const retryBtn = document.getElementById('retry-btn');
   
-  // Retry button — return to form
+  // Retry button
   retryBtn?.addEventListener('click', () => {
     errorState.classList.add('hidden');
     formState.classList.remove('hidden');
     emailInput.focus();
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Subscribe';
   });
   
-  // Copy subject line to clipboard
-  copyBtn?.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText('Subscribe');
-      copyBtn.textContent = 'Copied!';
-      setTimeout(() => copyBtn.textContent = 'Copy', 2000);
-    } catch (e) {
-      // Fallback: select text
-      const range = document.createRange();
-      range.selectNode(document.getElementById('success-subject'));
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
-    }
-  });
-  
+  // Formspree handles submission — we just intercept for UX
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -221,19 +192,25 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
     
     // Loading state
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Opening...';
+    submitBtn.textContent = 'Subscribing...';
     
-    // Build mailto link with user's email pre-filled
-    const mailtoHref = `mailto:derekkosakura@gmail.com?subject=Subscribe&body=Please%20subscribe%20me%20to%20the%20Mission%20Freedom%20Dispatch.%0A%0AEmail%3A%20${encodeURIComponent(email)}`;
-    
-    // Update the success-state mailto link with their email
-    mailtoLink.href = mailtoHref;
-    
-    // Show success state immediately (API-free — no backend confirmation needed)
-    showSuccess();
-    
-    // Open their email client automatically
-    window.location.href = mailtoHref;
+    try {
+      // Submit to Formspree via fetch
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+      
+      if (response.ok) {
+        showSuccess();
+      } else {
+        showError('Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      showError('Network error. Check your connection and try again.');
+    }
     
     submitBtn.disabled = false;
     submitBtn.textContent = 'Subscribe';
@@ -252,5 +229,7 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
     errorState.classList.remove('hidden');
     successState.classList.add('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Subscribe';
   }
 </script>
