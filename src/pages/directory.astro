@@ -1,0 +1,259 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Get all directory entries
+const entries = await Astro.glob('../content/directory/*.md');
+
+// Schema: ItemList for AEO
+const itemListSchema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "The Hardware Grid – AI & Mining Hardware Directory",
+  "description": "Curated benchmarks and affiliate links for local AI inference hardware and crypto mining rigs. All tested in-house or sourced from verified reviewers.",
+  "itemListElement": entries.map((e, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "item": {
+      "@type": "Product",
+      "name": e.frontmatter.name,
+      "description": e.frontmatter.name_full,
+      "brand": { "@type": "Brand", "name": e.frontmatter.brand },
+      "offers": {
+        "@type": "Offer",
+        "price": e.frontmatter.price,
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+  }))
+};
+
+const categories = ["all", ...new Set(entries.map(e => e.frontmatter.category).filter(Boolean))];
+const subcategories = ["all", ...new Set(entries.map(e => e.frontmatter.subcategory).filter(Boolean))];
+
+// Decode entries for the template
+const products = entries.map(e => ({
+  ...e.frontmatter,
+  Content: e.Content,
+  rawContent: e.rawContent || ''
+}));
+---
+
+<Layout
+  title="The Hardware Grid – AI & Mining Hardware Directory"
+  description="Curated local AI inference rigs and crypto mining hardware. Benchmarked, scored, and linked with affiliate transparency. Built by Mission Freedom."
+>
+
+<!-- Schema -->
+<script type="application/ld+json" is:inline set:html={JSON.stringify(itemListSchema)} />
+
+<!-- Hero -->
+<section class="relative py-20 overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-accent/10"></div>
+  <div class="relative z-10 max-w-6xl mx-auto px-4 text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-gold/10 border border-brand-gold/30 mb-6">
+      <span class="w-2 h-2 bg-brand-gold rounded-full animate-pulse"></span>
+      <span class="text-brand-gold text-sm font-mono">MISSION FREEDOM DIRECTORY</span>
+    </div>
+    
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <span class="text-gradient">The Hardware Grid</span>
+    </h1>
+    <p class="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
+      Inference rigs, mining machines, and the parts we actually use to run local AI and autonomous systems.
+      Benchmarked. Honest. Linked.
+    </p>
+    
+    <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
+      <span class="flex items-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span>Tested in-house</span>
+      <span class="flex items-center gap-2"><span class="w-2 h-2 bg-brand-gold rounded-full"></span>Affiliate links disclosed</span>
+      <span class="flex items-center gap-2"><span class="w-2 h-2 bg-brand-accent rounded-full"></span>Updated weekly</span>
+    </div>
+  </div>
+</section>
+
+<!-- Filters -->
+<section class="max-w-6xl mx-auto px-4 mb-8">
+  <div class="glass-card rounded-2xl p-4 flex flex-wrap gap-3 items-center">
+    <span class="text-sm text-gray-500 font-mono mr-2">FILTER:</span>
+    <div class="flex flex-wrap gap-2" id="category-filters">
+      {categories.map(cat => (
+        <button 
+          class="filter-btn px-4 py-1.5 rounded-full text-sm font-medium border transition-all"
+          data-filter={cat}
+          data-active={cat === 'all' ? 'true' : 'false'}
+        >
+          {cat === 'all' ? 'All' : cat.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+        </button>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Product Grid -->
+<section class="max-w-6xl mx-auto px-4 pb-16">
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="product-grid">
+    {products.map(product => (
+      <article 
+        class="product-card glass-card rounded-2xl overflow-hidden transition-all hover:border-brand-gold/40 group"
+        data-category={product.category}
+        data-subcategory={product.subcategory}
+        data-featured={product.featured ? 'true' : 'false'}
+      >
+        <!-- Image -->
+        <div class="relative h-48 overflow-hidden bg-black/20">
+          <img 
+            src={product.image} 
+            alt={product.name}
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+          <div class="absolute top-3 right-3 flex gap-2">
+            {product.featured && (
+              <span class="px-2 py-1 rounded-full bg-brand-gold text-black text-xs font-bold">GRID PICK</span>
+            )}
+          </div>
+          
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+            <span class="text-brand-gold text-xs font-mono">{product.brand}</span>
+          </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-5">
+          <h3 class="text-lg font-semibold mb-1">{product.name}</h3>
+          <p class="text-sm text-gray-400 mb-3 line-clamp-2">{product.name_full}</p>
+          
+          <div class="flex flex-wrap gap-2 mb-4">
+            {product.affiliate_tags?.map(tag => (
+              <span class="text-xs px-2 py-1 rounded-full bg-brand-accent/10 text-brand-accent border border-brand-accent/20">{tag}</span>
+            ))}
+          </div>
+          
+          <div class="space-y-2 mb-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Price</span>
+              <span class="font-mono font-semibold text-brand-gold">${product.price}</span>
+            </div>
+            
+            {product.ollama_score !== 'N/A (enabler)' && (
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Ollama Score</span>
+                <span class="font-mono text-emerald-400">{product.ollama_score} tok/s</span>
+              </div>
+            )}
+            
+            {product.hashrate && (
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Hashrate</span>
+                <span class="font-mono text-brand-accent">{product.hashrate}</span>
+              </div>
+            )}
+          </div>
+          
+          <a 
+            href={product.amazon_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block w-full text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition"
+          >
+            View on Amazon →
+          </a>
+          
+          <p class="text-xs text-gray-600 mt-2 text-center">
+            {product.source}
+          </p>
+        </div>
+      </article>
+    ))}
+  </div>
+  
+  <!-- Empty state -->
+  <div id="empty-state" class="hidden text-center py-16">
+    <p class="text-gray-500">No products match this filter.</p>
+  </div>
+</section>
+
+<!-- The Spec (Methodology) -->
+<section class="max-w-4xl mx-auto px-4 py-16 border-t border-white/5">
+  <h2 class="text-2xl font-bold mb-6 text-center"><span class="text-gradient">The Spec</span></h2>
+  
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5">
+      <h3 class="font-semibold mb-2 text-brand-gold">🏠 Tested In-House</h3>
+      <p class="text-sm text-gray-400">Everything labeled "Tested in-house" was benchmarked on our stack. Real numbers, not datasheet claims.</p>
+    </div>
+    
+    <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5">
+      <h3 class="font-semibold mb-2 text-brand-gold">📏 How We Score</h3>
+      <p class="text-sm text-gray-400">Ollama Score = tokens/sec on llama3.2 3B Q4_K_M at stock settings. No overclocking, no tricks.</p>
+    </div>
+    
+    <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5">
+      <h3 class="font-semibold mb-2 text-brand-gold">🔗 Transparency</h3>
+      <p class="text-sm text-gray-400">All product links use our Amazon affiliate tag (dare404-20). We earn a commission if you buy. Price to you is unchanged.</p>
+    </div>
+  </div>
+  
+  <div class="mt-8 text-center">
+    <p class="text-sm text-gray-500 mb-4">Want your product featured in The Grid?</p>
+    <a href="mailto:derekkosakura@gmail.com?subject=Directory Sponsorship – The Hardware Grid" 
+       class="inline-block px-6 py-2 rounded-lg border border-brand-gold/30 text-brand-gold hover:bg-brand-gold/10 transition text-sm"
+    >
+      Sponsor Placement →
+    </a>
+  </div>
+</section>
+
+<script is:inline>
+(function() {
+  var filters = document.querySelectorAll('.filter-btn');
+  var cards = document.querySelectorAll('.product-card');
+  var empty = document.getElementById('empty-state');
+  var grid = document.getElementById('product-grid');
+  
+  function setActive(activeBtn) {
+    filters.forEach(function(btn) {
+      btn.setAttribute('data-active', 'false');
+      btn.classList.remove('bg-brand-gold', 'text-black', 'border-brand-gold');
+      btn.classList.add('border-white/10', 'text-gray-400', 'hover:border-white/30');
+    });
+    activeBtn.setAttribute('data-active', 'true');
+    activeBtn.classList.remove('border-white/10', 'text-gray-400', 'hover:border-white/30');
+    activeBtn.classList.add('bg-brand-gold', 'text-black', 'border-brand-gold');
+  }
+  
+  function filter(category) {
+    var visible = 0;
+    cards.forEach(function(card) {
+      if (category === 'all' || card.dataset.category === category) {
+        card.style.display = '';
+        visible++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    
+    if (visible === 0) {
+      empty.classList.remove('hidden');
+      grid.classList.add('hidden');
+    } else {
+      empty.classList.add('hidden');
+      grid.classList.remove('hidden');
+    }
+  }
+  
+  filters.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      setActive(this);
+      filter(this.dataset.filter);
+    });
+  });
+  
+  // Set initial active state
+  var allBtn = document.querySelector('[data-filter="all"]');
+  if (allBtn) setActive(allBtn);
+})();
+</script>
+
+</Layout>
