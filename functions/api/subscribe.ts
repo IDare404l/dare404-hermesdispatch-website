@@ -2,26 +2,22 @@
  * Cloudflare Pages Function: Newsletter Subscriber Handler
  * 
  * Receives POST requests, validates email, stores in KV.
+ * Also handles GET requests for health checks.
  * Separate Python sync script handles Sheet writes + emails.
  */
 
 export const onRequestPost = async ({ request, env }: { request: Request; env: any }) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json'
   };
 
-  // Handle preflight
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-
   try {
     const body = await request.json() as { email?: string; source?: string };
     const email = body.email?.toLowerCase().trim();
-    const source = body.source || 'hermesdispatch.dev';
+    const source = body.source || 'hermesmissionfreedom.ai';
 
     // Validate email
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -70,4 +66,29 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: a
       error: 'Something went wrong. Please try again.' 
     }), { status: 500, headers: corsHeaders });
   }
+};
+
+export const onRequestGet = async () => {
+  return new Response(JSON.stringify({ 
+    status: 'ok',
+    service: 'Mission Freedom Subscriber API',
+    version: '1.0'
+  }), { 
+    status: 200, 
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*'
+    } 
+  });
+};
+
+export const onRequestOptions = async () => {
+  return new Response(null, { 
+    status: 204, 
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    } 
+  });
 };

@@ -1,0 +1,256 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ParticleBackground from '../components/ParticleBackground.astro';
+
+const title = "Subscribe | Mission Freedom";
+const description = "Join Mission Freedom Daily — tactical AI automation insights delivered to your inbox.";
+---
+
+<Layout title={title} description={description}>
+  <section class="relative pt-32 pb-16 overflow-hidden min-h-screen">
+    <div class="absolute inset-0 animated-gradient"></div>
+    <div class="grid-overlay"></div>
+    <ParticleBackground />
+    
+    <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-brand-gold/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-brand-accent/10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Subscribe Form -->
+      <div id="subscribe-form" class="glass-card rounded-3xl p-8 md:p-12 text-center border border-brand-gold/20">
+        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-8 flex items-center justify-center text-4xl shadow-lg shadow-brand-gold/30">
+          📧
+        </div>
+        
+        <h1 class="display-heading text-white mb-4">
+          Join the <span class="text-gradient">Dispatch</span>
+        </h1>
+        
+        <p class="text-gray-400 text-lg mb-8">
+          Get <span class="text-brand-gold">Mission Freedom Daily</span> — tactical insights on AI agent automation,
+          multi-agent orchestration, and building autonomous systems.
+        </p>
+        
+        <form id="sub-form" class="max-w-md mx-auto space-y-4">
+          <div class="relative">
+            <input 
+              type="email" 
+              id="email-input"
+              placeholder="you@example.com"
+              required
+              class="w-full px-6 py-4 rounded-xl bg-brand-card border border-brand-border text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
+            />
+          </div>
+          
+          <button 
+            type="submit"
+            id="submit-btn"
+            class="btn-primary w-full whitespace-nowrap"
+          >
+            Subscribe
+          </button>
+        </form>
+        
+        <p class="text-gray-500 text-sm mt-6">
+          API-free. No external services. Privacy-first (no tracking).
+        </p>
+        
+        <div class="flex flex-wrap items-center justify-center gap-6 mt-8 text-gray-500 text-xs">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            No spam, ever
+          </span>
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            One-click unsubscribe
+          </span>
+        </div>
+      </div>
+      
+      <!-- Success State (hidden by default) -->
+      <div id="success-state" class="hidden glass-card rounded-3xl p-8 md:p-12 text-center border border-emerald-500/30">
+        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 mx-auto mb-8 flex items-center justify-center text-4xl shadow-lg shadow-emerald-500/30">
+          ✅
+        </div>
+        
+        <h1 class="display-heading text-white mb-4">
+          You're <span class="text-emerald-400">In</span>
+        </h1>
+        
+        <p class="text-gray-300 text-lg mb-4">
+          Welcome to the Dispatch!
+        </p>
+        
+        <div class="bg-brand-card rounded-xl p-6 mb-6 text-left">
+          <p class="text-sm text-gray-400 mb-2">To complete your subscription, send an email with this subject:</p>
+          <div class="flex items-center gap-2 bg-black/30 rounded-lg p-3 mb-4">
+            <code id="success-subject" class="text-brand-gold text-sm flex-1">Subscribe</code>
+            <button id="copy-btn" class="text-xs text-gray-400 hover:text-white transition-colors px-2 py-1 rounded border border-gray-700">
+              Copy
+            </button>
+          </div>
+          
+          <p class="text-sm text-gray-400 mb-2">Send to:</p>
+          <div class="flex items-center gap-2 bg-black/30 rounded-lg p-3">
+            <code class="text-brand-gold text-sm flex-1">derekkosakura@gmail.com</code>
+          </div>
+        </div>
+        
+        <a 
+          id="mailto-link"
+          href="mailto:derekkosakura@gmail.com?subject=Subscribe"
+          class="btn-primary inline-block mb-4"
+        >
+          Open Email Client
+        </a>
+        
+        <div class="space-y-3 text-sm text-gray-400 bg-brand-card rounded-xl p-4">
+          <p class="flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+            </svg>
+            Delivered daily at 3 PM MST
+          </p>
+          <p class="flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            Reply "Unsubscribe" anytime to stop
+          </p>
+          <p class="flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            You'll be added within 24 hours
+          </p>
+        </div>
+        
+        <a href="/" class="btn-primary inline-block mt-8">
+          Back to Home
+        </a>
+      </div>
+      
+      <!-- Error State (hidden by default) -->
+      <div id="error-state" class="hidden glass-card rounded-3xl p-8 md:p-12 text-center border border-red-500/30">
+        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 mx-auto mb-8 flex items-center justify-center text-4xl shadow-lg shadow-red-500/30">
+          ⚠️
+        </div>
+        
+        <h1 class="display-heading text-white mb-4">
+          Something <span class="text-red-400">Went Wrong</span>
+        </h1>
+        
+        <p class="text-gray-300 text-lg mb-4" id="error-message">
+          We couldn't validate your email right now.
+        </p>
+        
+        <p class="text-gray-400 mb-8">
+          Don't worry — you can still join manually. Send an email to <code class="bg-brand-card px-2 py-1 rounded text-brand-gold">derekkosakura@gmail.com</code> with subject <code class="bg-brand-card px-2 py-1 rounded text-brand-gold">Subscribe</code>.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            href="mailto:derekkosakura@gmail.com?subject=Subscribe"
+            class="btn-primary inline-block"
+          >
+            Subscribe via Email
+          </a>
+          <button 
+            id="retry-btn"
+            class="btn-secondary inline-block"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+      
+    </div>
+  </section>
+</Layout>
+
+<script is:inline>
+  const form = document.getElementById('sub-form');
+  const emailInput = document.getElementById('email-input');
+  const submitBtn = document.getElementById('submit-btn');
+  const formState = document.getElementById('subscribe-form');
+  const successState = document.getElementById('success-state');
+  const errorState = document.getElementById('error-state');
+  const errorMessage = document.getElementById('error-message');
+  const mailtoLink = document.getElementById('mailto-link');
+  const copyBtn = document.getElementById('copy-btn');
+  const retryBtn = document.getElementById('retry-btn');
+  
+  // Retry button — return to form
+  retryBtn?.addEventListener('click', () => {
+    errorState.classList.add('hidden');
+    formState.classList.remove('hidden');
+    emailInput.focus();
+  });
+  
+  // Copy subject line to clipboard
+  copyBtn?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText('Subscribe');
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+    } catch (e) {
+      // Fallback: select text
+      const range = document.createRange();
+      range.selectNode(document.getElementById('success-subject'));
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    }
+  });
+  
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = emailInput.value.trim().toLowerCase();
+    
+    // Client-side validation
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showError('Please enter a valid email address.');
+      return;
+    }
+    
+    // Loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Opening...';
+    
+    // Build mailto link with user's email pre-filled
+    const mailtoHref = `mailto:derekkosakura@gmail.com?subject=Subscribe&body=Please%20subscribe%20me%20to%20the%20Mission%20Freedom%20Dispatch.%0A%0AEmail%3A%20${encodeURIComponent(email)}`;
+    
+    // Update the success-state mailto link with their email
+    mailtoLink.href = mailtoHref;
+    
+    // Show success state immediately (API-free — no backend confirmation needed)
+    showSuccess();
+    
+    // Open their email client automatically
+    window.location.href = mailtoHref;
+    
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Subscribe';
+  });
+  
+  function showSuccess() {
+    formState.classList.add('hidden');
+    successState.classList.remove('hidden');
+    errorState.classList.add('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  function showError(msg) {
+    errorMessage.textContent = msg || 'Something went wrong. Please try again.';
+    formState.classList.add('hidden');
+    errorState.classList.remove('hidden');
+    successState.classList.add('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
