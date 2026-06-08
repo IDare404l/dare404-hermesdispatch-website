@@ -10,15 +10,11 @@ affiliate_tags: ["miner", "asic", "bitcoin", "mining", "bitmain", "high-wattage"
 ihardware_tags: [200ths, 3500w, sha256, bitmain]
 featured: true
 sponsored: false
-source: "Industry standard"
+source: "Based on manufacturer specs"
 image: "https://m.media-amazon.com/images/I/61lLJg2b9ML._AC_SL1500_.jpg"
 brand: Bitmain
 ---
-## Overview
-
-The Antminer S21 is the current efficiency king for SHA-256 Bitcoin mining at 17.5 J/TH. If you're running serious hashrate in the Treasure Valley and have access to cheap power or free solar, this is the benchmark machine.
-
-## Specs
+## Specifications
 
 | Metric | Value |
 |---|---|
@@ -27,29 +23,25 @@ The Antminer S21 is the current efficiency king for SHA-256 Bitcoin mining at 17
 | Efficiency | 17.5 J/TH |
 | Noise | ~80 dB |
 | Network | RJ45 Ethernet |
+| Algorithm | SHA-256 |
 
-## ROI Reality Check (Idaho)
+## ROI Notes
 
-Assumptions: $0.09/kWh (Idaho avg), BTC price, current difficulty.
+Power costs vary by location. Using Idaho average ($0.09/kWh) as reference:
 
-**Rough math:**
-- Daily revenue: ~$18-25 (varies with BTC)
 - Daily power cost: ~$7.50 (3.5kW × 24h × $0.09)
-- Net per day: ~$10-17
-- Time to ROI: ~200-350 days (volatile)
+- Daily revenue estimate: varies with BTC price and difficulty
+- Time to ROI: depends on electricity rate and network conditions
 
-## Why We Track It
+This is not financial advice. Figures change constantly with difficulty adjustments.
 
-Our "Moving Metal" newsletter section tracks efficiency per watt, not just hashrate. The S21 is the baseline we compare against. When a new machine drops below 16 J/TH, it's worth monitoring.
+## Practical Notes
 
-## Limitations
+- Uses 220V service — not a standard home outlet machine.
+- Heat output is significant. Indoor operation requires ventilation or active cooling.
+- SHA-256 only — Bitcoin and Bitcoin forks only.
 
-- Not cost-effective unless you're sub-$0.08/kWh
-- Needs 240V 20A circuit minimum
-- Heat output requires ventilation or outdoor placement
-- Single-algorithm SHA-256 only — Bitcoin forks only
+## General Notes
 
-## Hardware Notes
-
-**Ideal for:** Industrial mining, solar farms, heat recovery systems.
-**Skip if:** You're above $0.12/kWh or running from home without industrial power.
+**Potential fit for:** Industrial mining, solar farms, locations with sub-$0.08/kWh electricity.
+**Less ideal for:** Home operation due to noise + power requirements.

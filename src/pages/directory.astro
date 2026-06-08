@@ -8,8 +8,8 @@ const entries = await Astro.glob('../content/directory/*.md');
 const itemListSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  "name": "The Hardware Grid – AI & Mining Hardware Directory",
-  "description": "Curated benchmarks and affiliate links for local AI inference hardware and crypto mining rigs. All tested in-house or sourced from verified reviewers.",
+  "name": "The Hardware Grid & The Data Stack – Hardware & Tools Directory",
+  "description": "Curated hardware rigs, mining machines, and data tools with honest benchmarks and affiliate transparency. Built by Mission Freedom.",
   "itemListElement": entries.map((e, i) => ({
     "@type": "ListItem",
     "position": i + 1,
@@ -40,8 +40,8 @@ const products = entries.map(e => ({
 ---
 
 <Layout
-  title="The Hardware Grid – AI & Mining Hardware Directory"
-  description="Curated local AI inference rigs and crypto mining hardware. Benchmarked, scored, and linked with affiliate transparency. Built by Mission Freedom."
+  title="The Hardware Grid & The Data Stack – Mission Freedom Directory"
+  description="Curated hardware, mining rigs, and data tools. Honest benchmarks, affiliate transparency, built by Mission Freedom."
 >
 
 <!-- Schema -->
@@ -57,15 +57,15 @@ const products = entries.map(e => ({
     </div>
     
     <h1 class="text-4xl md:text-5xl font-bold mb-4">
-      <span class="text-gradient">The Hardware Grid</span>
+      <span class="text-gradient">The Hardware Grid & The Data Stack</span>
     </h1>
     <p class="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
-      Inference rigs, mining machines, and the parts we actually use to run local AI and autonomous systems.
+      Inference rigs, mining machines, and the tools we actually use to run local AI, autonomous systems, and data-driven trading.
       Benchmarked. Honest. Linked.
     </p>
     
     <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
-      <span class="flex items-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span>Tested in-house</span>
+      <span class="flex items-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span>Community-reported</span>
       <span class="flex items-center gap-2"><span class="w-2 h-2 bg-brand-gold rounded-full"></span>Affiliate links disclosed</span>
       <span class="flex items-center gap-2"><span class="w-2 h-2 bg-brand-accent rounded-full"></span>Updated weekly</span>
     </div>
@@ -152,12 +152,12 @@ const products = entries.map(e => ({
           </div>
           
           <a 
-            href={product.amazon_link}
+            href={product.referral_link || product.amazon_link}
             target="_blank"
             rel="noopener noreferrer"
             class="block w-full text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition"
           >
-            View on Amazon →
+            {product.referral_link ? 'Try It Free →' : 'View on Amazon →'}
           </a>
           
           <p class="text-xs text-gray-600 mt-2 text-center">
@@ -180,8 +180,8 @@ const products = entries.map(e => ({
   
   <div class="grid md:grid-cols-3 gap-6">
     <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5">
-      <h3 class="font-semibold mb-2 text-brand-gold">🏠 Tested In-House</h3>
-      <p class="text-sm text-gray-400">Everything labeled "Tested in-house" was benchmarked on our stack. Real numbers, not datasheet claims.</p>
+      <h3 class="font-semibold mb-2 text-brand-gold">🏠 How We Source</h3>
+      <p class="text-sm text-gray-400">Entries labeled "Based on community benchmarks" or "Based on manufacturer specs" are sourced from public Ollama performance threads, Reddit discussions, and official documentation. We do not claim hands-on testing unless explicitly stated.</p>
     </div>
     
     <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5">
@@ -191,7 +191,7 @@ const products = entries.map(e => ({
     
     <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5">
       <h3 class="font-semibold mb-2 text-brand-gold">🔗 Transparency</h3>
-      <p class="text-sm text-gray-400">All product links use our Amazon affiliate tag (dare404-20). We earn a commission if you buy. Price to you is unchanged.</p>
+      <p class="text-sm text-gray-400">Product links use our Amazon affiliate tag (dare404-20) or partner referral links. We earn a commission if you buy or sign up. Price to you is unchanged.</p>
     </div>
   </div>
   

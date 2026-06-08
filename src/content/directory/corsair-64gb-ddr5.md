@@ -8,37 +8,39 @@ price_range: "150-200"
 amazon_link: "https://www.amazon.com/dp/B0BSXH6DZZ?tag=dare404-20"
 affiliate_tags: ["ram", "ddr5", "64gb", "upgrade", "ollama-compatible"]
 ihardware_tags: [64gb-ddr5, 5600mhz, corsair]
-ollama_score: "N/A (enabler)"
 featured: false
 sponsored: false
-source: "Tested in-house"
+source: "Based on community compatibility"
 image: "https://m.media-amazon.com/images/I/81X7VEm8qGL._AC_SL1500_.jpg"
 brand: Corsair
 ---
 ## Overview
 
-If you're running local LLMs, RAM is the bottleneck before GPU. 64GB DDR5 lets you run larger context windows and bigger models without swapping. The Corsair Vengeance kit is what we use in our inference rigs — reliable, fast, and available everywhere.
+DDR5 has become the standard for new builds, and RAM is often the bottleneck for local LLM inference before GPU. 64GB allows running larger context windows or multiple models simultaneously on machines that support it.
 
-## Why It Matters for AI
+## Capacity Planning
+
+General guidance from Ollama documentation and community reports:
 
 | Config | Usable Model Sizes | Notes |
 |---|---|---|
-| 16GB | Up to 3B Q4 | Entry point |
-| 32GB | Up to 7B Q4, 3B Q8 | Sweet spot for most tasks |
-| **64GB** | Up to **13B Q4**, **7B Q8** | **Our recommended minimum for serious work** |
-| 128GB | Up to 30B+ | Overkill unless you're running multi-model orchestration |
+| 16GB | Up to 3B Q4 | Entry point for basic inference |
+| 32GB | Up to 7B Q4 | Sweet spot for most single-model tasks |
+| **64GB** | Up to **13B Q4**, **7B Q8** | Gives headroom for multi-model setups |
+| 128GB | Up to 30B+ | Overkill unless running orchestration simultaneously |
 
 ## Compatibility
 
-Works with any DDR5 motherboard. Ideal for:
-- Mini PC upgrades (Beelink, Minisforum, Intel NUC)
+Works with any DDR5 motherboard. Commonly used in:
+- Mini PC upgrades (Beelink, Minisforum, some Intel NUC models)
 - Desktop AM5 builds
+- DDR5-capable Intel platforms
 
 ## Limitations
 
-- DDR5 is now the standard; older DDR4 systems cannot use it
-- 64GB is total system memory — Ollama shares it with your OS and other processes
+- Requires DDR5 slots — DDR4 motherboards cannot use this kit
+- Ollama shares system memory with the OS, so total capacity isn't fully available to the model
 
-## Hardware Notes
+## Memory Rule of Thumb
 
-**The rule:** Every 1B parameters at Q4_K_M needs ~0.6GB RAM. 7B model = ~4GB. 13B = ~8GB. 30B = ~19GB. 64GB gives you headroom to run multiple models simultaneously — critical for multi-agent systems like ours.
+Approximately 0.5-0.7GB per 1B parameters at Q4 quantization. Exact numbers depend on architecture and batch size.

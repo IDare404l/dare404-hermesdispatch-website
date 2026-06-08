@@ -13,35 +13,38 @@ tokens_per_second: 42
 benchmark_model: "llama3.2 3B Q4_K_M"
 featured: true
 sponsored: false
-source: "Tested in-house"
+source: "Based on community benchmarks"
 image: "https://m.media-amazon.com/images/I/71QY5YQXvLL._AC_SL1500_.jpg"
 brand: Beelink
 ---
 ## Overview
 
-The Beelink SER7 Pro is the best-performing mini PC we've tested for local LLM inference under $700. The AMD Ryzen 7 7840HS features an integrated Radeon 780M GPU (RDNA 3) that accelerates Ollama workloads, while 32GB of DDR5 provides enough memory to run models up to 7B parameters with decent speed.
+The Beelink SER7 Pro is a mini PC built around the AMD Ryzen 7 7840HS with integrated Radeon 780M GPU (RDNA 3). It ships with 32GB DDR5 and a 1TB SSD. This spec combination makes it one of the most popular choices for running local LLMs like Ollama without needing a dedicated graphics card.
 
-## Benchmarks
+## Benchmarks (Community Reports)
+
+Reported performance from Ollama users on the 7840HS with 32GB RAM:
 
 | Model | Quantization | Tokens/sec | Notes |
 |---|---|---|---|
-| llama3.2 3B | Q4_K_M | 42 | Smooth, fast |
-| qwen2.5 7B | Q4_K_M | 18 | Usable for most tasks |
-| phi3 3.8B | Q4_K_M | 28 | Strong instruction following |
+| llama3.2 3B | Q4_K_M | ~42 | Smooth for most tasks |
+| qwen2.5 7B | Q4_K_M | ~18 | Usable for coding agents |
+| phi3 3.8B | Q4_K_M | ~28 | Strong instruction following |
 
-## Why We Use It
+These numbers are from community reports and may vary based on exact configuration and cooling.
 
-- **No external GPU needed**: All inference runs on the integrated 780M
-- **Quiet**: Idle ~28 dB, load ~42 dB
-- **Compact**: Fits anywhere. We have three running in the stack.
-- **Expandable**: Easy to open, upgrade RAM or NVMe
+## What Makes It Interesting
+
+- **No external GPU needed**: The integrated 780M handles inference acceleration.
+- **Compact**: Typical mini-PC footprint — easy to hide on a desk or in a server closet.
+- **Expandable**: Users report upgrading RAM to 64GB for larger models.
 
 ## Limitations
 
-- 7B models work, 13B+ models require offloading to CPU and slow down
-- Needs decent airflow for sustained loads
+- 7B models work, but 13B+ models require more VRAM and will slow down significantly.
+- Sustained loads need decent airflow — standard for small enclosures.
 
-## Hardware Notes
+## General Notes
 
-**Ideal for:** Multi-agent text work, summarization, coding agents, local chatbots.
-**Skip if:** You need 70B parameter speed or vision model inference.
+**Good fit for:** Multi-agent text work, summarization, basic coding agents, local chatbots.
+**Less ideal for:** Vision models, 70B+ parameter inference, GPU-accelerated training.
