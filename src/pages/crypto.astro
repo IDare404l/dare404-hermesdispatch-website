@@ -1,0 +1,186 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const entries = await Astro.glob('../content/directory/*.md');
+const cryptoEntries = entries.filter(e => e.frontmatter.subcategory === 'mining');
+const dataEntries = entries.filter(e => e.frontmatter.subcategory === 'calculator');
+
+const products = [...cryptoEntries, ...dataEntries].map(e => ({...e.frontmatter, Content: e.Content}));
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Crypto Mining Hardware | The Mine",
+  "description": "ASIC miners, GPU rigs, and profitability calculators. Community-sourced benchmarks for the Boise crypto community.",
+  "itemListElement": products.map((p, i) => ({
+    "@type": "ListItem", "position": i + 1,
+    "item": {"@type": "Product", "name": p.name, "description": p.name_full,
+      "brand": {"@type": "Brand", "name": p.brand || p.name.split(' ')[0]},
+      "offers": {"@type": "Offer", "price": p.price, "priceCurrency": "USD"}}
+  }))
+};
+---
+
+<Layout title="Crypto Mining Hardware | The Mine" description="ASIC miners and profitability tools. Community benchmarks for Boise crypto miners.">
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+<!-- Hero -->
+<section class="relative py-20 overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-accent/10"></div>
+  <div class="relative z-10 max-w-6xl mx-auto px-4 text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-6">
+      <span class="text-brand-accent text-sm font-mono">⛏️ THE MINE</span>
+    </div>
+    
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <span class="text-gradient">Crypto Mining</span>
+    </h1>
+    <p class="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
+      ASIC miners, GPU rigs, and profitability calculators. Run the numbers before you buy.
+    </p>
+    
+    <div class="flex flex-wrap justify-center gap-3 text-sm">
+      <a href="/directory" class="px-4 py-2 rounded-full border border-white/10 hover:border-brand-gold/50 transition">← Full Directory</a>
+      <a href="/hardware" class="px-4 py-2 rounded-full border border-white/10 hover:border-brand-accent/50 transition">Upgrades →</a>
+      <a href="/invest" class="px-4 py-2 rounded-full border border-white/10 hover:border-brand-gold/50 transition">The Ledger →</a>
+    </div>
+  </div>
+</section>
+
+<!-- Tools Grid -->
+<section class="max-w-6xl mx-auto px-4 pb-16">
+  <div class="grid md:grid-cols-2 gap-6">
+    {products.map(product => (
+      <article class="glass-card rounded-2xl overflow-hidden transition-all hover:border-brand-accent/40 group">
+        <div class="p-6">
+          <h3 class="text-xl font-semibold mb-2">{product.name}</h3>
+          <p class="text-gray-400 mb-4">{product.name_full}</p>
+          
+          <div class="flex flex-wrap gap-2 mb-4">
+            {<span class="text-xs px-2 py-1 rounded-full bg-brand-accent/10 text-brand-accent">{product.subcategory}</span>}
+            {product.hashrate && (<span class="text-xs px-2 py-1 rounded-full bg-purple-500/10 text-purple-400">{product.hashrate}</span>)}
+          </div>
+          
+          {product.why_use && <p class="text-sm text-gray-500 mb-4">{product.why_use}</p>}
+          
+          <a href={product.referral_link || product.amazon_link} target="_blank" rel="noopener noreferrer"
+            class="block w-full text-center py-2.5 rounded-lg bg-brand-accent/10 border border-brand-accent/30 text-brand-accent font-medium hover:bg-brand-accent/20 transition">
+            {product.amazon_link ? 'View on Amazon →' : (product.referral_link ? 'Try It →' : 'Learn More →')}
+          </a>
+          
+          <p class="text-xs text-gray-600 mt-2 text-center">
+            {product.source || 'Based on manufacturer specs'}
+          </p>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<!-- Boise Power Cost -->
+<section class="max-w-4xl mx-auto px-4 pb-16 border-t border-white/5">
+  <h2 class="text-2xl font-bold mb-6 text-center"><span class="text-gradient">🗺️ Boise Mining Reality</span></h2>
+  
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="glass-card p-6 rounded-xl">
+      <h3 class="font-semibold mb-3 text-brand-gold">💡 Power Costs</h3>
+      <up class="text-sm text-gray-400 space-y-2">
+        <li>Idaho average: ~$0.09/kWh (U.S. average: $0.16)</li>
+        <li>3,500W ASIC = $226/month to run</li>
+        <li>S21 profit margin: ~$180-300/mo (depending on BTC price)</li>
+        <li>ROI break-even: ~14-18 months at $3,499 + power</li>
+      </ul>
+    </div>
+    
+    <div class="glass-card p-6 rounded-xl">
+      <h3 class="font-semibold mb-3 text-brand-gold">🏠 Where to Buy</h3>
+      <up class="text-sm text-gray-400 space-y-2">
+        <li><strong>Direct:</strong> Bitmain (bitmain.com) — new units, warranty</li>
+        <li><strong>Amazon:</strong> Faster shipping, used/refurbished options</li>
+        <li><strong>Local:</strong> Check Boise Craigslist / Facebook Marketplace</li>
+        <li><strong>Warning:</strong> Always calculate ROI before buying</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Mining Calculator -->
+<section class="max-w-4xl mx-auto px-4 pb-16">
+  <div class="glass-card p-6 rounded-xl">
+    <h3 class="font-semibold mb-4 text-brand-gold text-center">⛏️ Quick Profitability Check</h3>
+    <div class="grid md:grid-cols-3 gap-4 mb-4">
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Hashrate (Th/s)</label>
+        <input type="number" id="hashrate" value="200" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-center" />
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Power Cost ($/kWh)</label>
+        <input type="number" id="power-cost" value="0.09" step="0.01" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-center" />
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">BTC Price ($)</label>
+        <input type="number" id="btc-price" value="68000" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-center" />
+      </div>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-4 text-center">
+      <div class="glass-card p-4 rounded-xl">
+        <div class="text-sm text-gray-500">Daily Revenue</div>
+        <div class="text-2xl font-bold text-emerald-400" id="daily-rev">$18.20</div>
+      </div>
+      <div class="glass-card p-4 rounded-xl">
+        <div class="text-sm text-gray-500">Daily Cost</div>
+        <div class="text-2xl font-bold text-red-400" id="daily-cost">$7.56</div>
+      </div>
+      <div class="glass-card p-4 rounded-xl">
+        <div class="text-sm text-gray-500">Daily Profit</div>
+        <div class="text-2xl font-bold text-brand-gold" id="daily-profit">$10.64</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  function calculate() {
+    var h = parseFloat(document.getElementById('hashrate').value) || 0;
+    var cost = parseFloat(document.getElementById('power-cost').value) || 0;
+    var btc = parseFloat(document.getElementById('btc-price').value) || 0;
+    
+    var networkDiff = 83e12; // approx
+    var blockReward = 3.125;
+    var blocksPerDay = 144;
+    var powerW = 3500; // S21
+    
+    var dailyBTC = h * 1e12 / networkDiff * blockReward * blocksPerDay;
+    var dailyRev = dailyBTC * btc;
+    var dailyCost = powerW / 1000 * 24 * cost;
+    var profit = dailyRev - dailyCost;
+    
+    document.getElementById('daily-rev').textContent = '$' + dailyRev.toFixed(2);
+    document.getElementById('daily-cost').textContent = '$' + dailyCost.toFixed(2);
+    document.getElementById('daily-profit').textContent = '$' + profit.toFixed(2);
+  }
+  document.getElementById('hashrate').addEventListener('input', calculate);
+  document.getElementById('power-cost').addEventListener('input', calculate);
+  document.getElementById('btc-price').addEventListener('input', calculate);
+</script>
+
+<!-- Local Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Mission Freedom — Crypto Mining Directory",
+  "description": "Community-sourced crypto mining hardware and ROI calculators for the Boise, Idaho area.",
+  "url": "https://hermesdispatch.dev/crypto",
+  "areaServed": {
+    "@type": "City",
+    "name": "Boise",
+    "containedIn": {"@type": "State", "name": "Idaho"}
+  },
+  "priceRange": "$$$"
+}
+</script>
+
+</Layout>
