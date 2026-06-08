@@ -4,7 +4,7 @@ category: data-stack
 subcategory: charting
 price: 0
 price_range: "Free / Paid"
-referral_link: "https://www.tradingview.com/partner-program/"
+referral_link: "https://www.tradingview.com/?aff_id=167461"
 tags:
 - charting
 - analysis
