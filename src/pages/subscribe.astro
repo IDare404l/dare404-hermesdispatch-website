@@ -32,12 +32,11 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
           multi-agent orchestration, and building autonomous systems.
         </p>
         
-        <!-- Formspree — clean, no mailto -->
+        <!-- API-free mailto subscription -->
         <form 
           id="sub-form" 
-          action="https://formspree.io/f/xnqkvnoy" 
-          method="POST"
           class="max-w-md mx-auto space-y-4"
+          onsubmit="return false;"
         >
           <div class="relative">
             <input 
@@ -48,16 +47,14 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
               required
               class="w-full px-6 py-4 rounded-xl bg-brand-card border border-brand-border text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
             />
-            <!-- Honeypot field for spam bots -->
-            <input type="text" name="_gotcha" style="display:none" />
           </div>
           
           <button 
-            type="submit"
+            type="button"
             id="submit-btn"
             class="btn-primary w-full whitespace-nowrap"
           >
-            Subscribe
+            Subscribe via Email
           </button>
         </form>
         
@@ -78,80 +75,12 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
             </svg>
             One-click unsubscribe
           </span>
-        </div>
-      </div>
-      
-      <!-- Success State (hidden by default) -->
-      <div id="success-state" class="hidden glass-card rounded-3xl p-8 md:p-12 text-center border border-emerald-500/30">
-        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 mx-auto mb-8 flex items-center justify-center text-4xl shadow-lg shadow-emerald-500/30">
-          ✅
-        </div>
-        
-        <h1 class="display-heading text-white mb-4">
-          You're <span class="text-emerald-400">In</span>
-        </h1>
-        
-        <p class="text-gray-300 text-lg mb-4">
-          Welcome to the Dispatch!
-        </p>
-        
-        <div class="bg-brand-card rounded-xl p-6 mb-6 text-left">
-          <p class="text-sm text-gray-400 mb-2">You'll receive:</p>
-          <ul class="space-y-2 text-sm text-gray-300">
-            <li class="flex items-center gap-2">
-              <span class="text-brand-gold">📦</span> The Rig — AI hardware benchmarks
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="text-brand-accent">⛏️</span> The Mine — Crypto mining insights
-            </li>
-            <li class="flex items-center gap-2">
-              <span class="text-purple-400">💰</span> The Ledger — Trading tools & finance
-            </li>
-          </ul>
-        </div>
-        
-        <div class="space-y-3 text-sm text-gray-400 bg-brand-card rounded-xl p-4">
-          <p class="flex items-center justify-center gap-2">
-            <svg class="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
-            Delivered daily at 3 PM MST
-          </p>
-          <p class="flex items-center justify-center gap-2">
-            <svg class="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-            </svg>
-            Reply "Unsubscribe" anytime to stop
-          </p>
-        </div>
-        
-        <a href="/" class="btn-primary inline-block mt-8">
-          Back to Home
-        </a>
-      </div>
-      
-      <!-- Error State (hidden by default) -->
-      <div id="error-state" class="hidden glass-card rounded-3xl p-8 md:p-12 text-center border border-red-500/30">
-        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 mx-auto mb-8 flex items-center justify-center text-4xl shadow-lg shadow-red-500/30">
-          ⚠️
-        </div>
-        
-        <h1 class="display-heading text-white mb-4">
-          Something <span class="text-red-400">Went Wrong</span>
-        </h1>
-        
-        <p class="text-gray-300 text-lg mb-4" id="error-message">
-          We couldn't save your subscription right now.
-        </p>
-        
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button 
-            id="retry-btn"
-            class="btn-primary inline-block"
-          >
-            Try Again
-          </button>
+            API-free (mailto)
+          </span>
         </div>
       </div>
       
@@ -160,76 +89,39 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
 </Layout>
 
 <script is:inline>
-  const form = document.getElementById('sub-form');
   const emailInput = document.getElementById('email-input');
   const submitBtn = document.getElementById('submit-btn');
-  const formState = document.getElementById('subscribe-form');
-  const successState = document.getElementById('success-state');
-  const errorState = document.getElementById('error-state');
-  const errorMessage = document.getElementById('error-message');
-  const retryBtn = document.getElementById('retry-btn');
   
-  // Retry button
-  retryBtn?.addEventListener('click', () => {
-    errorState.classList.add('hidden');
-    formState.classList.remove('hidden');
-    emailInput.focus();
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Subscribe';
-  });
-  
-  // Formspree handles submission — we just intercept for UX
-  form?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
+  submitBtn?.addEventListener('click', () => {
     const email = emailInput.value.trim().toLowerCase();
     
     // Client-side validation
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showError('Please enter a valid email address.');
+      emailInput.focus();
+      emailInput.classList.add('border-red-500');
+      setTimeout(() => emailInput.classList.remove('border-red-500'), 2000);
       return;
     }
     
-    // Loading state
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Subscribing...';
+    // Build mailto link with pre-filled subject + body
+    const subject = encodeURIComponent('Subscribe');
+    const body = encodeURIComponent('Please subscribe me to Mission Freedom Daily.\n\nEmail: ' + email);
+    const mailto = 'mailto:derekkosakura@gmail.com?subject=' + subject + '&body=' + body;
     
-    try {
-      // Submit to Formspree via fetch
-      const formData = new FormData(form);
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      });
-      
-      if (response.ok) {
-        showSuccess();
-      } else {
-        showError('Something went wrong. Please try again.');
-      }
-    } catch (err) {
-      showError('Network error. Check your connection and try again.');
-    }
+    // Open email client
+    window.location.href = mailto;
     
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Subscribe';
+    // After a short delay, redirect to confirmation page
+    setTimeout(() => {
+      window.location.href = '/subscribed/';
+    }, 1500);
   });
   
-  function showSuccess() {
-    formState.classList.add('hidden');
-    successState.classList.remove('hidden');
-    errorState.classList.add('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-  
-  function showError(msg) {
-    errorMessage.textContent = msg || 'Something went wrong. Please try again.';
-    formState.classList.add('hidden');
-    errorState.classList.remove('hidden');
-    successState.classList.add('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Subscribe';
-  }
+  // Allow Enter key to submit
+  emailInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitBtn.click();
+    }
+  });
 </script>

@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ParticleBackground from '../components/ParticleBackground.astro';
+
+const title = "Subscribed | Mission Freedom";
+const description = "Welcome to the Dispatch. Your subscription request has been sent.";
+---
+
+<Layout title={title} description={description}>
+  <section class="relative pt-32 pb-16 overflow-hidden min-h-screen">
+    <div class="absolute inset-0 animated-gradient"></div>
+    <div class="grid-overlay"></div>
+    <ParticleBackground />
+    
+    <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-brand-gold/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-brand-accent/10 rounded-full blur-3xl"></div>
+    
+    <div class="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="glass-card rounded-3xl p-8 md:p-12 text-center border border-emerald-500/20">
+        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 mx-auto mb-8 flex items-center justify-center text-4xl shadow-lg shadow-emerald-500/30">
+          ✅
+        </div>
+        
+        <h1 class="display-heading text-white mb-4">
+          You're <span class="text-emerald-400">In</span>
+        </h1>
+        
+        <p class="text-gray-300 text-lg mb-4">
+          Your subscription request has been sent. We will add you to the Dispatch shortly.
+        </p>
+        
+        <div class="bg-brand-card rounded-xl p-6 mb-6 text-left">
+          <p class="text-sm text-gray-400 mb-2">What you will receive:</p>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li class="flex items-center gap-2">
+              <span class="text-brand-gold">📦</span> The Rig — AI hardware benchmarks
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-brand-accent">⛏️</span> The Mine — Crypto mining insights
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-purple-400">💰</span> The Ledger — Trading tools &amp; finance
+            </li>
+          </ul>
+        </div>
+        
+        <div class="space-y-3 text-sm text-gray-400 bg-brand-card rounded-xl p-4">
+          <p class="flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+            </svg>
+            Delivered daily at 3 PM MST
+          </p>
+          <p class="flex items-center justify-center gap-2">
+            <svg class="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            Reply <strong class="text-white">Unsubscribe</strong> anytime to stop
+          </p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+          <a href="/" class="btn-primary inline-block">
+            Back to Home
+          </a>
+          <a href="/directory/" class="px-6 py-3 border border-brand-border rounded-xl text-gray-400 hover:text-white hover:border-brand-gold transition-colors">
+            Explore the Directory
+          </a>
+        </div>
+        
+      </div>
+      
+    </div>
+  </section>
+</Layout>
