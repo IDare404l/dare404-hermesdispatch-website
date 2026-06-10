@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Subscription Flow Test</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #0a0a0a; color: #e0e0e0; }
+    .pass { color: #10b981; font-weight: bold; }
+    .fail { color: #ef4444; font-weight: bold; }
+    .info { color: #f59e0b; }
+    pre { background: #1a1a1a; padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 13px; }
+    button { background: #f59e0b; color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #fbbf24; }
+    #results { margin-top: 20px; }
+    .result-item { padding: 8px 0; border-bottom: 1px solid #333; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Subscription Flow Test</h1>
+  <p>Tests the full subscription system before Cloudflare KV is wired.</p>
+  <button onclick="runTests()">Run Tests</button>
+  <div id="results"></div>
+
+<script>
+async function runTests() {
+  const out = document.getElementById('results');
+  out.innerHTML = '';
+  const log = (label, status, detail) => {
+    const cls = status === 'PASS' ? 'pass' : status === 'FAIL' ? 'fail' : 'info';
+    out.innerHTML += `<div class="result-item"><span class="${cls}">[${status}]</span> ${label}</div>`;
+    if (detail) out.innerHTML += `<pre>${detail}</pre>`;
+  };
+
+  // Test 1: API health
+  try {
+    const r = await fetch('/api/subscribe', { method: 'GET' });
+    const d = await r.json();
+    if (d.status === 'ok') log('API Health Check', 'PASS', JSON.stringify(d, null, 2));
+    else log('API Health Check', 'FAIL', JSON.stringify(d));
+  } catch(e) { log('API Health Check', 'FAIL', e.message); }
+
+  // Test 2: Invalid email rejection
+  try {
+    const r = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'bad-email' })
+    });
+    const d = await r.json();
+    if (!d.success && r.status === 400) log('Invalid Email Rejection', 'PASS', `Status: ${r.status}\n${JSON.stringify(d, null, 2)}`);
+    else log('Invalid Email Rejection', 'FAIL', `Status: ${r.status}\n${JSON.stringify(d, null, 2)}`);
+  } catch(e) { log('Invalid Email Rejection', 'FAIL', e.message); }
+
+  // Test 3: Valid email acceptance
+  try {
+    const testEmail = `test-${Date.now()}@example.com`;
+    const r = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: testEmail })
+    });
+    const d = await r.json();
+    if (d.success) {
+      const statusNote = d.status === 'stored' ? 'KV is wired! ✅' :
+                         d.status === 'accepted' ? 'KV not yet bound. Will be processed when you wire it tomorrow.' :
+                         `Status: ${d.status}`;
+      log('Valid Email Acceptance', 'PASS', `${statusNote}\n\nResponse:\n${JSON.stringify(d, null, 2)}`);
+    } else {
+      log('Valid Email Acceptance', 'FAIL', JSON.stringify(d, null, 2));
+    }
+  } catch(e) { log('Valid Email Acceptance', 'FAIL', e.message); }
+
+  // Test 4: Duplicate prevention
+  try {
+    const dupEmail = `dup-${Date.now()}@example.com`;
+    await fetch('/api/subscribe', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: dupEmail })
+    });
+    const r2 = await fetch('/api/subscribe', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: dupEmail })
+    });
+    const d2 = await r2.json();
+    if (d2.success && (d2.status === 'duplicate' || d2.message?.includes('Already'))) {
+      log('Duplicate Prevention', 'PASS', JSON.stringify(d2, null, 2));
+    } else {
+      log('Duplicate Prevention', 'INFO', `May need KV binding for full duplicate detection.\n${JSON.stringify(d2, null, 2)}`);
+    }
+  } catch(e) { log('Duplicate Prevention', 'FAIL', e.message); }
+
+  log('Test Complete', 'INFO', 'If KV is not bound, all emails will show status "accepted". Once you wire KV tomorrow, they will persist.');
+}
+</script>
+</body>
+</html>
