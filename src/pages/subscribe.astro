@@ -32,7 +32,7 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
           multi-agent orchestration, and building autonomous systems.
         </p>
         
-        <!-- API-free mailto subscription -->
+        <!-- Clean inline subscription form -->
         <form 
           id="sub-form" 
           class="max-w-md mx-auto space-y-4"
@@ -45,6 +45,7 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
               id="email-input"
               placeholder="you@example.com"
               required
+              autocomplete="email"
               class="w-full px-6 py-4 rounded-xl bg-brand-card border border-brand-border text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
             />
           </div>
@@ -54,7 +55,7 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
             id="submit-btn"
             class="btn-primary w-full whitespace-nowrap"
           >
-            Subscribe via Email
+            Subscribe
           </button>
         </form>
         
@@ -79,7 +80,7 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
             <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
-            API-free (mailto)
+            Instant signup
           </span>
         </div>
       </div>
@@ -89,32 +90,77 @@ const description = "Join Mission Freedom Daily — tactical AI automation insig
 </Layout>
 
 <script is:inline>
+  const form = document.getElementById('sub-form');
   const emailInput = document.getElementById('email-input');
   const submitBtn = document.getElementById('submit-btn');
+  const formState = document.getElementById('subscribe-form');
   
-  submitBtn?.addEventListener('click', () => {
+  submitBtn?.addEventListener('click', async () => {
     const email = emailInput.value.trim().toLowerCase();
     
     // Client-side validation
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      emailInput.focus();
       emailInput.classList.add('border-red-500');
       setTimeout(() => emailInput.classList.remove('border-red-500'), 2000);
+      emailInput.focus();
       return;
     }
     
-    // Build mailto link with pre-filled subject + body
-    const subject = encodeURIComponent('Subscribe');
-    const body = encodeURIComponent('Please subscribe me to Mission Freedom Daily.\n\nEmail: ' + email);
-    const mailto = 'mailto:derekkosakura@gmail.com?subject=' + subject + '&body=' + body;
+    // Loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Subscribing...';
     
-    // Open email client
-    window.location.href = mailto;
-    
-    // After a short delay, redirect to confirmation page
-    setTimeout(() => {
-      window.location.href = '/subscribed/';
-    }, 1500);
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'hermesmissionfreedom.ai' })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // Swap form for success message inline
+        formState.innerHTML = `
+          <div class="py-8">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 mx-auto mb-6 flex items-center justify-center text-4xl shadow-lg shadow-emerald-500/30">
+              ✅
+            </div>
+            <h2 class="display-heading text-white mb-2">You're <span class="text-emerald-400">In</span></h2>
+            <p class="text-gray-300 text-lg mb-6">${data.message || "Welcome to the Dispatch!"}</p>
+            <div class="bg-brand-card rounded-xl p-6 mb-6 text-left max-w-sm mx-auto">
+              <p class="text-sm text-gray-400 mb-2">What you'll receive:</p>
+              <ul class="space-y-2 text-sm text-gray-300">
+                <li class="flex items-center gap-2"><span class="text-brand-gold">📦</span> The Rig — AI hardware</li>
+                <li class="flex items-center gap-2"><span class="text-brand-accent">⛏️</span> The Mine — Crypto mining</li>
+                <li class="flex items-center gap-2"><span class="text-purple-400">💰</span> The Ledger — Trading &amp; finance</li>
+              </ul>
+            </div>
+            <a href="/" class="btn-primary inline-block">Back to Home</a>
+          </div>
+        `;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subscribe';
+        emailInput.classList.add('border-red-500');
+        setTimeout(() => emailInput.classList.remove('border-red-500'), 2000);
+      }
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Subscribe';
+      // Fallback: show manual instructions
+      formState.innerHTML = `
+        <div class="py-8">
+          <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-4xl shadow-lg">📧</div>
+          <h2 class="display-heading text-white mb-2">One more step</h2>
+          <p class="text-gray-300 mb-6">Send an email to <strong class="text-brand-gold">derekkosakura@gmail.com</strong> with subject <strong class="text-brand-gold">Subscribe</strong>.</p>
+          <a href="mailto:derekkosakura@gmail.com?subject=Subscribe" class="btn-primary inline-block mb-4">Open Email Client</a>
+          <br/>
+          <a href="/" class="text-gray-400 hover:text-white text-sm">← Back to Home</a>
+        </div>
+      `;
+    }
   });
   
   // Allow Enter key to submit
