@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import ParticleBackground from '../components/ParticleBackground.astro';
 import FeatureCard from '../components/FeatureCard.astro';
-import NewsletterCTA from '../components/NewsletterCTA.astro';
+import SubscriptionForm from '../components/SubscriptionForm.astro';
 import StatsSection from '../components/StatsSection.astro';
 import { SkillsList } from '../components/SkillsList';
 import { ToolsList } from '../components/ToolsList';
@@ -242,7 +242,7 @@ const processSteps = [
   </section>
   
   <!-- Newsletter CTA -->
-  <NewsletterCTA />
+  <SubscriptionForm inline={true} />
   
   <!-- FAQ Schema (AEO) -->
   <script type="application/ld+json">

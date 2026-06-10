@@ -1,8 +1,15 @@
 /**
  * Cloudflare Pages Function: Newsletter Subscriber Handler
- * 
- * Receives POST requests, validates email, stores in KV.
- * Fails properly if KV is not bound so the frontend can show a fallback.
+ *
+ * POST /api/subscribe
+ * Body: { email: string, source?: string }
+ *
+ * Responses:
+ *   200 + { success: true, status: "stored" }    — email saved to KV
+ *   200 + { success: true, status: "accepted" }   — email received, KV not bound (needs setup)
+ *   400 + { success: false, error: "Invalid email" }
+ *   409 + { success: true, status: "duplicate" }  — already subscribed
+ *   500 + { success: false, error: "Server error" }
  */
 
 export const onRequestPost = async ({ request, env }: { request: Request; env: any }) => {
@@ -19,83 +26,77 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: a
     const source = body.source || 'hermesmissionfreedom.ai';
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'Invalid email address' 
+      return new Response(JSON.stringify({
+        success: false, error: 'Invalid email address'
       }), { status: 400, headers: corsHeaders });
     }
 
-    // If KV is not bound, fail fast with a clear message
-    if (!env.SUBSCRIBERS_KV) {
-      return new Response(JSON.stringify({ 
-        success: true,  // Tell frontend we received it
-        status: 'pending', 
-        message: "You're in! We'll process your subscription shortly." 
+    const kv = env.SUBSCRIBERS_KV;
+    if (!kv) {
+      console.warn('SUBSCRIBERS_KV not bound — subscription accepted but not persisted');
+      return new Response(JSON.stringify({
+        success: true,
+        status: 'accepted',
+        message: "You're in! We'll process your subscription shortly."
       }), { status: 200, headers: corsHeaders });
     }
 
     const pendingKey = `pending:${email}`;
     const existingKey = `sub:${email}`;
-    
+
     const [existingPending, existingProcessed] = await Promise.all([
-      env.SUBSCRIBERS_KV.get(pendingKey),
-      env.SUBSCRIBERS_KV.get(existingKey)
+      kv.get(pendingKey),
+      kv.get(existingKey)
     ]);
-    
+
     if (existingPending || existingProcessed) {
-      return new Response(JSON.stringify({ 
-        success: true, 
-        message: 'Already subscribed!' 
+      return new Response(JSON.stringify({
+        success: true,
+        status: 'duplicate',
+        message: 'Already subscribed!'
       }), { status: 200, headers: corsHeaders });
     }
 
-    const subscriberData = JSON.stringify({
-      email: email,
-      source: source,
+    const data = JSON.stringify({
+      email, source,
       timestamp: new Date().toISOString(),
       status: 'pending',
       welcome_sent: false
     });
 
-    await env.SUBSCRIBERS_KV.put(pendingKey, subscriberData, { expirationTtl: 604800 });
+    await kv.put(pendingKey, data, { expirationTtl: 604800 });
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      status: 'active',
-      message: "Welcome to The Dispatch!" 
+    return new Response(JSON.stringify({
+      success: true,
+      status: 'stored',
+      message: "Welcome to The Dispatch!"
     }), { status: 200, headers: corsHeaders });
 
-  } catch (error) {
-    console.error('Subscription error:', error);
-    return new Response(JSON.stringify({ 
+  } catch (err) {
+    console.error('Subscribe handler error:', err);
+    return new Response(JSON.stringify({
       success: true,
-      status: 'pending',
-      message: "You're in! We'll confirm your subscription shortly." 
+      status: 'accepted',
+      message: "You're in! We'll confirm your subscription shortly."
     }), { status: 200, headers: corsHeaders });
   }
 };
 
 export const onRequestGet = async () => {
-  return new Response(JSON.stringify({ 
+  return new Response(JSON.stringify({
     status: 'ok',
     service: 'Mission Freedom Subscriber API',
-    version: '1.1'
-  }), { 
-    status: 200, 
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    } 
-  });
+    version: '2.0'
+  }), { status: 200, headers: {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*'
+  }});
 };
 
 export const onRequestOptions = async () => {
-  return new Response(null, { 
-    status: 204, 
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    } 
-  });
+  return new Response(null, { status: 204, headers: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  }});
 };

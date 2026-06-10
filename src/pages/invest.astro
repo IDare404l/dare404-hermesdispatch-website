@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import SubscriptionForm from '../components/SubscriptionForm.astro';
 
 const entries = await Astro.glob('../content/directory/*.md');
 const financeEntries = entries.filter(e => e.frontmatter.category === 'data-stack');
@@ -132,16 +133,7 @@ const schema = {
 <!-- Newsletter CTA -->
 <section class="max-w-4xl mx-auto px-4 pb-16">
   <div class="glass-card rounded-2xl p-8 text-center">
-    <h2 class="text-2xl font-bold mb-3">📰 Get <span class="text-gradient">The Ledger</span> Daily</h2>
-    <p class="text-gray-400 mb-6">One email. Three sections. AI, Crypto, and Investing — built by dare404 in Boise, Idaho.</p>
-    
-    <a href="/subscribe" class="inline-block px-6 py-3 rounded-lg bg-brand-gold text-black font-semibold hover:bg-brand-gold/90 transition">
-      Subscribe Now →
-    </a>
-    
-    <p class="text-xs text-gray-600 mt-4">
-      We use your email only to send The Ledger. Unsubscribe anytime. <a href="/privacy" class="underline hover:text-gray-400">Privacy Policy</a>.
-    </p>
+    <SubscriptionForm inline={true} />
   </div>
 </section>
 
