@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 
 // Mission Freedom v4 Skills — Canonical active skills only
 // Excludes archived skills and duplicates
+// Updated: 2026-06-10
 
 const categories = {
   'Orchestration': {
@@ -12,7 +13,8 @@ const categories = {
       { name: 'agent-fleet-management', desc: 'Manage the lifecycle of multi-agent domain agents.', details: 'v4 architecture: spawn, monitor, retire domain agents. Tracks execution logs, audits, and skill health across all 7 agents.' },
       { name: 'learning-system-manager', desc: 'Central controller for Mission Freedom\'s learning ecosystem.', details: 'ASSIGN learning priorities, SUGGEST knowledge gaps, IMPLEMENT curriculum updates, IMPROVE continuous system optimization. EDUCATOR runs this nightly.' },
       { name: 'kanban-orchestrator', desc: 'Decomposition playbook for multi-agent task orchestration.', details: 'Breaks complex projects into bite-sized tasks, assigns to domain agents, tracks completion. Anti-temptation rules prevent scope creep.' },
-      { name: 'cron-pipeline-reliability', desc: 'Design and harden multi-stage cron pipelines.', details: 'Stage isolation, retry logic, dead-letter queues, alerting. Built from the newsletter pipeline failures of 2026-06-01.' }
+      { name: 'cron-pipeline-reliability', desc: 'Design and harden multi-stage cron pipelines.', details: 'Stage isolation, retry logic, dead-letter queues, alerting. Built from the newsletter pipeline failures of 2026-06-01.' },
+      { name: 'token-fallback-framework', desc: 'Token independence framework for Mission Freedom.', details: 'Default is FULL EXECUTION ALWAYS. Conservation tiers exist only as emergency opt-in when explicitly requested by user.' }
     ]
   },
   'Security \u0026 Audit': {
@@ -20,17 +22,19 @@ const categories = {
     description: 'SENTINEL domain — credential hygiene and system hardening',
     skills: [
       { name: 'security-agent-management', desc: 'Manage credential hygiene, file permissions, and security policies.', details: 'Centralized .credentials/ directory, credential_manager.py, get_credential() access controls. Full audit trail for all secret access.' },
-      { name: 'credential-manager', desc: 'Centralized secret handling for all agents.', details: 'Replaced plaintext .env secrets. All agents pull credentials through get_credential() instead of direct environment reads. File permission monitoring included.' }
+      { name: 'skill-library-maintenance', desc: 'Maintain and curate the Hermes skill library.', details: 'Identify obsolete skills, find duplicates, archive deprecated functionality, ensure consistency across the skill ecosystem.' }
     ]
   },
   'Content \u0026 Social': {
     icon: '📰',
     description: 'Newsletter and X/Twitter automation',
     skills: [
-      { name: 'newsletter-writer', desc: 'Daily dispatch in Rycen Beans\' voice.', details: 'Boise-based AI automation insights. Action-first, no fluff. Two-stage pipeline: agent researches at 17:00, script emails at 17:15. Manual approval mandatory.' },
+      { name: 'newsletter-writer', desc: 'Daily dispatch in dare404 voice.', details: 'Boise-based AI automation insights. Action-first, no fluff. API-free delivery via Himalaya CLI.' },
       { name: 'newsletter-writing-mastery', desc: 'Dedicated mastery tracker for newsletter quality.', details: '6-category scoring: Structure, Voice, Content, Engagement, SEO, Deliverability. Currently at 72% targeting 95%.' },
-      { name: 'x-creator', desc: 'Content creation specialist for X/Twitter.', details: 'Viral hooks, thread frameworks, engagement timing. Cross-promotes newsletter and shop content.' },
-      { name: 'x-helper', desc: 'Twitter/X SEO specialist for @Dare__404.', details: 'Masters X algorithm, hashtag performance, reply strategies. Growth-focused with data-backed timing.' }
+      { name: 'x-creator', desc: 'Content creation specialist for X/Twitter.', details: 'Viral hooks, thread frameworks, engagement timing. Cross-promotes newsletter and directory content.' },
+      { name: 'x-helper', desc: 'Twitter/X SEO specialist for @Dare__404.', details: 'Masters X algorithm, hashtag performance, reply strategies. Growth-focused with data-backed timing.' },
+      { name: 'daily-newsletter-creator', desc: 'Automated AI research, newsletter generation, email dispatch.', details: 'Adaptive learning from viral newsletters. Respects manual approval gates.' },
+      { name: 'daily-report', desc: 'Generate and deliver the Mission Freedom combined morning report.', details: 'System health, cron status, newsletter pipeline state, learning progress. Produces markdown for Obsidian archive.' }
     ]
   },
   'Development': {
@@ -39,7 +43,9 @@ const categories = {
     skills: [
       { name: 'website-builder-agent', desc: 'Specialized website creation agent.', details: 'Learns best practices from real design systems. Astro + Cloudflare Pages. AEO-first architecture (FAQ, HowTo, Organization schema).' },
       { name: 'cloudflare-pages-deployment', desc: 'Deploy static sites to Cloudflare Pages.', details: 'Two paths: Git-based (CI/CD) or direct (Wrangler CLI). Domain management, preview deployments, rollbacks.' },
-      { name: 'claude-design', desc: 'Design one-off HTML artifacts.', details: 'Landing pages, decks, prototypes. Rapid iteration for newsletter CTAs and campaign pages.' }
+      { name: 'claude-design', desc: 'Design one-off HTML artifacts.', details: 'Landing pages, decks, prototypes. Rapid iteration for newsletter CTAs and campaign pages.' },
+      { name: 'website-config-sync', desc: 'Auto-sync stats between skills and website config.', details: 'When skills count, categories, or agents change, update the centralized config file automatically.' },
+      { name: 'website-timeline-updater', desc: 'Update website timeline with accurate dates from Obsidian logs.', details: 'Parses log timestamps and injects them into the Astro site timeline page.' }
     ]
   },
   'E-Commerce': {
@@ -48,7 +54,8 @@ const categories = {
     skills: [
       { name: 'etsy-seo-researcher', desc: 'Etsy SEO and competitor research.', details: 'Cat-themed POD clothing. Trend analysis, listing optimization, competitor intelligence. Feeds into design generation pipeline.' },
       { name: 'etsy-designer', desc: 'Cloud-based AI design agent.', details: 'Transforms SEO research into complete design concepts with prompts, specs, and implementation notes.' },
-      { name: 'etsy-pod-orchestrator', desc: 'Master orchestrator for Etsy operations.', details: 'Coordinates SEO research, design generation, listing creation, and social promotion across agents.' }
+      { name: 'etsy-pod-orchestrator', desc: 'Master orchestrator for Etsy operations.', details: 'Coordinates SEO research, design generation, listing creation, and social promotion across agents.' },
+      { name: 'midjourney-prompt-engineer', desc: 'Specialized Midjourney prompt engineer.', details: 'Generates optimized prompts for print-on-demand t-shirt designs. Graphic-only descriptions, style control, conversion-optimized imagery.' }
     ]
   },
   'Learning': {
@@ -57,7 +64,9 @@ const categories = {
     skills: [
       { name: 'educator', desc: 'Tracks and guides learning for all content creators.', details: 'School domain runtime. Daily learning scripts across 6 domains. Weekly briefs every Sunday at 09:00.' },
       { name: 'arxiv', desc: 'Search arXiv papers by keyword, author, or ID.', details: 'Academic research integration for AI/ML developments. Feeds into newsletter "Quick Bites" and internal briefs.' },
-      { name: 'trend-hunter', desc: 'Multi-platform trend research agent.', details: 'Google Trends, Twitter viral, Etsy patterns. Runs autonomously, reports to IGOR. Feeds design and content systems.' }
+      { name: 'trend-hunter', desc: 'Multi-platform trend research agent.', details: 'Google Trends, Twitter viral, Etsy patterns. Runs autonomously, reports to IGOR. Feeds design and content systems.' },
+      { name: 'overnight-learning-system', desc: 'All agents learn overnight, build domain expertise, and prevent repeated failures.', details: 'Integrates agent creation standards, failure-to-learning bridge, and automatic domain discovery. Everything writes to Obsidian.' },
+      { name: 'ai-intelligence', desc: 'Maintains up-to-date intelligence on the AI landscape.', details: 'Covers LLMs, agents, infrastructure, safety, business models, and emerging trends for newsletter content and creator briefings.' }
     ]
   },
   'Infrastructure': {
@@ -66,7 +75,9 @@ const categories = {
     skills: [
       { name: 'hermes-agent', desc: 'Configure, extend, or contribute to Hermes Agent.', details: 'CLI, config, models, providers, tools, skills, cron. The tool you use to improve the tools.' },
       { name: 'himalaya', desc: 'Himalaya CLI for IMAP/SMTP email.', details: 'Replaces Gmail SMTP and AgentMail. Reliable terminal-based email. Used by all MF communication workflows.' },
-      { name: 'obsidian', desc: 'Obsidian knowledge management mastery.', details: 'Vault organization, linking strategies, daily compaction. All agents log to 03-Intelligence/Agents/[domain]/' }
+      { name: 'obsidian', desc: 'Obsidian knowledge management mastery.', details: 'Vault organization, linking strategies, daily compaction. All agents log to 03-Intelligence/Agents/[domain]/' },
+      { name: 'unified-email-system', desc: 'Unified email system for ALL Mission Freedom communications.', details: 'Consolidates Himalaya CLI, Gmail SMTP, AgentMail, and transactional email patterns into one reliable skill.' },
+      { name: 'native-mcp', desc: 'MCP client: connect servers, register tools.', details: 'stdio/HTTP transport. Configure servers in config.yaml for automatic tool discovery.' }
     ]
   }
 };
