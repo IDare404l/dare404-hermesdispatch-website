@@ -10,8 +10,7 @@ const categories = {
     icon: '🎯',
     description: 'IGOR core infrastructure and multi-agent coordination',
     skills: [
-      { name: 'agent-fleet-management', desc: 'Manage the lifecycle of multi-agent domain agents.', details: 'v4 architecture: spawn, monitor, retire domain agents. Tracks execution logs, audits, and skill health across all 7 agents.' },
-      { name: 'learning-system-manager', desc: 'Central controller for Mission Freedom\'s learning ecosystem.', details: 'ASSIGN learning priorities, SUGGEST knowledge gaps, IMPLEMENT curriculum updates, IMPROVE continuous system optimization. EDUCATOR runs this nightly.' },
+      { name: 'agent-fleet-management', desc: 'Manage the lifecycle of multi-agent domain agents.', details: 'v4 architecture: spawn, monitor, retire domain agents. Tracks execution logs, audits, and skill health across all 6 agents.' },
       { name: 'kanban-orchestrator', desc: 'Decomposition playbook for multi-agent task orchestration.', details: 'Breaks complex projects into bite-sized tasks, assigns to domain agents, tracks completion. Anti-temptation rules prevent scope creep.' },
       { name: 'cron-pipeline-reliability', desc: 'Design and harden multi-stage cron pipelines.', details: 'Stage isolation, retry logic, dead-letter queues, alerting. Built from the newsletter pipeline failures of 2026-06-01.' },
       { name: 'token-fallback-framework', desc: 'Token independence framework for Mission Freedom.', details: 'Default is FULL EXECUTION ALWAYS. Conservation tiers exist only as emergency opt-in when explicitly requested by user.' }
@@ -58,15 +57,15 @@ const categories = {
       { name: 'midjourney-prompt-engineer', desc: 'Specialized Midjourney prompt engineer.', details: 'Generates optimized prompts for print-on-demand t-shirt designs. Graphic-only descriptions, style control, conversion-optimized imagery.' }
     ]
   },
-  'Learning': {
+  'Research & Intelligence': {
     icon: '🎓',
-    description: 'EDUCATOR domain — continuous learning and knowledge curation',
+    description: 'Continuous learning, trend research, and knowledge curation',
     skills: [
-      { name: 'educator', desc: 'Tracks and guides learning for all content creators.', details: 'School domain runtime. Daily learning scripts across 6 domains. Weekly briefs every Sunday at 09:00.' },
       { name: 'arxiv', desc: 'Search arXiv papers by keyword, author, or ID.', details: 'Academic research integration for AI/ML developments. Feeds into newsletter "Quick Bites" and internal briefs.' },
       { name: 'trend-hunter', desc: 'Multi-platform trend research agent.', details: 'Google Trends, Twitter viral, Etsy patterns. Runs autonomously, reports to IGOR. Feeds design and content systems.' },
-      { name: 'overnight-learning-system', desc: 'All agents learn overnight, build domain expertise, and prevent repeated failures.', details: 'Integrates agent creation standards, failure-to-learning bridge, and automatic domain discovery. Everything writes to Obsidian.' },
-      { name: 'ai-intelligence', desc: 'Maintains up-to-date intelligence on the AI landscape.', details: 'Covers LLMs, agents, infrastructure, safety, business models, and emerging trends for newsletter content and creator briefings.' }
+      { name: 'ai-intelligence', desc: 'Maintains up-to-date intelligence on the AI landscape.', details: 'Covers LLMs, agents, infrastructure, safety, business models, and emerging trends for newsletter content and creator briefings.' },
+      { name: 'librarian-learner', desc: 'Simple web research learning for content pipelines.', details: 'Obsidian PKM, vault organization. Assists with research workflows and knowledge retention.' },
+      { name: 'web-research-engine-v2', desc: 'Real web research with DuckDuckGo + page scraping.', details: 'No API keys. Outputs JSON and Obsidian-ready markdown for agent consumption.' }
     ]
   },
   'Infrastructure': {
@@ -75,7 +74,7 @@ const categories = {
     skills: [
       { name: 'hermes-agent', desc: 'Configure, extend, or contribute to Hermes Agent.', details: 'CLI, config, models, providers, tools, skills, cron. The tool you use to improve the tools.' },
       { name: 'himalaya', desc: 'Himalaya CLI for IMAP/SMTP email.', details: 'Replaces Gmail SMTP and AgentMail. Reliable terminal-based email. Used by all MF communication workflows.' },
-      { name: 'obsidian', desc: 'Obsidian knowledge management mastery.', details: 'Vault organization, linking strategies, daily compaction. All agents log to 03-Intelligence/Agents/[domain]/' },
+      { name: 'obsidian', desc: 'Obsidian knowledge management mastery.', details: 'Vault organization, linking strategies, daily compaction. All agents log to Areas/Operations/Logs/[domain]/' },
       { name: 'unified-email-system', desc: 'Unified email system for ALL Mission Freedom communications.', details: 'Consolidates Himalaya CLI, Gmail SMTP, AgentMail, and transactional email patterns into one reliable skill.' },
       { name: 'native-mcp', desc: 'MCP client: connect servers, register tools.', details: 'stdio/HTTP transport. Configure servers in config.yaml for automatic tool discovery.' }
     ]
@@ -101,13 +100,13 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
         </h1>
         
         <p class="text-xl text-neutral-400 max-w-2xl mx-auto mb-6">
-          7 domain agents. {totalSkills} canonical skills. Zero duplicates.
+          6 domain agents. {totalSkills} canonical skills. Zero duplicates.
         </p>
         
         <div class="flex flex-wrap justify-center gap-4 text-sm">
           <span class="px-3 py-1 rounded-full bg-neutral-800 text-neutral-300">{totalSkills} Active Skills</span>
           <span class="px-3 py-1 rounded-full bg-neutral-800 text-neutral-300">{Object.keys(categories).length} Categories</span>
-          <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">7 Domain Agents</span>
+          <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">6 Domain Agents</span>
           <span class="px-3 py-1 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30">AEO-First</span>
         </div>
       </div>
@@ -119,10 +118,11 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
           <div>
             <h2 class="font-semibold text-lg mb-2">v4 Multi-Agent Architecture</h2>
             <p class="text-neutral-400 text-sm leading-relaxed">
-              IGOR orchestrates 7 specialist domain agents: <strong>EDUCATOR</strong> (learning/audits), 
-              <strong>Newsletter Writer</strong> (daily dispatch), <strong>Social Media Writer</strong> (X/Twitter), 
+              IGOR orchestrates 6 specialist domain agents: <strong>Newsletter Writer</strong> (daily dispatch), 
+              <strong>Social Media Writer</strong> (X/Twitter), 
               <strong>Web Developer</strong> (sites/deploy), <strong>POD Manager</strong> (Etsy/print-on-demand), 
-              and <strong>SENTINEL</strong> (security/hardening). Each agent loads skills, executes, logs to Obsidian.
+              <strong>SENTINEL</strong> (security/hardening), and <strong>Subscriber Sync</strong> (email lifecycle).
+              Each agent loads skills, executes, logs to Obsidian.
               No solo orchestrator — coordinated specialization.
             </p>
           </div>
@@ -181,7 +181,7 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
       <!-- Stats -->
       <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
-          <div class="text-3xl font-bold text-orange-400">7</div>
+          <div class="text-3xl font-bold text-orange-400">6</div>
           <div class="text-sm text-neutral-500">Domain Agents</div>
         </div>
         <div class="p-4 bg-neutral-900 border border-neutral-800 rounded-xl text-center">
