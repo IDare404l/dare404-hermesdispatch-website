@@ -91,6 +91,55 @@ const fullCommit = versionData?.commit || 'local';
       <slot />
     </main>
     
+    <!-- Sticky Mobile Subscribe CTA -->
+    <div id="mobile-cta" class="fixed bottom-0 left-0 right-0 z-50 bg-neutral-900/95 border-t border-neutral-700 backdrop-blur-sm md:hidden translate-y-full transition-transform duration-300">
+      <div class="flex items-center gap-3 px-4 py-3 max-w-7xl mx-auto">
+        <div class="flex-1 min-w-0">
+          <p class="text-xs text-neutral-300 truncate">🚀 Get AI automation insights daily</p>
+          <p class="text-[10px] text-neutral-500">15:00 MST. One-click unsubscribe.</p>
+        </div>
+        <a href="/subscribe" class="btn-primary text-xs px-4 py-2 flex-shrink-0">Subscribe</a>
+        <button onclick="document.getElementById('mobile-cta').classList.add('translate-y-full')" class="text-neutral-500 text-lg leading-none flex-shrink-0 px-1">×</button>
+      </div>
+    </div>
+    
+    <!-- Exit-Intent Popup -->
+    <div id="exit-popup" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+      <div class="bg-neutral-900 border border-neutral-700 rounded-2xl p-8 max-w-md w-full shadow-2xl relative">
+        <button onclick="document.getElementById('exit-popup').classList.add('hidden');document.getElementById('exit-popup').classList.remove('flex')" class="absolute top-4 right-4 text-neutral-500 hover:text-white text-xl">×</button>
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-4 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📧</div>
+        <h3 class="text-xl font-bold text-center mb-2">Wait — Don't Miss Tomorrow's Dispatch</h3>
+        <p class="text-sm text-neutral-400 text-center mb-6">AI agent automation insights. Delivered daily at 15:00 MST. No spam. One-click unsubscribe.</p>
+        <form action="/api/subscribe/" method="POST" class="flex flex-col gap-3">
+          <input type="email" name="email" placeholder="you@example.com" required class="w-full px-4 py-3 rounded-xl bg-neutral-800 border border-neutral-600 text-white placeholder-neutral-500 focus:border-brand-gold focus:outline-none">
+          <button type="submit" class="btn-primary w-full">Subscribe Now</button>
+        </form>
+        <button onclick="document.getElementById('exit-popup').classList.add('hidden');document.getElementById('exit-popup').classList.remove('flex')" class="w-full mt-3 text-xs text-neutral-500 hover:text-neutral-300">No thanks, I'll browse</button>
+      </div>
+    </div>
+    
+    <script>
+      // Exit-intent detection
+      (function() {
+        let shown = false;
+        document.addEventListener('mouseleave', function(e) {
+          if (e.clientY < 0 && !shown && !window.location.pathname.includes('/subscribe')) {
+            shown = true;
+            var popup = document.getElementById('exit-popup');
+            if (popup) { popup.classList.remove('hidden'); popup.classList.add('flex'); }
+          }
+        });
+        
+        // Mobile CTA: show after 15s scroll
+        if (window.innerWidth < 768) {
+          setTimeout(function() {
+            var cta = document.getElementById('mobile-cta');
+            if (cta) cta.classList.remove('translate-y-full');
+          }, 15000);
+        }
+      })();
+    </script>
+    
     <footer class="border-t border-neutral-800 mt-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -113,7 +162,7 @@ const fullCommit = versionData?.commit || 'local';
           <div>
             <h4 class="font-semibold mb-4">Connect</h4>
             <ul class="space-y-2 text-sm text-neutral-400">
-              <li><a href="https://github.com/dare404" class="hover:text-neutral-200 transition-colors">GitHub</a></li>
+              <li><a href="https://github.com/IDare404l" class="hover:text-neutral-200 transition-colors">GitHub</a></li>
               <li><a href="https://twitter.com/Dare__404" class="hover:text-neutral-200 transition-colors">Twitter</a></li>
             </ul>
           </div>
