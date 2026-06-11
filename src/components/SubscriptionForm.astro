@@ -1,13 +1,13 @@
 ---
-// API-Free Subscription Component — mailto-based one-click signup
+// One-Click Subscription Component — Formspree direct POST
 // Usage: <SubscriptionForm inline={false} /> (full page) or <SubscriptionForm inline={true} /> (CTA)
 export interface Props {
   inline?: boolean;
 }
 const { inline = false } = Astro.props;
 
-const subscribeEmail = "derekkosakura@gmail.com";
-const subject = encodeURIComponent("Subscribe to Mission Freedom Daily");
+const FORMSPREE_ID = "xnqkvnoy";
+const FORM_ACTION = `https://formspree.io/f/${FORMSPREE_ID}`;
 ---
 
 <div class={`subscription-component ${inline ? 'inline-mode' : 'page-mode'}`} data-inline={inline}>
@@ -24,10 +24,11 @@ const subject = encodeURIComponent("Subscribe to Mission Freedom Daily");
       Get <span class="text-brand-gold">Mission Freedom Daily</span> — AI agent automation, multi-agent orchestration, and building autonomous systems.
     </p>
 
-    <form id="sub-form" class="max-w-md mx-auto space-y-4" onsubmit="return false;">
+    <form id="sub-form" action={FORM_ACTION} method="POST" class="max-w-md mx-auto space-y-4">
       <div class="relative">
         <input
           type="email"
+          name="email"
           id="email-input"
           placeholder="you@example.com"
           required
@@ -35,8 +36,10 @@ const subject = encodeURIComponent("Subscribe to Mission Freedom Daily");
           class="w-full px-6 py-4 rounded-xl bg-brand-card border border-brand-border text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
         />
       </div>
+      <input type="hidden" name="_subject" value="New Mission Freedom Subscriber" />
+      <input type="hidden" name="_next" value={`${Astro.site || ''}/subscribed/`} />
       <button
-        type="button"
+        type="submit"
         id="submit-btn"
         class="btn-primary w-full whitespace-nowrap flex items-center justify-center gap-2"
       >
@@ -45,16 +48,16 @@ const subject = encodeURIComponent("Subscribe to Mission Freedom Daily");
     </form>
 
     <p class="text-gray-500 text-xs mt-6 flex flex-wrap items-center justify-center gap-4">
-      <span class="flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>No spam</span>
+      <span class="flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Daily dispatch</span>
       <span class="flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>One-click unsubscribe</span>
-      <span class="flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>API-free signup</span>
+      <span class="flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>No spam</span>
     </p>
   </div>
 
   <div id="sub-success" class="sub-panel hidden">
     <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 mx-auto mb-6 flex items-center justify-center text-4xl shadow-lg shadow-emerald-500/30">✅</div>
-    <h2 class="display-heading text-white mb-2">Almost <span class="text-emerald-400">There</span></h2>
-    <p class="text-gray-300 text-lg mb-6">Please send the pre-filled email from your client to confirm.</p>
+    <h2 class="display-heading text-white mb-2">You're <span class="text-emerald-400">Subscribed</span></h2>
+    <p class="text-gray-300 text-lg mb-6">Check your inbox for the welcome email. First dispatch arrives tomorrow at 09:00 MST.</p>
     <div class="bg-brand-card rounded-xl p-6 mb-6 text-left max-w-sm mx-auto">
       <p class="text-sm text-gray-400 mb-2">What you'll receive:</p>
       <ul class="space-y-2 text-sm text-gray-300">
@@ -70,19 +73,18 @@ const subject = encodeURIComponent("Subscribe to Mission Freedom Daily");
   <div id="sub-error" class="sub-panel hidden">
     <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 mx-auto mb-6 flex items-center justify-center text-4xl shadow-lg shadow-red-500/30">⚠️</div>
     <h2 class="display-heading text-white mb-2">Oops, <span class="text-red-400">Something Failed</span></h2>
-    <p class="text-gray-300 text-lg mb-4">We couldn't open your email client automatically.</p>
+    <p class="text-gray-300 text-lg mb-4">We couldn't process your subscription right now.</p>
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
       <button id="retry-btn" class="btn-primary inline-block">Try Again</button>
-      <a id="manual-link" href={`mailto:${subscribeEmail}?subject=${subject}&body=Please subscribe me to Mission Freedom Daily.`} class="px-6 py-3 border border-brand-border rounded-xl text-gray-400 hover:text-white hover:border-brand-gold transition-colors inline-block">Open Email Client</a>
+      <a href="mailto:derekkosakura@gmail.com?subject=Subscribe to Mission Freedom Daily" class="px-6 py-3 border border-brand-border rounded-xl text-gray-400 hover:text-white hover:border-brand-gold transition-colors inline-block">Email Us Directly</a>
     </div>
-    <p class="text-gray-500 text-xs mt-4">If the button doesn't work, copy the address manually: {subscribeEmail}</p>
+    <p class="text-gray-500 text-xs mt-4">Or copy the address manually: derekkosakura@gmail.com</p>
   </div>
 </div>
 
 <script is:inline>
 (function() {
-  const SUBSCRIBE_EMAIL = "derekkosakura@gmail.com";
-  const SUBJECT = "Subscribe to Mission Freedom Daily";
+  const FORMSPRETE_ACTION = "https://formspree.io/f/xnqkvnoy";
 
   function isValidEmail(val) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
@@ -96,7 +98,8 @@ const subject = encodeURIComponent("Subscribe to Mission Freedom Daily");
       btnText: wrapper.querySelector('#btn-text'),
       submitBtn: wrapper.querySelector('#submit-btn'),
       emailInput: wrapper.querySelector('#email-input'),
-      retryBtn: wrapper.querySelector('#retry-btn')
+      retryBtn: wrapper.querySelector('#retry-btn'),
+      form: wrapper.querySelector('#sub-form')
     };
   }
 
@@ -109,50 +112,46 @@ const subject = encodeURIComponent("Subscribe to Mission Freedom Daily");
   function setLoading(isLoading, wrapper) {
     const p = getPanels(wrapper);
     p.submitBtn.disabled = isLoading;
-    p.btnText.textContent = isLoading ? 'Opening...' : 'Subscribe';
-  }
-
-  async function attemptSubscribe(email, wrapper) {
-    const p = getPanels(wrapper);
-    if (!isValidEmail(email)) {
-      p.emailInput.classList.add('border-red-500');
-      setTimeout(() => p.emailInput.classList.remove('border-red-500'), 2000);
-      p.emailInput.focus();
-      return;
-    }
-
-    setLoading(true, wrapper);
-
-    // Build mailto link with pre-filled body
-    const body = encodeURIComponent(`Please subscribe me to Mission Freedom Daily.\n\nMy email: ${email.trim()}`);
-    const mailto = `mailto:${SUBSCRIBE_EMAIL}?subject=${encodeURIComponent(SUBJECT)}&body=${body}`;
-
-    // Try to open mailto
-    const link = document.createElement('a');
-    link.href = mailto;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Give the browser a moment to hand off to the email client
-    setTimeout(() => {
-      setLoading(false, wrapper);
-      show('success', wrapper);
-      window.scrollTo({ top: wrapper.offsetTop - 80, behavior: 'smooth' });
-    }, 800);
+    p.btnText.textContent = isLoading ? 'Subscribing...' : 'Subscribe';
   }
 
   document.querySelectorAll('.subscription-component').forEach(wrapper => {
     const p = getPanels(wrapper);
-    if (!p.emailInput) return;
+    if (!p.form) return;
 
-    p.submitBtn?.addEventListener('click', () => {
-      attemptSubscribe(p.emailInput.value, wrapper);
-    });
+    p.form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = p.emailInput.value.trim();
 
-    p.emailInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); p.submitBtn.click(); }
+      if (!isValidEmail(email)) {
+        p.emailInput.classList.add('border-red-500');
+        setTimeout(() => p.emailInput.classList.remove('border-red-500'), 2000);
+        p.emailInput.focus();
+        return;
+      }
+
+      setLoading(true, wrapper);
+
+      try {
+        const formData = new FormData(p.form);
+        const response = await fetch(FORMSPRETE_ACTION, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (response.ok) {
+          setLoading(false, wrapper);
+          show('success', wrapper);
+          window.scrollTo({ top: wrapper.offsetTop - 80, behavior: 'smooth' });
+        } else {
+          throw new Error('Formspree returned ' + response.status);
+        }
+      } catch (err) {
+        setLoading(false, wrapper);
+        show('error', wrapper);
+        console.error('Subscribe error:', err);
+      }
     });
 
     p.retryBtn?.addEventListener('click', () => {
@@ -163,3 +162,7 @@ const subject = encodeURIComponent("Subscribe to Mission Freedom Daily");
   });
 })();
 </script>
+
+<style>
+.sub-panel.hidden { display: none !important; }
+</style>

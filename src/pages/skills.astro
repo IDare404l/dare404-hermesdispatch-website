@@ -24,16 +24,15 @@ const categories = {
       { name: 'skill-library-maintenance', desc: 'Maintain and curate the Hermes skill library.', details: 'Identify obsolete skills, find duplicates, archive deprecated functionality, ensure consistency across the skill ecosystem.' }
     ]
   },
-  'Content \u0026 Social': {
+  'Content & Social': {
     icon: '📰',
     description: 'Newsletter and X/Twitter automation',
     skills: [
-      { name: 'newsletter-writer', desc: 'Daily dispatch in dare404 voice.', details: 'Boise-based AI automation insights. Action-first, no fluff. API-free delivery via Himalaya CLI.' },
-      { name: 'newsletter-writing-mastery', desc: 'Dedicated mastery tracker for newsletter quality.', details: '6-category scoring: Structure, Voice, Content, Engagement, SEO, Deliverability. Currently at 72% targeting 95%.' },
+      { name: 'newsletter-writer', desc: 'Daily dispatch in dare404 voice.', details: 'Boise-based AI automation insights. Action-first, no fluff. Smart headline fetching from HN + TechCrunch. API-free delivery via Himalaya CLI.' },
       { name: 'x-creator', desc: 'Content creation specialist for X/Twitter.', details: 'Viral hooks, thread frameworks, engagement timing. Cross-promotes newsletter and directory content.' },
       { name: 'x-helper', desc: 'Twitter/X SEO specialist for @Dare__404.', details: 'Masters X algorithm, hashtag performance, reply strategies. Growth-focused with data-backed timing.' },
-      { name: 'daily-newsletter-creator', desc: 'Automated AI research, newsletter generation, email dispatch.', details: 'Adaptive learning from viral newsletters. Respects manual approval gates.' },
-      { name: 'daily-report', desc: 'Generate and deliver the Mission Freedom combined morning report.', details: 'System health, cron status, newsletter pipeline state, learning progress. Produces markdown for Obsidian archive.' }
+      { name: 'daily-newsletter-creator', desc: 'Automated AI research, newsletter generation, email dispatch.', details: 'Smart headline pipeline fetches real stories, generates narratives, sends draft for approval. No placeholders.' },
+      { name: 'daily-report', desc: 'Generate and deliver the Mission Freedom combined morning report.', details: 'System health, cron status, newsletter pipeline state. Logs to Obsidian. Consolidated delivery only.' }
     ]
   },
   'Development': {
@@ -82,6 +81,7 @@ const categories = {
 };
 
 const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.skills.length, 0);
+// Removed newsletter-writing-mastery skill 2026-06-10
 ---
 
 <Layout title="Skills | Mission Freedom - v4 Agent Arsenal">
@@ -118,12 +118,13 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
           <div>
             <h2 class="font-semibold text-lg mb-2">v4 Multi-Agent Architecture</h2>
             <p class="text-neutral-400 text-sm leading-relaxed">
-              IGOR orchestrates 6 specialist domain agents: <strong>Newsletter Writer</strong> (daily dispatch), 
+              IGOR orchestrates 6 specialist domain agents: <strong>Newsletter Writer</strong> (daily dispatch with real headlines), 
               <strong>Social Media Writer</strong> (X/Twitter), 
               <strong>Web Developer</strong> (sites/deploy), <strong>POD Manager</strong> (Etsy/print-on-demand), 
               <strong>SENTINEL</strong> (security/hardening), and <strong>Subscriber Sync</strong> (email lifecycle).
               Each agent loads skills, executes, logs to Obsidian.
               No solo orchestrator — coordinated specialization.
+              Domain mastery system removed 2026-06-10: zero output after 7 days.
             </p>
           </div>
         </div>
