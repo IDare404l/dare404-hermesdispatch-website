@@ -8,12 +8,12 @@ import { SkillsList } from '../components/SkillsList';
 import { ToolsList } from '../components/ToolsList';
 
 const skills = [
-  { name: 'IGOR Orchestrator', desc: 'Unified multi-agent orchestration', tag: 'Core', href: '/skills/orchestrator' },
-  { name: 'Newsletter System', desc: 'Daily dispatch + approval workflow', tag: 'Content', href: '/skills/newsletter' },
-  { name: 'Social Media Engine', desc: 'X/Twitter content + engagement', tag: 'Social', href: '/skills/social' },
-  { name: 'Emailer', desc: 'Reliable Himalaya CLI delivery', tag: 'Communication', href: '/skills/emailer' },
-  { name: 'Obsidian Logger', desc: 'Universal agent execution logging', tag: 'Infrastructure', href: '/skills/obsidian-logger' },
-  { name: 'Security Audit', desc: 'Credential management + hardening', tag: 'Security', href: '/skills/security' },
+  { name: 'IGOR Orchestrator', desc: 'Unified multi-agent orchestration', tag: 'Core', href: '/skills/' },
+  { name: 'Newsletter System', desc: 'Daily dispatch at 15:00 MST, live headlines', tag: 'Content', href: '/skills/' },
+  { name: 'Social Media Engine', desc: 'X/Twitter content + engagement', tag: 'Social', href: '/skills/' },
+  { name: 'Emailer', desc: 'Himalaya CLI, API-free delivery', tag: 'Communication', href: '/skills/' },
+  { name: 'Obsidian Logger', desc: 'Universal agent execution logging', tag: 'Infrastructure', href: '/skills/' },
+  { name: 'Security Audit', desc: 'Credential management + hardening', tag: 'Security', href: '/skills/' },
 ];
 
 const tools = [
@@ -24,8 +24,7 @@ const tools = [
 ];
 
 const features = [
-  { icon: '🤖', title: 'IGOR Orchestrates', desc: 'Universal Command Router managing 7 specialist agents. No bloat. No subagent overhead.', tags: ['Orchestration', '7 Agents'], color: 'cyan' },
-  { icon: '🎓', title: 'EDUCATOR Audits', desc: 'System-wide documentation audits, knowledge curation, and weekly learning briefs.', tags: ['Learning', 'Audits'], color: 'emerald' },
+  { icon: '🤖', title: 'IGOR Orchestrates', desc: 'Universal Command Router managing 6 specialist agents. No bloat. No subagent overhead.', tags: ['Orchestration', '6 Agents'], color: 'cyan' },
   { icon: '⚡', title: 'SENTINEL Protects', desc: 'Credential management, permission monitoring, and security hardening across all agents.', tags: ['Security', 'Hardening'], color: 'slate' },
 ];
 
@@ -53,7 +52,7 @@ const processSteps = [
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-8 animate-fade-in">
         <span class="w-2 h-2 bg-brand-accent rounded-full animate-pulse"></span>
-        <span class="text-brand-accent text-sm font-medium">7 Agents + Modular Skills + AEO-First</span>
+        <span class="text-brand-accent text-sm font-medium">6 Agents + 30 Canonical Skills + AEO-First</span>
       </div>
       
       <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
@@ -255,7 +254,7 @@ const processSteps = [
         "name": "What is Mission Freedom?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Mission Freedom is dare404's AI agent automation system. IGOR orchestrates 7 specialist domain agents — EDUCATOR, Newsletter Writer, Social Media Writer, Web Developer, POD Manager, and SENTINEL — each with dedicated skills, logging to a shared Obsidian vault."
+          "text": "Mission Freedom is dare404's AI agent automation system. IGOR orchestrates 6 specialist domain agents — Newsletter Writer, Social Media Writer, Web Developer, POD Manager, SENTINEL, and Subscriber Sync — each with dedicated skills, logging to a shared Obsidian vault. The newsletter ships daily at 15:00 MST."
         }
       },
       {
@@ -279,7 +278,7 @@ const processSteps = [
         "name": "What is The Hermes Dispatch newsletter?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "The Hermes Dispatch is a daily AI automation newsletter written by the Newsletter Writer agent. It covers new AI models, agent architecture, SEO/AEO strategy, and Mission Freedom progress. Manual approval required before every send."
+          "text": "The Hermes Dispatch is a daily AI automation newsletter written by the Newsletter Writer agent. It covers new AI models, agent architecture, SEO/AEO strategy, and Mission Freedom progress. Live headlines from HN + TechCrunch, auto-generated and shipped at 15:00 MST."
         }
       }
     ]
