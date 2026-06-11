@@ -69,6 +69,13 @@ const API_ENDPOINT = "/api/subscribe/";
     </div>
     <a href="/" class="btn-primary inline-block">Back to Home</a>
   </div>
+
+  <div id="sub-error" class="sub-panel hidden">
+    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 mx-auto mb-6 flex items-center justify-center text-4xl shadow-lg shadow-red-500/30">⚠️</div>
+    <h2 class="display-heading text-white mb-2">Subscription <span class="text-red-400">Failed</span></h2>
+    <p class="text-gray-300 text-lg mb-6" id="error-message">Something went wrong on our end. Please try again in a moment.</p>
+    <button id="retry-btn" class="btn-primary inline-block">Try Again</button>
+  </div>
 </div>
 
 <script is:inline>
@@ -85,9 +92,29 @@ const API_ENDPOINT = "/api/subscribe/";
     var btnText = wrapper.querySelector('#btn-text');
     var emailInput = wrapper.querySelector('#email-input');
     var successPanel = wrapper.querySelector('#sub-success');
+    var errorPanel = wrapper.querySelector('#sub-error');
+    var errorMessage = wrapper.querySelector('#error-message');
+    var retryBtn = wrapper.querySelector('#retry-btn');
     var initialPanel = wrapper.querySelector('#sub-initial');
 
     if (!form) return;
+
+    function showPanel(panel) {
+      [initialPanel, successPanel, errorPanel].forEach(function(p) {
+        if (p) p.style.display = 'none';
+      });
+      if (panel) {
+        panel.style.display = 'block';
+        panel.classList.remove('hidden');
+      }
+    }
+
+    if (retryBtn) {
+      retryBtn.addEventListener('click', function() {
+        showPanel(initialPanel);
+        emailInput.focus();
+      });
+    }
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -108,12 +135,18 @@ const API_ENDPOINT = "/api/subscribe/";
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email })
       }).then(function(r) {
-        return r.json().catch(function() { return { success: true, status: 'accepted' }; });
+        if (!r.ok) {
+          // HTTP error: 503 (KV unavailable), 500 (server error), etc.
+          return r.json().then(function(data) {
+            throw new Error(data.error || 'Server error ' + r.status);
+          }).catch(function() {
+            throw new Error('Server error ' + r.status);
+          });
+        }
+        return r.json();
       }).then(function(data) {
         if (data.success) {
-          initialPanel.style.display = 'none';
-          successPanel.style.display = 'block';
-          successPanel.classList.remove('hidden');
+          showPanel(successPanel);
           window.scrollTo({ top: wrapper.offsetTop - 80, behavior: 'smooth' });
         } else {
           throw new Error(data.error || 'Subscription failed');
@@ -121,8 +154,8 @@ const API_ENDPOINT = "/api/subscribe/";
       }).catch(function(err) {
         btn.disabled = false;
         btnText.textContent = 'Subscribe';
-        emailInput.classList.add('border-red-500');
-        setTimeout(function() { emailInput.classList.remove('border-red-500'); }, 2000);
+        if (errorMessage) errorMessage.textContent = err.message || 'Something went wrong. Please try again.';
+        showPanel(errorPanel);
         console.error('Subscribe error:', err);
       });
     });

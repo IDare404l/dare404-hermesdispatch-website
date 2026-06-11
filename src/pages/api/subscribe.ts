@@ -26,12 +26,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const kv = runtime?.env?.SUBSCRIBERS_KV || runtime?.bindings?.SUBSCRIBERS_KV;
 
     if (!kv) {
-      console.warn('SUBSCRIBERS_KV not bound — subscription accepted but not persisted');
+      // Honest: KV not bound — we cannot persist the subscription
+      console.error('SUBSCRIBERS_KV not bound — subscription NOT persisted');
       return new Response(JSON.stringify({
-        success: true,
-        status: 'accepted',
-        message: "You're in! We'll process your subscription shortly."
-      }), { status: 200, headers: corsHeaders });
+        success: false,
+        status: 'error',
+        error: 'Subscription service temporarily unavailable. Please try again later.'
+      }), { status: 503, headers: corsHeaders });
     }
 
     const pendingKey = `pending:${email}`;
@@ -68,10 +69,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
   } catch (err) {
     console.error('Subscribe handler error:', err);
     return new Response(JSON.stringify({
-      success: true,
-      status: 'accepted',
-      message: "You're in! We'll confirm your subscription shortly."
-    }), { status: 200, headers: corsHeaders });
+      success: false,
+      status: 'error',
+      error: 'Something went wrong. Please try again later.'
+    }), { status: 500, headers: corsHeaders });
   }
 };
 
