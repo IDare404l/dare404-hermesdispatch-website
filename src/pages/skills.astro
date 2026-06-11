@@ -120,11 +120,11 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
             <p class="text-neutral-400 text-sm leading-relaxed">
               IGOR orchestrates 6 specialist domain agents: <strong>Newsletter Writer</strong> (daily dispatch with real headlines), 
               <strong>Social Media Writer</strong> (X/Twitter), 
-              <strong>Web Developer</strong> (sites/deploy), <strong>POD Manager</strong> (Etsy/print-on-demand), 
-              <strong>SENTINEL</strong> (security/hardening), and <strong>Subscriber Sync</strong> (email lifecycle).
-              Each agent loads skills, executes, logs to Obsidian.
+              <strong>Web Developer</strong> (Astro + Cloudflare Pages), <strong>POD Manager</strong> (Etsy cat clothing), 
+              <strong>SENTINEL</strong> (security/hardening), and <strong>Subscriber Sync</strong> (email lifecycle via self-hosted API).
+              Each agent loads canonical skills, executes, logs to Obsidian.
               No solo orchestrator — coordinated specialization.
-              Domain mastery system removed 2026-06-10: zero output after 7 days.
+              Obsolete skills archived: tesla, medium-blogger, newsletter-writing-mastery, learning-system-manager.
             </p>
           </div>
         </div>
@@ -255,25 +255,25 @@ const totalSkills = Object.values(categories).reduce((sum, cat) => sum + cat.ski
         "@type": "HowToStep",
         "position": 1,
         "name": "Set up IGOR Orchestrator",
-        "text": "Configure the Universal Command Router to analyze requests and route to specialist agents. Establish the shared Obsidian logging vault."
+        "text": "Configure the Universal Command Router to analyze requests and route to specialist agents. Establish the shared Obsidian logging vault with structured directories per domain."
       },
       {
         "@type": "HowToStep",
         "position": 2,
         "name": "Create Domain Agents",
-        "text": "Spawn specialist agents for each domain: EDUCATOR for learning, Newsletter for content, Social Media for engagement, Web Developer for sites, POD Manager for e-commerce, SENTINEL for security."
+        "text": "Spawn specialist agents for each domain: Newsletter Writer (daily dispatch), Social Media Writer (X/Twitter), Web Developer (Astro/CF Pages), POD Manager (Etsy/cat clothing), SENTINEL (security/hardening), Subscriber Sync (email lifecycle)."
       },
       {
         "@type": "HowToStep",
         "position": 3,
         "name": "Install Canonical Skills",
-        "text": "Load only the skills each agent needs. Deduplicate overlapping skills. Log all execution to the shared Obsidian vault for auditability."
+        "text": "Load only the skills each agent needs. Archive obsolete skills (e.g., domain mastery, tesla skills). Deduplicate overlapping skills. Log all execution to Obsidian Areas/Operations/Logs/[domain]/."
       },
       {
         "@type": "HowToStep",
         "position": 4,
         "name": "Automate Daily Workflows",
-        "text": "Schedule cron jobs for each agent: EDUCATOR audits nightly, Newsletter researches at 17:00, Social posts hourly. Use manual approval gates for newsletters."
+        "text": "Schedule cron jobs: Newsletter pipeline at 17:00 with manual approval gate, Social posts hourly, IGOR health check nightly. All logs consolidate to Obsidian. One end-of-day summary to Telegram at 23:00."
       }
     ]
   }
