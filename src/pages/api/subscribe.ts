@@ -1,21 +1,11 @@
-/**
- * Cloudflare Pages Function: Newsletter Subscriber Handler
- *
- * POST /api/subscribe
- * Body: { email: string, source?: string }
- *
- * Responses:
- *   200 + { success: true, status: "stored" }    — email saved to KV
- *   200 + { success: true, status: "accepted" }   — email received, KV not bound (needs setup)
- *   400 + { success: false, error: "Invalid email" }
- *   409 + { success: true, status: "duplicate" }  — already subscribed
- *   500 + { success: false, error: "Server error" }
- */
+import type { APIRoute } from 'astro';
 
-export const onRequestPost = async ({ request, env }: { request: Request; env: any }) => {
+export const prerender = false;
+
+export const POST: APIRoute = async ({ request, locals }) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json'
   };
@@ -26,12 +16,15 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: a
     const source = body.source || 'hermesmissionfreedom.ai';
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return new Response(JSON.stringify({
-        success: false, error: 'Invalid email address'
-      }), { status: 400, headers: corsHeaders });
+      return new Response(JSON.stringify({ success: false, error: 'Invalid email address' }), {
+        status: 400, headers: corsHeaders
+      });
     }
 
-    const kv = env.SUBSCRIBERS_KV;
+    // Get KV binding from Cloudflare runtime via Astro locals
+    const runtime = (locals as any)?.runtime;
+    const kv = runtime?.env?.SUBSCRIBERS_KV || runtime?.bindings?.SUBSCRIBERS_KV;
+
     if (!kv) {
       console.warn('SUBSCRIBERS_KV not bound — subscription accepted but not persisted');
       return new Response(JSON.stringify({
@@ -82,21 +75,13 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: a
   }
 };
 
-export const onRequestGet = async () => {
-  return new Response(JSON.stringify({
-    status: 'ok',
-    service: 'Mission Freedom Subscriber API',
-    version: '2.0'
-  }), { status: 200, headers: {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*'
-  }});
-};
-
-export const onRequestOptions = async () => {
-  return new Response(null, { status: 204, headers: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
-  }});
+export const OPTIONS: APIRoute = async () => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
+  });
 };

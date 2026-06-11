@@ -1,11 +1,11 @@
 ---
-// One-Click Subscription — Formspree POST with instant success feedback
+// One-Click Subscription — Self-hosted POST to /api/subscribe
 export interface Props {
   inline?: boolean;
 }
 const { inline = false } = Astro.props;
 
-const FORM_ACTION = "https://formspree.io/f/xnqkvnoy";
+const API_ENDPOINT = "/api/subscribe/";
 ---
 
 <div class={`subscription-component ${inline ? 'inline-mode' : 'page-mode'}`} data-inline={inline}>
@@ -24,7 +24,7 @@ const FORM_ACTION = "https://formspree.io/f/xnqkvnoy";
 
     <form
       id="sub-form"
-      action={FORM_ACTION}
+      action={API_ENDPOINT}
       method="POST"
       class="max-w-md mx-auto space-y-4"
     >
@@ -39,7 +39,6 @@ const FORM_ACTION = "https://formspree.io/f/xnqkvnoy";
           class="w-full px-6 py-4 rounded-xl bg-brand-card border border-brand-border text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-all"
         />
       </div>
-      <input type="hidden" name="_subject" value="New Mission Freedom Subscriber" />
       <button
         type="submit"
         id="submit-btn"
@@ -74,7 +73,7 @@ const FORM_ACTION = "https://formspree.io/f/xnqkvnoy";
 
 <script is:inline>
 (function() {
-  var FORM_ACTION = "https://formspree.io/f/xnqkvnoy";
+  var API_ENDPOINT = "/api/subscribe/";
 
   function isValidEmail(v) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
@@ -101,22 +100,30 @@ const FORM_ACTION = "https://formspree.io/f/xnqkvnoy";
         return;
       }
 
-      // Disable button
       btn.disabled = true;
       btnText.textContent = 'Subscribing...';
 
-      // Send via fetch (no-cors means it always "succeeds" from browser perspective)
-      var data = new FormData(form);
-      fetch(FORM_ACTION, {
+      fetch(API_ENDPOINT, {
         method: 'POST',
-        body: data,
-        mode: 'no-cors'
-      }).catch(function() {}).finally(function() {
-        // Show success regardless — Formspree received it
-        initialPanel.style.display = 'none';
-        successPanel.style.display = 'block';
-        successPanel.classList.remove('hidden');
-        window.scrollTo({ top: wrapper.offsetTop - 80, behavior: 'smooth' });
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      }).then(function(r) {
+        return r.json().catch(function() { return { success: true, status: 'accepted' }; });
+      }).then(function(data) {
+        if (data.success) {
+          initialPanel.style.display = 'none';
+          successPanel.style.display = 'block';
+          successPanel.classList.remove('hidden');
+          window.scrollTo({ top: wrapper.offsetTop - 80, behavior: 'smooth' });
+        } else {
+          throw new Error(data.error || 'Subscription failed');
+        }
+      }).catch(function(err) {
+        btn.disabled = false;
+        btnText.textContent = 'Subscribe';
+        emailInput.classList.add('border-red-500');
+        setTimeout(function() { emailInput.classList.remove('border-red-500'); }, 2000);
+        console.error('Subscribe error:', err);
       });
     });
   });

@@ -5,3 +5,10 @@ compatibility_date = "2024-01-01"
 [build]
 command = "npm run build"
 publish = "dist"
+
+# KV Namespace binding for subscribers (must be created in Cloudflare dashboard first)
+# Run: npx wrangler kv namespace create "SUBSCRIBERS_KV"
+# Then add the ID here:
+[[kv_namespaces]]
+binding = "SUBSCRIBERS_KV"
+id = "replace_with_actual_kv_namespace_id"
