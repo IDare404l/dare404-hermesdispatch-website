@@ -8,17 +8,9 @@ export const agents = [
     color: "cyan"
   },
   {
-    name: "EDUCATOR",
-    emoji: "🎓",
-    description: "System Auditor & Learning Curator. Manages documentation, knowledge organization, and continuous learning.",
-    category: "Knowledge",
-    status: "active",
-    color: "emerald"
-  },
-  {
     name: "Newsletter Writer",
     emoji: "✉️",
-    description: "Daily dispatch generation, approval workflow, and subscriber management via Buttondown.",
+    description: "Daily dispatch generation, auto-send workflow, and subscriber management via self-hosted API.",
     category: "Content",
     status: "active",
     color: "amber"
@@ -66,27 +58,17 @@ export const agentDetails = [
     category: "Orchestration",
     status: "active",
     color: "cyan",
-    skills: ["Task Routing", "Output Validation", "Tool Management", "Learning Coordination"]
-  },
-  {
-    name: "EDUCATOR",
-    emoji: "🎓",
-    role: "System Auditor & Learning Curator",
-    description: "EDUCATOR maintains the Obsidian vault, audits system documentation, curates learning resources, and ensures knowledge is organized and accessible across all Mission Freedom operations.",
-    category: "Knowledge",
-    status: "active",
-    color: "emerald",
-    skills: ["System Audits", "Documentation", "Knowledge Curation", "Learning Plans"]
+    skills: ["Task Routing", "Output Validation", "Tool Management"]
   },
   {
     name: "Newsletter Writer",
     emoji: "✉️",
     role: "Daily Dispatch",
-    description: "Generates The Hermes Dispatch daily at 06:00 MST. Handles SEO optimization, monetization strategy, approval workflows, and Buttondown API integration.",
+    description: "Generates The Hermes Dispatch daily at 15:00 MST. Auto-send workflow with security scan, self-hosted subscriber API.",
     category: "Content",
     status: "active",
     color: "amber",
-    skills: ["Daily Dispatch", "SEO", "Monetization", "Subscriber Management"]
+    skills: ["Daily Dispatch", "SEO", "Security Scan", "Subscriber Management"]
   },
   {
     name: "Social Media Writer",
@@ -198,13 +180,13 @@ export const skillCategories = [
       {
         name: "System Audits",
         description: "Continuous system health checks, documentation audits, and knowledge reviews",
-        agents: ["EDUCATOR", "SENTINEL"],
+        agents: ["SENTINEL"],
         icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />'
       },
       {
         name: "Knowledge Curation",
         description: "Obsidian vault organization, documentation standards, and learning resource management",
-        agents: ["EDUCATOR"],
+        agents: ["IGOR"],
         icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />'
       }
     ]

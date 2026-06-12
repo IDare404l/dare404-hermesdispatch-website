@@ -6,9 +6,9 @@ const responsibilities = [
     id: 'orchestration',
     icon: '🎯',
     title: 'Unified Orchestration',
-    description: 'Replaced multi-agent architecture with unified execution context. Manages all Mission Freedom operations through modular skill blocks instead of subagent delegation.',
+    description: 'Manages all Mission Freedom operations through modular skill blocks. Coordinates 6 specialist domain agents with dedicated skills and execution logs.',
     metric: '60-70% token savings',
-    skills: ['igor-unified-orchestrator', 'modular-workflow-orchestrator', 'hermes-orchestrator']
+    skills: ['agent-fleet-management', 'kanban-orchestrator', 'cron-pipeline-reliability']
   },
   {
     id: 'monitoring',
@@ -24,15 +24,15 @@ const responsibilities = [
     title: 'Centralized Logging',
     description: 'Universal logging for all Mission Freedom operations. Structured Obsidian vault integration with agent self-reporting patterns.',
     metric: 'Single source of truth',
-    skills: ['obsidian-logger', 'centralized-logging-architecture']
+    skills: ['obsidian', 'daily-report']
   },
   {
-    id: 'learning',
-    icon: '📚',
-    title: 'Learning System Management',
-    description: 'Central controller for Mission Freedoms learning ecosystem. Assigns priorities, identifies knowledge gaps, and implements curriculum updates.',
-    metric: '{skills.length}+ skills tracked',
-    skills: ['learning-system-manager', 'unified-learning-agent', 'skill-trainer']
+    id: 'security',
+    icon: '🛡️',
+    title: 'Security & Audit',
+    description: 'Security audits, credential management, permission monitoring, and system hardening. SENTINEL ensures all agents operate within secure boundaries.',
+    metric: 'Triple-check quality',
+    skills: ['security-agent-management', 'skill-library-maintenance', 'autofix-monitor']
   },
   {
     id: 'ecommerce',
@@ -40,7 +40,7 @@ const responsibilities = [
     title: 'Ecommerce Automation',
     description: 'Complete Etsy automation for print-on-demand. Daily trend research, design generation, and listing optimization.',
     metric: 'Daily 07:00 reports',
-    skills: ['tabby', 'etsy-trend-analyzer', 'listing-optimizer']
+    skills: ['etsy-seo-researcher', 'etsy-designer', 'etsy-pod-orchestrator']
   },
   {
     id: 'social',
@@ -48,15 +48,15 @@ const responsibilities = [
     title: 'Social Media Engagement',
     description: 'Unified Twitter/X engagement across all accounts. Handles engagement sweeps, cross-promotion monitoring, and daily progress documentation.',
     metric: 'Hourly + daily cadence',
-    skills: ['unified-twatter', 'twatter', 'social-media-manager']
+    skills: ['x-creator', 'x-helper', 'social-media-automation']
   },
   {
     id: 'content',
     icon: '📰',
     title: 'Content Creation',
-    description: 'Newsletter and social content generation. Daily, weekly, and monthly content across multiple platforms.',
+    description: 'Newsletter and social content generation. Daily dispatch across multiple platforms with real headlines and auto-send.',
     metric: 'Multi-platform distribution',
-    skills: ['daily-report', 'weekly-newsletter-generator', 'newsletter-writer']
+    skills: ['daily-newsletter-creator', 'newsletter-writer', 'daily-report']
   },
   {
     id: 'token',
@@ -69,8 +69,8 @@ const responsibilities = [
 ];
 
 const igorStats = [
-  { label: 'Agents Orchestrated', value: '7', sub: 'domain specialists' },
-  { label: 'Skills Managed', value: '24+', sub: 'canonical, zero duplicates' },
+  { label: 'Agents Orchestrated', value: '6', sub: 'domain specialists' },
+  { label: 'Skills Managed', value: '30', sub: 'canonical, zero duplicates' },
   { label: 'Daily Operations', value: '24/7', sub: 'automated workflows' },
   { label: 'Architecture', value: 'v4', sub: 'coordinated specialization' },
 ];
@@ -165,7 +165,7 @@ const workflow = [
             </div>
           </div>
           <div class="flex flex-wrap gap-2">
-            {['Unified Orchestrator', 'Auto-Fix Monitor', 'Skill Pattern Recognizer', 'Token Management', 'Logging', 'Learning System'].map(skill => (
+            {['Unified Orchestrator', 'Auto-Fix Monitor', 'Skill Pattern Recognizer', 'Token Management', 'Logging'].map(skill => (
               <span class="px-3 py-1.5 bg-orange-500/10 border border-orange-500/30 text-orange-400 rounded-lg text-sm">{skill}</span>
             ))}
           </div>
@@ -337,7 +337,7 @@ const workflow = [
               <span class="text-2xl">🔗</span>
               <div>
                 <h4 class="font-semibold text-emerald-400 mb-1">Cross-Agent Coordination</h4>
-                <p class="text-sm text-neutral-400">EDUCATOR briefs Newsletter. POD feeds Social. All log to shared Obsidian vault. No silos.</p>
+                <p class="text-sm text-neutral-400">IGOR audits docs. POD feeds Social. All log to shared Obsidian vault. No silos.</p>
               </div>
             </div>
                 
@@ -345,7 +345,7 @@ const workflow = [
               <span class="text-2xl">🛡️</span>
               <div>
                 <h4 class="font-semibold text-emerald-400 mb-1">Gatekeeper + Auditor</h4>
-                <p class="text-sm text-neutral-400">IGOR validates outputs before delivery. SENTINEL audits credentials. EDUCATOR audits docs. Triple-check quality.</p>
+                <p class="text-sm text-neutral-400">IGOR validates outputs before delivery. SENTINEL audits credentials and docs. Double-check quality.</p>
               </div>
             </div>
           </div>

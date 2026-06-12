@@ -5,9 +5,16 @@ import Layout from '../layouts/Layout.astro';
 // All dates sourced from Obsidian logs
 const timeline = [
   {
+    date: 'June 11, 2026',
+    title: 'API + Skill Cleanup',
+    description: 'Fixed wrangler.toml KV binding bug (pages_build_output_dir nested inside kv_namespaces). Archived 12 duplicate skills into unified skill sets: email (→ unified-email-system), YouTube transcription (→ yt-teacher-agent), affiliate marketing (→ v2), web research (→ v2). Website references updated to remove obsolete skill names.',
+    status: 'completed',
+    milestone: true
+  },
+  {
     date: 'June 2026',
     title: 'Multi-Agent v4 Architecture',
-    description: 'Evolved from solo orchestrator to 6-agent coordinated system: IGOR (orchestrator) + EDUCATOR + Newsletter + Social + Web Dev + POD + SENTINEL. Each agent logs to Obsidian, all skills deduplicated.',
+    description: 'Evolved from solo orchestrator to 6-agent coordinated system: IGOR (orchestrator) + Newsletter + Social + Web Dev + POD + SENTINEL. Each agent logs to Obsidian, all skills deduplicated. EDUCATOR domain retired 2026-06-10 (zero output after 7 days).',
     status: 'completed',
     milestone: true
   },
@@ -68,7 +75,7 @@ const timeline = [
 const metrics = [
   { label: 'Project Start', value: 'May 2025', icon: '📅' },
   { label: 'Architecture', value: '6 Agents', icon: '🤖' },
-  { label: 'Skills Library', value: '24+', icon: '🛠️' },
+  { label: 'Skills Library', value: '30', icon: '🛠️' },
   { label: 'Token Savings', value: '60-70%', icon: '⭕' },
   { label: 'Daily Operations', value: 'Automated', icon: '⚡' },
   { label: 'Status', value: 'Active', icon: '🟢' }

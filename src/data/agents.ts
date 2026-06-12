@@ -8,17 +8,9 @@ export const agents = [
     color: "cyan"
   },
   {
-    name: "EDUCATOR",
-    emoji: "🎓",
-    description: "System Auditor \u0026 Learning Curator. Manages documentation, knowledge organization, and continuous learning.",
-    category: "Knowledge",
-    status: "active",
-    color: "emerald"
-  },
-  {
     name: "Newsletter Writer",
     emoji: "✉️",
-    description: "Daily dispatch generation, approval workflow, and subscriber management via Buttondown.",
+    description: "Daily dispatch generation, auto-send workflow, and subscriber management via self-hosted API.",
     category: "Content",
     status: "active",
     color: "amber"
