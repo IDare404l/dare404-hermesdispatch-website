@@ -64,11 +64,11 @@ export const agentDetails = [
     name: "Newsletter Writer",
     emoji: "✉️",
     role: "Daily Dispatch",
-    description: "Generates The Hermes Dispatch daily at 15:00 MST. Auto-send workflow with security scan, self-hosted subscriber API.",
+    description: "Generates The Hermes Dispatch daily at 15:00 MST using LLM web research, Obsidian ops logs, security scan, and auto-approval. Delivers via Himalaya CLI to API-free mailto subscribers.",
     category: "Content",
     status: "active",
     color: "amber",
-    skills: ["Daily Dispatch", "SEO", "Security Scan", "Subscriber Management"]
+    skills: ["LLM Research", "Daily Dispatch", "Security Scan", "Auto-approval", "Himalaya CLI", "API-free Subscribe"]
   },
   {
     name: "Social Media Writer",
@@ -104,11 +104,11 @@ export const agentDetails = [
     name: "SENTINEL",
     emoji: "🛡️",
     role: "Security Monitor",
-    description: "Security audit, credential management, permission monitoring, and system hardening. SENTINEL ensures all agents and systems operate within secure boundaries.",
+    description: "Domain-isolated credential vault (CredentialManager), security audits, permission monitoring, and system hardening. All agent secrets route through SENTINEL before any external API call.",
     category: "Security",
     status: "active",
     color: "slate",
-    skills: ["Security Audits", "Credentials", "Permissions", "Hardening"]
+    skills: ["Credential Vault", "Domain Isolation", "Security Audits", "Permissions", "Hardening"]
   }
 ];
 

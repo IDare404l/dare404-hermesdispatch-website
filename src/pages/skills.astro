@@ -19,9 +19,11 @@ const categories = {
   },
   'Security \u0026 Audit': {
     icon: '🛡️',
-    description: 'SENTINEL domain — credential hygiene and system hardening',
+    description: 'SENTINEL domain — domain-isolated credential vault and system hardening',
     skills: [
+      { name: 'credential-manager', desc: 'Domain-isolated secret loader with audit trail.', details: 'credential_manager.py: canonical ~/.hermes/.credentials/ store, per-domain allowlists, 0o600/0o700 permissions, access logging to Obsidian security log.' },
       { name: 'security-agent-management', desc: 'Manage credential hygiene, file permissions, and security policies.', details: 'Centralized .credentials/ directory, credential_manager.py, get_credential() access controls. Full audit trail for all secret access.' },
+      { name: 'security-scanner', desc: 'Content and code secret-leak detection.', details: 'Scans drafts, scripts, and command history for API keys, tokens, passwords before auto-approval or deployment.' },
       { name: 'skill-library-maintenance', desc: 'Maintain and curate the Hermes skill library.', details: 'Identify obsolete skills, find duplicates, archive deprecated functionality, ensure consistency across the skill ecosystem.' }
     ]
   },
@@ -30,9 +32,13 @@ const categories = {
     description: 'Newsletter and X/Twitter automation',
     skills: [
       { name: 'newsletter-writer', desc: 'Daily dispatch in dare404 voice.', details: 'Boise-based AI automation insights. Action-first, no fluff. Smart headline fetching from HN + TechCrunch. API-free delivery via Himalaya CLI.' },
+      { name: 'newsletter-llm-generator', desc: 'LLM-driven draft generation with real web research.', details: 'Queries DuckDuckGo for AI/tech/funding news, reads Obsidian ops logs, writes real markdown with no placeholders. Registered with approval tracker.' },
+      { name: 'newsletter-approval-tracker', desc: 'Pending/approved/rejected queue management.', details: 'Tracks DOC IDs, edition IDs, file paths. Auto-approves drafts that pass the security scanner.' },
+      { name: 'security-scanner', desc: 'Content security and secret-leak detection.', details: 'Scans drafts for API keys, secrets, and sensitive placeholders before auto-approval.' },
+      { name: 'newsletter-sender', desc: 'Himalaya CLI delivery to subscribers.', details: 'Renders HTML, generates subject line, sends via Himalaya MIME, moves sent issue to Published.' },
+      { name: 'subscriber-harvester', desc: 'API-free mailto subscriber management.', details: 'Scans Gmail/Himalaya for Subscribe/Unsubscribe subjects and updates local subscriber list.' },
       { name: 'x-creator', desc: 'Content creation specialist for X/Twitter.', details: 'Viral hooks, thread frameworks, engagement timing. Cross-promotes newsletter and directory content.' },
       { name: 'x-helper', desc: 'Twitter/X SEO specialist for @Dare__404.', details: 'Masters X algorithm, hashtag performance, reply strategies. Growth-focused with data-backed timing.' },
-      { name: 'daily-newsletter-creator', desc: 'Automated AI research, newsletter generation, email dispatch.', details: 'Smart headline pipeline fetches real stories, generates narratives, sends draft for approval. No placeholders.' },
       { name: 'daily-report', desc: 'Generate and deliver the Mission Freedom combined morning report.', details: 'System health, cron status, newsletter pipeline state. Logs to Obsidian. Consolidated delivery only.' }
     ]
   },
