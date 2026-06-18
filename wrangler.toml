@@ -1,6 +1,5 @@
 # Cloudflare Pages Configuration for Main Site
 name = "hermesdispatch"
-account_id = "d81e775dbdc3d7af0bdc7940f13d3a60"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
 
