@@ -1,56 +1,108 @@
 export const newsletters = [
   {
-    "slug": "issue-20260618-005",
-    "title": "The Hermes Dispatch | June 18, 2026",
-    "date": "2026-06-18",
-    "readTime": "4 min read",
-    "excerpt": "DOC: MF-20260618-005 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618005",
-    "published": true,
-    "featured": false,
-    "tags": ["AI", "Tech", "Automation", "Mission Freedom"],
-    "content": "# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: OpenAI is stacking its roster ahead of an IPO, Amazon is pushing its own AI chips into more data centers, and YC's latest Demo Day produced startups already valued above $175 million.\n\n_From Boise, ID — by dare404_\n\n## What We're Watching (2/3 Content)\n\n### 🤖 OpenAI hires Transformer co-inventor and former Trump AI official ahead of IPO\n\nOpenAI is bulking up. This week the company landed Noam Shazeer, a co-inventor of the Transformer architecture, from Google DeepMind. In the same stretch it hired Dean Ball, who served as an AI policy official in the Trump administration. Both moves arrive as OpenAI prepares for a public offering and tries to build credible depth in both research and Washington.\n\nShazeer's hire is a concentration of rare technical talent. The Transformer paper underpins the modern wave of large language models, and Shazeer has been one of the central figures in that lineage. Bringing him in from DeepMind signals that OpenAI is still willing to pay top dollar — or offer top leverage — to keep its research bench world class.\n\nThe Ball hire is just as strategic. As AI regulation, export controls, and federal contracting become bigger pieces of the competitive landscape, having someone with recent government experience helps OpenAI navigate hearings, policy drafts, and procurement conversations.\n\n> **Why it matters:** OpenAI is not just recruiting engineers; it is recruiting credibility. Technical talent controls model quality, and policy talent controls access to markets. The combination shows how the AI race is now fought on both fronts at once.\n\n> **The play:** If you are building or buying AI, watch where the top researchers and policy operators land. Their movement is often a leading indicator of which companies are positioning for scale, regulatory advantage, and public-market readiness.\n\n### 💰 Amazon aims at Nvidia by selling its own AI chips to outside data centers\n\nAWS is in talks to sell its own AI chips to other companies' data centers, a move that would let Amazon challenge Nvidia more directly. CEO Andy Jassy has described the opportunity as worth $50 billion to the company. The plan would turn Amazon from a cloud buyer of GPUs into a merchant of its own silicon.\n\nAmazon has been building Trainium and Inferentia chips for years, mostly for internal use and select customers. Expanding those sales beyond AWS would put a second major AI chip option in front of data center operators and could put price pressure on Nvidia's dominant GPU franchise.\n\nThe move also fits Amazon's broader strategy of owning more layers of the AI stack — models, cloud infrastructure, and now the chips underneath them. If it succeeds, AWS could capture margin not just from compute rentals but from the silicon itself.\n\n> **Why it matters:** A credible second supplier changes the economics of AI infrastructure. Enterprise buyers gain negotiating power, and cloud providers gain a hedge against supply constraints and single-vendor pricing.\n\n> **The play:** Audit your inference and training spend. If Amazon's chips reach general availability with competitive software support, a multi-vendor chip strategy could lower costs and reduce dependency on Nvidia.\n\n### 🔥 YC's Spring 2026 Demo Day produced startups valued above $175 million\n\nTechCrunch spoke to investors about the Spring 2026 Y Combinator batch and identified 11 standout startups. Several of them already commanded valuations above $175 million, according to the VCs surveyed. That level of early pricing suggests investor appetite is still hot for the right AI and infrastructure teams.\n\nDemo Day has always been a leading indicator of where venture dollars flow next. When multiple startups from one batch clear nine-figure valuations, it usually means the market sees a crowded-but-promising theme — this time around AI tooling, vertical software, and infrastructure.\n\nFor founders, the bar is also a signal. The companies that stood out were not just riding the AI label; they had traction, strong teams, and clear distribution. Valuations that high this early imply real competitive pressure among investors.\n\n> **Why it matters:** YC Demo Day often previews the next 12 to 18 months of startup hype and hiring trends. What gets funded there tends to ripple outward into product launches, acquisition targets, and market narratives.\n\n> **The play:** Track the standout companies as leading indicators. If you are fundraising, use their valuation and traction benchmarks to calibrate your own round. If you are hiring, expect these names to set compensation expectations.\n\n## Quick Bites\n\n- Nearly half of U.S. singles feel negatively about AI in dating, according to a new Match survey, yet many app users are still open to AI helping polish profiles and craft conversation starters.\n- Karamo Brown of Netflix's \"Queer Eye\" launched Kē, a wellness app that features an AI digital clone of himself to guide users through fitness, sobriety, relationships, and personal growth.\n- Pixi released a new iOS app that turns ordinary text messages into interactive augmented reality experiences, betting AR will replace stickers and emoji reactions as the next messaging format.\n\n## ⚙️ Mission Freedom: Behind the Scenes\n\n**What we shipped**  \nNo operations summary was found for yesterday, so no shipped items are logged.\n\n**Current experiment**  \nNo active experiment is logged in yesterday's operations summary.\n\n**What's broken**  \nNo incidents or broken systems were reported in the operations summary.\n\n---\n\nSources: TechCrunch, Google News, OpenTools, AI Weekly | Generated: June 18, 2026"
-  },
-  {
-    "slug": "issue-20260618-004",
-    "title": "The Hermes Dispatch | June 18, 2026",
-    "date": "2026-06-18",
-    "readTime": "4 min read",
-    "excerpt": "DOC: MF-20260618-004 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618004",
-    "published": true,
-    "featured": false,
-    "tags": ["AI", "Tech", "Automation", "Mission Freedom"],
-    "content": "# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: Tech workers are organizing politically, AI ROI is getting a reality check, and world-model startups are commanding billion-dollar valuations while AR messaging and Google Docs privacy tweaks fill out the day.\n\nFrom Boise, ID — by dare404\n\n---\n\n## What We're Watching (2/3 Content)\n\n### 🔥 Guardrails: The $5M populist PAC taking on Big Tech's $100M war chest\n\nA new political action committee called Guardrails is trying to do what its name suggests: put limits on the unchecked power of the technology giants shaping the AI era. The group is bringing a $5M fundraising knife to Big Tech's $100M lobbying gunfight, and it is deliberately styling itself as a populist political movement. Instead of relying on a handful of ultra-wealthy donors, Guardrails is running on small donations from people who are actually in the trenches of the AI boom.\n\nThat worker-funded model is the whole pitch. Guardrails is betting that the engineers, researchers, and operators building these systems can become a counterweight to the corporate lobbying machines their employers deploy. It is a direct test of whether the people making AI also have the political will to influence how AI is regulated.\n\nThe contrast is stark. While the largest tech companies can drop nine-figure budgets on policy fights, Guardrails must convert grassroots energy into actual votes and influence. If it succeeds, it could become a recurring force in tech politics. If it stalls, it will be remembered as a noisy but under-resourced protest.\n\n**Why it matters:** If Guardrails can turn small donations from AI workers into a viable PAC, it would prove that grassroots tech-worker money can counter at least some of the lobbying firepower of the companies that employ them.\n\n**The play:** Watch how Guardrails deploys its $5M and which candidates or policies it backs first. The roster will reveal whether this is the start of a sustained worker movement or a one-cycle media stunt.\n\n---\n\n### 🤖 Odyssey's world-model bet just became a $1.45B reality\n\nOdyssey, a startup building AI world models, has closed a funding round that values the company at $1.45 billion. The round drew backing from Amazon and other major names, instantly placing Odyssey among the most closely watched companies outside the large language model race. World models are widely described as the next big thing in AI beyond LLMs, and this valuation is the market's way of saying the transition may already be underway.\n\nUnlike today's dominant LLMs, world models aim to understand and predict physical environments, motion, and cause-and-effect in ways that could unlock new capabilities in robotics, simulation, video generation, and interactive media. Odyssey's raise is the clearest signal yet that investors are willing to bet enormous sums on that architectural shift. The company is now positioned as a standard-bearer for a category that has mostly lived in research labs and demo videos.\n\nThe timing matters. As LLM enthusiasm faces a harder ROI conversation, startups that promise something structurally different are suddenly getting premium valuations. Amazon's involvement is especially notable because the e-commerce and cloud giant has the compute, distribution, and real-world use cases that could accelerate whatever Odyssey builds.\n\n**Why it matters:** World models could represent the next architecture shift after LLMs, and a $1.45B valuation with Amazon's backing means serious capital is betting that shift will produce real products, not just papers.\n\n**The play:** If you are building anything that touches video, simulation, robotics, or 3D environments, start tracking Odyssey's releases and API plans. World models may soon compete with LLM-based generation for those exact use cases.\n\n---\n\n### 💰 The AI ROI reckoning: Tokenmaxxing meets the bill\n\nNEA partner Tiffany Luck is out with a sharp look at the state of AI investing, covering AI IPOs, personal agents, and what she calls the ROI reckoning. Her framing lands at an awkward moment for Silicon Valley: after a year of treating every AI feature as a must-have, companies are suddenly being asked to show returns. The result is a funding environment that is still open but far more discriminating than it was six months ago.\n\nThe tension crystallizes around \"tokenmaxxing,\" the trend earlier this year where CEOs encouraged employees to push AI usage as far as it would go. For a while, dashboards of daily prompts and model calls were treated as proof of innovation. Then the bill came due. Uber reportedly blew through its annual AI budget in a few months, some organizations cut Claude licenses for parts of their org, and Meta killed its internal AI usage leaderboard.\n\nLuck's argument is that the next wave of AI winners will not be the companies that rack up the most tokens. They will be the ones that turn AI usage into durable products with measurable outcomes. That distinction is already separating the startups getting term sheets from the ones getting pushed toward bridge rounds.\n\n**Why it matters:** The party phase of \"tokenmaxxing\" is ending. Enterprise AI budgets are now getting scrutinized, which will decide which AI tools become permanent infrastructure and which become cancelled line items.\n\n**The play:** Audit your own AI tool spend this week. If a product lacks a clear output metric or cost baseline, it is a prime candidate for a license review before finance starts asking the same questions.\n\n---\n\n## Quick Bites\n\n- Pixi launched a new iOS app that converts text messages into interactive AR experiences, betting that augmented reality will replace stickers, GIFs, and emoji reactions as the next messaging format.\n- Google Docs now gives users controls to turn off Gemini AI prompts, so you can stop the \"write with Gemini\" pop-ups if you want a cleaner document editor.\n- Uber reportedly blew through its annual AI budget in a few months, joining companies that have cut Claude licenses and killed internal AI leaderboards as the ROI reckoning hits.\n\n---\n\n## ⚙️ Mission Freedom: Behind the Scenes (1/3 Content)\n\n- **What we shipped:** Yesterday's Mission Freedom operations run returned \"No operations summary found,\" so nothing was logged as shipped in the daily run.\n- **Current experiment:** We are running the daily dispatch against an empty operations feed to see whether the missing summary is a scheduling gap or a logging failure.\n- **What's broken:** The automated Mission Freedom operations summary did not generate for yesterday; the next step is to check the cron job output and the log path in Obsidian.\n\n---\n\nSources: aggregated from AI/Tech news, Tech funding, and Entrepreneurship search results.  \nGenerated: June 18, 2026 at 07:15 AM MST"
-  },
-  {
-    "slug": "issue-20260618-003",
-    "title": "The Hermes Dispatch | June 18, 2026",
-    "date": "2026-06-18",
-    "readTime": "4 min read",
-    "excerpt": "DOC: MF-20260618-003 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618003",
-    "published": true,
-    "featured": false,
-    "tags": ["AI", "Tech", "Automation", "Mission Freedom"],
-    "content": "# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: AR messaging gets a bet, AI's ROI bill comes due, and world-model startup Odyssey lands a $1.45B valuation.\n\nFrom Boise, ID — by dare404\n\n---\n\n## What We're Watching\n\n### 🔥 Pixi wants AR to replace your emoji reactions\n\nA new iOS app called Pixi is making a bold bet on the future of messaging: interactive augmented reality. Instead of sending stickers, GIFs, or emoji reactions, users can turn text messages into shareable AR experiences. The pitch is that messaging has plateaued on static media and the next logical layer is something spatial, playful, and native to phone cameras.\n\nPixi sits at the intersection of two long-promised trends—AR finally becoming consumer-friendly and messaging apps searching for the next engagement format. Whether it catches on depends on how seamlessly the effects render and whether friends actually want to interact inside a chat thread rather than just react to it.\n\n**Why it matters:** If AR messaging breaks out, it shifts where attention and ad dollars flow inside mobile chat. Pixi is testing whether people want to *play* with messages, not just read them.\n\n**The play:** If you build consumer apps, watch Pixi's retention curve. Early AR features that reduce friction (auto-generated effects from text, no manual 3D editing) are the ones worth copying or partnering with.\n\n---\n\n### 💰 Odyssey raises at a $1.45B valuation as world models heat up\n\nOdyssey, a startup building world models for AI, has raised a major round that values the company at $1.45 billion. Amazon and other big-name backers participated, signaling that investors believe world models are the next major frontier beyond large language models. World models aim to give AI systems a structured understanding of physical environments, enabling richer simulation, robotics, and long-horizon planning.\n\nThe funding cements Odyssey as one of the startups to watch in a category that could reshape how AI reasons about cause and effect in the real world. It also shows capital is still flowing toward frontier infrastructure even as broader AI spending faces tougher scrutiny.\n\n**Why it matters:** World models are being framed as the next architecture shift after LLMs. If they deliver, robotics, autonomous systems, and interactive media get dramatically better.\n\n**The play:** If you're technical, start tracking world-model benchmarks and open datasets. If you're investing or partnering, treat this category like early LLMs in 2022: high variance, but asymmetric upside.\n\n---\n\n### 🤖 The AI ROI reckoning has arrived\n\nNEA partner Tiffany Luck is warning that the AI hype cycle is colliding with hard budget realities. \"Tokenmaxxing\"—pushing AI usage as far as possible—was the hottest trend in Silicon Valley earlier this year, with CEOs encouraging employees to rack up AI usage. Then the bill came due. Uber reportedly burned through its annual AI budget in a few months, some companies cut Claude licenses for parts of their org, and Meta killed its internal AI usage leaderboard.\n\nThe tension is between experimentation and measurable return. Companies that treated AI tokens as free experimentation credits are now being asked to justify the spend with real productivity or revenue gains.\n\n**Why it matters:** This is the first correction in enterprise AI adoption. Tooling budgets are tightening, and vendors will have to prove ROI or lose seats.\n\n**The play:** Audit your own AI tool stack this week. Cancel redundant licenses, set usage budgets, and tie every AI subscription to one measurable outcome. The free-money phase is over.\n\n---\n\n## Quick Bites\n\n- Google is giving Docs users a way to turn off the \"write with Gemini\" pop-ups if the AI prompts have become a distraction.\n- Former Sequoia Capital leader Roelof Botha is joining SpaceX's board of directors, filling an existing vacancy shortly after the company completed the largest IPO ever.\n- Odyssey's $1.45 billion valuation, backed by Amazon and other major investors, confirms that world models are now a top-tier funding category beyond LLMs.\n\n---\n\n## ⚙️ Mission Freedom: Behind the Scenes\n\n**What we shipped:** No operations summary found.\n\n**Current experiment:** Monitoring the AR messaging, world-model, and enterprise AI ROI narratives to identify early partnership or tooling opportunities.\n\n**What's broken:** No operations summary found.\n\n---\n\n*Sources: AI/Tech news, Tech funding, Entrepreneurship search results.*\n\n*Generated: 2026-06-18*"
-  },
-  {
-    "slug": "issue-20260618-002",
-    "title": "The Hermes Dispatch | June 18, 2026",
-    "date": "2026-06-18",
-    "readTime": "4 min read",
-    "excerpt": "DOC: MF-20260618-002 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618002",
-    "published": true,
-    "featured": false,
-    "tags": ["AI", "Tech", "Automation", "Mission Freedom"],
-    "content": "# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: AR messaging gets real, AI ROI faces a reckoning, and SpaceX ropes in a top-tier operator as it goes public in the biggest IPO ever.\n\nFrom Boise, ID — by dare404\n\n---\n\n## What We're Watching\n\n### 🔥 Pixi wants your texts to live in AR\n\nA startup called Pixi just launched a new iOS app that turns plain text messages into interactive augmented reality experiences. Instead of firing back stickers, GIFs, or emoji reactions, users can drop AR objects, scenes, and effects directly into a conversation. Pixi is betting that messaging's next evolution isn't richer media — it's spatial, interactive layers on top of everyday chat.\n\nThe idea sits at a crowded intersection: Apple has been pushing ARKit for years, Meta keeps chasing social AR glasses, and Snapchat built an empire on camera-first communication. Pixi's twist is making AR creation feel lightweight enough for a text thread. If it works, it changes what \"replying\" means — from reacting to co-creating a tiny 3D moment.\n\nExecution risk is high. AR has a long graveyard of cool demos that never became habits. Battery drain, rendering quality, and the social friction of asking friends to look through a camera are real hurdles. But the timing is interesting: Apple is finally shipping more capable Vision and iPhone hardware, and consumer attention is drifting toward richer, more visual messaging.\n\n**Why it matters:** Messaging is the most-used software category on Earth. Even a small behavioral shift — from emoji to AR moments — could reshape content creation, ad formats, and how platforms monetize attention.\n\n**The play:** If you're building consumer apps, watch whether Pixi can sustain daily active use past the novelty window. AR features may soon become a table-stakes engagement layer, not a gimmick.\n\n---\n\n### 🤖 The AI ROI reckoning has arrived\n\nNEA's Tiffany Luck is out with a sharp read on where AI investing is heading: away from \"tokenmaxxing\" and toward actual returns. Earlier this year, CEOs raced to push AI usage as far as possible. Then the bill came due. Uber reportedly burned through its annual AI budget in months, some companies trimmed Claude licenses for parts of their organizations, and Meta killed its internal AI usage leaderboard.\n\nThe pullback doesn't mean AI is over. It means the free-spending experimental phase is ending and procurement is getting rational. Enterprises are asking harder questions about productivity gains, security, and whether a Copilot license actually moves the needle. Investors like Luck see this as the moment when real winners separate from hype merchants.\n\nThis is also the context for AI IPOs. Public-market discipline is different from late-stage private rounds, and companies heading toward listings will need to show unit economics, not just narrative. Personal agents and vertical AI applications look more durable than broad \"every-tool-for-everyone\" plays.\n\n**Why it matters:** The next 12–18 months will sort real AI businesses from budget-line experiments. Capital is still flowing, but the bar for proof just got much higher.\n\n**The play:** Audit your AI tooling costs this month. Cut licenses with no measurable output, double down on the ones that compress real workflow time, and track ROI in hours saved or revenue generated — not just usage volume.\n\n---\n\n### 💰 SpaceX goes public, adds Roelof Botha to its board\n\nSpaceX has gone public in the largest IPO ever, and it is already making board-level moves. Roelof Botha, the former Sequoia Capital leader, is joining SpaceX's board of directors to fill what the company described as an \"existing vacancy.\" Botha is one of Silicon Valley's most seasoned operators, known for steering companies through scaling, governance, and public-market transitions.\n\nThe SpaceX IPO is a landmark event regardless of who sits on the board. It turns a private rocket and satellite juggernaut into a public entity with all the disclosure, quarterly scrutiny, and investor expectations that come with it. Adding Botha signals that SpaceX wants experienced hands guiding that transition — someone who has seen multiple companies move from founder-led chaos to institutional discipline.\n\nBotha's presence also strengthens the link between SpaceX and traditional tech-capital networks at a moment when the company's valuation, strategy, and political exposure will all be under a microscope. Starlink alone carries defense, telecom, and geopolitical weight that most public companies never touch.\n\n**Why it matters:** This IPO rewrites the aerospace and defense capital landscape. SpaceX is now the benchmark for what hard-tech companies can achieve, and its stock will likely influence everything from startup valuations to national space policy.\n\n**The play:** If you're an investor or operator in hard tech, study how SpaceX manages its first few quarters. The playbook for going public while running multiple capital-intensive programs — rockets, satellites, communications — is about to become the new textbook.\n\n---\n\n## Quick Bites\n\n- Google Docs users can now disable Gemini's \"write with Gemini\" pop-ups through the app's settings, a small but welcome win for anyone tired of AI nudges interrupting their workflow.\n- Odyssey, a startup building world models — AI systems that understand and simulate physical environments — has reached a $1.45 billion valuation backed by Amazon and other major investors, positioning world models as the next frontier beyond LLMs.\n- Pixi's AR messaging push is being watched closely because messaging apps are the most sticky consumer platforms, and any new format that catches on tends to reshape content and advertising ecosystems.\n\n---\n\n## ⚙️ Mission Freedom: Behind the Scenes\n\n**What we shipped:** No operations summary found for yesterday.\n\n**Current experiment:** We are continuing to refine our daily dispatch pipeline, source-verification workflow, and the balance between editorial depth and reader time. Yesterday produced no shipped updates, so today's focus is on consistency and recovery.\n\n**What's broken:** The ops summary did not generate for the prior day. We are treating that as a signal, not an excuse — investigating why the summary was missing and tightening the logging step so it does not repeat.\n\n---\n\n*Sources: TechCrunch, The Verge, Bloomberg, NEA / Tiffany Luck commentary*\n\n*Generated: June 18, 2026 at 12:00 UTC*"
-  },
-  {
     "slug": "issue-001",
+    "title": "The Hermes Dispatch | June 18, 2026",
+    "date": "2026-06-18",
+    "readTime": "4 min read",
+    "excerpt": "Anthropic's IPO push, Google's agentic AI rollout, and a memory-chip supply crunch are reshaping who controls AI infrast",
+    "published": true,
+    "featured": true,
+    "tags": [
+      "AI",
+      "Tech",
+      "Automation",
+      "Mission Freedom"
+    ],
+    "content": "DOC: MF-20260618-006 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618006\n\n# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: Anthropic's IPO push, Google's agentic AI rollout, and a memory-chip supply crunch are reshaping who controls AI infrastructure and who gets to build with it.\n\nFrom Boise, ID \u2014 by dare404\n\n---\n\n## What We're Watching\n\n### \ud83d\udd25 Anthropic Files for IPO and Builds an Enterprise Army\n\nOn June 1, 2026, Anthropic confidentially submitted a draft S-1 regis"
+  },
+  {
+    "slug": "issue-002",
+    "title": "The Hermes Dispatch | June 18, 2026",
+    "date": "2026-06-18",
+    "readTime": "4 min read",
+    "excerpt": "OpenAI is stacking its roster ahead of an IPO, Amazon is pushing its own AI chips into more data centers, and YC's lates",
+    "published": true,
+    "featured": false,
+    "tags": [
+      "AI",
+      "Tech",
+      "Automation",
+      "Mission Freedom"
+    ],
+    "content": "DOC: MF-20260618-005 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618005\n\n# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: OpenAI is stacking its roster ahead of an IPO, Amazon is pushing its own AI chips into more data centers, and YC's latest Demo Day produced startups already valued above $175 million.\n\n_From Boise, ID \u2014 by dare404_\n\n## What We're Watching (2/3 Content)\n\n### \ud83e\udd16 OpenAI hires Transformer co-inventor and former Trump AI official ahead of IPO\n\nOpenAI i"
+  },
+  {
+    "slug": "issue-003",
+    "title": "The Hermes Dispatch | June 18, 2026",
+    "date": "2026-06-18",
+    "readTime": "4 min read",
+    "excerpt": "Tech workers are organizing politically, AI ROI is getting a reality check, and world-model startups are commanding bill",
+    "published": true,
+    "featured": false,
+    "tags": [
+      "AI",
+      "Tech",
+      "Automation",
+      "Mission Freedom"
+    ],
+    "content": "DOC: MF-20260618-004 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618004\n\n# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: Tech workers are organizing politically, AI ROI is getting a reality check, and world-model startups are commanding billion-dollar valuations while AR messaging and Google Docs privacy tweaks fill out the day.\n\nFrom Boise, ID \u2014 by dare404\n\n---\n\n## What We're Watching (2/3 Content)\n\n### \ud83d\udd25 Guardrails: The $5M populist PAC taking on Big Tech's $100M"
+  },
+  {
+    "slug": "issue-004",
+    "title": "The Hermes Dispatch | June 18, 2026",
+    "date": "2026-06-18",
+    "readTime": "4 min read",
+    "excerpt": "AR messaging gets a bet, AI's ROI bill comes due, and world-model startup Odyssey lands a $1.45B valuation.",
+    "published": true,
+    "featured": false,
+    "tags": [
+      "AI",
+      "Tech",
+      "Automation",
+      "Mission Freedom"
+    ],
+    "content": "DOC: MF-20260618-003 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618003\n\n# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: AR messaging gets a bet, AI's ROI bill comes due, and world-model startup Odyssey lands a $1.45B valuation.\n\nFrom Boise, ID \u2014 by dare404\n\n---\n\n## What We're Watching\n\n### \ud83d\udd25 Pixi wants AR to replace your emoji reactions\n\nA new iOS app called Pixi is making a bold bet on the future of messaging: interactive augmented reality. Instead of sending sti"
+  },
+  {
+    "slug": "issue-005",
+    "title": "The Hermes Dispatch | June 18, 2026",
+    "date": "2026-06-18",
+    "readTime": "4 min read",
+    "excerpt": "AR messaging gets real, AI ROI faces a reckoning, and SpaceX ropes in a top-tier operator as it goes public in the bigge",
+    "published": true,
+    "featured": false,
+    "tags": [
+      "AI",
+      "Tech",
+      "Automation",
+      "Mission Freedom"
+    ],
+    "content": "DOC: MF-20260618-002 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618002\n\n# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: AR messaging gets real, AI ROI faces a reckoning, and SpaceX ropes in a top-tier operator as it goes public in the biggest IPO ever.\n\nFrom Boise, ID \u2014 by dare404\n\n---\n\n## What We're Watching\n\n### \ud83d\udd25 Pixi wants your texts to live in AR\n\nA startup called Pixi just launched a new iOS app that turns plain text messages into interactive augmented reali"
+  },
+  {
+    "slug": "issue-006",
+    "title": "The Hermes Dispatch | June 18, 2026",
+    "date": "2026-06-18",
+    "readTime": "4 min read",
+    "excerpt": "Pixi wants AR to replace your emoji reactions, Odyssey just hit a $1.45B valuation building world models, and the AI ind",
+    "published": true,
+    "featured": false,
+    "tags": [
+      "AI",
+      "Tech",
+      "Automation",
+      "Mission Freedom"
+    ],
+    "content": "DOC: MF-20260618-001 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260618001\n\n# The Hermes Dispatch | June 18, 2026\n\n### 4 min read | TL;DR: Pixi wants AR to replace your emoji reactions, Odyssey just hit a $1.45B valuation building world models, and the AI industry's \"tokenmaxxing\" hangover is forcing a hard ROI reckoning.\n\n_From Boise, ID \u2014 by dare404_\n\n---\n\n## What We're Watching (2/3 Content)\n\n### \ud83d\udd25 Pixi thinks the future of texting is augmented reality\n\nA startup called Pixi has "
+  },
+  {
+    "slug": "issue-007",
     "title": "The Hermes Dispatch | June 17, 2026",
     "date": "2026-06-17",
     "readTime": "4 min read",
     "excerpt": "The White House is pushing coordinated AI innovation and security, Google Cloud is automating council planning with gene",
     "published": true,
-    "featured": true,
+    "featured": false,
     "tags": [
       "AI",
       "Tech",
@@ -60,7 +112,7 @@ export const newsletters = [
     "content": "DOC: MF-20260617-002 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260617002\n\n# The Hermes Dispatch | June 17, 2026\n\n### 4 min read | TL;DR: The White House is pushing coordinated AI innovation and security, Google Cloud is automating council planning with generative AI, startup funding just logged a record quarter, and yesterday\u2019s Mission Freedom ops summary was not found.\n\n_From Boise, ID \u2014 by dare404_\n\n---\n\n## What We're Watching (2/3 Content)\n\n### \ud83d\udd25 White House maps AI innovation "
   },
   {
-    "slug": "issue-002",
+    "slug": "issue-008",
     "title": "The Hermes Dispatch | June 18, 2026",
     "date": "2026-06-17",
     "readTime": "4 min read",
@@ -76,7 +128,7 @@ export const newsletters = [
     "content": "DOC: MF-20260617-001 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: SYS-0008\n\n# The Hermes Dispatch | June 18, 2026\n### 4 min read | TL;DR: [One-line summary of today's top story]\n\n*From Boise, ID \u2014 by dare404*\n\n---\n\n## What We're Watching (2/3 Content)\n\n### \ud83d\udd25 [AI/Tech Headline 1]\n[3-4 paragraphs on the most important external story today]\n\n**Why it matters:**\n[Explain why this impacts builders, operators, or the AI ecosystem]\n\n**The play:**\n[What action to take or what this means practical"
   },
   {
-    "slug": "issue-003",
+    "slug": "issue-009",
     "title": "The Hermes Dispatch | June 12, 2026",
     "date": "2026-06-11",
     "readTime": "4 min read",
@@ -92,7 +144,7 @@ export const newsletters = [
     "content": "DOC: MF-20260611-002 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: SYS-0006\n\n# The Hermes Dispatch | June 12, 2026\n### 4 min read | TL;DR: [One-line summary of today's top story]\n\n*From Boise, ID \u2014 by dare404*\n\n---\n\n## What We're Watching (2/3 Content)\n\n### \ud83d\udd25 [AI/Tech Headline 1]\n[3-4 paragraphs on the most important external story today]\n\n**Why it matters:**\n[Explain why this impacts builders, operators, or the AI ecosystem]\n\n**The play:**\n[What action to take or what this means practical"
   },
   {
-    "slug": "issue-004",
+    "slug": "issue-010",
     "title": "The Hermes Dispatch | June 12, 2026",
     "date": "2026-06-11",
     "readTime": "4 min read",
@@ -106,22 +158,6 @@ export const newsletters = [
       "Mission Freedom"
     ],
     "content": "DOC: MF-20260611-001 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: SYS-0005\n\n# The Hermes Dispatch | June 12, 2026\n### 4 min read | TL;DR: [One-line summary of today's top story]\n\n*From Boise, ID \u2014 by dare404*\n\n---\n\n## What We're Watching (2/3 Content)\n\n### \ud83d\udd25 [AI/Tech Headline 1]\n[3-4 paragraphs on the most important external story today]\n\n**Why it matters:**\n[Explain why this impacts builders, operators, or the AI ecosystem]\n\n**The play:**\n[What action to take or what this means practical"
-  },
-  {
-    "slug": "issue-005",
-    "title": "The Hermes Dispatch | June 11, 2026",
-    "date": "2026-06-10",
-    "readTime": "4 min read",
-    "excerpt": "AI\u2022ON: Artificial Intelligence Open Network",
-    "published": true,
-    "featured": false,
-    "tags": [
-      "AI",
-      "Tech",
-      "Automation",
-      "Mission Freedom"
-    ],
-    "content": "DOC: MF-20260610-002 | TYPE: DAILY DISPATCH | STATUS: PENDING | EDITION: ED-20260610002\n\n# The Hermes Dispatch | June 11, 2026\n### 4 min read | TL;DR: AI\u2022ON: Artificial Intelligence Open Network\n\n*From Boise, ID \u2014 by dare404*\n\n---\n\n## What We're Watching\n\n\n### \ud83d\udd25 AI\u2022ON: Artificial Intelligence Open Network\nThis development signals continued maturation of the AI infrastructure stack. Builders should track tooling velocity and cost curves rather than model releases alone.\n\n**Why it matters:**\nCover"
   }
 ];
 
