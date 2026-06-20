@@ -1,0 +1,191 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const entries = await Astro.glob('../../content/directory/*.md');
+const miners = entries.filter(e => e.frontmatter.subcategory === 'mining').sort(
+  (a, b) => (a.frontmatter.price || 0) - (b.frontmatter.price || 0)
+);
+const products = miners.map(e => ({...e.frontmatter, Content: e.Content}));
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "ASIC Miner ROI Comparison | The Mine",
+  "description": "Side-by-side ASIC miner ROI comparison including hashrate, power draw, and daily profit estimate at Idaho power rates.",
+  "itemListElement": products.map((p, i) => ({
+    "@type": "ListItem", "position": i + 1,
+    "item": {"@type": "Product", "name": p.name, "description": p.name_full,
+      "brand": {"@type": "Brand", "name": p.brand || p.name.split(' ')[0]},
+      "offers": {"@type": "Offer", "price": p.price, "priceCurrency": "USD"}}
+  }))
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Which ASIC miner has the best ROI in 2026?",
+      "acceptedAnswer": { "@type": "Answer", "text": "The Antminer S21 is currently the efficiency leader at ~17.5 J/TH. Lower efficiency means lower daily profit at the same hashrate and power cost." }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does it cost to run an ASIC miner per month?",
+      "acceptedAnswer": { "@type": "Answer", "text": "At $0.09/kWh, a 3,500W ASIC costs about $226 per month in electricity. At the U.S. average of $0.16/kWh, that rises to about $403 per month." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can you mine Bitcoin profitably at home?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Only if your electricity is cheap and you can handle the noise and heat. At $0.09/kWh with modern ASICs, home mining can break even or profit depending on BTC price." }
+    }
+  ]
+};
+
+const btcPrice = 68000;
+const powerCost = 0.09;
+const networkDiff = 83e12;
+const blockReward = 3.125;
+const blocksPerDay = 144;
+---
+
+<Layout title="ASIC Miner ROI Calculator | The Mine" description="Compare ASIC miner ROI with Idaho power costs. Updated hashrate, efficiency, and profitability data.">
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+<script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+<section class="relative py-20 overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-accent/10"></div>
+  <div class="relative z-10 max-w-6xl mx-auto px-4 text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-6">
+      <span class="text-brand-accent text-sm font-mono">⛏️ THE MINE — ROI</span>
+    </div>
+    
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <span class="text-gradient">ASIC Miner ROI</span>
+    </h1>
+    
+    <p class="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
+      Compare hashrate, efficiency, and daily profit at Idaho power rates. Default assumes BTC ${btcPrice.toLocaleString()} and ${powerCost}/kWh.
+    </p>
+  </div>
+</section>
+
+<section class="max-w-6xl mx-auto px-4 pb-8">
+  <div class="glass-card rounded-2xl p-6 mb-8">
+    <div class="grid md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">BTC Price ($)</label>
+        <input type="number" id="roi-btc" value={btcPrice} class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-center" />
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Power Cost ($/kWh)</label>
+        <input type="number" id="roi-cost" value={powerCost} step="0.01" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-center" />
+      </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Network Difficulty</label>
+        <input type="number" id="roi-diff" value={networkDiff} class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-center" />
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-card rounded-2xl overflow-hidden">
+    <table class="w-full text-sm" id="roi-table">
+      <thead class="bg-white/5 border-b border-white/10">
+        <tr>
+          <th class="text-left p-4 font-semibold">Miner</th>
+          <th class="text-left p-4 font-semibold">Hashrate</th>
+          <th class="text-left p-4 font-semibold">Power</th>
+          <th class="text-left p-4 font-semibold">Efficiency</th>
+          <th class="text-left p-4 font-semibold">Daily Profit</th>
+          <th class="text-left p-4 font-semibold">Break-even</th>
+          <th class="text-right p-4 font-semibold">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {products.map(product => {
+          const hashrateMatch = (product.name_full || product.name).match(/(\d+(?:\.\d+)?)\s*Th\/s/i);
+          const hashrate = hashrateMatch ? parseFloat(hashrateMatch[1]) : 200;
+          const powerMatch = (product.name_full || product.name).match(/(\d{3,5})\s*W/i);
+          const power = powerMatch ? parseFloat(powerMatch[1]) : 3500;
+          const efficiency = hashrate ? (power / hashrate).toFixed(1) : 0;
+          const dailyBTC = hashrate * 1e12 / networkDiff * blockReward * blocksPerDay;
+          const dailyRev = dailyBTC * btcPrice;
+          const dailyCost = (power / 1000) * 24 * powerCost;
+          const dailyProfit = dailyRev - dailyCost;
+          const breakEven = dailyProfit > 0 ? Math.ceil(product.price / (dailyProfit * 30)) : '∞';
+          return (
+            <tr class="border-b border-white/5 hover:bg-white/[0.02] transition roi-row"
+                data-hashrate={hashrate}
+                data-power={power}
+                data-price={product.price}
+                data-efficiency={efficiency}
+                data-daily-profit={dailyProfit.toFixed(2)}>
+              <td class="p-4">
+                <span class="font-semibold">{product.name}</span>
+                <span class="text-xs text-gray-500 ml-2">{product.brand}</span>
+              </td>
+              <td class="p-4 font-mono">{hashrate} Th/s</td>
+              <td class="p-4 font-mono">{power}W</td>
+              <td class="p-4 font-mono">{efficiency} J/TH</td>
+              <td class="p-4 font-mono text-emerald-400 roi-profit">${dailyProfit.toFixed(2)}</td>
+              <td class="p-4 font-mono roi-breakeven">{breakEven} mo</td>
+              <td class="p-4 text-right">
+                <a href={product.amazon_link} target="_blank" rel="noopener noreferrer"
+                  class="inline-block px-4 py-1.5 rounded-lg bg-brand-accent/10 border border-brand-accent/30 text-brand-accent hover:bg-brand-accent/20 transition text-xs font-medium">
+                  View →
+                </a>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="max-w-4xl mx-auto px-4 pb-16">
+  <h2 class="text-2xl font-bold mb-6"><span class="text-gradient">FAQ</span></h2>
+  <div class="space-y-4">
+    <details class="glass-card rounded-xl p-4 group">
+      <summary class="font-semibold cursor-pointer">Which ASIC miner has the best ROI in 2026?</summary>
+      <p class="text-gray-400 mt-3 text-sm">The Antminer S21 is currently the efficiency leader at ~17.5 J/TH. Lower efficiency means lower daily profit at the same hashrate and power cost.</p>
+    </details>
+    <details class="glass-card rounded-xl p-4 group">
+      <summary class="font-semibold cursor-pointer">How much does it cost to run an ASIC miner per month?</summary>
+      <p class="text-gray-400 mt-3 text-sm">At $0.09/kWh, a 3,500W ASIC costs about $226 per month in electricity. At the U.S. average of $0.16/kWh, that rises to about $403 per month.</p>
+    </details>
+    <details class="glass-card rounded-xl p-4 group">
+      <summary class="font-semibold cursor-pointer">Can you mine Bitcoin profitably at home?</summary>
+      <p class="text-gray-400 mt-3 text-sm">Only if your electricity is cheap and you can handle the noise and heat. At $0.09/kWh with modern ASICs, home mining can break even or profit depending on BTC price.</p>
+    </details>
+  </div>
+</section>
+
+<script is:inline>
+  function recalcROI() {
+    const btc = parseFloat(document.getElementById('roi-btc').value) || 68000;
+    const cost = parseFloat(document.getElementById('roi-cost').value) || 0.09;
+    const diff = parseFloat(document.getElementById('roi-diff').value) || 83e12;
+    const blockReward = 3.125;
+    const blocksPerDay = 144;
+
+    document.querySelectorAll('.roi-row').forEach(row => {
+      const h = parseFloat(row.dataset.hashrate);
+      const power = parseFloat(row.dataset.power);
+      const price = parseFloat(row.dataset.price);
+      const dailyBTC = h * 1e12 / diff * blockReward * blocksPerDay;
+      const dailyRev = dailyBTC * btc;
+      const dailyCost = (power / 1000) * 24 * cost;
+      const profit = dailyRev - dailyCost;
+      const breakeven = profit > 0 ? Math.ceil(price / (profit * 30)) : '∞';
+      row.querySelector('.roi-profit').textContent = '$' + profit.toFixed(2);
+      row.querySelector('.roi-breakeven').textContent = breakeven + ' mo';
+    });
+  }
+  ['roi-btc','roi-cost','roi-diff'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recalcROI);
+  });
+</script>
+
+</Layout>

@@ -1,0 +1,135 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Hermes Dispatch Sponsorships",
+  "description": "Sponsored placements in the daily AI hardware, crypto mining, and trading tools directory and newsletter.",
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "99",
+    "highPrice": "1500",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does a sponsored newsletter placement cost?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Sponsored slots start at $150 per issue. We limit each dispatch to three sponsors to maintain reader trust." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I sponsor a directory listing?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Sponsored directory placements are $99/month per category with a 'Sponsored' badge and priority placement." }
+    },
+    {
+      "@type": "Question",
+      "name": "Do you offer dedicated sends or lead magnets?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Dedicated sends and co-branded lead magnets are available starting at $1,500 depending on audience size and deliverables." }
+    }
+  ]
+};
+---
+
+<Layout title="Advertise | Hermes Dispatch" description="Sponsor the Hermes Dispatch newsletter or directory. Reach AI hardware, crypto mining, and trading tool audiences.">
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+<script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+<section class="relative py-20 overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-gold/10"></div>
+  <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-gold/10 border border-brand-gold/30 mb-6">
+      <span class="text-brand-gold text-sm font-mono">SPONSORSHIPS</span>
+    </div>
+    
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <span class="text-gradient">Advertise with Us</span>
+    </h1>
+    
+    <p class="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
+      Reach builders, miners, and traders actively searching for hardware, brokers, and tools.
+    </p>
+  </div>
+</section>
+
+<section class="max-w-5xl mx-auto px-4 pb-16">
+  <div class="grid md:grid-cols-3 gap-6">
+    <article class="glass-card rounded-2xl p-6">
+      <div class="text-2xl mb-4">📋</div>
+      <h3 class="text-xl font-bold mb-2">Directory Sponsorship</h3>
+      <p class="text-gray-400 mb-4 text-sm">Featured placement in /hardware, /crypto, or /invest with a 'Sponsored' badge.</p>
+      <ul class="text-sm text-gray-400 space-y-2 mb-6">
+        <li>✓ Top-of-category visibility</li>
+        <li>✓ Dofollow affiliate/referral link
+        <li>✓ Listed for one month, auto-renew
+      </ul>
+      <div class="text-2xl font-bold text-brand-gold mb-4">$99/mo</div>
+      <a href="mailto:sponsors@hermesdispatch.dev?subject=Sponsorship%20Inquiry" class="block text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition">Inquire →</a>
+    </article>
+    
+    <article class="glass-card rounded-2xl p-6 border-brand-gold/30">
+      <div class="text-2xl mb-4">📨</div>
+      <h3 class="text-xl font-bold mb-2">Newsletter Placement</h3>
+      <p class="text-gray-400 mb-4 text-sm">Native text placement in The Rig, The Mine, or The Ledger section. Max 3 sponsors per issue.</p>
+      <ul class="text-sm text-gray-400 space-y-2 mb-6">
+        <li>✓ 1–2 sentences + CTA link
+        <li>✓ Matched to relevant vertical
+        <li>✓ Open/click reporting on request
+      </ul>
+      <div class="text-2xl font-bold text-brand-gold mb-4">$150/issue</div>
+      <a href="mailto:sponsors@hermesdispatch.dev?subject=Newsletter%20Placement%20Inquiry" class="block text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition">Inquire →</a>
+    </article>
+    
+    <article class="glass-card rounded-2xl p-6">
+      <div class="text-2xl mb-4">🚀</div>
+      <h3 class="text-xl font-bold mb-2">Dedicated Send</h3>
+      <p class="text-gray-400 mb-4 text-sm">Full sponsored issue or co-branded lead magnet. Best for launches or high-ticket tools.</p>
+      <ul class="text-sm text-gray-400 space-y-2 mb-6">
+        <li>✓ Full issue creative
+        <li>✓ Landing page + tracking
+        <li>✓ Follow-up mention in next dispatch
+      </ul>
+      <div class="text-2xl font-bold text-brand-gold mb-4">From $1,500</div>
+      <a href="mailto:sponsors@hermesdispatch.dev?subject=Dedicated%20Send%20Inquiry" class="block text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition">Inquire →</a>
+    </article>
+  </div>
+</section>
+
+<section class="max-w-4xl mx-auto px-4 pb-16">
+  <h2 class="text-2xl font-bold mb-6"><span class="text-gradient">Audience</span></h2>
+  <div class="glass-card rounded-2xl p-6">
+    <ul class="text-gray-400 space-y-3">
+      <li>🔧 <strong>The Rig:</strong> Local LLM builders, AI hardware buyers, Ollama users</li>
+      <li>⛏️ <strong>The Mine:</strong> Crypto miners, ASIC buyers, ROI researchers</li>
+      <li>💰 <strong>The Ledger:</strong> Traders, API automators, brokerage switchers</li>
+    </ul>
+  </div>
+</section>
+
+<section class="max-w-4xl mx-auto px-4 pb-16">
+  <h2 class="text-2xl font-bold mb-6"><span class="text-gradient">FAQ</span></h2>
+  <div class="space-y-4">
+    <details class="glass-card rounded-xl p-4 group">
+      <summary class="font-semibold cursor-pointer">How much does a sponsored newsletter placement cost?</summary>
+      <p class="text-gray-400 mt-3 text-sm">Sponsored slots start at $150 per issue. We limit each dispatch to three sponsors to maintain reader trust.</p>
+    </details>
+    <details class="glass-card rounded-xl p-4 group">
+      <summary class="font-semibold cursor-pointer">Can I sponsor a directory listing?</summary>
+      <p class="text-gray-400 mt-3 text-sm">Yes. Sponsored directory placements are $99/month per category with a 'Sponsored' badge and priority placement.</p>
+    </details>
+    <details class="glass-card rounded-xl p-4 group">
+      <summary class="font-semibold cursor-pointer">Do you offer dedicated sends or lead magnets?</summary>
+      <p class="text-gray-400 mt-3 text-sm">Yes. Dedicated sends and co-branded lead magnets are available starting at $1,500 depending on audience size and deliverables.</p>
+    </details>
+  </div>
+</section>
+
+</Layout>
