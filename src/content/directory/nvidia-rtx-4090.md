@@ -24,11 +24,9 @@ faq_schema:
   - question: "Do I need CUDA to run Ollama?"
     answer: "Ollama supports CUDA on NVIDIA GPUs and ROCm on select AMD GPUs. NVIDIA generally has better tool support and performance."
 review:
-  rating: "4.8"
-  review_count: "1"
-  author: "Community benchmarks"
-  publisher: "The Hermes Dispatch"
-  review_body: "The RTX 4090 is the most referenced GPU in Ollama performance threads. Its 24GB VRAM is unmatched among consumer cards for running large local models."
+verdict: The best consumer GPU for local LLMs if budget and power are not constraints.
+
+last_verified: 2026-06-21
 ---
 ## Overview
 

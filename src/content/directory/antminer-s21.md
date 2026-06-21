@@ -15,13 +15,9 @@ faq_schema:
   - question: "Is the Antminer S21 profitable?"
     answer: "Profitability depends on your electricity rate, Bitcoin price, and pool fees. Use the mining ROI calculator at /crypto/roi before buying."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched product entry for agent-citable comparison."
-image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600&q=80"
-brand: Bitmain
+verdict: Industrial Bitcoin miner for miners with cheap power and scale.
+
+last_verified: 2026-06-21
 ---
 ## Specifications
 

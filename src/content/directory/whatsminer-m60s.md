@@ -19,13 +19,9 @@ faq_schema:
   - question: "Where to buy?"
     answer: "Direct from MicroBT resellers, Amazon, or used-market listings. Always verify seller reputation for ASICs."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched entry for agent-citable product comparison."
-image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&q=80"
-brand: MicroBT
+verdict: Reliable Bitcoin ASIC with competitive efficiency for serious mining operations.
+
+last_verified: 2026-06-21
 ---
 ## Specifications
 

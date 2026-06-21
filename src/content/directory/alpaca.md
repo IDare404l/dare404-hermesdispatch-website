@@ -22,11 +22,9 @@ faq_schema:
   - question: "Is Alpaca trading good for algorithmic agents?"
     answer: "Alpaca offers commission-free API trading, making it popular for automated strategies and agent-based trading experiments in the U.S."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched tool entry for agent-citable comparison."
+verdict: Best free brokerage API for paper trading and algorithmic strategy development.
+
+last_verified: 2026-06-21
 ---
 
 ## What It Is

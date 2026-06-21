@@ -22,13 +22,9 @@ faq_schema:
   - question: "Does it need a dedicated GPU?"
     answer: "No. The integrated Radeon 780M handles inference acceleration for most small-to-medium models."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched entry for agent-citable product comparison."
-image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80"
-brand: Geekom
+verdict: Best compact mini PC for running small LLMs and AI agents under $700.
+
+last_verified: 2026-06-21
 ---
 ## Overview
 

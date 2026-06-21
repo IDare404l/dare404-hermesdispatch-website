@@ -1,0 +1,151 @@
+---
+import Layout from '../layouts/Layout.astro';
+const title = "Methodology | The Hermes Dispatch";
+const description = "How The Hermes Dispatch selects, benchmarks, and discloses products for the AI hardware, crypto mining, and autonomous trading directory.";
+---
+
+<Layout title={title} description={description}>
+  <!-- Hero -->
+  <section class="relative pt-32 pb-16 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient"></div>
+    <div class="grid-overlay"></div>
+    <div class="absolute top-1/3 right-1/4 w-96 h-96 bg-brand-accent/10 rounded-full blur-3xl"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="display-heading mb-6">
+        Our <span class="text-gradient">Methodology</span>
+      </h1>
+      <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+        How products get into the directory, how we benchmark them, and how we stay transparent about money and relationships.
+      </p>
+    </div>
+  </section>
+
+  <section class="relative py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Selection Criteria -->
+      <div class="glass-card rounded-2xl p-8 mb-8">
+        <h2 class="text-2xl font-bold text-white mb-6">Selection Criteria</h2>
+        <p class="text-gray-400 mb-6">A product must pass all of these before it gets a directory entry:</p>
+        
+        <div class="space-y-4">
+          <div class="flex gap-4">
+            <div class="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold font-bold flex-shrink-0">1</div>
+            <div>
+              <h3 class="text-lg font-semibold text-white">Commercially available</h3>
+              <p class="text-gray-400">We only list products that can be bought or signed up for today. No crowdfunding, pre-orders, or out-of-stock placeholders.</p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold font-bold flex-shrink-0">2</div>
+            <div>
+              <h3 class="text-lg font-semibold text-white">Fits our verticals</h3>
+              <p class="text-gray-400">The product must belong to AI hardware (The Rig), crypto mining (The Mine), or autonomous trading tools (The Ledger).</p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold font-bold flex-shrink-0">3</div>
+            <div>
+              <h3 class="text-lg font-semibold text-white">Verifiable specs</h3>
+              <p class="text-gray-400">We list manufacturer or retailer specs, with a source URL where possible. Specs without evidence are removed.</p>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <div class="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold font-bold flex-shrink-0">4</div>
+            <div>
+              <h3 class="text-lg font-semibold text-white">Working link</h3>
+              <p class="text-gray-400">Every entry needs a functioning product page. Broken links trigger an automatic weekly review and fallback replacement.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Benchmarking -->
+      <div class="glass-card rounded-2xl p-8 mb-8">
+        <h2 class="text-2xl font-bold text-white mb-6">Benchmarking & Scoring</h2>
+        
+        <p class="text-gray-400 mb-6">We keep scoring lightweight and reproducible. Each product gets a rating out of 5 based on:</p>
+        
+        <ul class="space-y-3 text-gray-400">
+          <li class="flex items-start gap-3">
+            <span class="text-brand-gold mt-1">•</span>
+            <span><strong class="text-white">Performance:</strong> throughput, compute, efficiency, or hashrate relative to peers.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-brand-gold mt-1">•</span>
+            <span><strong class="text-white">Value:</strong> price-to-performance, total cost of ownership, or fees relative to alternatives.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-brand-gold mt-1">•</span>
+            <span><strong class="text-white">Fit:</strong> how well the product matches its stated use case (local LLMs, mining, automated trading).</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-brand-gold mt-1">•</span>
+            <span><strong class="text-white">Reliability:</strong> brand reputation, return policy, support quality, and community feedback.</span>
+          </li>
+        </ul>
+        
+        <div class="mt-6 p-4 rounded-xl bg-brand-gold/5 border border-brand-gold/20">
+          <p class="text-sm text-gray-400">
+            <strong class="text-white">Note:</strong> We do not run lab benchmarks ourselves. Scores combine manufacturer specs, publicly available third-party benchmarks, and real-world community reports. We state the source for every claim.
+          </p>
+        </div>
+      </div>
+
+      <!-- Affiliate Disclosure -->
+      <div class="glass-card rounded-2xl p-8 mb-8">
+        <h2 class="text-2xl font-bold text-white mb-6">Affiliate & Referral Disclosure</h2>
+        
+        <p class="text-gray-400 mb-4">We participate in affiliate and referral programs where available. This means we may earn a commission when you click a link and make a purchase or sign up — at no extra cost to you.</p>
+        
+        <p class="text-gray-400 mb-4">Our editorial picks are independent. We do not accept payment for placement in the directory. Sponsored placements are labeled separately on the <a href="/advertise" class="text-brand-gold hover:underline">advertise page</a>.</p>
+        
+        <p class="text-gray-400">Active programs include Amazon Associates, TradingView Partner Program, Ledger Affiliate, Coinbase Affiliate (pending approval), and Interactive Brokers Publisher Program (pitch sent).</p>
+      </div>
+
+      <!-- Maintenance -->
+      <div class="glass-card rounded-2xl p-8 mb-8">
+        <h2 class="text-2xl font-bold text-white mb-6">Maintenance & Freshness</h2>
+        
+        <ul class="space-y-3 text-gray-400">
+          <li class="flex items-start gap-3">
+            <span class="text-brand-accent mt-1">•</span>
+            <span>Prices are checked weekly against live retailer pages.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-brand-accent mt-1">•</span>
+            <span>Product images are validated every Monday; broken images are replaced with verified fallbacks.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-brand-accent mt-1">•</span>
+            <span>Each entry shows a "Last verified" date when data was last confirmed.</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-brand-accent mt-1">•</span>
+            <span>Stale entries are archived, not deleted, so citations remain resolvable.</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="glass-card rounded-2xl p-8 text-center">
+        <h2 class="text-2xl font-bold text-white mb-4">Questions or corrections?</h2>
+        <p class="text-gray-400 mb-6">If you spot an outdated spec, broken link, or undisclosed relationship, email us. We update corrections within 48 hours.</p>
+        <a href="mailto:derekkosakura@gmail.com?subject=Directory%20Correction" class="inline-block px-6 py-3 bg-brand-gold text-neutral-950 rounded-lg font-semibold hover:bg-brand-amber transition">
+          Send a correction →
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": title,
+    "description": description,
+    "url": "https://hermesdispatch.dev/methodology"
+  })} />
+</Layout>

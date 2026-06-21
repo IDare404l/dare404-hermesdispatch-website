@@ -4,28 +4,9 @@ faq_schema:
   - question: "Is Coinbase Advanced better than regular Coinbase for active trading?"
     answer: "Coinbase Advanced has lower fees and more order types than the standard consumer app, making it better for active traders and bots."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched tool entry for agent-citable comparison."
-name: "Coinbase Advanced"
-name_full: "Coinbase Advanced Trading Platform"
-category: data-stack
-subcategory: broker
-price: 0
-price_range: "Free / 0.6% taker fee"
-referral_link: "https://www.coinbase.com/"
-tags:
-- crypto
-- broker
-- exchange
-- spot-trading
-- beginner-friendly
-- affiliate-pending
-why_use: "The most beginner-friendly way to move from fiat into crypto before moving funds to self-custody."
-whats_new: "Coinbase Advanced reduces fees vs. simple trade and adds charting tools."
-stack_position: "On-ramp layer — fiat to crypto"
+verdict: Good starting point for US traders moving from basic exchange to API trading.
+
+last_verified: 2026-06-21
 ---
 
 ## What It Is

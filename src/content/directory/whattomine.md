@@ -4,27 +4,9 @@ faq_schema:
   - question: "How accurate is WhatToMine?"
     answer: "WhatToMine provides estimates based on current coin prices and network difficulty. Actual earnings vary with pool luck, power cost, and market swings."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched tool entry for agent-citable comparison."
-name: "WhatToMine"
-category: data-stack
-subcategory: calculator
-price: 0
-price_range: "Free"
-referral_link: "https://whattomine.com/"
-tags:
-- mining-calculator
-- crypto
-- profitability
-- asic
-- gpu-mining
-- free-tool
-why_use: "Before you buy a miner, you need to know the ROI. WhatToMine tells you exactly that."
-whats_new: "Updated daily with network difficulty, coin prices, and power cost estimates."
-stack_position: "Planning layer — run the numbers before you buy"
+verdict: Essential profitability calculator for comparing mining hardware and coins.
+
+last_verified: 2026-06-21
 ---
 
 ## What It Is

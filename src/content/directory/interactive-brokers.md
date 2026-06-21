@@ -4,28 +4,9 @@ faq_schema:
   - question: "Why do serious traders use Interactive Brokers?"
     answer: "Interactive Brokers offers global market access, low margin rates, professional order types, and a stable API for automated trading systems."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched tool entry for agent-citable comparison."
-name: "Interactive Brokers"
-name_full: "Interactive Brokers — Stock, Options, Futures Brokerage"
-category: data-stack
-subcategory: broker
-price: 0
-price_range: "Free / Per-share commission"
-referral_link: "https://www.interactivebrokers.com/"
-tags:
-- broker
-- stocks
-- options
-- futures
-- api-trading
-- high-payout-referral
-why_use: "Best-in-class API for automated trading and lowest margin rates for serious accounts."
-whats_new: "IBKR offers up to $1,000 per referred client through its referral program."
-stack_position: "Execution layer — live capital deployment"
+verdict: Best for low-cost, regulated API trading across stocks, options, and futures.
+
+last_verified: 2026-06-21
 ---
 
 ## What It Is

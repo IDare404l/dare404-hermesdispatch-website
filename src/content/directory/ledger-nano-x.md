@@ -19,13 +19,9 @@ faq_schema:
   - question: "What if I lose the device?"
     answer: "Your recovery seed (24 words) restores access. Never store it digitally or share it."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched entry for agent-citable product comparison."
-image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=600&q=80"
-brand: Ledger
+verdict: Most trusted hardware wallet for securing crypto mining payouts and holdings.
+
+last_verified: 2026-06-21
 ---
 ## Overview
 

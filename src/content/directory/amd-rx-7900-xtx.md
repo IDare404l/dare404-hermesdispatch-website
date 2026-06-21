@@ -22,13 +22,9 @@ faq_schema:
   - question: "What about the 7900 XT?"
     answer: "The XT has 20GB VRAM and lower compute. XTX is the safer choice for large models."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched entry for agent-citable product comparison."
-image: "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=600&q=80"
-brand: AMD
+verdict: A cost-effective alternative to NVIDIA for ROCm-based local inference.
+
+last_verified: 2026-06-21
 ---
 ## Overview
 

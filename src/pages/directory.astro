@@ -41,14 +41,15 @@ const products = entries.map(e => ({
 // Build per-product Product+FAQPage schema for AEO
 const productSchemas = products.map(product => {
   const schema = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": product.name,
-    "description": product.name_full || product.why_use || ``,
-    "brand": { "@type": "Brand", "name": product.brand || "Unknown" },
-    "image": product.image || "",
-    "category": product.category ? product.category.replace(/-/g, " ") : "",
-    "offers": {
+   "@context": "https://schema.org",
+   "@type": "Product",
+   "name": product.name,
+   "description": product.verdict || product.name_full || ``,
+   "image": product.image || "",
+   "category": product.category ? product.category.replace(/-/g, " ") : "",
+   "brand": { "@type": "Brand", "name": product.brand || "Unknown" },
+   "dateModified": product.last_verified || "",
+   "offers": {
       "@type": "Offer",
       "price": String(product.price || "0"),
       "priceCurrency": "USD",
@@ -181,7 +182,16 @@ const allSchemas = [itemListSchema, ...productSchemas];
             ))}
           </div>
           
+          <p class="text-xs text-gray-500 mb-3">
+            Last verified: {product.last_verified}
+          </p>
+          
           <div class="space-y-2 mb-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Verdict</span>
+              <span class="text-right text-sm text-white font-medium max-w-[60%]">{product.verdict}</span>
+            </div>
+          
             <div class="flex justify-between text-sm">
               <span class="text-gray-500">Price</span>
               <span class="font-mono font-semibold text-brand-gold">${product.price}</span>

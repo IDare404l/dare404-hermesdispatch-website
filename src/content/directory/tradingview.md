@@ -4,27 +4,9 @@ faq_schema:
   - question: "Can TradingView automate trades?"
     answer: "TradingView is primarily for charting and alerts. Automation requires webhooks to a connected broker or exchange that supports API orders."
 review:
-  rating: "4.5"
-  review_count: "1"
-  author: "The Hermes Dispatch"
-  publisher: "The Hermes Dispatch"
-  review_body: "Community-researched tool entry for agent-citable comparison."
-name: "TradingView"
-category: data-stack
-subcategory: charting
-price: 0
-price_range: "Free / Paid"
-referral_link: "https://www.tradingview.com/?aff_id=167461"
-tags:
-- charting
-- analysis
-- pinescript
-- backtesting
-- bot-building
-- free-tier
-why_use: "Prototype strategies visually before automating them. Feed your bot data from what you see on the chart."
-whats_new: "AI-powered pattern recognition added to premium. Still the best free charting tool."
-stack_position: "Visual layer — feeds into execution APIs"
+verdict: Best charting platform for technical analysis across crypto, stocks, and forex.
+
+last_verified: 2026-06-21
 ---
 
 ## What It Is
