@@ -5,8 +5,8 @@ category: hardware-grid
 subcategory: wallet
 price: 149
 price_range: "100-150"
-amazon_link: "https://www.amazon.com/dp/B07YFC8V8B?tag=dare404-20"
-affiliate_tags: ["wallet", "hardware-wallet", "crypto", "security", "ledger"]
+amazon_link: "https://shop.ledger.com/?r=ca1b30139f19"
+referral_link: "https://shop.ledger.com/?r=ca1b30139f19"
 ihardware_tags: [hardware-wallet, bluetooth, ledger]
 featured: false
 sponsored: false

@@ -67,11 +67,11 @@ const schema = {
           
           <a href={product.referral_link || product.amazon_link} target="_blank" rel="noopener noreferrer"
             class="block w-full text-center py-2.5 rounded-lg bg-brand-accent/10 border border-brand-accent/30 text-brand-accent font-medium hover:bg-brand-accent/20 transition">
-            {product.amazon_link ? 'View on Amazon →' : (product.referral_link ? 'Try It →' : 'Learn More →')}
+            {product.amazon_link ? 'View on Amazon →' : (product.referral_link ? 'Buy Direct →' : 'Learn More →')}
           </a>
           
           <p class="text-xs text-gray-600 mt-2 text-center">
-            {product.source || 'Based on manufacturer specs'}
+            {product.referral_link ? 'Referral link — we may earn' : (product.amazon_link ? 'Affiliate link — we may earn' : '')}
           </p>
         </div>
       </article>
