@@ -10,6 +10,7 @@ referral_link: "https://shop.ledger.com/?r=ca1b30139f19"
 ihardware_tags: [hardware-wallet, bluetooth, ledger]
 featured: false
 sponsored: false
+image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=600&q=80"
 source: "Based on manufacturer specs"
 faq_schema:
   - question: "Is a hardware wallet necessary?"

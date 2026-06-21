@@ -13,6 +13,7 @@ tokens_per_second: 42
 benchmark_model: "llama3.2 3B Q4_K_M"
 featured: true
 sponsored: false
+image: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&q=80"
 source: "Based on community benchmarks"
 faq_schema:
   - question: "Is the Beelink SER7 good for Ollama?"

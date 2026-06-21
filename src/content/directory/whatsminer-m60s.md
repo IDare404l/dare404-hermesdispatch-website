@@ -10,6 +10,7 @@ affiliate_tags: ["miner", "asic", "bitcoin", "mining", "microbt", "high-wattage"
 ihardware_tags: [186ths, 3606w, sha256, microbt]
 featured: false
 sponsored: false
+image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600&q=80"
 source: "Based on manufacturer specs"
 faq_schema:
   - question: "Whatsminer M60S vs Antminer S21?"

@@ -10,6 +10,7 @@ affiliate_tags: ["ram", "ddr5", "64gb", "upgrade", "ollama-compatible"]
 ihardware_tags: [64gb-ddr5, 5600mhz, corsair]
 featured: false
 sponsored: false
+image: "https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80"
 source: "Based on community compatibility"
 faq_schema:
   - question: "How much RAM do I need for local LLMs?"

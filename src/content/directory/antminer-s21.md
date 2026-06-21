@@ -10,6 +10,7 @@ affiliate_tags: ["miner", "asic", "bitcoin", "mining", "bitmain", "high-wattage"
 ihardware_tags: [200ths, 3500w, sha256, bitmain]
 featured: true
 sponsored: false
+image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600&q=80"
 source: "Based on manufacturer specs"
 faq_schema:
   - question: "Is the Antminer S21 profitable?"

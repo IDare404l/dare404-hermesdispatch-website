@@ -10,6 +10,7 @@ affiliate_tags: ["storage", "ssd", "nvme", "2tb", "fast-load", "ollama-compatibl
 ihardware_tags: [nvme-gen4, 2tb-ssd, samsung]
 featured: false
 sponsored: false
+image: "https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80"
 source: "Based on manufacturer specs"
 faq_schema:
   - question: "Does SSD speed matter for LLM inference?"
