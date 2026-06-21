@@ -54,6 +54,52 @@ export const reviews: Review[] = [
     date: "2026-06-14",
     verified: false
   }
+,
+  {
+    productSlug: "nvidia-rtx-4080-super",
+    author: "Mid-range builder",
+    rating: 4,
+    title: "Great 16GB value",
+    body: "Runs Llama 3 8B and 13B models very well. Not enough for 70B, but the price is right.",
+    date: "2026-06-18",
+    verified: false
+  },
+  {
+    productSlug: "antminer-s19-xp",
+    author: "Used ASIC buyer",
+    rating: 4,
+    title: "Solid used workhorse",
+    body: "Bought refurbished. Stable at 140 TH/s. Efficiency is not cutting-edge but the price was right.",
+    date: "2026-06-17",
+    verified: false
+  },
+  {
+    productSlug: "trezor-safe-3",
+    author: "Security minimalist",
+    rating: 5,
+    title: "Open source peace of mind",
+    body: "Like that the firmware is open. Setup was simple and the device feels well built.",
+    date: "2026-06-16",
+    verified: false
+  },
+  {
+    productSlug: "koinly",
+    author: "Active trader",
+    rating: 5,
+    title: "Tax season saver",
+    body: "Synced 4 exchanges and a wallet. Generated my Schedule D attachment in under an hour.",
+    date: "2026-06-15",
+    verified: false
+  },
+  {
+    productSlug: "kraken-pro",
+    author: "Futures trader",
+    rating: 4,
+    title: "Reliable pro platform",
+    body: "Good liquidity, advanced order types, and the security record gives confidence.",
+    date: "2026-06-14",
+    verified: false
+  },
 ];
 
 export function getReviewsForProduct(slug: string): Review[] {

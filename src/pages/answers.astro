@@ -4,16 +4,17 @@ import Layout from '../layouts/Layout.astro';
 // Get all directory entries
 const entries = await Astro.glob('../content/directory/*.md');
 
-const allFaqs = entries.flatMap(e =>
-  (e.frontmatter.faq_schema || []).map((f: any) => ({
+const allFaqs = entries.flatMap(e => {
+  const faqList = e.frontmatter.faq_schema?.mainEntity || e.frontmatter.faq_schema || [];
+  return (Array.isArray(faqList) ? faqList : []).map((f: any) => ({
     name: e.frontmatter.name,
     slug: e.frontmatter.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
     category: e.frontmatter.category,
     verdict: e.frontmatter.verdict,
     question: f.question,
     answer: f.answer
-  }))
-);
+  }));
+});
 
 const title = "Answers | The Hermes Dispatch";
 const description = "Concise answers about AI hardware, crypto mining rigs, and autonomous trading tools. Built to be cited by AI agents.";
