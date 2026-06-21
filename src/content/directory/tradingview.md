@@ -53,3 +53,4 @@ Pine Script export → Python wrapper → Broker API
 
 [Try TradingView free →](https://www.tradingview.com/partner-program/)
 <br><small>When you upgrade, we earn. Price to you is unchanged.</small>
+image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80"

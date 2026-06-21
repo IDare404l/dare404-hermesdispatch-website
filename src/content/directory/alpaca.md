@@ -71,3 +71,4 @@ Alpaca's partner program is **not self-serve** (unlike TradingView). Here's how 
 
 [Get Alpaca API access →](https://alpaca.markets/)
 <br><small>Commission-free. When you sign up, we may earn.</small>
+image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80"

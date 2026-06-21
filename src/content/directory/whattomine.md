@@ -47,3 +47,4 @@ Input your local power cost. At $0.09/kWh (Idaho average), most modern ASICs are
 
 [Check mining profitability →](https://whattomine.com/)
 <br><small>Free calculator. No affiliate.</small>
+image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600&q=80"

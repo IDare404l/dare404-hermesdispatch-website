@@ -45,3 +45,4 @@ Signal generation → Risk check → IB API execution → Portfolio tracking
 
 [Open Interactive Brokers →](https://www.interactivebrokers.com/)
 <br><small>Apply for the referral program to capture $1,000 per funded referral.</small>
+image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80"
