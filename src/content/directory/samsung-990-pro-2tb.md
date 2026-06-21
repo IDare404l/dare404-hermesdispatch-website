@@ -11,7 +11,7 @@ ihardware_tags: [nvme-gen4, 2tb-ssd, samsung]
 featured: false
 sponsored: false
 source: "Based on manufacturer specs"
-image: "https://m.media-amazon.com/images/I/61Q4XxP1bDL._AC_SL1000_.jpg"
+image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80"
 brand: Samsung
 ---
 ## Overview

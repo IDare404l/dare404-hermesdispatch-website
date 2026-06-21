@@ -11,7 +11,7 @@ ihardware_tags: [hardware-wallet, bluetooth, ledger]
 featured: false
 sponsored: false
 source: "Based on manufacturer specs"
-image: "https://m.media-amazon.com/images/I/71PpV0UhOeL._AC_SL1500_.jpg"
+image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=600&q=80"
 brand: Ledger
 ---
 ## Overview

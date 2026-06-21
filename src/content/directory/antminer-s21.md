@@ -11,7 +11,7 @@ ihardware_tags: [200ths, 3500w, sha256, bitmain]
 featured: true
 sponsored: false
 source: "Based on manufacturer specs"
-image: "https://m.media-amazon.com/images/I/61lLJg2b9ML._AC_SL1500_.jpg"
+image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600&q=80"
 brand: Bitmain
 ---
 ## Specifications

@@ -14,7 +14,7 @@ benchmark_model: "llama3.2 3B Q4_K_M"
 featured: true
 sponsored: false
 source: "Based on community benchmarks"
-image: "https://m.media-amazon.com/images/I/71QY5YQXvLL._AC_SL1500_.jpg"
+image: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=600&q=80"
 brand: Beelink
 ---
 ## Overview

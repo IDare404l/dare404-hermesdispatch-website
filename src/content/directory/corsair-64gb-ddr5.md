@@ -11,7 +11,7 @@ ihardware_tags: [64gb-ddr5, 5600mhz, corsair]
 featured: false
 sponsored: false
 source: "Based on community compatibility"
-image: "https://m.media-amazon.com/images/I/81X7VEm8qGL._AC_SL1500_.jpg"
+image: "https://images.unsplash.com/photo-1597852074816-d933c7d2b988?w=600&q=80"
 brand: Corsair
 ---
 ## Overview

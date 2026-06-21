@@ -11,7 +11,7 @@ ihardware_tags: [186ths, 3606w, sha256, microbt]
 featured: false
 sponsored: false
 source: "Based on manufacturer specs"
-image: "https://m.media-amazon.com/images/I/61mK9f6Mf-L._AC_SL1000_.jpg"
+image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&q=80"
 brand: MicroBT
 ---
 ## Specifications

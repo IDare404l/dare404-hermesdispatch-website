@@ -14,7 +14,7 @@ benchmark_model: "llama3.2 3B Q4_K_M"
 featured: false
 sponsored: false
 source: "Based on community benchmarks"
-image: "https://m.media-amazon.com/images/I/81pPkZYRiyL._AC_SL1500_.jpg"
+image: "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=600&q=80"
 brand: AMD
 ---
 ## Overview
