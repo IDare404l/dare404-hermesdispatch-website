@@ -1,0 +1,70 @@
+---
+// Automatic BreadcrumbList schema from current URL path.
+const path = Astro.url.pathname;
+const segments = path.split('/').filter(Boolean);
+
+// Label map for known paths
+const labels: Record<string, string> = {
+  'directory': 'Directory',
+  'hardware': 'The Rig',
+  'hardware-grid': 'The Rig',
+  'crypto': 'The Mine',
+  'invest': 'The Ledger',
+  'compare': 'Compare',
+  'roi': 'ROI',
+  'advertise': 'Advertise',
+  'about': 'About',
+  'methodology': 'Methodology',
+  'newsletter': 'Newsletter',
+  'subscribe': 'Subscribe',
+  'privacy': 'Privacy',
+  'team': 'Team',
+  'skills': 'Skills',
+  'timeline': 'Timeline',
+  'agents': 'Agents'
+};
+
+let url = '/';
+const crumbs = [
+  { name: 'Home', url: '/' }
+];
+
+for (const segment of segments) {
+  url += `${segment}/`;
+  // If this looks like a newsletter issue slug, label it generically
+  const label = labels[segment] || (segment.startsWith('issue-') ? 'Issue' : segment.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+  crumbs.push({ name: label, url });
+}
+
+// Don't render breadcrumbs on the homepage
+if (segments.length === 0) {
+  return null;
+}
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": crumbs.map((c, i) => ({
+    "@type": "ListItem",
+    "position": i + 1,
+    "name": c.name,
+    "item": `https://hermesdispatch.dev${c.url}`
+  }))
+};
+---
+
+<nav aria-label="Breadcrumb" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-2 text-sm text-gray-500">
+  <ol class="flex flex-wrap items-center gap-2">
+    {crumbs.map((crumb, i) => (
+      <li class="flex items-center gap-2">
+        {i > 0 && <span class="text-gray-700">/</span>}
+        {i === crumbs.length - 1 ? (
+          <span class="text-gray-300" aria-current="page">{crumb.name}</span>
+        ) : (
+          <a href={crumb.url} class="hover:text-brand-gold transition-colors">{crumb.name}</a>
+        )}
+      </li>
+    ))}
+  </ol>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+</nav>
