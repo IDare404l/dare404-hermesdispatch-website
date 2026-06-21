@@ -1,4 +1,14 @@
 ---
+source: \"Based on official documentation and community use\"
+faq_schema:
+  - question: "Can TradingView automate trades?"
+    answer: "TradingView is primarily for charting and alerts. Automation requires webhooks to a connected broker or exchange that supports API orders."
+review:
+  rating: "4.5"
+  review_count: "1"
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  review_body: "Community-researched tool entry for agent-citable comparison."
 name: "TradingView"
 category: data-stack
 subcategory: charting

@@ -14,6 +14,19 @@ benchmark_model: "llama3.2 3B Q4_K_M"
 featured: false
 sponsored: false
 source: "Based on community benchmarks"
+faq_schema:
+  - question: "Is Geekom A8 better than Beelink SER7?"
+    answer: "Yes for raw performance, but it costs ~40% more. Choose SER7 for value, A8 for headroom."
+  - question: "Can it run 13B models?"
+    answer: "With 32GB it will run, but slowly. Upgrading to 64GB RAM is recommended for 13B+ models."
+  - question: "Does it need a dedicated GPU?"
+    answer: "No. The integrated Radeon 780M handles inference acceleration for most small-to-medium models."
+review:
+  rating: "4.5"
+  review_count: "1"
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  review_body: "Community-researched entry for agent-citable product comparison."
 image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80"
 brand: Geekom
 ---

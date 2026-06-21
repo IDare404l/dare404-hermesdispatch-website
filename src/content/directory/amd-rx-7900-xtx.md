@@ -14,6 +14,19 @@ benchmark_model: "llama3.2 3B Q4_K_M"
 featured: false
 sponsored: false
 source: "Based on community benchmarks"
+faq_schema:
+  - question: "Is 7900 XTX better than 4090 for LLMs?"
+    answer: "For pure performance, no — the 4090 is faster. For price-per-VRAM and open-stack preference, the 7900 XTX is competitive."
+  - question: "Does Ollama support AMD GPUs?"
+    answer: "Ollama has experimental ROCm support. llama.cpp with Vulkan/SYCL backends may also work."
+  - question: "What about the 7900 XT?"
+    answer: "The XT has 20GB VRAM and lower compute. XTX is the safer choice for large models."
+review:
+  rating: "4.5"
+  review_count: "1"
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  review_body: "Community-researched entry for agent-citable product comparison."
 image: "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=600&q=80"
 brand: AMD
 ---

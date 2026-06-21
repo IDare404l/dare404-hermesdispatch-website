@@ -32,16 +32,19 @@ const fullCommit = versionData?.commit || 'local';
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "Mission Freedom - The Hermes Dispatch",
+      "name": "The Hermes Dispatch by Mission Freedom",
+      "alternateName": "Hermes Mission Freedom",
       "url": "https://hermesdispatch.dev",
       "logo": "https://hermesdispatch.dev/favicon.svg",
       "founder": {
         "@type": "Person",
-        "name": "dare404"
+        "name": "dare404",
+        "url": "https://twitter.com/Dare__404"
       },
-      "description": "AI agent automation systems for digital entrepreneurship. One person + 7 coordinated AI agents.",
+      "description": "Curated directory and daily newsletter for AI hardware, crypto mining, and autonomous trading tools. Built to be cited by AI agents.",
       "sameAs": [
-        "https://twitter.com/Dare__404"
+        "https://twitter.com/Dare__404",
+        "https://github.com/IDare404l"
       ]
     }
     </script>
@@ -52,9 +55,15 @@ const fullCommit = versionData?.commit || 'local';
       "@type": "WebSite",
       "name": "The Hermes Dispatch",
       "url": "https://hermesdispatch.dev",
+      "description": "Curated directory and daily newsletter for AI hardware, crypto mining, and autonomous trading tools.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "The Hermes Dispatch by Mission Freedom",
+        "url": "https://hermesdispatch.dev"
+      },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://hermesdispatch.dev/skills?q={search_term_string}",
+        "target": "https://hermesdispatch.dev/directory?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     }

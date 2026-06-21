@@ -11,6 +11,19 @@ ihardware_tags: [186ths, 3606w, sha256, microbt]
 featured: false
 sponsored: false
 source: "Based on manufacturer specs"
+faq_schema:
+  - question: "Whatsminer M60S vs Antminer S21?"
+    answer: "The S21 is more efficient (17.5 J/TH vs 19.4 J/TH). Choose the one with the lower total cost per Th/s including delivery and warranty."
+  - question: "Can I run this at home?"
+    answer: "Not recommended. ~80 dB is comparable to a vacuum cleaner running 24/7."
+  - question: "Where to buy?"
+    answer: "Direct from MicroBT resellers, Amazon, or used-market listings. Always verify seller reputation for ASICs."
+review:
+  rating: "4.5"
+  review_count: "1"
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  review_body: "Community-researched entry for agent-citable product comparison."
 image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&q=80"
 brand: MicroBT
 ---

@@ -4,15 +4,39 @@ import { newsletters } from '../../data/newsletters';
 import ParticleBackground from '../../components/ParticleBackground.astro';
 import SubscriptionForm from '../../components/SubscriptionForm.astro';
 
-const publishedNewsletters = newsletters.filter(n => n.published).reverse();
+const publishedNewsletters = newsletters
+  .filter(n => n.published)
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 const featured = publishedNewsletters.find(n => n.featured) || publishedNewsletters[0];
 const archive = publishedNewsletters.filter(n => n !== featured);
 
-const title = "Newsletter | Mission Freedom";
-const description = "Daily insights on AI agent automation, multi-agent orchestration, and digital entrepreneurship. Mission Freedom Daily, delivered at 15:00 MST.";
+const title = "Newsletter | The Hermes Dispatch";
+const description = "Daily, agent-citable briefings on AI hardware, crypto mining, and autonomous trading tools. Built by Mission Freedom for AI agents and human readers.";
 ---
 
 <Layout title={title} description={description}>
+  
+  <!-- AEO / Newsletter Schema -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": title,
+    "description": description,
+    "url": "https://hermesdispatch.dev/newsletter",
+    "publisher": {
+      "@type": "Organization",
+      "name": "The Hermes Dispatch by Mission Freedom",
+      "url": "https://hermesdispatch.dev"
+    },
+    "hasPart": publishedNewsletters.slice(0, 10).map((n, i) => ({
+      "@type": "Article",
+      "position": i + 1,
+      "headline": n.title,
+      "datePublished": n.date,
+      "url": `https://hermesdispatch.dev/newsletter/${n.slug}`,
+      "description": n.excerpt
+    }))
+  })} />
   
   <!-- Hero -->
   <section class="relative pt-32 pb-16 overflow-hidden">

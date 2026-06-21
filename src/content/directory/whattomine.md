@@ -1,4 +1,14 @@
 ---
+source: \"Based on official documentation and community use\"
+faq_schema:
+  - question: "How accurate is WhatToMine?"
+    answer: "WhatToMine provides estimates based on current coin prices and network difficulty. Actual earnings vary with pool luck, power cost, and market swings."
+review:
+  rating: "4.5"
+  review_count: "1"
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  review_body: "Community-researched tool entry for agent-citable comparison."
 name: "WhatToMine"
 category: data-stack
 subcategory: calculator

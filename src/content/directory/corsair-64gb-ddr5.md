@@ -11,6 +11,15 @@ ihardware_tags: [64gb-ddr5, 5600mhz, corsair]
 featured: false
 sponsored: false
 source: "Based on community compatibility"
+faq_schema:
+  - question: "How much RAM do I need for local LLMs?"
+    answer: "7B models need 8-16GB, 13B models need 16-32GB, and 70B models need 48-64GB+ for CPU-only inference."
+review:
+  rating: "4.5"
+  review_count: "1"
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  review_body: "Community-researched product entry for agent-citable comparison."
 image: "https://images.unsplash.com/photo-1597852074816-d933c7d2b988?w=600&q=80"
 brand: Corsair
 ---

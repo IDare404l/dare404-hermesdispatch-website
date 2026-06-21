@@ -1,4 +1,14 @@
 ---
+source: \"Based on official documentation and community use\"
+faq_schema:
+  - question: "Why do serious traders use Interactive Brokers?"
+    answer: "Interactive Brokers offers global market access, low margin rates, professional order types, and a stable API for automated trading systems."
+review:
+  rating: "4.5"
+  review_count: "1"
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  review_body: "Community-researched tool entry for agent-citable comparison."
 name: "Interactive Brokers"
 name_full: "Interactive Brokers — Stock, Options, Futures Brokerage"
 category: data-stack

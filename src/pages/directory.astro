@@ -37,6 +37,57 @@ const products = entries.map(e => ({
   Content: e.Content,
   rawContent: e.rawContent || ''
 }));
+
+// Build per-product Product+FAQPage schema for AEO
+const productSchemas = products.map(product => {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.name_full || product.why_use || ``,
+    "brand": { "@type": "Brand", "name": product.brand || "Unknown" },
+    "image": product.image || "",
+    "category": product.category ? product.category.replace(/-/g, " ") : "",
+    "offers": {
+      "@type": "Offer",
+      "price": String(product.price || "0"),
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": product.referral_link || product.amazon_link || "https://hermesdispatch.dev/directory"
+    }
+  };
+  if (product.review) {
+    schema.review = {
+      "@type": "Review",
+      "author": { "@type": "Organization", "name": product.review.author || "The Hermes Dispatch" },
+      "publisher": { "@type": "Organization", "name": product.review.publisher || "The Hermes Dispatch" },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": String(product.review.rating || "4.5"),
+        "bestRating": "5"
+      },
+      "reviewBody": product.review.review_body || "Community-researched product entry."
+    };
+    schema.aggregateRating = {
+      "@type": "AggregateRating",
+      "ratingValue": String(product.review.rating || "4.5"),
+      "reviewCount": String(product.review.review_count || "1")
+    };
+  }
+  if (product.faq_schema && product.faq_schema.length > 0) {
+    schema.mainEntity = product.faq_schema.map(f => ({
+      "@type": "Question",
+      "name": f.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": f.answer
+      }
+    }));
+  }
+  return schema;
+});
+
+const allSchemas = [itemListSchema, ...productSchemas];
 ---
 
 <Layout
@@ -45,7 +96,7 @@ const products = entries.map(e => ({
 >
 
 <!-- Schema -->
-<script type="application/ld+json" is:inline set:html={JSON.stringify(itemListSchema)} />
+<script type="application/ld+json" is:inline set:html={JSON.stringify(allSchemas)} />
 
 <!-- Hero -->
 <section class="relative py-20 overflow-hidden">

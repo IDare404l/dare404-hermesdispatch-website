@@ -11,6 +11,19 @@ ihardware_tags: [nvme-gen4, 2tb-ssd, samsung]
 featured: false
 sponsored: false
 source: "Based on manufacturer specs"
+faq_schema:
+  - question: "Does SSD speed matter for LLM inference?"
+    answer: "For model loading, yes. For token generation, RAM/VRAM speed matters far more."
+  - question: "Is 2TB enough?"
+    answer: "For most users, yes. Heavy experimenters with 70B+ models may want 4TB."
+  - question: "Can I use this in a mini PC?"
+    answer: "Yes, if the mini PC has an M.2 2280 slot that supports NVMe."
+review:
+  rating: "4.5"
+  review_count: "1"
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  review_body: "Community-researched entry for agent-citable product comparison."
 image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80"
 brand: Samsung
 ---

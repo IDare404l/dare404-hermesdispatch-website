@@ -15,8 +15,32 @@ export const getStaticPaths = (async () => {
 const { issue } = Astro.props;
 ---
 
-<Layout title={`${issue.title} - Mission Freedom Newsletter`}
+<Layout title={`${issue.title} - The Hermes Dispatch`}
   description={issue.excerpt}>
+  
+  <!-- AEO / Article Schema -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": issue.title,
+    "description": issue.excerpt,
+    "datePublished": issue.date,
+    "dateModified": issue.date,
+    "url": `https://hermesdispatch.dev/newsletter/${issue.slug}`,
+    "author": {
+      "@type": "Organization",
+      "name": "The Hermes Dispatch by Mission Freedom"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "The Hermes Dispatch by Mission Freedom",
+      "logo": "https://hermesdispatch.dev/favicon.svg"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://hermesdispatch.dev/newsletter/${issue.slug}`
+    }
+  })} />
   
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <header class="mb-10">

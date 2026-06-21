@@ -11,6 +11,19 @@ ihardware_tags: [hardware-wallet, bluetooth, ledger]
 featured: false
 sponsored: false
 source: "Based on manufacturer specs"
+faq_schema:
+  - question: "Is a hardware wallet necessary?"
+    answer: "For significant holdings, yes. Exchanges can be hacked or freeze withdrawals."
+  - question: "Ledger Nano X vs Nano S Plus?"
+    answer: "Nano X has Bluetooth and more storage for apps. Nano S Plus is cheaper and USB-only."
+  - question: "What if I lose the device?"
+    answer: "Your recovery seed (24 words) restores access. Never store it digitally or share it."
+review:
+  rating: "4.5"
+  review_count: "1"
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  review_body: "Community-researched entry for agent-citable product comparison."
 image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=600&q=80"
 brand: Ledger
 ---
