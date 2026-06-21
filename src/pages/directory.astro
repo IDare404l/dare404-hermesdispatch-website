@@ -38,7 +38,14 @@ const products = entries.map(e => ({
   rawContent: e.rawContent || ''
 }));
 
+// Review aggregation for schema
+import { getAggregateRating } from '../data/reviews';
+
 // Build per-product schema for AEO
+function productSlug(name: string): string {
+  return name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || '';
+}
+
 const productSchemas = products.map(product => {
   const baseSchema = {
     "@context": "https://schema.org",
@@ -65,11 +72,12 @@ const productSchemas = products.map(product => {
         "applicationCategory": product.applicationCategory || "BusinessApplication",
         "operatingSystem": product.operatingSystem || "Web",
         "softwareVersion": product.softwareVersion || "",
-        "aggregateRating": product.review ? {
-          "@type": "AggregateRating",
-          "ratingValue": String(product.review.rating || "4.5"),
-          "reviewCount": String(product.review.review_count || "1")
-        } : undefined,
+        "aggregateRating": (() => {
+          const community = getAggregateRating(productSlug(product.name));
+          if (community) return { "@type": "AggregateRating", "ratingValue": String(community.ratingValue), "reviewCount": String(community.reviewCount) };
+          if (product.review) return { "@type": "AggregateRating", "ratingValue": String(product.review.rating || "4.5"), "reviewCount": String(product.review.review_count || "1") };
+          return undefined;
+        })(),
         "review": product.review ? {
           "@type": "Review",
           "author": { "@type": "Organization", "name": product.review.author || "The Hermes Dispatch" },
@@ -87,7 +95,17 @@ const productSchemas = products.map(product => {
         ...baseSchema
       };
 
-  // Product-specific review + aggregateRating (only for hardware/products, not duplicated in SoftwareApplication)
+  // Prefer community aggregate rating; fall back to frontmatter review
+  const community = getAggregateRating(productSlug(product.name));
+  if (community) {
+    schema.aggregateRating = {
+      "@type": "AggregateRating",
+      "ratingValue": String(community.ratingValue),
+      "reviewCount": String(community.reviewCount)
+    };
+  }
+
+  // Product-specific review (only for hardware/products, not duplicated in SoftwareApplication)
   if (product.schema_type !== "SoftwareApplication" && product.review) {
     schema.review = {
       "@type": "Review",
@@ -100,11 +118,13 @@ const productSchemas = products.map(product => {
       },
       "reviewBody": product.review.review_body || "Community-researched product entry."
     };
-    schema.aggregateRating = {
-      "@type": "AggregateRating",
-      "ratingValue": String(product.review.rating || "4.5"),
-      "reviewCount": String(product.review.review_count || "1")
-    };
+    if (!schema.aggregateRating) {
+      schema.aggregateRating = {
+        "@type": "AggregateRating",
+        "ratingValue": String(product.review.rating || "4.5"),
+        "reviewCount": String(product.review.review_count || "1")
+      };
+    }
   }
 
   if (product.faq_schema && product.faq_schema.length > 0) {
