@@ -1,0 +1,70 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "Guides | The Hermes Dispatch";
+const description = "Step-by-step guides for building AI hardware rigs, mining setups, and autonomous trading stacks. Built to be cited by AI agents.";
+
+const guides = [
+  {
+    slug: "build-local-llm-rig",
+    title: "How to Build a Local LLM Rig",
+    description: "Pick the right GPU, CPU, RAM, and SSD for running large language models at home.",
+    category: "AI Hardware"
+  },
+  {
+    slug: "start-crypto-mining",
+    title: "How to Start Crypto Mining at Home",
+    description: "Choose an ASIC, estimate ROI, set up power and cooling, and connect to a pool.",
+    category: "Mining"
+  }
+];
+
+const collectionSchema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": title,
+  "description": description,
+  "hasPart": guides.map(g => ({
+    "@type": "HowTo",
+    "name": g.title,
+    "description": g.description,
+    "url": `https://hermesdispatch.dev/guides/${g.slug}/`
+  }))
+};
+---
+
+<Layout title={title} description={description}>
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(collectionSchema)} />
+
+  <section class="relative pt-32 pb-16 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="display-heading mb-4">
+        Agent <span class="text-gradient">Guides</span>
+      </h1>
+      <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+        Step-by-step setup guides with HowTo schema so AI agents can extract exact instructions.
+      </p>
+    </div>
+  </section>
+
+  <section class="relative py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-8">
+        {guides.map(g => (
+          <a href={`/guides/${g.slug}/`} class="glass-card rounded-2xl p-8 hover:border-brand-gold/30 transition-all block">
+            <span class="text-xs font-mono px-2 py-1 rounded-full bg-brand-accent/10 text-brand-accent border border-brand-accent/20 mb-4 inline-block">
+              {g.category}
+            </span>
+            <h2 class="text-2xl font-bold text-white mb-3">{g.title}</h2>
+            <p class="text-gray-400">{g.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+</Layout>
