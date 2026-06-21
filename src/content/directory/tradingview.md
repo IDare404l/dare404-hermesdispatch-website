@@ -1,51 +1,40 @@
 ---
-source: \"Based on official documentation and community use\"
+name: "TradingView"
+category: "invest"
+subcategory: "charting"
+image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80"
+name_full: "TradingView"
+price: "Free; paid from $14.95/mo"
+source: "https://www.tradingview.com"
+referral_link: ""
+why_use: "Best-in-class charting, Pine Script strategy development, and social trading community."
+affiliate_tags: ["invest", "charting", "trading"]
+verdict: "Best charting platform for technical analysis and strategy prototyping."
+last_verified: "2026-06-21"
+applicationCategory: "FinanceApplication"
+operatingSystem: "Web, Windows, macOS, iOS, Android"
+softwareVersion: ""
 faq_schema:
-  - question: "Can TradingView automate trades?"
-    answer: "TradingView is primarily for charting and alerts. Automation requires webhooks to a connected broker or exchange that supports API orders."
+  mainEntity:
+    - question: "Is TradingView free?"
+      answer: "TradingView has a robust free tier. Paid plans add more indicators, alerts, and screeners."
+    - question: "Can I automate trades with TradingView?"
+      answer: "Yes. TradingView alerts can trigger webhooks that connect to broker APIs for automated execution."
+    - question: "What is Pine Script?"
+      answer: "Pine Script is TradingView's scripting language for custom indicators and strategies."
 review:
-verdict: Best charting platform for technical analysis across crypto, stocks, and forex.
-
-last_verified: 2026-06-21
-schema_type: SoftwareApplication
-applicationCategory: FinanceApplication
-operatingSystem: Web, iOS, Android, Windows, macOS
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  rating: "4.8"
+  review_count: "1"
+  review_body: "Unmatched charting and community. Essential for technical traders and strategy developers."
+schema_type: "SoftwareApplication"
 ---
 
-## What It Is
+TradingView is the most popular charting and technical analysis platform. It combines powerful charts, custom indicators via Pine Script, and a large community of traders.
 
-The largest trading community + browser charting platform. 50M+ users. Free tier gets 3 indicators, 1 chart, limited alerts. Premium unlocks:
+## When to choose
 
-- **20+ indicators per chart** — full technical stack
-- **Pine Script** — our strategy language; backtest → deploy
-- **Strategy tester** — walk-forward before you wire real money
-- **Alerts → Webhooks** — trigger bot trades from chart signals
-
-## How We Use It
-
-Every bot we write starts on TradingView:
-
-1. **Visual strategy** — draw levels, mark structure
-2. **Pine Script prototype** — 50 lines to test logic
-3. **Backtest** — 2 years history, see if it works
-4. **Webhook → Alpaca/IBKR** — automated execution
-
-## Why You Should Too
-
-Free tier is enough for 90% of retail traders. Premium is $14.95-179.95/mo — worth it when you're running live capital.
-
-## The Stack Position
-
-```
-Strategy design → Backtesting → Optimization
-        ↓
-Pine Script export → Python wrapper → Broker API
-        ↓
-        Live execution
-```
-
-## CTA
-
-[Try TradingView free →](https://www.tradingview.com/partner-program/)
-<br><small>When you upgrade, we earn. Price to you is unchanged.</small>
-image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80"
+- You rely on technical analysis
+- You want to develop and backtest strategies
+- You trade across multiple brokers

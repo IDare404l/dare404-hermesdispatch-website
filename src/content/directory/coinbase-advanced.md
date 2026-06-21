@@ -1,41 +1,40 @@
 ---
-source: \"Based on official documentation and community use\"
+name: "Coinbase Advanced"
+category: "invest"
+subcategory: "exchange"
+image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=600&q=80"
+name_full: "Coinbase Advanced Trade"
+price: "$0"
+source: "https://advanced.coinbase.com"
+referral_link: ""
+why_use: "Lower fees and more order types than standard Coinbase; strong regulatory standing in the US."
+affiliate_tags: ["invest", "exchange", "trading"]
+verdict: "Good starting point for US traders moving from basic exchange to API trading."
+last_verified: "2026-06-21"
+applicationCategory: "FinanceApplication"
+operatingSystem: "Web, iOS, Android"
+softwareVersion: ""
 faq_schema:
-  - question: "Is Coinbase Advanced better than regular Coinbase for active trading?"
-    answer: "Coinbase Advanced has lower fees and more order types than the standard consumer app, making it better for active traders and bots."
+  mainEntity:
+    - question: "Is Coinbase Advanced better than regular Coinbase for active trading?"
+      answer: "Coinbase Advanced has lower fees and more order types than the standard consumer app, making it better for active traders and bots."
+    - question: "Does it have an API?"
+      answer: "Yes. Coinbase Advanced Trade API supports REST and WebSocket for automated trading."
+    - question: "Is it available in the US?"
+      answer: "Yes, Coinbase Advanced is available to US users with full USD markets."
 review:
-verdict: Good starting point for US traders moving from basic exchange to API trading.
-
-last_verified: 2026-06-21
-schema_type: SoftwareApplication
-applicationCategory: FinanceApplication
-operatingSystem: Web, iOS, Android
+  author: "The Hermes Dispatch"
+  publisher: "The Hermes Dispatch"
+  rating: "4.2"
+  review_count: "1"
+  review_body: "Strong US compliance and liquidity. Fees are reasonable but not the lowest globally."
+schema_type: "SoftwareApplication"
 ---
 
-## What It Is
+Coinbase Advanced is the professional trading platform from Coinbase. It offers lower maker/taker fees, more order types, and a full API for algorithmic trading.
 
-Coinbase is the largest U.S.-regulated cryptocurrency exchange. Coinbase Advanced is its lower-fee active trading tier. It is the natural first stop for U.S. users converting dollars into Bitcoin or Ethereum.
+## When to choose
 
-## How We Use It
-
-1. **Fiat on-ramp** — deposit USD via ACH
-2. **Buy spot BTC/ETH** — lower fees than Coinbase simple interface
-3. **Withdraw to self-custody** — move to Ledger/Trezor for holding
-
-## Why You Should Too
-
-- Regulated in the U.S.
-- Strong liquidity and order books
-- Simple tax reporting exports
-
-## The Stack Position
-
-```
-Bank → Coinbase Advanced → Self-custody wallet → DeFi / DEX
-```
-
-## CTA
-
-[Open Coinbase Advanced →](https://www.coinbase.com/)
-<br><small>Apply for referral program to monetize signups.</small>
-image: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=600&q=80"
+- You are a US-based trader
+- You want regulatory clarity
+- You need USD liquidity and a stable API
