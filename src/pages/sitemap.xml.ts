@@ -18,6 +18,7 @@ export async function GET(context: APIContext) {
     { path: '/guides/build-local-llm-rig/', changefreq: 'weekly', priority: 0.8 },
     { path: '/guides/start-crypto-mining/', changefreq: 'weekly', priority: 0.8 },
     { path: '/reviews/', changefreq: 'weekly', priority: 0.7 },
+    { path: '/go/', changefreq: 'always', priority: 0.1 },
     { path: '/advertise/', changefreq: 'monthly', priority: 0.7 },
     { path: '/about/', changefreq: 'monthly', priority: 0.7 },
     { path: '/methodology/', changefreq: 'monthly', priority: 0.7 },
