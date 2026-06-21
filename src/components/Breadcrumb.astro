@@ -41,6 +41,11 @@ if (segments.length === 0) {
   return null;
 }
 
+const isSponsored = false;
+const sponsorCopy = "Sponsored: Curated AI hardware picks, honest benchmarks.";
+const sponsorCta = "Browse the Directory";
+const sponsorUrl = "/directory";
+
 const schema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -53,7 +58,7 @@ const schema = {
 };
 ---
 
-<nav aria-label="Breadcrumb" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-2 text-sm text-gray-500">
+<nav aria-label="Breadcrumb" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-1 text-sm text-gray-500">
   <ol class="flex flex-wrap items-center gap-2">
     {crumbs.map((crumb, i) => (
       <li class="flex items-center gap-2">
@@ -67,4 +72,12 @@ const schema = {
     ))}
   </ol>
   <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+  
+  <!-- Reserved ad space: remove hidden to activate sponsor banner -->
+  <div class="mt-2 hidden" data-sponsor-banner>
+    <a href={sponsorUrl} class="flex items-center justify-between gap-4 rounded-lg border border-brand-gold/30 bg-brand-gold/5 px-4 py-2 text-xs hover:bg-brand-gold/10 transition-colors">
+      <span class="text-brand-gold font-medium">{sponsorCopy}</span>
+      <span class="text-brand-accent">{sponsorCta} →</span>
+    </a>
+  </div>
 </nav>
