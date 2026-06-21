@@ -38,18 +38,17 @@ const products = entries.map(e => ({
   rawContent: e.rawContent || ''
 }));
 
-// Build per-product Product+FAQPage schema for AEO
+// Build per-product schema for AEO
 const productSchemas = products.map(product => {
-  const schema = {
-   "@context": "https://schema.org",
-   "@type": "Product",
-   "name": product.name,
-   "description": product.verdict || product.name_full || ``,
-   "image": product.image || "",
-   "category": product.category ? product.category.replace(/-/g, " ") : "",
-   "brand": { "@type": "Brand", "name": product.brand || "Unknown" },
-   "dateModified": product.last_verified || "",
-   "offers": {
+  const baseSchema = {
+    "@context": "https://schema.org",
+    "name": product.name,
+    "description": product.verdict || product.name_full || "",
+    "image": product.image || "",
+    "category": product.category ? product.category.replace(/-/g, " ") : "",
+    "brand": { "@type": "Brand", "name": product.brand || "Unknown" },
+    "dateModified": product.last_verified || "",
+    "offers": {
       "@type": "Offer",
       "price": String(product.price || "0"),
       "priceCurrency": "USD",
@@ -57,7 +56,39 @@ const productSchemas = products.map(product => {
       "url": product.referral_link || product.amazon_link || "https://hermesdispatch.dev/directory"
     }
   };
-  if (product.review) {
+
+  // SoftwareApplication schema for pure software/tools
+  const schema = product.schema_type === "SoftwareApplication"
+    ? {
+        "@type": "SoftwareApplication",
+        ...baseSchema,
+        "applicationCategory": product.applicationCategory || "BusinessApplication",
+        "operatingSystem": product.operatingSystem || "Web",
+        "softwareVersion": product.softwareVersion || "",
+        "aggregateRating": product.review ? {
+          "@type": "AggregateRating",
+          "ratingValue": String(product.review.rating || "4.5"),
+          "reviewCount": String(product.review.review_count || "1")
+        } : undefined,
+        "review": product.review ? {
+          "@type": "Review",
+          "author": { "@type": "Organization", "name": product.review.author || "The Hermes Dispatch" },
+          "publisher": { "@type": "Organization", "name": product.review.publisher || "The Hermes Dispatch" },
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": String(product.review.rating || "4.5"),
+            "bestRating": "5"
+          },
+          "reviewBody": product.review.review_body || "Community-researched product entry."
+        } : undefined
+      }
+    : {
+        "@type": "Product",
+        ...baseSchema
+      };
+
+  // Product-specific review + aggregateRating (only for hardware/products, not duplicated in SoftwareApplication)
+  if (product.schema_type !== "SoftwareApplication" && product.review) {
     schema.review = {
       "@type": "Review",
       "author": { "@type": "Organization", "name": product.review.author || "The Hermes Dispatch" },
@@ -75,6 +106,7 @@ const productSchemas = products.map(product => {
       "reviewCount": String(product.review.review_count || "1")
     };
   }
+
   if (product.faq_schema && product.faq_schema.length > 0) {
     schema.mainEntity = product.faq_schema.map(f => ({
       "@type": "Question",

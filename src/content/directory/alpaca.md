@@ -25,6 +25,9 @@ review:
 verdict: Best free brokerage API for paper trading and algorithmic strategy development.
 
 last_verified: 2026-06-21
+schema_type: SoftwareApplication
+applicationCategory: FinanceApplication
+operatingSystem: Web, Python SDK
 ---
 
 ## What It Is

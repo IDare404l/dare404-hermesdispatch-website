@@ -7,6 +7,9 @@ review:
 verdict: Best charting platform for technical analysis across crypto, stocks, and forex.
 
 last_verified: 2026-06-21
+schema_type: SoftwareApplication
+applicationCategory: FinanceApplication
+operatingSystem: Web, iOS, Android, Windows, macOS
 ---
 
 ## What It Is

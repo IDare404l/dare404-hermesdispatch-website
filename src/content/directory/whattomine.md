@@ -7,6 +7,9 @@ review:
 verdict: Essential profitability calculator for comparing mining hardware and coins.
 
 last_verified: 2026-06-21
+schema_type: SoftwareApplication
+applicationCategory: BusinessApplication
+operatingSystem: Web
 ---
 
 ## What It Is

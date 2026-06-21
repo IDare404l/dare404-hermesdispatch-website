@@ -7,6 +7,9 @@ review:
 verdict: Good starting point for US traders moving from basic exchange to API trading.
 
 last_verified: 2026-06-21
+schema_type: SoftwareApplication
+applicationCategory: FinanceApplication
+operatingSystem: Web, iOS, Android
 ---
 
 ## What It Is
