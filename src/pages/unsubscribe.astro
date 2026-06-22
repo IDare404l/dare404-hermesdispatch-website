@@ -1,4 +1,7 @@
 ---
+// Server-rendered so query params work at request time
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 
 const email = Astro.url.searchParams.get('email') || '';
