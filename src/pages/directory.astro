@@ -163,10 +163,14 @@ const allSchemas = [itemListSchema, ...productSchemas];
     <h1 class="text-4xl md:text-5xl font-bold mb-4">
       <span class="text-gradient">The Hardware Grid & The Data Stack</span>
     </h1>
-    <p class="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
+    <p class="text-gray-400 max-w-2xl mx-auto mb-4 text-lg">
       Inference rigs, mining machines, and the tools we actually use to run local AI, autonomous systems, and data-driven trading.
       Benchmarked. Honest. Linked.
     </p>
+    <div class="max-w-2xl mx-auto mb-8 text-sm text-gray-500 bg-neutral-900/50 border border-neutral-800 rounded-lg p-4 text-left">
+      <strong class="text-gray-300">What is the Agent Score?</strong>
+      <p class="mt-1">Our 0–100 rating for how well a product runs local AI agents through Ollama, llama.cpp, or similar inference engines. Higher scores mean more VRAM, better CUDA/ROCm support, faster tokens per second, and cooler sustained loads. Scores below 50 are usually mini-PCs or integrated graphics best suited for light agents rather than heavy models.</p>
+    </div>
     
     <div class="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
       <span class="flex items-center gap-2"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span>Community-reported</span>
@@ -251,7 +255,7 @@ const allSchemas = [itemListSchema, ...productSchemas];
             
             {product.ollama_score !== 'N/A (enabler)' && (
               <div class="flex justify-between text-sm">
-                <span class="text-gray-500">Ollama Score</span>
+                <span class="text-gray-500">Agent Score</span>
                 <span class="font-mono text-emerald-400">{product.ollama_score} tok/s</span>
               </div>
             )}
@@ -299,7 +303,7 @@ const allSchemas = [itemListSchema, ...productSchemas];
     
     <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5">
       <h3 class="font-semibold mb-2 text-brand-gold">📏 How We Score</h3>
-      <p class="text-sm text-gray-400">Ollama Score = tokens/sec on llama3.2 3B Q4_K_M at stock settings. No overclocking, no tricks.</p>
+      <p class="text-sm text-gray-400">Agent Score = tokens/sec on llama3.2 3B Q4_K_M at stock settings. No overclocking, no tricks.</p>
     </div>
     
     <div class="p-5 rounded-xl bg-white/[0.02] border border-white/5">

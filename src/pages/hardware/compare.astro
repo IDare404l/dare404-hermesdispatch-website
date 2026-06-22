@@ -59,9 +59,13 @@ const faqSchema = {
       <span class="text-brand-accent text-sm font-mono">THE RIG — COMPARISON</span>
     </div>
     <h1 class="text-4xl md:text-5xl font-bold mb-4"><span class="text-gradient">Best Local LLM Hardware</span></h1>
-    <p class="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
+    <p class="text-gray-400 max-w-2xl mx-auto mb-4 text-lg">
       Mini PCs vs. GPUs for running Ollama and local AI agents. Benchmarked on llama3.2 3B Q4_K_M.
     </p>
+    <div class="max-w-2xl mx-auto mb-8 text-sm text-gray-500 bg-neutral-900/50 border border-neutral-800 rounded-lg p-4 text-left">
+      <strong class="text-gray-300">Agent Score (0–100):</strong>
+      <p class="mt-1">A practical rating for local-agent inference. 80–100 means desktop-class VRAM and fast CUDA/ROCm throughput. 40–60 means usable for light agents but not for large models or long contexts.</p>
+    </div>
   </div>
 </section>
 
@@ -73,7 +77,7 @@ const faqSchema = {
           <th class="text-left p-4 font-semibold">Product</th>
           <th class="text-left p-4 font-semibold">Type</th>
           <th class="text-left p-4 font-semibold">Price</th>
-          <th class="text-left p-4 font-semibold">Ollama Score</th>
+          <th class="text-left p-4 font-semibold">Agent Score</th>
           <th class="text-left p-4 font-semibold">Best For</th>
           <th class="text-right p-4 font-semibold">Action</th>
         </tr>
