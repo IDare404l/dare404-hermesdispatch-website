@@ -117,13 +117,31 @@ const schema = {
             <p class="text-sm text-gray-400">{product.why_use}</p>
           </div>
           
-          <a href={product.referral_link || product.amazon_link} target="_blank" rel="noopener noreferrer"
-            class="block w-full text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition">
-            Try It Free →
-          </a>
+          {(() => {
+            const ctaUrl = product.referral_link || product.amazon_link || product.source || '';
+            const ctaLabel = product.cta_label
+              ? product.cta_label
+              : product.amazon_link
+              ? 'View on Amazon →'
+              : product.referral_link
+              ? 'Try It Free →'
+              : (product.source || '').includes('amazon.com')
+              ? 'View on Amazon →'
+              : 'Learn More →';
+            return (
+              <a
+                href={`/go/${product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/?url=${encodeURIComponent(ctaUrl)}&source=invest`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block w-full text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition"
+              >
+                {ctaLabel}
+              </a>
+            );
+          })()}
           
           <p class="text-xs text-gray-600 mt-2 text-center">
-            {product.referral_link ? 'Referral link — we may earn' : 'Affiliate link — we may earn'}
+            {product.referral_link ? 'Referral link — we may earn' : product.amazon_link ? 'Affiliate link — we may earn' : 'Direct link'}
           </p>
         </div>
       </article>

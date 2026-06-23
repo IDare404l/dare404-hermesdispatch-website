@@ -268,14 +268,28 @@ const allSchemas = [itemListSchema, ...productSchemas];
             )}
           </div>
           
-          <a 
-            href={`/go/${product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/?url=${encodeURIComponent(product.referral_link || product.amazon_link || '')}&source=directory`}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block w-full text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition"
-          >
-            {product.referral_link ? 'Try It Free →' : 'View on Amazon →'}
-          </a>
+          {(() => {
+            const ctaUrl = product.referral_link || product.amazon_link || product.source || '';
+            const ctaLabel = product.cta_label
+              ? product.cta_label
+              : product.amazon_link
+              ? 'View on Amazon →'
+              : product.referral_link
+              ? 'Try It Free →'
+              : (product.source || '').includes('amazon.com')
+              ? 'View on Amazon →'
+              : 'Learn More →';
+            return (
+              <a
+                href={`/go/${product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/?url=${encodeURIComponent(ctaUrl)}&source=directory`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block w-full text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition"
+              >
+                {ctaLabel}
+              </a>
+            );
+          })()}
           
           <p class="text-xs text-gray-600 mt-2 text-center">
             {product.source}
