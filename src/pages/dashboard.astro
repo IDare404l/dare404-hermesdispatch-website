@@ -1,0 +1,101 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const links = [
+  { name: 'Directory', url: '/directory', desc: 'Curated AI hardware, crypto miners, and trading tools' },
+  { name: 'AI Hardware', url: '/hardware', desc: 'Local LLM rigs and components' },
+  { name: 'Crypto Mining', url: '/crypto', desc: 'ASICs, pools, and ROI tools' },
+  { name: 'Invest & Trade', url: '/invest', desc: 'Brokerages, charting, and APIs' },
+  { name: 'Answers', url: '/answers', desc: 'AEO answer-first product Q&A' },
+  { name: 'Guides', url: '/guides', desc: 'How-to guides and build walkthroughs' },
+  { name: 'Reviews', url: '/reviews', desc: 'Community ratings and benchmarks' },
+  { name: 'Podcast', url: '/podcast', desc: 'AI agents interviewing AI agents' },
+  { name: 'Newsletter', url: '/newsletter', desc: 'Daily Hermes Dispatch archive' },
+  { name: 'Advertise', url: '/advertise', desc: 'Sponsorship and placement info' },
+  { name: 'About IGOR', url: '/about-dare404', desc: 'Author identity and Person schema' },
+  { name: 'Methodology', url: '/methodology', desc: 'How products are scored and verified' },
+  { name: 'Subscribe', url: '/subscribe', desc: 'One-click newsletter signup' },
+];
+
+const status = [
+  { label: 'Site', value: 'https://hermesdispatch.dev', url: 'https://hermesdispatch.dev' },
+  { label: 'Newsletter', value: 'Daily 15:00 MST', url: '/newsletter' },
+  { label: 'Reports', value: 'Obsidian Command Center', url: 'https://obsidian.md' },
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Mission Freedom Dashboard",
+  "itemListElement": links.map((l, i) => ({
+    "@type": "ListItem", "position": i + 1,
+    "item": { "@type": "WebPage", "name": l.name, "url": `https://hermesdispatch.dev${l.url}` }
+  }))
+};
+---
+
+<Layout
+  title="Dashboard | Mission Freedom Command Center"
+  description="Verified links and system status for the Hermes Dispatch directory and automation systems."
+>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+  <section class="relative py-12 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-gold/10"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-gold/10 border border-brand-gold/30 mb-6">
+        <span class="text-brand-gold text-sm font-mono">COMMAND CENTER</span>
+      </div>
+      
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">
+        <span class="text-gradient">Mission Freedom Dashboard</span>
+      </h1>
+      <p class="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
+        Verified links to every public surface. Last link audit runs weekly; screenshots are logged when a link breaks.
+      </p>
+      
+      <div class="flex flex-wrap justify-center gap-3 text-sm">
+        {status.map(s => (
+          <a
+            href={s.url}
+            target={s.url.startsWith('http') ? '_blank' : undefined}
+            rel={s.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+            class="px-4 py-2 rounded-full border border-white/10 hover:border-brand-gold/50 transition"
+          >
+            <span class="text-gray-500">{s.label}:</span> <span class="text-brand-gold">{s.value}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-4 pb-16">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {links.map(link => (
+        <a
+          href={link.url}
+          class="glass-card rounded-xl p-5 hover:border-brand-gold/40 transition group"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-lg font-semibold group-hover:text-brand-gold transition">{link.name}</h3>
+            <svg class="w-5 h-5 text-gray-500 group-hover:text-brand-gold transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </div>
+          <p class="text-sm text-gray-400">{link.desc}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-4 pb-16">
+    <div class="glass-card rounded-2xl p-6 text-center">
+      <h2 class="text-xl font-semibold mb-2">Found a broken link?</h2>
+      <p class="text-gray-400 mb-4">
+        This dashboard is tested weekly. Broken links are logged with screenshots in the vault.
+      </p>
+      <a href="/about-dare404" class="text-brand-gold hover:underline text-sm">Contact dare404 →</a>
+    </div>
+  </section>
+
+</Layout>

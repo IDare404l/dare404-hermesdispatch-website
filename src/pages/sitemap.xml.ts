@@ -26,6 +26,7 @@ export async function GET(context: APIContext) {
     { path: '/about/', changefreq: 'monthly', priority: 0.7 },
     { path: '/methodology/', changefreq: 'monthly', priority: 0.7 },
     { path: '/newsletter/', changefreq: 'daily', priority: 0.9 },
+    { path: '/dashboard/', changefreq: 'daily', priority: 0.8 },
     { path: '/subscribe/', changefreq: 'monthly', priority: 0.6 },
     { path: '/privacy/', changefreq: 'monthly', priority: 0.5 },
     { path: '/team/', changefreq: 'monthly', priority: 0.5 },
