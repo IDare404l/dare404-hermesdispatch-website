@@ -1,5 +1,6 @@
 ---
 import { type GetStaticPaths } from 'astro';
+import { marked } from 'marked';
 import Layout from '../../layouts/Layout.astro';
 import { newsletters, getNewsletterBySlug } from '../../data/newsletters';
 
@@ -13,6 +14,26 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { issue } = Astro.props;
+
+// Render markdown content to HTML with dark-mode friendly styling
+const rawHtml = marked.parse(issue.content);
+
+// Post-process HTML for newsletter-specific styling
+const styledHtml = rawHtml
+  // Wrap H2 section headers with underline
+  .replace(/<h2>(.*?)<\/h2>/g, '<div class="border-b border-gray-800 pb-3 mt-10 mb-6"><h2 class="text-2xl font-semibold text-white m-0">$1</h2></div>')
+  // Style H3 story headlines
+  .replace(/<h3>(.*?)<\/h3>/g, '<h3 class="text-xl font-semibold mt-8 mb-3 text-white">$1</h3>')
+  // Style horizontal rules
+  .replace(/<hr>/g, '<hr class="border-gray-800 my-8" />')
+  // Style blockquotes based on label
+  .replace(/<blockquote>\s*<p><strong>Agent TL;DR:<\/strong>(.*?)<\/p>\s*<\/blockquote>/g, '<div class="bg-red-500/5 border-l-4 border-red-500 p-4 my-4 rounded-r"><p class="text-red-400 text-xs font-semibold uppercase tracking-wider m-0 mb-1">Agent TL;DR</p><p class="text-gray-200 m-0">$1</p></div>')
+  .replace(/<blockquote>\s*<p><strong>Why it matters:<\/strong>(.*?)<\/p>\s*<\/blockquote>/g, '<div class="bg-amber-400/5 border-l-4 border-amber-400 p-4 my-4 rounded-r"><p class="text-amber-400 text-xs font-semibold uppercase tracking-wider m-0 mb-1">Why it matters</p><p class="text-gray-200 m-0">$1</p></div>')
+  .replace(/<blockquote>\s*<p><strong>The play:<\/strong>(.*?)<\/p>\s*<\/blockquote>/g, '<div class="bg-cyan-400/5 border-l-4 border-cyan-400 p-4 my-4 rounded-r"><p class="text-cyan-400 text-xs font-semibold uppercase tracking-wider m-0 mb-1">The play</p><p class="text-gray-200 m-0">$1</p></div>')
+  // Style links
+  .replace(/<a href=/g, '<a class="text-cyan-400 underline hover:text-cyan-300" target="_blank" rel="noopener" href=')
+  // Style strong inside paragraphs
+  .replace(/<p>(.*?)<\/p>/g, '<p class="mb-4">$1</p>');
 ---
 
 <Layout title={`${issue.title} - The Hermes Dispatch`}
@@ -45,7 +66,7 @@ const { issue } = Astro.props;
   
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <header class="mb-10">
-      <div class="flex items-center gap-4 mb-4 text-sm text-gray-500">
+      <div class="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-500">
         <time>{new Date(issue.date).toLocaleDateString('en-US', { 
           month: 'long', 
           day: 'numeric', 
@@ -60,45 +81,12 @@ const { issue } = Astro.props;
       <p class="text-xl text-gray-400">{issue.excerpt}</p>
     </header>
     
-    <div class="prose prose-invert prose-lg max-w-none">
-      {issue.content.split('\n').map((line, i) => {
-        if (line.startsWith('# ')) {
-          return <h1 key={i} class="text-3xl font-bold mt-8 mb-4">{line.slice(2)}</h1>;
-        }
-        if (line.startsWith('## ')) {
-          return <h2 key={i} class="text-2xl font-semibold mt-8 mb-4">{line.slice(3)}</h2>;
-        }
-        if (line.startsWith('### ')) {
-          return <h3 key={i} class="text-xl font-semibold mt-6 mb-3">{line.slice(4)}</h3>;
-        }
-        if (line.startsWith('- **')) {
-          const match = line.match(/- \*\*(.+?)\*\*:(?:(.+))?/);
-          if (match) {
-            return (
-              <li key={i} class="mb-2">
-                <strong class="text-brand-gold">{match[1]}</strong>: {match[2] || ''}
-              </li>
-            );
-          }
-        }
-        if (line.startsWith('- ')) {
-          return <li key={i} class="mb-2 ml-4">{line.slice(2)}</li>;
-        }
-        if (line.startsWith('**') && line.endsWith('**')) {
-          return <p key={i} class="font-semibold text-brand-gold">{line.slice(2, -2)}</p>;
-        }
-        if (line === '---') {
-          return <hr key={i} class="border-gray-800 my-8" />;
-        }
-        if (line.trim() === '') {
-          return <div key={i} class="h-4" />;
-        }
-        return <p key={i} class="mb-4">{line}</p>;
-      })}
+    <div class="newsletter-body text-gray-200 leading-relaxed text-lg">
+      <div set:html={styledHtml} />
     </div>
     
     <footer class="mt-12 pt-8 border-t border-gray-800">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
         <a href="/newsletter" class="text-gray-400 hover:text-brand-gold transition">
           ← Back to Newsletter
         </a>
