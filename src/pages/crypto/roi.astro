@@ -2,22 +2,66 @@
 import Layout from '../../layouts/Layout.astro';
 
 const entries = await Astro.glob('../../content/directory/*.md');
-const miners = entries.filter(e => e.frontmatter.subcategory === 'mining').sort(
-  (a, b) => (a.frontmatter.price || 0) - (b.frontmatter.price || 0)
+const miners = entries.filter(e => e.frontmatter.subcategory === 'mining' || e.frontmatter.subcategory === 'asic').sort(
+  (a, b) => (Number(a.frontmatter.price) || 0) - (Number(b.frontmatter.price) || 0)
 );
-const products = miners.map(e => ({...e.frontmatter, Content: e.Content}));
+const products = miners.map(e => ({...e.frontmatter, Content: e.Content})).map(p => ({
+  ...p,
+  priceNum: typeof p.price === 'string' ? parseFloat(p.price.replace(/[^0-9.]/g,'')) || 0 : (Number(p.price) || 0)
+}));
+
+const parseHashrate = (p) => {
+  const hashrateMatch = (p.name_full || p.name).match(/(\d+(?:\.\d+)?)\s*Th\/s/i);
+  return hashrateMatch ? parseFloat(hashrateMatch[1]) : 200;
+};
+const parsePower = (p) => {
+  const powerMatch = (p.name_full || p.name).match(/(\d{3,5})\s*W/i);
+  return powerMatch ? parseFloat(powerMatch[1]) : 3500;
+};
+const enrichedProducts = products.map(p => {
+  const hashrate = parseHashrate(p);
+  const power = parsePower(p);
+  const efficiency = hashrate ? (power / hashrate).toFixed(1) : 0;
+  return { ...p, hashrate, power, efficiency };
+});
+
+const btcPrice = 68000;
+const powerCost = 0.09;
+const networkDiff = 83e12;
+const blockReward = 3.125;
+const blocksPerDay = 144;
+const todayISO = new Date().toISOString().slice(0,10);
 
 const schema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
   "name": "ASIC Miner ROI Comparison | The Mine",
   "description": "Side-by-side ASIC miner ROI comparison including hashrate, power draw, and daily profit estimate at Idaho power rates.",
-  "itemListElement": products.map((p, i) => ({
+  "itemListElement": enrichedProducts.map((p, i) => ({
     "@type": "ListItem", "position": i + 1,
     "item": {"@type": "Product", "name": p.name, "description": p.name_full,
-      "brand": {"@type": "Brand", "name": p.brand || p.name.split(' ')[0]},
-      "offers": {"@type": "Offer", "price": p.price, "priceCurrency": "USD"}}
+      "brand": {"@type": "Brand", "name": p.brand || (typeof p.name === 'string' ? p.name.split(' ')[0] : 'ASIC')},
+      "offers": {"@type": "Offer", "price": p.priceNum, "priceCurrency": "USD"}}
   }))
+};
+
+const calcSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mining Payback Stress Test",
+  "applicationCategory": "FinanceApplication",
+  "description": "Stress-test ASIC miner ROI against BTC price, network difficulty growth, and power cost. Built for the Boise, Idaho mining community.",
+  "offers": {"@type": "Offer", "price": 0, "priceCurrency": "USD"},
+  "operatingSystem": "Web",
+  "author": {"@type": "Person", "name": "dare404", "url": "https://hermesdispatch.dev/about-dare404"},
+  "publisher": {"@type": "Organization", "name": "The Hermes Dispatch", "url": "https://hermesdispatch.dev"},
+  "dateModified": todayISO,
+  "featureList": [
+    "Payback curve under difficulty growth",
+    "Break-even BTC price heatmap",
+    "Idaho default power rate ($0.09/kWh)",
+    "Sensitivity to -30%, base, +30% BTC price scenarios"
+  ]
 };
 
 const faqSchema = {
@@ -38,42 +82,48 @@ const faqSchema = {
       "@type": "Question",
       "name": "Can you mine Bitcoin profitably at home?",
       "acceptedAnswer": { "@type": "Answer", "text": "Only if your electricity is cheap and you can handle the noise and heat. At $0.09/kWh with modern ASICs, home mining can break even or profit depending on BTC price." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the break-even BTC price for an Antminer S21?",
+      "acceptedAnswer": { "@type": "Answer", "text": "At $0.09/kWh and current difficulty, the S21 needs a BTC price above roughly $41,000 just to cover electricity. Hardware payback requires a higher BTC price or falling difficulty." }
+    },
+    {
+      "@type": "Question",
+      "name": "How fast does Bitcoin difficulty erase mining profits?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Difficulty has historically grown 3-7% per adjustment in bull markets. A sustained 5% monthly growth can turn a 12-month payback into 18+ months unless BTC price rises in step." }
     }
   ]
 };
-
-const btcPrice = 68000;
-const powerCost = 0.09;
-const networkDiff = 83e12;
-const blockReward = 3.125;
-const blocksPerDay = 144;
 ---
 
-<Layout title="ASIC Miner ROI Calculator | The Mine" description="Compare ASIC miner ROI with Idaho power costs. Updated hashrate, efficiency, and profitability data.">
+<Layout title="Mining Payback Stress Test | The Mine" description="Stress-test ASIC miner payback against BTC price, difficulty growth, and power cost. Default Idaho $0.09/kWh.">
 
 <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+<script type="application/ld+json" is:inline set:html={JSON.stringify(calcSchema)} />
 <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
 
 <section class="relative py-20 overflow-hidden">
   <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-accent/10"></div>
   <div class="relative z-10 max-w-6xl mx-auto px-4 text-center">
     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-6">
-      <span class="text-brand-accent text-sm font-mono">⛏️ THE MINE — ROI</span>
+      <span class="text-brand-accent text-sm font-mono">⛏️ THE MINE — STRESS TEST</span>
     </div>
-    
+
     <h1 class="text-4xl md:text-5xl font-bold mb-4">
-      <span class="text-gradient">ASIC Miner ROI</span>
+      <span class="text-gradient">Mining Payback Stress Test</span>
     </h1>
-    
+
     <p class="text-gray-400 max-w-2xl mx-auto mb-8 text-lg">
-      Compare hashrate, efficiency, and daily profit at Idaho power rates. Default assumes BTC ${btcPrice.toLocaleString()} and ${powerCost}/kWh.
+      Model payback under BTC price shocks, difficulty growth, and your local power rate. Idaho default ${powerCost}/kWh, BTC ${btcPrice.toLocaleString()}.
     </p>
   </div>
 </section>
 
+<!-- Global assumptions -->
 <section class="max-w-6xl mx-auto px-4 pb-8">
   <div class="glass-card rounded-2xl p-6 mb-8">
-    <div class="grid md:grid-cols-3 gap-4">
+    <div class="grid md:grid-cols-4 gap-4">
       <div>
         <label class="block text-xs text-gray-500 mb-1">BTC Price ($)</label>
         <input type="number" id="roi-btc" value={btcPrice} class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-center" />
@@ -86,7 +136,14 @@ const blocksPerDay = 144;
         <label class="block text-xs text-gray-500 mb-1">Network Difficulty</label>
         <input type="number" id="roi-diff" value={networkDiff} class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-center" />
       </div>
+      <div>
+        <label class="block text-xs text-gray-500 mb-1">Monthly Difficulty Growth (%)</label>
+        <input type="number" id="roi-growth" value="3" step="0.1" class="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-center" />
+      </div>
     </div>
+    <p class="text-xs text-gray-500 mt-4 text-center">
+      Defaults are estimates only. Network difficulty resets roughly every 2 weeks; this model compounds monthly for stress-test clarity.
+    </p>
   </div>
 
   <div class="glass-card rounded-2xl overflow-hidden">
@@ -98,40 +155,37 @@ const blocksPerDay = 144;
           <th class="text-left p-4 font-semibold">Power</th>
           <th class="text-left p-4 font-semibold">Efficiency</th>
           <th class="text-left p-4 font-semibold">Daily Profit</th>
-          <th class="text-left p-4 font-semibold">Break-even</th>
+          <th class="text-left p-4 font-semibold">Base Break-even</th>
+          <th class="text-left p-4 font-semibold">Stress Break-even</th>
           <th class="text-right p-4 font-semibold">Action</th>
         </tr>
       </thead>
       <tbody>
-        {products.map(product => {
-          const hashrateMatch = (product.name_full || product.name).match(/(\d+(?:\.\d+)?)\s*Th\/s/i);
-          const hashrate = hashrateMatch ? parseFloat(hashrateMatch[1]) : 200;
-          const powerMatch = (product.name_full || product.name).match(/(\d{3,5})\s*W/i);
-          const power = powerMatch ? parseFloat(powerMatch[1]) : 3500;
-          const efficiency = hashrate ? (power / hashrate).toFixed(1) : 0;
-          const dailyBTC = hashrate * 1e12 / networkDiff * blockReward * blocksPerDay;
+        {enrichedProducts.map(product => {
+          const dailyBTC = product.hashrate * 1e12 / networkDiff * blockReward * blocksPerDay;
           const dailyRev = dailyBTC * btcPrice;
-          const dailyCost = (power / 1000) * 24 * powerCost;
+          const dailyCost = (product.power / 1000) * 24 * powerCost;
           const dailyProfit = dailyRev - dailyCost;
-          const breakEven = dailyProfit > 0 ? Math.ceil(product.price / (dailyProfit * 30)) : '∞';
+          const breakEven = dailyProfit > 0 ? Math.ceil(product.priceNum / (dailyProfit * 30)) : '∞';
           return (
             <tr class="border-b border-white/5 hover:bg-white/[0.02] transition roi-row"
-                data-hashrate={hashrate}
-                data-power={power}
-                data-price={product.price}
-                data-efficiency={efficiency}
-                data-daily-profit={dailyProfit.toFixed(2)}>
+                data-name={product.name}
+                data-hashrate={product.hashrate}
+                data-power={product.power}
+                data-price={product.priceNum}
+                data-efficiency={product.efficiency}>
               <td class="p-4">
                 <span class="font-semibold">{product.name}</span>
                 <span class="text-xs text-gray-500 ml-2">{product.brand}</span>
               </td>
-              <td class="p-4 font-mono">{hashrate} Th/s</td>
-              <td class="p-4 font-mono">{power}W</td>
-              <td class="p-4 font-mono">{efficiency} J/TH</td>
+              <td class="p-4 font-mono">{product.hashrate} Th/s</td>
+              <td class="p-4 font-mono">{product.power}W</td>
+              <td class="p-4 font-mono">{product.efficiency} J/TH</td>
               <td class="p-4 font-mono text-emerald-400 roi-profit">${dailyProfit.toFixed(2)}</td>
               <td class="p-4 font-mono roi-breakeven">{breakEven} mo</td>
+              <td class="p-4 font-mono text-amber-400 roi-stress-breakeven">-</td>
               <td class="p-4 text-right">
-                <a href={product.amazon_link} target="_blank" rel="noopener noreferrer"
+                <a href={product.amazon_link || product.referral_link} target="_blank" rel="noopener noreferrer"
                   class="inline-block px-4 py-1.5 rounded-lg bg-brand-accent/10 border border-brand-accent/30 text-brand-accent hover:bg-brand-accent/20 transition text-xs font-medium">
                   View →
                 </a>
@@ -141,6 +195,55 @@ const blocksPerDay = 144;
         })}
       </tbody>
     </table>
+  </div>
+</section>
+
+<!-- Payback curve -->
+<section class="max-w-6xl mx-auto px-4 pb-8">
+  <div class="glass-card rounded-2xl p-6">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <h2 class="text-2xl font-bold"><span class="text-gradient">Payback Curve</span></h2>
+      <select id="curve-miner" class="bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm">
+        {enrichedProducts.map(p => <option value={p.name}>{p.name}</option>)}
+      </select>
+    </div>
+    <p class="text-sm text-gray-400 mb-4">Cumulative net cash flow over 24 months, with monthly difficulty growth applied.</p>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm" id="curve-table">
+        <thead class="bg-white/5 border-b border-white/10">
+          <tr>
+            <th class="text-left p-3">Month</th>
+            <th class="text-right p-3">Difficulty</th>
+            <th class="text-right p-3">Monthly Profit</th>
+            <th class="text-right p-3">Cumulative Net</th>
+            <th class="text-right p-3">Status</th>
+          </tr>
+        </thead>
+        <tbody class="font-mono"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Sensitivity heatmap -->
+<section class="max-w-6xl mx-auto px-4 pb-16">
+  <div class="glass-card rounded-2xl p-6">
+    <h2 class="text-2xl font-bold mb-4"><span class="text-gradient">Break-even BTC Price Sensitivity</span></h2>
+    <p class="text-sm text-gray-400 mb-4">Minimum BTC price needed to recover hardware cost within 24 months at different power rates.</p>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm" id="sensitivity-table">
+        <thead class="bg-white/5 border-b border-white/10">
+          <tr>
+            <th class="text-left p-3">Miner</th>
+            <th class="text-right p-3">$0.07/kWh</th>
+            <th class="text-right p-3">$0.09/kWh (Idaho)</th>
+            <th class="text-right p-3">$0.13/kWh</th>
+            <th class="text-right p-3">$0.18/kWh</th>
+          </tr>
+        </thead>
+        <tbody class="font-mono"></tbody>
+      </table>
+    </div>
   </div>
 </section>
 
@@ -159,33 +262,140 @@ const blocksPerDay = 144;
       <summary class="font-semibold cursor-pointer">Can you mine Bitcoin profitably at home?</summary>
       <p class="text-gray-400 mt-3 text-sm">Only if your electricity is cheap and you can handle the noise and heat. At $0.09/kWh with modern ASICs, home mining can break even or profit depending on BTC price.</p>
     </details>
+    <details class="glass-card rounded-xl p-4 group">
+      <summary class="font-semibold cursor-pointer">What is the break-even BTC price for an Antminer S21?</summary>
+      <p class="text-gray-400 mt-3 text-sm">At $0.09/kWh and current difficulty, the S21 needs a BTC price above roughly $41,000 just to cover electricity. Hardware payback requires a higher BTC price or falling difficulty.</p>
+    </details>
+    <details class="glass-card rounded-xl p-4 group">
+      <summary class="font-semibold cursor-pointer">How fast does Bitcoin difficulty erase mining profits?</summary>
+      <p class="text-gray-400 mt-3 text-sm">Difficulty has historically grown 3-7% per adjustment in bull markets. A sustained 5% monthly growth can turn a 12-month payback into 18+ months unless BTC price rises in step.</p>
+    </details>
   </div>
 </section>
 
-<script is:inline>
+<script is:inline define:vars={{ blockReward, blocksPerDay }}>
+  const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+  function getInputs() {
+    return {
+      btc: parseFloat(document.getElementById('roi-btc').value) || 68000,
+      cost: parseFloat(document.getElementById('roi-cost').value) || 0.09,
+      diff: parseFloat(document.getElementById('roi-diff').value) || 83e12,
+      growth: (parseFloat(document.getElementById('roi-growth').value) || 3) / 100
+    };
+  }
+
+  function minerProfit(hashrate, power, btc, cost, diff) {
+    const dailyBTC = hashrate * 1e12 / diff * blockReward * blocksPerDay;
+    const dailyRev = dailyBTC * btc;
+    const dailyCost = (power / 1000) * 24 * cost;
+    return { dailyRev, dailyCost, dailyProfit: dailyRev - dailyCost };
+  }
+
   function recalcROI() {
-    const btc = parseFloat(document.getElementById('roi-btc').value) || 68000;
-    const cost = parseFloat(document.getElementById('roi-cost').value) || 0.09;
-    const diff = parseFloat(document.getElementById('roi-diff').value) || 83e12;
-    const blockReward = 3.125;
-    const blocksPerDay = 144;
+    const { btc, cost, diff, growth } = getInputs();
 
     document.querySelectorAll('.roi-row').forEach(row => {
       const h = parseFloat(row.dataset.hashrate);
       const power = parseFloat(row.dataset.power);
       const price = parseFloat(row.dataset.price);
-      const dailyBTC = h * 1e12 / diff * blockReward * blocksPerDay;
-      const dailyRev = dailyBTC * btc;
-      const dailyCost = (power / 1000) * 24 * cost;
-      const profit = dailyRev - dailyCost;
-      const breakeven = profit > 0 ? Math.ceil(price / (profit * 30)) : '∞';
-      row.querySelector('.roi-profit').textContent = '$' + profit.toFixed(2);
-      row.querySelector('.roi-breakeven').textContent = breakeven + ' mo';
+      const base = minerProfit(h, power, btc, cost, diff);
+      const baseBE = base.dailyProfit > 0 ? Math.ceil(price / (base.dailyProfit * 30)) : '∞';
+
+      // Stress: apply growth for 12 months then hold
+      let stressProfit = 0;
+      let moDiff = diff;
+      for (let m = 0; m < 24; m++) {
+        if (m > 0) moDiff *= (1 + growth);
+        const mp = minerProfit(h, power, btc, cost, moDiff);
+        if (mp.dailyProfit > 0) stressProfit += mp.dailyProfit * 30;
+      }
+      const stressBE = stressProfit > 0 ? Math.ceil(price / stressProfit * 24) : '∞';
+
+      row.querySelector('.roi-profit').textContent = '$' + base.dailyProfit.toFixed(2);
+      row.querySelector('.roi-breakeven').textContent = baseBE + ' mo';
+      const stressEl = row.querySelector('.roi-stress-breakeven');
+      stressEl.textContent = (stressBE === '∞' ? '∞' : stressBE + ' mo');
+      stressEl.className = 'p-4 font-mono roi-stress-breakeven ' + (
+        stressBE === '∞' ? 'text-red-400' : (stressBE <= 12 ? 'text-emerald-400' : (stressBE <= 24 ? 'text-amber-400' : 'text-red-400'))
+      );
     });
+
+    renderCurve();
+    renderSensitivity();
   }
-  ['roi-btc','roi-cost','roi-diff'].forEach(id => {
-    document.getElementById(id).addEventListener('input', recalcROI);
+
+  function renderCurve() {
+    const { btc, cost, diff, growth } = getInputs();
+    const name = document.getElementById('curve-miner').value;
+    const row = Array.from(document.querySelectorAll('.roi-row')).find(r => r.dataset.name === name);
+    if (!row) return;
+    const h = parseFloat(row.dataset.hashrate);
+    const power = parseFloat(row.dataset.power);
+    const price = parseFloat(row.dataset.price);
+    const tbody = document.querySelector('#curve-table tbody');
+    let html = '';
+    let cumulative = -price;
+    let moDiff = diff;
+    let paybackMonth = null;
+    for (let m = 0; m <= 24; m++) {
+      if (m > 0) moDiff *= (1 + growth);
+      const mp = minerProfit(h, power, btc, cost, moDiff);
+      const moProfit = mp.dailyProfit * 30;
+      if (m > 0) cumulative += moProfit;
+      if (paybackMonth === null && cumulative >= 0 && m > 0) paybackMonth = m;
+      const status = cumulative >= 0 ? '✅ Profitable' : '🟡 Underwater';
+      html += `<tr class="border-b border-white/5"><td class="p-3">${m}</td><td class="p-3 text-right">${moDiff.toExponential(2)}</td><td class="p-3 text-right">${currency.format(moProfit)}</td><td class="p-3 text-right">${currency.format(cumulative)}</td><td class="p-3 text-right">${m === 0 ? '—' : status}</td></tr>`;
+    }
+    tbody.innerHTML = html;
+    // Highlight payback row
+    if (paybackMonth !== null) {
+      const rows = tbody.querySelectorAll('tr');
+      if (rows[paybackMonth]) rows[paybackMonth].classList.add('bg-brand-accent/10');
+    }
+  }
+
+  function renderSensitivity() {
+    const { diff } = getInputs();
+    const powerRates = [0.07, 0.09, 0.13, 0.18];
+    const tbody = document.querySelector('#sensitivity-table tbody');
+    let html = '';
+    document.querySelectorAll('.roi-row').forEach(row => {
+      const name = row.dataset.name;
+      const h = parseFloat(row.dataset.hashrate);
+      const power = parseFloat(row.dataset.power);
+      const price = parseFloat(row.dataset.price);
+      html += '<tr class="border-b border-white/5"><td class="p-3 font-semibold">' + name + '</td>';
+      for (const rate of powerRates) {
+        // Find BTC price where cumulative 24-month net cash flow = 0 with default 3% monthly growth
+        let lo = 1000, hi = 500000;
+        for (let iter = 0; iter < 40; iter++) {
+          const mid = (lo + hi) / 2;
+          let cumulative = -price;
+          let moDiff = diff;
+          for (let m = 1; m <= 24; m++) {
+            moDiff *= 1.03;
+            const mp = minerProfit(h, power, mid, rate, moDiff);
+            cumulative += mp.dailyProfit * 30;
+          }
+          if (cumulative > 0) hi = mid; else lo = mid;
+        }
+        const be = Math.round((lo + hi) / 2);
+        html += `<td class="p-3 text-right ${rate === 0.09 ? 'text-brand-accent' : ''}">${be.toLocaleString()}</td>`;
+      }
+      html += '</tr>';
+    });
+    tbody.innerHTML = html;
+  }
+
+  ['roi-btc','roi-cost','roi-diff','roi-growth'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', recalcROI);
   });
+  document.getElementById('curve-miner').addEventListener('change', renderCurve);
+
+  // Initial run
+  recalcROI();
 </script>
 
 </Layout>
