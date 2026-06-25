@@ -148,12 +148,11 @@ const schema = {
     var cost = parseFloat(document.getElementById('power-cost').value) || 0;
     var btc = parseFloat(document.getElementById('btc-price').value) || 0;
     
-    var networkDiff = 83e12; // approx
-    var blockReward = 3.125;
-    var blocksPerDay = 144;
-    var powerW = 3500; // S21
-    
-    var dailyBTC = h * 1e12 / networkDiff * blockReward * blocksPerDay;
+    const networkDiff = 83e12;
+    const blockReward = 3.125;
+    const powerW = 3500;
+
+    var dailyBTC = h * 1e12 * 86400 * blockReward / (networkDiff * Math.pow(2, 32));
     var dailyRev = dailyBTC * btc;
     var dailyCost = powerW / 1000 * 24 * cost;
     var profit = dailyRev - dailyCost;

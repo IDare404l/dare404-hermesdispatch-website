@@ -162,7 +162,7 @@ const faqSchema = {
       </thead>
       <tbody>
         {enrichedProducts.map(product => {
-          const dailyBTC = product.hashrate * 1e12 / networkDiff * blockReward * blocksPerDay;
+          const dailyBTC = product.hashrate * 1e12 * 86400 * blockReward / (networkDiff * Math.pow(2, 32));
           const dailyRev = dailyBTC * btcPrice;
           const dailyCost = (product.power / 1000) * 24 * powerCost;
           const dailyProfit = dailyRev - dailyCost;
@@ -286,7 +286,7 @@ const faqSchema = {
   }
 
   function minerProfit(hashrate, power, btc, cost, diff) {
-    const dailyBTC = hashrate * 1e12 / diff * blockReward * blocksPerDay;
+    const dailyBTC = hashrate * 1e12 * 86400 * blockReward / (diff * Math.pow(2, 32));
     const dailyRev = dailyBTC * btc;
     const dailyCost = (power / 1000) * 24 * cost;
     return { dailyRev, dailyCost, dailyProfit: dailyRev - dailyCost };
