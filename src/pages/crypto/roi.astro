@@ -302,22 +302,24 @@ const faqSchema = {
       const base = minerProfit(h, power, btc, cost, diff);
       const baseBE = base.dailyProfit > 0 ? Math.ceil(price / (base.dailyProfit * 30)) : '∞';
 
-      // Stress: apply growth for 12 months then hold
-      let stressProfit = 0;
+      // Stress: simulate monthly until cumulative profit recovers price
+      let cumulative = 0;
+      let paybackMonth = null;
       let moDiff = diff;
-      for (let m = 0; m < 24; m++) {
-        if (m > 0) moDiff *= (1 + growth);
+      for (let m = 1; m <= 36; m++) {
+        moDiff *= (1 + growth);
         const mp = minerProfit(h, power, btc, cost, moDiff);
-        if (mp.dailyProfit > 0) stressProfit += mp.dailyProfit * 30;
+        if (mp.dailyProfit > 0) cumulative += mp.dailyProfit * 30;
+        if (paybackMonth === null && cumulative >= price) paybackMonth = m;
       }
-      const stressBE = stressProfit > 0 ? Math.ceil(price / stressProfit * 24) : '∞';
+      const stressBE = paybackMonth !== null ? paybackMonth : (cumulative > 0 ? '>36' : '∞');
 
       row.querySelector('.roi-profit').textContent = '$' + base.dailyProfit.toFixed(2);
       row.querySelector('.roi-breakeven').textContent = baseBE + ' mo';
       const stressEl = row.querySelector('.roi-stress-breakeven');
-      stressEl.textContent = (stressBE === '∞' ? '∞' : stressBE + ' mo');
+      stressEl.textContent = stressBE + (typeof stressBE === 'number' ? ' mo' : '');
       stressEl.className = 'p-4 font-mono roi-stress-breakeven ' + (
-        stressBE === '∞' ? 'text-red-400' : (stressBE <= 12 ? 'text-emerald-400' : (stressBE <= 24 ? 'text-amber-400' : 'text-red-400'))
+        stressBE === '∞' ? 'text-red-400' : (typeof stressBE === 'number' && stressBE <= 12 ? 'text-emerald-400' : (stressBE === '>36' || (typeof stressBE === 'number' && stressBE <= 24) ? 'text-amber-400' : 'text-red-400'))
       );
     });
 
