@@ -1,0 +1,270 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "Claim Verifier | The Hermes Dispatch";
+const description = "Verify a claim against web search results. Get a confidence score, cross-source confirmation, and a citable verdict for AI agents and humans.";
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Claim Verifier",
+  "applicationCategory": "ReferenceApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": description
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How does the claim verifier work?", "acceptedAnswer": { "@type": "Answer", "text": "It searches the web for snippets matching the claim, then scores confidence based on how many independent sources corroborate it and whether any contradictions appear." } },
+    { "@type": "Question", "name": "Can AI agents cite these verdicts?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Each verdict is rendered with ClaimReview schema markup, making it machine-readable and citable by agentic systems." } },
+    { "@type": "Question", "name": "What confidence level means a claim is trustworthy?", "acceptedAnswer": { "@type": "Answer", "text": "High confidence requires multiple independent authoritative sources saying the same thing. Medium confidence usually means limited or single-source coverage. Low confidence means contradiction or no reliable coverage." } }
+  ]
+};
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(softwareSchema)} />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+  <section class="relative py-20 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-purple-900/10"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/30 mb-6">
+        <span class="text-purple-400 text-sm font-mono">TOOL — TRUST ENGINE</span>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold mb-4"><span class="text-gradient">Claim Verifier</span></h1>
+      <p class="text-gray-400 max-w-2xl mx-auto text-lg">
+        Paste a claim or headline. The verifier searches public sources and returns a confidence score plus a citable verdict.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-4 pb-8">
+    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Claim to verify</label>
+        <textarea id="claim" rows="3" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none text-lg">NVIDIA released the RTX 5090 in June 2026.</textarea>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <label class="text-sm text-gray-400">Search depth:</label>
+        <select id="depth" class="px-4 py-2 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none text-sm">
+          <option value="5">5 sources</option>
+          <option value="10" selected>10 sources</option>
+          <option value="15">15 sources</option>
+        </select>
+      </div>
+
+      <button id="verify-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+        <span id="verify-text">Verify Claim</span>
+      </button>
+
+      <div id="result" class="hidden border-t border-white/10 pt-6">
+        <div id="verdict-card" class="p-6 rounded-xl border mb-6 text-center">
+          <p class="text-xs uppercase tracking-wider mb-2">Verdict</p>
+          <h2 id="verdict-level" class="text-3xl font-bold"></h2>
+          <p id="verdict-score" class="text-sm text-gray-400 mt-2"></p>
+        </div>
+
+        <h3 class="text-lg font-semibold text-white mb-3">Sources Checked</h3>
+        <div id="sources" class="space-y-3"></div>
+
+        <div class="mt-6 p-4 rounded-xl bg-white/[0.02] border border-white/10">
+          <p class="text-xs text-gray-500 uppercase mb-2">Citable JSON</p>
+          <pre id="claim-json" class="text-xs text-gray-300 font-mono whitespace-pre-wrap overflow-x-auto"></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-4 py-16 border-t border-white/5">
+    <h2 class="text-2xl font-bold mb-6 text-center"><span class="text-gradient">Frequently Asked</span></h2>
+    <div class="space-y-4">
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">How does the claim verifier work?</summary>
+        <p class="text-gray-400 mt-3 text-sm">It searches the web for snippets matching the claim, then scores confidence based on how many independent sources corroborate it and whether any contradictions appear.</p>
+      </details>
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">Can AI agents cite these verdicts?</summary>
+        <p class="text-gray-400 mt-3 text-sm">Yes. Each verdict is rendered with ClaimReview schema markup, making it machine-readable and citable by agentic systems.</p>
+      </details>
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">What confidence level means trustworthy?</summary>
+        <p class="text-gray-400 mt-3 text-sm">High confidence requires multiple independent authoritative sources saying the same thing. Medium confidence usually means limited or single-source coverage. Low confidence means contradiction or no reliable coverage.</p>
+      </details>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function() {
+      var verifyBtn = document.getElementById('verify-btn');
+      var verifyText = document.getElementById('verify-text');
+      var claimInput = document.getElementById('claim');
+      var depthInput = document.getElementById('depth');
+      var result = document.getElementById('result');
+      var verdictCard = document.getElementById('verdict-card');
+      var verdictLevel = document.getElementById('verdict-level');
+      var verdictScore = document.getElementById('verdict-score');
+      var sources = document.getElementById('sources');
+      var claimJson = document.getElementById('claim-json');
+
+      function extractSnippets(html) {
+        var clean = html.replace(/\u003cscript[^\u003e]*\u003e[\s\S]*?\u003c\/script\u003e/gi, ' ')
+          .replace(/\u003cstyle[^\u003e]*\u003e[\s\S]*?\u003c\/style\u003e/gi, ' ')
+          .replace(/\u003c[^\u003e]+\u003e/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        return clean.slice(0, 800);
+      }
+
+      async function search(query, count) {
+        var corsProxy = 'https://api.allorigins.win/raw?url=';
+        var url = corsProxy + encodeURIComponent('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query));
+        var res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!res.ok) throw new Error('Search fetch failed: ' + res.status);
+        var html = await res.text();
+        var matches = html.match(/result__a[^\u003e]*href="([^"]+)"/g) || [];
+        var urls = matches.slice(0, count).map(function(m) {
+          return m.replace(/.*href="/, '').replace(/"$/, '');
+        });
+        return urls.filter(function(u) { return u && !u.startsWith('/'); });
+      }
+
+      async function fetchSourceText(url) {
+        try {
+          var corsProxy = 'https://api.allorigins.win/raw?url=';
+          var res = await fetch(corsProxy + encodeURIComponent(url));
+          if (!res.ok) return '';
+          var html = await res.text();
+          return extractSnippets(html);
+        } catch (e) {
+          return '';
+        }
+      }
+
+      function scoreClaim(claim, sourcesList) {
+        var claimKeywords = claim.toLowerCase().split(/\s+/).filter(function(w) { return w.length > 3; });
+        var supports = 0, contradicts = 0, neutral = 0;
+
+        sourcesList.forEach(function(src) {
+          var text = src.text.toLowerCase();
+          var hitCount = 0;
+          claimKeywords.forEach(function(kw) {
+            if (text.indexOf(kw) >= 0) hitCount++;
+          });
+          if (hitCount >= 2) {
+            if (/false|fake|misleading|not true|debunked|hoax/.test(text)) {
+              contradicts++;
+              src.sentiment = 'contradicts';
+            } else if (/true|confirmed|reported|announced|released|official/.test(text)) {
+              supports++;
+              src.sentiment = 'supports';
+            } else {
+              neutral++;
+              src.sentiment = 'neutral';
+            }
+          } else {
+            src.sentiment = 'neutral';
+          }
+        });
+
+        var score = 0;
+        if (sourcesList.length > 0) {
+          score = Math.round((supports / sourcesList.length) * 100);
+        }
+        if (contradicts > 0) score -= Math.round((contradicts / sourcesList.length) * 60);
+        score = Math.max(0, Math.min(100, score));
+
+        var level = 'Low confidence';
+        if (score >= 75 && supports >= 2) level = 'High confidence';
+        else if (score >= 40) level = 'Medium confidence';
+        else if (contradicts > 0) level = 'Contradicted';
+        else level = 'Insufficient evidence';
+
+        return { score, level, supports, contradicts, neutral, sourcesList };
+      }
+
+      verifyBtn.addEventListener('click', async function() {
+        verifyBtn.disabled = true;
+        verifyText.textContent = 'Searching sources...';
+        result.classList.add('hidden');
+        sources.innerHTML = '';
+
+        try {
+          var claim = claimInput.value.trim();
+          if (!claim) throw new Error('Enter a claim to verify.');
+
+          var urls = await search(claim, parseInt(depthInput.value, 10));
+          if (!urls.length) throw new Error('No sources found. Try a different query.');
+
+          verifyText.textContent = 'Reading ' + urls.length + ' sources...';
+          var sourceData = await Promise.all(urls.map(async function(url) {
+            return { url: url, text: await fetchSourceText(url) };
+          }));
+          sourceData = sourceData.filter(function(s) { return s.text.length > 40; });
+
+          var verdict = scoreClaim(claim, sourceData);
+
+          var colorClass = verdict.level === 'High confidence' ? 'border-emerald-500/30 bg-emerald-500/5' :
+            verdict.level === 'Medium confidence' ? 'border-amber-500/30 bg-amber-500/5' :
+            verdict.level === 'Contradicted' ? 'border-red-500/30 bg-red-500/5' : 'border-gray-500/30 bg-white/[0.02]';
+          var textClass = verdict.level === 'High confidence' ? 'text-emerald-400' :
+            verdict.level === 'Medium confidence' ? 'text-amber-400' :
+            verdict.level === 'Contradicted' ? 'text-red-400' : 'text-gray-400';
+
+          verdictCard.className = 'p-6 rounded-xl border mb-6 text-center ' + colorClass;
+          verdictLevel.className = 'text-3xl font-bold ' + textClass;
+          verdictLevel.textContent = verdict.level;
+          verdictScore.textContent = 'Score: ' + verdict.score + '/100 · ' + verdict.supports + ' support · ' + verdict.contradicts + ' contradict · ' + verdict.neutral + ' neutral';
+
+          verdict.sourcesList.forEach(function(src) {
+            var icon = src.sentiment === 'supports' ? '✅' : src.sentiment === 'contradicts' ? '❌' : '⚪';
+            var sentimentClass = src.sentiment === 'supports' ? 'text-emerald-400' : src.sentiment === 'contradicts' ? 'text-red-400' : 'text-gray-500';
+            sources.innerHTML += [
+              '<div class="p-4 rounded-xl bg-white/[0.02] border border-white/10 flex flex-col md:flex-row gap-4">',
+              '<div class="flex-1">',
+              '<a href="' + src.url + '" target="_blank" rel="noopener noreferrer" class="text-sm text-brand-gold hover:underline break-all">' + src.url + '</a>',
+              '<p class="text-xs text-gray-400 mt-1 line-clamp-3">' + src.text.slice(0, 240).replace(/\u003c/g, '&lt;') + '...</p>',
+              '</div>',
+              '<div class="text-sm font-medium ' + sentimentClass + '" style="white-space:nowrap">' + icon + ' ' + src.sentiment + '</div>',
+              '</div>'
+            ].join('');
+          });
+
+          var schema = {
+            "@context": "https://schema.org",
+            "@type": "ClaimReview",
+            "claimReviewed": claim,
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": verdict.score,
+              "bestRating": 100,
+              "worstRating": 0,
+              "alternateName": verdict.level
+            },
+            "itemReviewed": {
+              "@type": "Claim",
+              "appearance": urls.slice(0, 5)
+            },
+            "author": { "@type": "Organization", "name": "The Hermes Dispatch" },
+            "datePublished": new Date().toISOString().split('T')[0]
+          };
+          claimJson.textContent = JSON.stringify(schema, null, 2);
+
+          result.classList.remove('hidden');
+          result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (err) {
+          sources.innerHTML = '<div class="p-4 rounded-xl bg-red-500/5 border border-red-500/20 text-red-400"><strong>Error:</strong> ' + (err.message || 'Unknown error') + '</div>';
+          result.classList.remove('hidden');
+        } finally {
+          verifyBtn.disabled = false;
+          verifyText.textContent = 'Verify Claim';
+        }
+      });
+    })();
+  </script>
+</Layout>

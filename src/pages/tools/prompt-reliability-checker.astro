@@ -1,0 +1,234 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "Prompt Reliability Checker | The Hermes Dispatch";
+const description = "Test how brittle your system prompt is. Run it multiple times against a local LLM and get a variance, failure, and consistency score.";
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Prompt Reliability Checker",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": description
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Why do prompts fail in production?", "acceptedAnswer": { "@type": "Answer", "text": "Common causes include ambiguous instructions, missing output constraints, brittle examples, and over-reliance on the model's implicit reasoning. Small input changes often produce large output variance." } },
+    { "@type": "Question", "name": "What is a good reliability score?", "acceptedAnswer": { "@type": "Answer", "text": "Aim for a variance score above 85 and a failure rate below 5%. If outputs vary widely across identical prompts, add stricter schemas, few-shot examples, and validation rules." } },
+    { "@type": "Question", "name": "Can this run against my own Ollama instance?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Enter your Ollama API endpoint and model name. The checker runs client-side against your local server so prompts and outputs never leave your machine." } }
+  ]
+};
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(softwareSchema)} />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+  <section class="relative py-20 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-cyan-900/10"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-6">
+        <span class="text-cyan-400 text-sm font-mono">TOOL — AGENT QA</span>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold mb-4"><span class="text-gradient-cool">Prompt Reliability Checker</span></h1>
+      <p class="text-gray-400 max-w-2xl mx-auto text-lg">
+        Run your system prompt + user message multiple times. Score consistency, failure rate, and output variance before shipping to production.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-4 pb-8">
+    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+      
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Ollama endpoint</label>
+          <input id="endpoint" type="text" value="http://localhost:11434" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none font-mono text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Model</label>
+          <input id="model" type="text" value="llama3.2" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none font-mono text-sm" />
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Runs</label>
+          <select id="runs" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none">
+            <option value="3">3 (quick)</option>
+            <option value="5" selected>5 (standard)</option>
+            <option value="10">10 (thorough)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Expected format (optional)</label>
+          <input id="expected" type="text" placeholder="e.g. valid JSON or 'yes/no'" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none text-sm" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">System prompt</label>
+        <textarea id="system-prompt" rows="4" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none font-mono text-sm">You are a classifier. Reply with exactly one word: YES or NO. Then explain your reasoning in one sentence.</textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">User message</label>
+        <textarea id="user-message" rows="3" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none font-mono text-sm">Is this claim trustworthy: "Drinking one glass of red wine per day prevents heart disease"?</textarea>
+      </div>
+
+      <button id="run-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+        <span id="run-text">Run Reliability Test</span>
+      </button>
+
+      <div id="result" class="hidden border-t border-white/10 pt-6">
+        <h2 class="text-xl font-bold text-white mb-4">Reliability Report</h2>
+        <div id="scores" class="grid grid-cols-3 gap-4 mb-6"></div>
+        <div id="outputs" class="space-y-3"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-4 py-16 border-t border-white/5">
+    <h2 class="text-2xl font-bold mb-6 text-center"><span class="text-gradient-cool">Frequently Asked</span></h2>
+    <div class="space-y-4">
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">Why do prompts fail in production?</summary>
+        <p class="text-gray-400 mt-3 text-sm">Common causes include ambiguous instructions, missing output constraints, brittle examples, and over-reliance on the model's implicit reasoning.</p>
+      </details>
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">What is a good reliability score?</summary>
+        <p class="text-gray-400 mt-3 text-sm">Aim for a consistency score above 85 and a failure rate below 5%. If outputs vary widely across identical prompts, add stricter schemas and validation rules.</p>
+      </details>
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">Can this run against my own Ollama instance?</summary>
+        <p class="text-gray-400 mt-3 text-sm">Yes. Enter your Ollama API endpoint and model name. The checker runs client-side against your local server so prompts and outputs never leave your machine.</p>
+      </details>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function() {
+      var runBtn = document.getElementById('run-btn');
+      var runText = document.getElementById('run-text');
+      var result = document.getElementById('result');
+      var scores = document.getElementById('scores');
+      var outputs = document.getElementById('outputs');
+      var endpoint = document.getElementById('endpoint');
+      var model = document.getElementById('model');
+      var runs = document.getElementById('runs');
+      var expected = document.getElementById('expected');
+      var systemPrompt = document.getElementById('system-prompt');
+      var userMessage = document.getElementById('user-message');
+
+      function normalize(s) {
+        return (s || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+      }
+
+      function levenshtein(a, b) {
+        var matrix = [];
+        for (var i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (var j = 0; j <= a.length; j++) matrix[0][j] = j;
+        for (i = 1; i <= b.length; i++) {
+          for (j = 1; j <= a.length; j++) {
+            matrix[i][j] = b[i-1] === a[j-1] ? matrix[i-1][j-1] : Math.min(
+              matrix[i-1][j-1] + 1,
+              matrix[i][j-1] + 1,
+              matrix[i-1][j] + 1
+            );
+          }
+        }
+        return matrix[b.length][a.length];
+      }
+
+      function avgLevenshtein(responses) {
+        var total = 0, count = 0;
+        for (var i = 0; i < responses.length; i++) {
+          for (var j = i + 1; j < responses.length; j++) {
+            total += levenshtein(normalize(responses[i]), normalize(responses[j]));
+            count++;
+          }
+        }
+        return count ? total / count : 0;
+      }
+
+      function checkFailures(responses, pattern) {
+        if (!pattern) return 0;
+        var re = new RegExp(pattern, 'i');
+        return responses.filter(function(r) { return !re.test(r); }).length;
+      }
+
+      async function runOne() {
+        var url = endpoint.value.replace(/\/$/, '') + '/api/generate';
+        var res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: model.value,
+            system: systemPrompt.value,
+            prompt: userMessage.value,
+            stream: false,
+            options: { temperature: 0.7 }
+          })
+        });
+        if (!res.ok) throw new Error('Ollama returned ' + res.status);
+        var data = await res.json();
+        return data.response || '';
+      }
+
+      runBtn.addEventListener('click', async function() {
+        runBtn.disabled = true;
+        runText.textContent = 'Running...';
+        result.classList.add('hidden');
+        outputs.innerHTML = '';
+        scores.innerHTML = '';
+
+        try {
+          var n = parseInt(runs.value, 10);
+          var responses = [];
+          for (var i = 0; i < n; i++) {
+            responses.push(await runOne());
+          }
+
+          var avgDist = avgLevenshtein(responses);
+          var maxPossible = Math.max.apply(null, responses.map(function(r) { return normalize(r).length; })) || 1;
+          var consistency = Math.max(0, Math.round(100 - (avgDist / maxPossible) * 100));
+          var failures = checkFailures(responses, expected.value);
+          var failureRate = Math.round((failures / n) * 100);
+
+          scores.innerHTML = [
+            '<div class="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-center"><p class="text-xs text-gray-400 uppercase">Consistency</p><p class="text-2xl font-mono text-emerald-400">' + consistency + '</p></div>',
+            '<div class="p-4 rounded-xl bg-' + (failureRate < 10 ? 'emerald' : failureRate < 30 ? 'amber' : 'red') + '-500/5 border border-' + (failureRate < 10 ? 'emerald' : failureRate < 30 ? 'amber' : 'red') + '-500/20 text-center"><p class="text-xs text-gray-400 uppercase">Failures</p><p class="text-2xl font-mono text-' + (failureRate < 10 ? 'emerald' : failureRate < 30 ? 'amber' : 'red') + '-400">' + failures + '/' + n + '</p></div>',
+            '<div class="p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20 text-center"><p class="text-xs text-gray-400 uppercase">Avg Distance</p><p class="text-2xl font-mono text-cyan-400">' + avgDist.toFixed(1) + '</p></div>'
+          ].join('');
+
+          responses.forEach(function(r, idx) {
+            outputs.innerHTML += [
+              '<div class="p-4 rounded-xl bg-white/[0.02] border border-white/10">',
+              '<p class="text-xs text-gray-500 mb-1">Run ' + (idx + 1) + '</p>',
+              '<pre class="text-sm text-gray-300 whitespace-pre-wrap font-mono">' + r.replace(/</g, '&lt;') + '</pre>',
+              '</div>'
+            ].join('');
+          });
+
+          result.classList.remove('hidden');
+          result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (err) {
+          outputs.innerHTML = '<div class="p-4 rounded-xl bg-red-500/5 border border-red-500/20 text-red-400"><strong>Error:</strong> ' + (err.message || 'Unknown error') + '</div>';
+          result.classList.remove('hidden');
+        } finally {
+          runBtn.disabled = false;
+          runText.textContent = 'Run Reliability Test';
+        }
+      });
+    })();
+  </script>
+</Layout>

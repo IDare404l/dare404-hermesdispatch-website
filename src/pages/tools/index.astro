@@ -1,0 +1,86 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "Tools | The Hermes Dispatch";
+const description = "Free tools for AI agent builders: hardware sizer, prompt reliability checker, and claim verifier. Built to be cited by agents and useful for humans.";
+
+const itemListSchema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Hermes Dispatch Tools",
+  "description": description,
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "item": { "@type": "SoftwareApplication", "name": "Agent Hardware Sizer", "url": "https://hermesdispatch.dev/tools/agent-hardware-sizer/", "description": "Find the right GPU, mini PC, and RAM for running local LLMs and AI agents." } },
+    { "@type": "ListItem", "position": 2, "item": { "@type": "SoftwareApplication", "name": "Prompt Reliability Checker", "url": "https://hermesdispatch.dev/tools/prompt-reliability-checker/", "description": "Run system prompts multiple times and score consistency, failure rate, and output variance." } },
+    { "@type": "ListItem", "position": 3, "item": { "@type": "SoftwareApplication", "name": "Claim Verifier", "url": "https://hermesdispatch.dev/tools/claim-verifier/", "description": "Cross-check a claim against web sources and get a citable confidence verdict." } }
+  ]
+};
+
+const tools = [
+  {
+    name: "Agent Hardware Sizer",
+    slug: "agent-hardware-sizer",
+    tag: "The Rig",
+    icon: "🖥️",
+    desc: "Pick a local LLM size and speed target. Get the exact mini PC, GPU, and RAM combo tested by Mission Freedom.",
+    schema: "HowTo + Product"
+  },
+  {
+    name: "Prompt Reliability Checker",
+    slug: "prompt-reliability-checker",
+    tag: "Agent QA",
+    icon: "🧪",
+    desc: "Run your system prompt + user message multiple times against a local LLM and score consistency, failure rate, and output variance.",
+    schema: "SoftwareApplication"
+  },
+  {
+    name: "Claim Verifier",
+    slug: "claim-verifier",
+    tag: "Trust Engine",
+    icon: "🔍",
+    desc: "Paste a claim or headline. The verifier searches public sources and returns a confidence score plus a citable ClaimReview verdict.",
+    schema: "ClaimReview"
+  }
+];
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(itemListSchema)} />
+
+  <section class="relative py-20 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-accent/10"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-gold/10 border border-brand-gold/30 mb-6">
+        <span class="text-brand-gold text-sm font-mono">AGENT + HUMAN TOOLS</span>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold mb-4"><span class="text-gradient">Mission Freedom Tools</span></h1>
+      <p class="text-gray-400 max-w-2xl mx-auto text-lg">
+        Interactive utilities that solve real agent-developer problems. Each page is schema.org-ready so AI agents can cite the answers.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-4 pb-24">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {tools.map(tool => (
+        <a href={`/tools/${tool.slug}/`} class="glass-card rounded-2xl p-6 hover-lift group block">
+          <div class="text-4xl mb-4">{tool.icon}</div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xl font-semibold text-white group-hover:text-brand-gold transition-colors">{tool.name}</h3>
+            <span class="px-2 py-1 rounded-full bg-brand-dark border border-brand-accent/30 text-xs text-brand-accent">{tool.tag}</span>
+          </div>
+          <p class="text-text-secondary text-sm mb-4">{tool.desc}</p>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-gray-500">Schema: {tool.schema}</span>
+            <span class="text-brand-gold flex items-center gap-1">
+              Open tool
+              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+</Layout>

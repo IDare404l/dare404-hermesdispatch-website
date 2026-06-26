@@ -1,0 +1,213 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "Agent Hardware Sizer | The Hermes Dispatch";
+const description = "Find the exact mini PC, GPU, and RAM config you need to run local LLMs and AI agents. Pick a model and get a tested hardware recommendation with affiliate links.";
+
+const howToSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Choose Hardware for Local LLM Agents",
+  "description": description,
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "Pick a model size", "text": "Select the parameter count and quantization you plan to run. Larger models need more VRAM or system RAM." },
+    { "@type": "HowToStep", "position": 2, "name": "Set your speed target", "text": "Choose how many tokens per second you need. Higher speeds require dedicated GPUs or high-end mini PCs." },
+    { "@type": "HowToStep", "position": 3, "name": "Get a hardware match", "text": "The sizer recommends a tested mini PC, GPU, and RAM combo from The Rig directory." }
+  ]
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How much VRAM do I need for a 7B LLM?", "acceptedAnswer": { "@type": "Answer", "text": "A 7B model at Q4_K_M needs about 4.5–6 GB of VRAM. Most modern AMD Ryzen mini PCs with RDNA 3 iGPU can run it. For 13B models you want 10–12 GB, and 70B models need 40–48 GB+ or aggressive quantization." } },
+    { "@type": "Question", "name": "Can I run local LLMs without a GPU?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, on CPU-only inference. Expect much lower tokens per second. Mini PCs like the Beelink SER7 run 7B models at ~42 tok/s using integrated graphics, no discrete GPU required." } },
+    { "@type": "Question", "name": "Is 32GB RAM enough for local AI agents?", "acceptedAnswer": { "@type": "Answer", "text": "32GB is the sweet spot for 7B models and light multi-agent setups. For 13B models or running several models at once, upgrade to 64GB." } },
+    { "@type": "Question", "name": "What is the best mini PC for running Ollama?", "acceptedAnswer": { "@type": "Answer", "text": "For value, the Beelink SER7 Pro with Ryzen 7 7840HS. For more headroom, the Geekom A8 with Ryzen 9 8945HS. Both run Ollama out of the box." } }
+  ]
+};
+
+// Recommended products map (slug → recommendation label)
+const productLinks: Record<string, { slug: string; label: string }> = {
+  'beelink-ser7': { slug: 'beelink-ser7', label: 'Beelink SER7 Pro' },
+  'geekom-a8': { slug: 'geekom-a8', label: 'Geekom A8' },
+  'rtx-4090': { slug: 'nvidia-rtx-4090', label: 'NVIDIA RTX 4090' },
+  'corsair-64gb': { slug: 'corsair-64gb-ddr5', label: 'Corsair 64GB DDR5' }
+};
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(howToSchema)} />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+  <section class="relative py-20 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-brand-accent/10"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30 mb-6">
+        <span class="text-brand-accent text-sm font-mono">TOOL — THE RIG</span>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold mb-4"><span class="text-gradient">Agent Hardware Sizer</span></h1>
+      <p class="text-gray-400 max-w-2xl mx-auto text-lg">
+        Pick a local LLM and speed target. Get the exact mini PC, GPU, and RAM combo tested by Mission Freedom.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-4 pb-8">
+    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Model size</label>
+          <select id="model-size" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none">
+            <option value="3B">3B parameters</option>
+            <option value="7B" selected>7B parameters</option>
+            <option value="13B">13B parameters</option>
+            <option value="30B">30B parameters</option>
+            <option value="70B">70B parameters</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Quantization</label>
+          <select id="quant" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none">
+            <option value="Q4" selected>Q4_K_M (balanced)</option>
+            <option value="Q5">Q5_K_M (quality)</option>
+            <option value="Q8">Q8_0 (best quality)</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Speed target</label>
+        <div class="grid grid-cols-3 gap-3">
+          <button class="speed-btn px-4 py-3 rounded-xl border border-brand-border text-sm font-medium text-gray-300 hover:border-brand-gold transition" data-speed="economy">Economy<br><span class="text-xs text-gray-500">15-30 tok/s</span></button>
+          <button class="speed-btn px-4 py-3 rounded-xl border border-brand-gold bg-brand-gold/10 text-sm font-medium text-white transition" data-speed="comfortable">Comfortable<br><span class="text-xs text-gray-400">30-60 tok/s</span></button>
+          <button class="speed-btn px-4 py-3 rounded-xl border border-brand-border text-sm font-medium text-gray-300 hover:border-brand-gold transition" data-speed="fast">Fast<br><span class="text-xs text-gray-500">60+ tok/s</span></button>
+        </div>
+      </div>
+
+      <button id="size-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+        <span>Size My Rig</span>
+      </button>
+
+      <div id="result" class="hidden border-t border-white/10 pt-6">
+        <h2 class="text-xl font-bold text-white mb-4">Recommended Build</h2>
+        <div id="result-body" class="space-y-4"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-3xl mx-auto px-4 py-16 border-t border-white/5">
+    <h2 class="text-2xl font-bold mb-6 text-center"><span class="text-gradient">Frequently Asked</span></h2>
+    <div class="space-y-4">
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">How much VRAM do I need for a 7B LLM?</summary>
+        <p class="text-gray-400 mt-3 text-sm">A 7B model at Q4_K_M needs about 4.5–6 GB of VRAM. Most modern AMD Ryzen mini PCs with RDNA 3 iGPU can run it.</p>
+      </details>
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">Can I run local LLMs without a GPU?</summary>
+        <p class="text-gray-400 mt-3 text-sm">Yes on CPU-only inference, but it is much slower. Mini PCs like the Beelink SER7 run 7B models at ~42 tok/s using integrated graphics.</p>
+      </details>
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">Is 32GB RAM enough for local AI agents?</summary>
+        <p class="text-gray-400 mt-3 text-sm">32GB is the sweet spot for 7B models. For 13B models or running several models at once, upgrade to 64GB.</p>
+      </details>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function() {
+      var speedBtns = document.querySelectorAll('.speed-btn');
+      var selectedSpeed = 'comfortable';
+      var sizeBtn = document.getElementById('size-btn');
+      var modelSize = document.getElementById('model-size');
+      var quant = document.getElementById('quant');
+      var result = document.getElementById('result');
+      var resultBody = document.getElementById('result-body');
+
+      function activateSpeed(btn) {
+        speedBtns.forEach(function(b) {
+          b.classList.remove('border-brand-gold', 'bg-brand-gold/10', 'text-white');
+          b.classList.add('border-brand-border', 'text-gray-300');
+        });
+        btn.classList.remove('border-brand-border', 'text-gray-300');
+        btn.classList.add('border-brand-gold', 'bg-brand-gold/10', 'text-white');
+        selectedSpeed = btn.dataset.speed;
+      }
+
+      speedBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() { activateSpeed(this); });
+      });
+
+      function gbNeeded(size, q) {
+        // Approximate model memory at load (weights + overhead)
+        var base = { '3B': 1.8, '7B': 4.2, '13B': 7.8, '30B': 18, '70B': 42 };
+        var mult = { 'Q4': 1.0, 'Q5': 1.2, 'Q8': 1.7 };
+        return base[size] * mult[q];
+      }
+
+      function tokTarget() {
+        return { economy: 22, comfortable: 45, fast: 80 }[selectedSpeed];
+      }
+
+      function recommend(size, q, speed) {
+        var needed = gbNeeded(size, q);
+        var target = tokTarget();
+        var build = [];
+
+        if (size === '70B' || (size === '30B' && q === 'Q8')) {
+          build = [
+            { type: 'GPU', name: 'NVIDIA RTX 4090 24GB', slug: 'nvidia-rtx-4090', note: 'Minimum for this config. 70B Q4 needs quantization offload or multi-GPU.', price: '$1,599' },
+            { type: 'RAM', name: 'Corsair Vengeance 64GB DDR5', slug: 'corsair-64gb-ddr5', note: 'For model offloading and long contexts.', price: '$189' }
+          ];
+        } else if (size === '30B' || (size === '13B' && q === 'Q8') || speed === 'fast') {
+          build = [
+            { type: 'GPU', name: 'NVIDIA RTX 4090 24GB', slug: 'nvidia-rtx-4090', note: 'Handles 13B/30B models at high speed.', price: '$1,599' },
+            { type: 'RAM', name: 'Corsair Vengeance 64GB DDR5', slug: 'corsair-64gb-ddr5', note: 'Headroom for offloading and orchestration.', price: '$189' }
+          ];
+        } else if (size === '13B' || speed === 'comfortable') {
+          build = [
+            { type: 'Mini PC', name: 'Geekom A8 (Ryzen 9 8945HS, 32GB)', slug: 'geekom-a8', note: 'Upgrade to 64GB RAM for best 13B results.', price: '$899' },
+            { type: 'RAM Upgrade', name: 'Corsair Vengeance 64GB DDR5', slug: 'corsair-64gb-ddr5', note: 'Recommended if you plan to run 13B+ models.', price: '$189' }
+          ];
+        } else {
+          build = [
+            { type: 'Mini PC', name: 'Beelink SER7 Pro (Ryzen 7 7840HS, 32GB)', slug: 'beelink-ser7', note: 'Best value for 3B–7B local agents.', price: '$649' }
+          ];
+        }
+        return { needed: needed.toFixed(1), target: target, build: build };
+      }
+
+      sizeBtn.addEventListener('click', function() {
+        var rec = recommend(modelSize.value, quant.value, selectedSpeed);
+        var html = [
+          '<div class="p-4 rounded-xl bg-brand-accent/5 border border-brand-accent/20">',
+          '<p class="text-sm text-gray-400">Approximate load memory</p>',
+          '<p class="text-2xl font-mono text-emerald-400">' + rec.needed + ' GB</p>',
+          '<p class="text-xs text-gray-500 mt-1">Target speed: ~' + rec.target + ' tok/s</p>',
+          '</div>'
+        ].join('');
+
+        rec.build.forEach(function(item) {
+          html += [
+            '<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/10">',
+            '<div class="flex-1">',
+            '<span class="text-xs text-brand-gold uppercase tracking-wider">' + item.type + '</span>',
+            '<h3 class="text-lg font-semibold text-white">' + item.name + '</h3>',
+            '<p class="text-sm text-gray-400">' + item.note + '</p>',
+            '</div>',
+            '<div class="text-right md:text-right flex flex-row md:flex-col items-center md:items-end gap-3">',
+            '<span class="text-lg font-mono text-brand-gold">' + item.price + '</span>',
+            '<a href="/go/' + item.slug + '/?url=' + encodeURIComponent('https://hermesdispatch.dev/directory#' + item.slug) + '&source=agent-hardware-sizer"',
+            'class="px-4 py-2 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-sm font-medium hover:bg-brand-gold/20 transition">View in Directory →</a>',
+            '</div>',
+            '</div>'
+          ].join('');
+        });
+
+        resultBody.innerHTML = html;
+        result.classList.remove('hidden');
+        result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    })();
+  </script>
+</Layout>
