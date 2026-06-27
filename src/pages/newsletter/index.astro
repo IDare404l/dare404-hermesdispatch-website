@@ -7,7 +7,8 @@ import SubscriptionForm from '../../components/SubscriptionForm.astro';
 const publishedNewsletters = newsletters
   .filter(n => n.published)
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-const featured = publishedNewsletters.find(n => n.featured) || publishedNewsletters[0];
+// The most recently published issue is always featured, regardless of any manual featured flag
+const featured = publishedNewsletters[0];
 const archive = publishedNewsletters.filter(n => n !== featured);
 
 const title = "Newsletter | The Hermes Dispatch";
