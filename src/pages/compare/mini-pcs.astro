@@ -1,0 +1,128 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import miniPcs from '../../data/mini_pcs.json';
+
+const title = "Mini PC for AI Comparison — Mac Mini M4 vs AMD AI Mini PCs (2026)";
+const description = "Compare mini PCs for local LLM inference: Mac Mini M4, Beelink GTR9 Pro, GMKtec EVO-X2, GEEKOM A8. Sort by RAM, bandwidth, tokens/sec, price, and power.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": miniPcs.map((pc, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": pc.name,
+      "url": `https://hermesdispatch.dev/compare/mini-pcs/`,
+      "description": `${pc.ram_gb}GB ${pc.memory_type}, up to ${pc.max_model_q4} models, ${pc.ollama_tps['8B']} tok/s on 8B`,
+    })),
+  })} />
+
+  <article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <header class="mb-10">
+      <h1 class="text-4xl font-bold mb-4">{title}</h1>
+      <p class="text-xl text-gray-400">{description}</p>
+    </header>
+
+    <div class="mb-6 flex flex-wrap gap-4">
+      <button data-sort="ram" class="sort-btn px-4 py-2 bg-neutral-800 rounded-lg hover:bg-neutral-700">Sort by RAM</button>
+      <button data-sort="bandwidth" class="sort-btn px-4 py-2 bg-neutral-800 rounded-lg hover:bg-neutral-700">Sort by bandwidth</button>
+      <button data-sort="8b" class="sort-btn px-4 py-2 bg-neutral-800 rounded-lg hover:bg-neutral-700">Sort by 8B tok/s</button>
+      <button data-sort="price" class="sort-btn px-4 py-2 bg-neutral-800 rounded-lg hover:bg-neutral-700">Sort by price</button>
+      <button data-sort="tdp" class="sort-btn px-4 py-2 bg-neutral-800 rounded-lg hover:bg-neutral-700">Sort by power</button>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border border-neutral-800 rounded-lg overflow-hidden">
+        <thead class="bg-neutral-800">
+          <tr>
+            <th class="px-4 py-3">Mini PC</th>
+            <th class="px-4 py-3">RAM</th>
+            <th class="px-4 py-3">Bandwidth</th>
+            <th class="px-4 py-3">Max model (Q4)</th>
+            <th class="px-4 py-3">8B tok/s</th>
+            <th class="px-4 py-3">32B tok/s</th>
+            <th class="px-4 py-3">70B tok/s</th>
+            <th class="px-4 py-3">TDP</th>
+            <th class="px-4 py-3">Price</th>
+            <th class="px-4 py-3">Deal</th>
+          </tr>
+        </thead>
+        <tbody id="mini-pc-table" class="divide-y divide-neutral-800">
+          {miniPcs.map((pc) => (
+            <tr class="hover:bg-neutral-800/50" data-name={pc.name} data-ram={pc.ram_gb} data-bandwidth={pc.bandwidth_gbps} data-8b={pc.ollama_tps['8B']} data-price={pc.price_usd} data-tdp={pc.tdp_w}>
+              <td class="px-4 py-3">
+                <div class="font-semibold">{pc.name}</div>
+                <div class="text-sm text-gray-500">{pc.cpu}</div>
+              </td>
+              <td class="px-4 py-3">{pc.ram_gb} GB {pc.memory_type}</td>
+              <td class="px-4 py-3">{pc.bandwidth_gbps} GB/s</td>
+              <td class="px-4 py-3">{pc.max_model_q4}</td>
+              <td class="px-4 py-3">{pc.ollama_tps['8B']} tok/s</td>
+              <td class="px-4 py-3">{pc.ollama_tps['32B'] > 0 ? `${pc.ollama_tps['32B']} tok/s` : 'N/A'}</td>
+              <td class="px-4 py-3">{pc.ollama_tps['70B'] > 0 ? `${pc.ollama_tps['70B']} tok/s` : 'N/A'}</td>
+              <td class="px-4 py-3">{pc.tdp_w} W</td>
+              <td class="px-4 py-3">${pc.price_usd}</td>
+              <td class="px-4 py-3">
+                <a href={`/go/${pc.slug}/?url=${encodeURIComponent(pc.source)}&source=compare-mini-pcs`} class="text-cyan-400 underline hover:text-cyan-300">See price →</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <section class="mt-12 grid md:grid-cols-3 gap-6">
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+        <h3 class="text-lg font-semibold mb-2">Best for 70B models</h3>
+        <p class="text-gray-400">Beelink GTR9 Pro or GMKtec EVO-X2 with 128 GB LPDDR5X. Both run Llama 3.1 70B Q4 at ~5–8 tok/s.</p>
+      </div>
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+        <h3 class="text-lg font-semibold mb-2">Best silent / efficient</h3>
+        <p class="text-gray-400">Mac mini M4 Pro 64 GB. 273 GB/s unified memory, ~15–25 W under load, and fan noise under 20 dBA.</p>
+      </div>
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+        <h3 class="text-lg font-semibold mb-2">Best budget entry</h3>
+        <p class="text-gray-400">GEEKOM A8 32 GB. Handles 7B–13B quantized models and has USB4 for a future eGPU.</p>
+      </div>
+    </section>
+
+    <section class="mt-12 prose prose-invert max-w-none">
+      <h2>Why mini PCs matter for local AI</h2>
+      <p>A modern AI mini PC can run 7B–70B parameter models on your desk for the price of a few months of ChatGPT Plus. RAM capacity and memory bandwidth matter far more than NPU TOPS or CPU core count.</p>
+
+      <h3>Mac Mini M4 vs AMD AI mini PCs</h3>
+      <ul>
+        <li><strong>Mac mini M4 Pro:</strong> Best efficiency and bandwidth, but capped at 64 GB. Ideal for 30B models and below.</li>
+        <li><strong>Beelink GTR9 Pro:</strong> 128 GB ceiling + dual 10GbE. Best for 70B models and homelab networking.</li>
+        <li><strong>GMKtec EVO-X2:</strong> Cheapest 128 GB config with OCuLink for a future NVIDIA eGPU.</li>
+      </ul>
+
+      <h3>What about NPU TOPS?</h3>
+      <p>NPU ratings (50–86 TOPS) are marketing for image and video AI, not autoregressive LLM inference. Ollama, llama.cpp, and LM Studio do not route LLM workloads to the NPU.</p>
+
+      <p>
+        <a href="/compare/recommend/" class="text-cyan-400 underline hover:text-cyan-300">Find the right GPU →</a>
+        <span class="mx-2">•</span>
+        <a href="/tools/vram-calculator/" class="text-cyan-400 underline hover:text-cyan-300">VRAM calculator →</a>
+      </p>
+    </section>
+  </article>
+
+  <script>
+    const table = document.getElementById('mini-pc-table');
+    document.querySelectorAll('.sort-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.sort;
+        const rows = Array.from(table.querySelectorAll('tr'));
+        rows.sort((a, b) => {
+          const av = parseFloat(a.dataset[key] || 0);
+          const bv = parseFloat(b.dataset[key] || 0);
+          return bv - av;
+        });
+        rows.forEach((row) => table.appendChild(row));
+      });
+    });
+  </script>
+</Layout>

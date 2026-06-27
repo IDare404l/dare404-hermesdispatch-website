@@ -1,0 +1,104 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import miniPcs from '../../data/mini_pcs.json';
+
+const title = "Mini PC Recommender for Local AI";
+const description = "Answer three questions and get a mini PC recommendation for running local LLMs, from budget entry to 70B models.";
+---
+
+<Layout title={title} description={description}>
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <header class="mb-10">
+      <h1 class="text-4xl font-bold mb-4">{title}</h1>
+      <p class="text-xl text-gray-400">Pick the right compact AI workstation for your model size, budget, and noise tolerance.</p>
+    </header>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6 space-y-6">
+        <div>
+          <label class="block text-sm font-medium mb-2">Biggest model you want to run (Q4)</label>
+          <select id="model-size" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white">
+            <option value="8">7B–8B (chat bots, basic agents)</option>
+            <option value="14">14B (better reasoning)</option>
+            <option value="32">30B–32B (high quality)</option>
+            <option value="70">70B (frontier-class local)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Budget ceiling</label>
+          <select id="budget" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white">
+            <option value="700">~$600–700 (budget)</option>
+            <option value="1500">~$1,000–1,500 (mid-range)</option>
+            <option value="2500">~$1,500–2,500 (high-end)</option>
+            <option value="99999">No limit</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2">Noise / power priority</label>
+          <select id="silence" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white">
+            <option value="any">No preference</option>
+            <option value="silent">Silent / low power (under 35W load)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="results" class="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+        <p class="text-gray-500">Choose your preferences to see a ranked recommendation.</p>
+      </div>
+    </div>
+  </article>
+
+  <script define:vars={{ miniPcs }}>
+    const modelSizeEl = document.getElementById('model-size');
+    const budgetEl = document.getElementById('budget');
+    const silenceEl = document.getElementById('silence');
+    const resultsEl = document.getElementById('results');
+
+    const modelRamNeed = { 8: 16, 14: 24, 32: 48, 70: 96 };
+
+    function update() {
+      const size = parseInt(modelSizeEl.value, 10);
+      const budget = parseInt(budgetEl.value, 10);
+      const silence = silenceEl.value;
+      const minRam = modelRamNeed[size];
+
+      const candidates = miniPcs
+        .filter((pc) => pc.ram_gb >= minRam && pc.price_usd <= budget)
+        .filter((pc) => silence !== 'silent' || pc.tdp_w <= 35)
+        .map((pc) => {
+          let score = pc.agent_score;
+          if (pc.ram_gb >= minRam + 32) score += 10;
+          if (pc.tdp_w <= 35 && silence === 'silent') score += 15;
+          if (pc.price_usd <= budget * 0.7) score += 5;
+          return { pc, score };
+        })
+        .sort((a, b) => b.score - a.score);
+
+      if (!candidates.length) {
+        resultsEl.innerHTML = `<p class="text-red-400">No mini PC in our dataset matches. Try a smaller model, higher budget, or check /compare/gpus for desktop GPUs.</p>`;
+        return;
+      }
+
+      const winner = candidates[0].pc;
+      resultsEl.innerHTML = `
+        <p class="text-sm text-gray-400 uppercase tracking-wider">Top pick</p>
+        <h2 class="text-2xl font-bold mt-1">${winner.name}</h2>
+        <div class="mt-4 space-y-2 text-gray-300">
+          <p><strong>RAM:</strong> ${winner.ram_gb} GB ${winner.memory_type} (${winner.bandwidth_gbps} GB/s)</p>
+          <p><strong>Max model (Q4):</strong> ${winner.max_model_q4}</p>
+          <p><strong>Power:</strong> ${winner.tdp_w} W · <strong>Noise:</strong> ~${winner.noise_db} dBA</p>
+          <p><strong>Price:</strong> $${winner.price_usd}</p>
+          <p class="text-sm text-gray-400 mt-4">${winner.notes}</p>
+        </div>
+        <a href="/go/${winner.slug}/?url=${encodeURIComponent(winner.source)}&source=mini-pc-recommender" class="mt-6 inline-block text-cyan-400 underline hover:text-cyan-300">Check current price →</a>
+      `;
+    }
+
+    modelSizeEl.addEventListener('change', update);
+    budgetEl.addEventListener('change', update);
+    silenceEl.addEventListener('change', update);
+    update();
+  </script>
+</Layout>

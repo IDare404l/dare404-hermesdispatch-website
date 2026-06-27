@@ -291,9 +291,14 @@ const allSchemas = [itemListSchema, ...productSchemas];
                   {ctaLabel}
                 </a>
                 {isGpu && (
-                  <a href="/compare/gpus" class="block w-full text-center py-2 rounded-lg bg-brand-card border border-brand-border text-gray-400 text-sm hover:border-brand-gold/30 hover:text-brand-gold transition">
-                    Compare benchmarks
-                  </a>
+                  <div class="grid grid-cols-2 gap-2">
+                    <a href="/compare/gpus" class="block w-full text-center py-2 rounded-lg bg-brand-card border border-brand-border text-gray-400 text-sm hover:border-brand-gold/30 hover:text-brand-gold transition">
+                      Compare GPUs
+                    </a>
+                    <a href="/compare/mini-pcs" class="block w-full text-center py-2 rounded-lg bg-brand-card border border-brand-border text-gray-400 text-sm hover:border-brand-gold/30 hover:text-brand-gold transition">
+                      Compare mini PCs
+                    </a>
+                  </div>
                 )}
               </div>
             );
