@@ -1,0 +1,189 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "LLM VRAM Calculator — How Much GPU Memory Do You Need?";
+const description = "Calculate how much VRAM you need to run Llama, Qwen, DeepSeek, and Mistral models locally. Pick model size and quantization.";
+
+const models = [
+  { name: "Llama 3.1 8B", params: 8.0 },
+  { name: "Llama 3.1 70B", params: 70.0 },
+  { name: "Llama 3.2 1B", params: 1.0 },
+  { name: "Llama 3.2 3B", params: 3.0 },
+  { name: "Qwen 2.5 7B", params: 7.0 },
+  { name: "Qwen 2.5 72B", params: 72.0 },
+  { name: "Mistral 7B", params: 7.0 },
+  { name: "Mixtral 8x7B", params: 47.0 },
+  { name: "DeepSeek R1 14B", params: 14.0 },
+  { name: "DeepSeek R1 32B", params: 32.0 },
+  { name: "Gemma 2 9B", params: 9.0 },
+  { name: "Gemma 2 27B", params: 27.0 },
+];
+
+const quantizations = [
+  { label: "FP16", bits: 16 },
+  { label: "Q8", bits: 8 },
+  { label: "Q6", bits: 6 },
+  { label: "Q5", bits: 5 },
+  { label: "Q4", bits: 4 },
+  { label: "Q3", bits: 3 },
+  { label: "Q2", bits: 2 },
+];
+---
+
+<Layout title={title} description={description}>
+  <!-- FAQPage Schema -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much VRAM do I need for Llama 3.1 70B?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Llama 3.1 70B needs about 140 GB at FP16, 70 GB at Q8, 40 GB at Q4, and 28 GB at Q3. A single 48 GB GPU can run it at Q4; two 48 GB GPUs or one Apple Silicon Mac with 64-128 GB unified memory can run it at Q8 or better."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is LLM VRAM calculated?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "VRAM ≈ (parameters × quantization bits) ÷ 8 × 1.2. The 1.2 factor covers key-value cache, overhead, and context buffers. For example, a 7B model at Q4 uses about 4.2 GB of VRAM."
+        }
+      }
+    ]
+  })} />
+
+  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <header class="mb-12">
+      <h1 class="text-4xl font-bold mb-4">{title}</h1>
+      <p class="text-xl text-gray-400">Estimate GPU memory for local LLMs by model size and quantization. Add 20% overhead for context cache.</p>
+    </header>
+
+    <div class="grid md:grid-cols-2 gap-8 mb-12">
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+        <label class="block text-sm font-medium mb-2" for="model">Model</label>
+        <select id="model" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white">
+          data-models={JSON.stringify(models)}>{models.map((m) => (
+            <option value={m.params} selected={m.name === "Llama 3.1 8B"}>{m.name}</option>
+          ))}
+        </select>
+
+        <label class="block text-sm font-medium mt-6 mb-2" for="quant">Quantization</label>
+        <select id="quant" class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white">
+          {quantizations.map((q) => (
+            <option value={q.bits} selected={q.label === "Q4"}>{q.label} ({q.bits}-bit)</option>
+          ))}
+        </select>
+
+        <label class="block text-sm font-medium mt-6 mb-2" for="context">Context length: <span id="context-val">4096</span> tokens</label>
+        <input id="context" type="range" min="512" max="131072" step="512" value="4096"
+          class="w-full accent-cyan-400" />
+
+        <div class="mt-6 flex items-center gap-2">
+          <input id="kv-cache" type="checkbox" checked class="accent-cyan-400" />
+          <label for="kv-cache" class="text-sm">Include KV-cache overhead (+20%)</label>
+        </div>
+      </div>
+
+      <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-6 flex flex-col justify-center">
+        <p class="text-sm text-gray-400 uppercase tracking-wider">Estimated VRAM</p>
+        <p class="text-5xl font-bold text-cyan-400 mt-2"><span id="vram">5.4</span> GB</p>
+        <p class="text-sm text-gray-400 mt-4">Formula: <span id="formula">8B × 4 bit ÷ 8 × 1.2 = 4.8 GB + cache</span></p>
+
+        <div class="mt-8 p-4 bg-neutral-800/50 rounded-lg border border-neutral-700">
+          <p class="text-sm font-medium mb-2">Recommended hardware for this config:</p>
+          <p id="recommendation" class="text-gray-300">RTX 4060 Ti 16GB, RX 7600 XT 16GB, or Apple M4 16GB.</p>
+        </div>
+
+        <a href="/compare/gpus/" class="mt-6 inline-block text-cyan-400 underline hover:text-cyan-300">Compare GPUs →</a>
+      </div>
+    </div>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-6">Common configs at a glance</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border border-neutral-800 rounded-lg overflow-hidden">
+          <thead class="bg-neutral-800">
+            <tr>
+              <th class="px-4 py-3">Model</th>
+              <th class="px-4 py-3">Q4 (fast)</th>
+              <th class="px-4 py-3">Q8 (quality)</th>
+              <th class="px-4 py-3">FP16 (best)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-800">
+            {models.slice(0, 6).map((m) => (
+              <tr class="hover:bg-neutral-800/50">
+                <td class="px-4 py-3">{m.name}</td>
+                <td class="px-4 py-3">{Math.ceil((m.params * 4 / 8) * 1.2)} GB</td>
+                <td class="px-4 py-3">{Math.ceil((m.params * 8 / 8) * 1.2)} GB</td>
+                <td class="px-4 py-3">{Math.ceil((m.params * 16 / 8) * 1.2)} GB</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="prose prose-invert max-w-none">
+      <h2>How this works</h2>
+      <p>
+        The calculator uses the standard rule of thumb:
+        <strong>VRAM ≈ parameters × bits ÷ 8 × 1.2</strong>.
+        The 1.2 multiplier adds headroom for the key-value cache, model overhead, and a typical context window.
+        For exact numbers, use your inference engine's loader (llama.cpp, Ollama, vLLM) with your actual prompt length.
+      </p>
+
+      <h2>Frequently asked questions</h2>
+      <h3>How much VRAM for Llama 3.1 70B?</h3>
+      <p>About 40 GB at Q4, 70 GB at Q8, and 140 GB at FP16. A single RTX 3090/4090 (24 GB) cannot fit the full model at Q4; you need two 3090s, a 48 GB card, or Apple Silicon with 64-128 GB unified memory.</p>
+
+      <h3>Can I run a 70B model on 24 GB VRAM?</h3>
+      <p>No for the full model. You would need aggressive offloading to system RAM or CPU, which kills tokens/sec. Use a smaller model (8B-13B) or a GPU with 40 GB+ VRAM for usable 70B performance.</p>
+    </section>
+  </article>
+
+  <script>
+    const modelEl = document.getElementById('model');
+    const quantEl = document.getElementById('quant');
+    const contextEl = document.getElementById('context');
+    const contextVal = document.getElementById('context-val');
+    const kvEl = document.getElementById('kv-cache');
+    const vramEl = document.getElementById('vram');
+    const formulaEl = document.getElementById('formula');
+    const recEl = document.getElementById('recommendation');
+
+    const models = JSON.parse(modelEl.dataset.models || '[]');
+
+    function update() {
+      const params = parseFloat(modelEl.value);
+      const bits = parseFloat(quantEl.value);
+      const context = parseInt(contextEl.value, 10);
+      const overhead = kvEl.checked ? 1.2 : 1.05;
+      const base = (params * bits / 8) * overhead;
+      const contextCost = kvEl.checked ? (context * params / 1_000_000) * 0.5 : 0;
+      const total = base + contextCost;
+
+      vramEl.textContent = total.toFixed(1);
+      const name = modelEl.options[modelEl.selectedIndex].text;
+      formulaEl.textContent = `${params}B × ${bits}-bit ÷ 8 × ${overhead.toFixed(1)} + ${contextCost.toFixed(1)} GB context = ${total.toFixed(1)} GB`;
+
+      let rec = "";
+      if (total <= 12) rec = "RTX 4060 Ti 16GB, RX 7600 XT 16GB, Apple M4 16GB.";
+      else if (total <= 24) rec = "RTX 3090/4090 24GB, RX 7900 XT 20GB, Apple M4 Max 36GB.";
+      else if (total <= 48) rec = "RTX 3090 pair (48GB), RTX 4090 pair (48GB), or Mac Studio M2 Ultra 64GB.";
+      else if (total <= 80) rec = "Mac Studio M2 Ultra 64GB, RTX 4090 ×3 (72GB), or a 48GB datacenter GPU pair.";
+      else if (total <= 140) rec = "Mac Studio M3 Max 128GB, two 48GB datacenter GPUs, or RTX 4090 ×6.";
+      else rec = "Multi-GPU workstation or cloud inference. Use our /compare/gpus to plan the build.";
+      recEl.textContent = rec;
+    }
+
+    modelEl.addEventListener('change', update);
+    quantEl.addEventListener('change', update);
+    contextEl.addEventListener('input', (e) => { contextVal.textContent = e.target.value; update(); });
+    kvEl.addEventListener('change', update);
+    update();
+  </script>
+</Layout>
