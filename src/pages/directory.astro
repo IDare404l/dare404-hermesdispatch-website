@@ -279,15 +279,23 @@ const allSchemas = [itemListSchema, ...productSchemas];
               : (product.source || '').includes('amazon.com')
               ? 'View on Amazon →'
               : 'Learn More →';
+            const isGpu = product.category === 'hardware' || product.subcategory === 'gpu';
             return (
-              <a
-                href={`/go/${product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/?url=${encodeURIComponent(ctaUrl)}&source=directory`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="block w-full text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition"
-              >
-                {ctaLabel}
-              </a>
+              <div class="space-y-2">
+                <a
+                  href={`/go/${product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/?url=${encodeURIComponent(ctaUrl)}&source=directory`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="block w-full text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition"
+                >
+                  {ctaLabel}
+                </a>
+                {isGpu && (
+                  <a href="/compare/gpus" class="block w-full text-center py-2 rounded-lg bg-brand-card border border-brand-border text-gray-400 text-sm hover:border-brand-gold/30 hover:text-brand-gold transition">
+                    Compare benchmarks
+                  </a>
+                )}
+              </div>
             );
           })()}
           

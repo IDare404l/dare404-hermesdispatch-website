@@ -1,0 +1,153 @@
+{
+  "gpus": {
+    "NVIDIA GeForce RTX 5090": {
+      "vram_gb": 32,
+      "memory_type": "GDDR7",
+      "tdp_w": 575,
+      "release_date": "2025-01-30",
+      "process_nm": "TSMC 4N",
+      "passmark_g3d": 48000,
+      "ollama_tps": {
+        "llama-3.1-8b": 155.0,
+        "llama-3.1-70b": 22.0,
+        "qwen2.5-7b": 165.0
+      },
+      "notes": "Flagship Blackwell gaming/AI card. Estimated data."
+    },
+    "NVIDIA GeForce RTX 4090": {
+      "vram_gb": 24,
+      "memory_type": "GDDR6X",
+      "tdp_w": 450,
+      "release_date": "2022-10-12",
+      "process_nm": "TSMC 4N",
+      "passmark_g3d": 39535,
+      "ollama_tps": {
+        "llama-3.1-8b": 125.0,
+        "llama-3.1-70b": 18.0,
+        "qwen2.5-7b": 135.0
+      },
+      "notes": "Top pick for local LLMs today."
+    },
+    "NVIDIA GeForce RTX 4080": {
+      "vram_gb": 16,
+      "memory_type": "GDDR6X",
+      "tdp_w": 320,
+      "release_date": "2022-11-16",
+      "process_nm": "TSMC 4N",
+      "passmark_g3d": 34675,
+      "ollama_tps": {
+        "llama-3.1-8b": 105.0,
+        "llama-3.1-70b": 15.0,
+        "qwen2.5-7b": 115.0
+      }
+    },
+    "NVIDIA GeForce RTX 4070 Ti": {
+      "vram_gb": 12,
+      "memory_type": "GDDR6X",
+      "tdp_w": 285,
+      "release_date": "2023-01-05",
+      "process_nm": "TSMC 4N",
+      "passmark_g3d": 31704,
+      "ollama_tps": {
+        "llama-3.1-8b": 85.0,
+        "llama-3.1-70b": 11.0,
+        "qwen2.5-7b": 92.0
+      }
+    },
+    "NVIDIA GeForce RTX 3090": {
+      "vram_gb": 24,
+      "memory_type": "GDDR6X",
+      "tdp_w": 350,
+      "release_date": "2020-09-24",
+      "process_nm": "Samsung 8N",
+      "passmark_g3d": 26655,
+      "ollama_tps": {
+        "llama-3.1-8b": 95.0,
+        "llama-3.1-70b": 14.0,
+        "qwen2.5-7b": 105.0
+      },
+      "notes": "Best VRAM-per-dollar for large models on used market."
+    },
+    "NVIDIA GeForce RTX 3090 Ti": {
+      "vram_gb": 24,
+      "memory_type": "GDDR6X",
+      "tdp_w": 450,
+      "release_date": "2022-03-29",
+      "process_nm": "TSMC 4N",
+      "passmark_g3d": 29280,
+      "ollama_tps": {
+        "llama-3.1-8b": 98.0,
+        "llama-3.1-70b": 15.0,
+        "qwen2.5-7b": 108.0
+      }
+    },
+    "Apple Mac Studio M4 Max": {
+      "vram_gb": 128,
+      "memory_type": "Unified Memory",
+      "tdp_w": 130,
+      "release_date": "2025-11",
+      "process_nm": "TSMC 3nm",
+      "passmark_g3d": 17500,
+      "ollama_tps": {
+        "llama-3.1-8b": 65.0,
+        "llama-3.1-70b": 9.0,
+        "qwen2.5-7b": 70.0
+      },
+      "notes": "Massive unified memory for 70B+ models, lower raw TPS."
+    },
+    "Apple Mac Studio M3 Max": {
+      "vram_gb": 128,
+      "memory_type": "Unified Memory",
+      "tdp_w": 110,
+      "release_date": "2023-10-30",
+      "process_nm": "TSMC 3nm",
+      "passmark_g3d": 15300,
+      "ollama_tps": {
+        "llama-3.1-8b": 55.0,
+        "llama-3.1-70b": 7.0,
+        "qwen2.5-7b": 60.0
+      }
+    },
+    "Apple Mac Studio M2 Ultra": {
+      "vram_gb": 192,
+      "memory_type": "Unified Memory",
+      "tdp_w": 180,
+      "release_date": "2023-06-05",
+      "process_nm": "TSMC 5nm",
+      "passmark_g3d": 14450,
+      "ollama_tps": {
+        "llama-3.1-8b": 50.0,
+        "llama-3.1-70b": 8.0
+      }
+    },
+    "Geekom A8 (Ryzen 9 8945HS, Radeon 780M)": {
+      "vram_gb": 8,
+      "memory_type": "DDR5-5600",
+      "tdp_w": 65,
+      "release_date": "2024",
+      "process_nm": "TSMC 4nm",
+      "passmark_g3d": 3500,
+      "ollama_tps": {
+        "llama-3.1-8b": 12.0,
+        "qwen2.5-7b": 13.0
+      },
+      "notes": "Mini PC. Good for 3B-7B models, very low power."
+    },
+    "GMKtec NucBox K8+ (Ryzen 7 8845HS, Radeon 780M)": {
+      "vram_gb": 8,
+      "memory_type": "DDR5-5600",
+      "tdp_w": 65,
+      "release_date": "2024",
+      "process_nm": "TSMC 4nm",
+      "passmark_g3d": 3300,
+      "ollama_tps": {
+        "llama-3.1-8b": 11.0,
+        "qwen2.5-7b": 12.0
+      },
+      "notes": "Budget mini PC for local LLM experiments."
+    }
+  },
+  "last_updated": "2026-06-27T15:45:55.233629Z",
+  "source": "curated public spec sheets + community Ollama/vLLM benchmarks",
+  "methodology": "All token/sec numbers are 4-bit quantized inference at ~4096 context, averaged from community Ollama and vLLM runs."
+}

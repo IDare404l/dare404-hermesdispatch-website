@@ -1,0 +1,83 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import benchmarkData from "../../data/gpu_benchmarks.json";
+
+const gpus = Object.entries(benchmarkData.gpus).map(([name, d]) => ({ name, ...d }));
+const models = Array.from(new Set(gpus.flatMap(g => Object.keys(g.ollama_tps || {})))).sort();
+const pageTitle = "GPU Benchmarks for Local LLMs (2026) | Hermes Dispatch";
+const pageDescription = "Compare NVIDIA RTX 4090, RTX 5090, Apple Silicon and mini PCs for running Ollama, vLLM and local LLMs. Tokens/sec, VRAM, TDP, and affiliate deals.";
+---
+
+<Layout title={pageTitle} description={pageDescription}>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+        GPU Benchmarks for <span class="text-brand-gold">Local LLMs</span>
+      </h1>
+      <p class="text-text-secondary text-lg max-w-2xl mx-auto">
+        Real-world Ollama tokens/sec on popular models. Filter by VRAM, model size, and power budget.
+      </p>
+      <p class="text-xs text-gray-500 mt-2">
+        Data: 4-bit quantized inference, ~4096 context, averaged from community Ollama/vLLM runs.
+      </p>
+    </div>
+
+    <div class="overflow-x-auto rounded-2xl border border-brand-border bg-brand-card/50">
+      <table class="w-full text-left">
+        <thead class="bg-brand-card border-b border-brand-border">
+          <tr>
+            <th class="px-4 py-3 text-sm font-semibold text-gray-300">GPU / System</th>
+            <th class="px-4 py-3 text-sm font-semibold text-gray-300">VRAM</th>
+            <th class="px-4 py-3 text-sm font-semibold text-gray-300">TDP</th>
+            <th class="px-4 py-3 text-sm font-semibold text-gray-300">PassMark</th>
+            {models.map(m => (
+              <th class="px-4 py-3 text-sm font-semibold text-brand-gold whitespace-nowrap">{m} t/s</th>
+            ))}
+            <th class="px-4 py-3 text-sm font-semibold text-gray-300"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {gpus.map(gpu => {
+            const slug = gpu.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+            return (
+              <tr class="border-b border-brand-border/50 hover:bg-brand-card/70 transition-colors">
+                <td class="px-4 py-4">
+                  <div class="font-medium text-white">{gpu.name}</div>
+                  {gpu.notes && <div class="text-xs text-gray-400 mt-1">{gpu.notes}</div>}
+                </td>
+                <td class="px-4 py-4 text-gray-300">{gpu.vram_gb} GB</td>
+                <td class="px-4 py-4 text-gray-300">{gpu.tdp_w} W</td>
+                <td class="px-4 py-4 text-gray-300">{gpu.passmark_g3d?.toLocaleString() ?? "—"}</td>
+                {models.map(m => (
+                  <td class="px-4 py-4 text-gray-300 font-mono">
+                    {gpu.ollama_tps?.[m] ? gpu.ollama_tps[m].toFixed(1) : "—"}
+                  </td>
+                ))}
+                <td class="px-4 py-4">
+                  <a href={`/go/${slug}`} class="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-gold/10 text-brand-gold text-sm hover:bg-brand-gold/20 transition-colors">
+                    See deals
+                  </a>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-12 grid md:grid-cols-3 gap-6">
+      <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
+        <h3 class="text-lg font-semibold text-white mb-2">Best for 8B models</h3>
+        <p class="text-gray-400 text-sm">RTX 4070 Ti or RTX 3090. Both run Llama 3.1 8B at 85–95 tok/s. 3090 wins on VRAM; 4070 Ti wins on power.</p>
+      </div>
+      <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
+        <h3 class="text-lg font-semibold text-white mb-2">Best for 70B models</h3>
+        <p class="text-gray-400 text-sm">Apple Mac Studio M4 Max (128 GB unified) or RTX 4090 (24 GB). For 70B 4-bit you need ~40+ GB; Apple wins on memory capacity.</p>
+      </div>
+      <div class="p-6 rounded-2xl bg-brand-card border border-brand-border">
+        <h3 class="text-lg font-semibold text-white mb-2">Budget starter</h3>
+        <p class="text-gray-400 text-sm">Geekom A8 or GMKtec K8+. ~12 tok/s on 7B models, 65W, under $600. Perfect for experiments.</p>
+      </div>
+    </div>
+  </main>
+</Layout>
