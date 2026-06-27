@@ -1,29 +1,42 @@
 ---
-name: "Samsung 990 Pro 2TB"
-name_full: "Samsung 990 Pro 2TB NVMe Gen4 SSD"
+name: Samsung 990 Pro 2TB
+name_full: Samsung 990 Pro 2TB NVMe Gen4 SSD
 category: hardware-grid
 subcategory: storage
 price: 149
-price_range: "120-180"
-amazon_link: "https://www.amazon.com/dp/B0BHJF2DPN?tag=dare404-20"
-affiliate_tags: ["storage", "ssd", "nvme", "2tb", "fast-load", "ollama-compatible"]
-ihardware_tags: [nvme-gen4, 2tb-ssd, samsung]
+price_range: 120-180
+amazon_link: https://www.amazon.com/dp/B0BHJF2DPN?tag=dare404-20
+affiliate_tags:
+- storage
+- ssd
+- nvme
+- 2tb
+- fast-load
+- ollama-compatible
+ihardware_tags:
+- nvme-gen4
+- 2tb-ssd
+- samsung
 featured: false
 sponsored: false
-image: "https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80"
-source: "Based on manufacturer specs"
+image: https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80
+source: https://www.amazon.com/s?k=samsung+990+pro+2tb&tag=dare404-20
 faq_schema:
-  - question: "Does SSD speed matter for LLM inference?"
-    answer: "For model loading, yes. For token generation, RAM/VRAM speed matters far more."
-  - question: "Is 2TB enough?"
-    answer: "For most users, yes. Heavy experimenters with 70B+ models may want 4TB."
-  - question: "Can I use this in a mini PC?"
-    answer: "Yes, if the mini PC has an M.2 2280 slot that supports NVMe."
-review:
+- question: Does SSD speed matter for LLM inference?
+  answer: For model loading, yes. For token generation, RAM/VRAM speed matters far
+    more.
+- question: Is 2TB enough?
+  answer: For most users, yes. Heavy experimenters with 70B+ models may want 4TB.
+- question: Can I use this in a mini PC?
+  answer: Yes, if the mini PC has an M.2 2280 slot that supports NVMe.
+review: null
 verdict: Fast NVMe storage that reduces model load times for local inference.
-
 last_verified: 2026-06-21
+attribution: Based on manufacturer specs
+ollama_score: N/A (enabler)
 ---
+
+
 ## Overview
 
 Local LLMs load large model files from disk. A fast NVMe SSD reduces model load time and improves context-switching when running multiple models. The Samsung 990 Pro is one of the fastest consumer Gen4 drives.

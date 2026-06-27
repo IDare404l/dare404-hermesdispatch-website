@@ -119,7 +119,7 @@ const pageDescription = "Pick a model size and budget. We recommend the best GPU
             </div>
             <div class="text-sm text-gray-400 mb-3">${g.vram_gb} GB ${g.memory_type} • ${g.tdp_w} W • ${g.tps.toFixed(1)} tok/s on ${model}</div>
             ${g.notes ? `<p class="text-sm text-gray-400 mb-3">${g.notes}</p>` : ''}
-            <a href="/go/${slugify(g.name)}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-gold/10 text-brand-gold text-sm hover:bg-brand-gold/20 transition-colors">See deals →</a>
+            <a href={`/go/${slugify(g.name)}?url=${encodeURIComponent(g.source || '')}&source=compare-recommend`} class="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-gold/10 text-brand-gold text-sm hover:bg-brand-gold/20 transition-colors">See deals →</a>
           </div>
         `).join('');
       }

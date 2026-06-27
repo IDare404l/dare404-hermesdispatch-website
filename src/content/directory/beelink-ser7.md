@@ -1,28 +1,40 @@
 ---
 name: Beelink SER7 Pro
-name_full: "Beelink SER7 Pro (AMD Ryzen 7 7840HS, 32GB DDR5, 1TB SSD)"
+name_full: Beelink SER7 Pro (AMD Ryzen 7 7840HS, 32GB DDR5, 1TB SSD)
 category: hardware-grid
 subcategory: mini-pc
 price: 649
-price_range: "600-700"
-amazon_link: "https://www.amazon.com/dp/B0CCP7XRV4?tag=dare404-20"
-affiliate_tags: ["mini-pc", "ollama-compatible", "under-700", "amd", "ryzen", "local-inference"]
-ihardware_tags: [ryzen-7-7840hs, 32gb-ram, 1tb-ssd, rdna3-igpu]
+price_range: 600-700
+amazon_link: https://www.amazon.com/dp/B0CCP7XRV4?tag=dare404-20
+affiliate_tags:
+- mini-pc
+- ollama-compatible
+- under-700
+- amd
+- ryzen
+- local-inference
+ihardware_tags:
+- ryzen-7-7840hs
+- 32gb-ram
+- 1tb-ssd
+- rdna3-igpu
 ollama_score: 42
 tokens_per_second: 42
-benchmark_model: "llama3.2 3B Q4_K_M"
+benchmark_model: llama3.2 3B Q4_K_M
 featured: true
 sponsored: false
-image: "https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&q=80"
-source: "Based on community benchmarks"
+image: https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&q=80
+source: https://www.amazon.com/dp/B0CCP7XRV4?tag=dare404-20
 faq_schema:
-  - question: "Is the Beelink SER7 good for Ollama?"
-    answer: "It is a compact mini PC for light inference and agent prototyping. For large models, look at 64GB+ RAM systems or a dedicated GPU."
-review:
+- question: Is the Beelink SER7 good for Ollama?
+  answer: It is a compact mini PC for light inference and agent prototyping. For large
+    models, look at 64GB+ RAM systems or a dedicated GPU.
+review: null
 verdict: Strong mid-range mini PC with good balance of CPU, RAM, and price.
-
 last_verified: 2026-06-21
+attribution: Based on community benchmarks
 ---
+
 ## Overview
 
 The Beelink SER7 Pro is a mini PC built around the AMD Ryzen 7 7840HS with integrated Radeon 780M GPU (RDNA 3). It ships with 32GB DDR5 and a 1TB SSD. This spec combination makes it one of the most popular choices for running local LLMs like Ollama without needing a dedicated graphics card.

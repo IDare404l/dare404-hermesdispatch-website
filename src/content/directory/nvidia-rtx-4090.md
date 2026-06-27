@@ -1,33 +1,47 @@
 ---
-name: "NVIDIA RTX 4090"
-name_full: "NVIDIA GeForce RTX 4090 24GB GDDR6X"
+name: NVIDIA RTX 4090
+name_full: NVIDIA GeForce RTX 4090 24GB GDDR6X
 category: hardware-grid
 subcategory: gpu
 price: 1599
-price_range: "1500-1700"
-amazon_link: "https://www.amazon.com/dp/B0GBL341F3?tag=dare404-20"
-affiliate_tags: ["gpu", "nvidia", "rtx-4090", "24gb-vram", "high-end", "local-inference"]
-ihardware_tags: [rtx-4090, 24gb-gddr6x, cuda, ad102]
+price_range: 1500-1700
+amazon_link: https://www.amazon.com/dp/B0GBL341F3?tag=dare404-20
+affiliate_tags:
+- gpu
+- nvidia
+- rtx-4090
+- 24gb-vram
+- high-end
+- local-inference
+ihardware_tags:
+- rtx-4090
+- 24gb-gddr6x
+- cuda
+- ad102
 ollama_score: 95
 tokens_per_second: 95
-benchmark_model: "llama3.2 3B Q4_K_M"
+benchmark_model: llama3.2 3B Q4_K_M
 featured: true
 sponsored: false
-source: "Based on community benchmarks"
-image: "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=600&q=80"
+source: https://www.amazon.com/s?k=rtx+4090&tag=dare404-20
+image: https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=600&q=80
 brand: NVIDIA
 faq_schema:
-  - question: "Is the NVIDIA RTX 4090 worth it for local LLMs?"
-    answer: "If you need the fastest consumer inference and plan to run 30B+ models, yes. For 7B-13B models, a 3090 or 4070 Ti Super is more cost-effective."
-  - question: "Can the RTX 4090 run 70B models?"
-    answer: "70B Q4 will not fit in 24GB. You need Q3 or Q2 quantization, or offload layers to system RAM."
-  - question: "Do I need CUDA to run Ollama?"
-    answer: "Ollama supports CUDA on NVIDIA GPUs and ROCm on select AMD GPUs. NVIDIA generally has better tool support and performance."
-review:
+- question: Is the NVIDIA RTX 4090 worth it for local LLMs?
+  answer: If you need the fastest consumer inference and plan to run 30B+ models,
+    yes. For 7B-13B models, a 3090 or 4070 Ti Super is more cost-effective.
+- question: Can the RTX 4090 run 70B models?
+  answer: 70B Q4 will not fit in 24GB. You need Q3 or Q2 quantization, or offload
+    layers to system RAM.
+- question: Do I need CUDA to run Ollama?
+  answer: Ollama supports CUDA on NVIDIA GPUs and ROCm on select AMD GPUs. NVIDIA
+    generally has better tool support and performance.
+review: null
 verdict: The best consumer GPU for local LLMs if budget and power are not constraints.
-
 last_verified: 2026-06-21
+attribution: Based on community benchmarks
 ---
+
 ## Overview
 
 The RTX 4090 is the current flagship for local LLM inference. With 24GB of GDDR6X VRAM and massive CUDA throughput, it is the card most often referenced in Ollama and llama.cpp performance discussions.

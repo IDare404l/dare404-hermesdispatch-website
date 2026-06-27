@@ -19,7 +19,14 @@ export async function GET(context: APIContext) {
   const source = context.url.searchParams.get('source') || 'website';
 
   if (!slug || !url) {
-    return new Response('Missing slug or url', { status: 400 });
+    return new Response(`Missing slug or url`, { status: 400 });
+  }
+
+  // Validate URL looks like a real destination
+  try {
+    new URL(url);
+  } catch {
+    return new Response(`Invalid destination URL: ${url}`, { status: 400 });
   }
 
   const click: ClickEvent = {

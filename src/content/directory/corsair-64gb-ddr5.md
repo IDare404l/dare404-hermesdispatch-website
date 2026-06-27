@@ -1,25 +1,37 @@
 ---
 name: Corsair Vengeance 64GB DDR5
-name_full: "Corsair Vengeance 64GB DDR5 5600MHz (2x32GB)"
+name_full: Corsair Vengeance 64GB DDR5 5600MHz (2x32GB)
 category: hardware-grid
 subcategory: memory
 price: 189
-price_range: "150-200"
-amazon_link: "https://www.amazon.com/dp/B0BSXH6DZZ?tag=dare404-20"
-affiliate_tags: ["ram", "ddr5", "64gb", "upgrade", "ollama-compatible"]
-ihardware_tags: [64gb-ddr5, 5600mhz, corsair]
+price_range: 150-200
+amazon_link: https://www.amazon.com/dp/B0BSXH6DZZ?tag=dare404-20
+affiliate_tags:
+- ram
+- ddr5
+- 64gb
+- upgrade
+- ollama-compatible
+ihardware_tags:
+- 64gb-ddr5
+- 5600mhz
+- corsair
 featured: false
 sponsored: false
-image: "https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80"
-source: "Based on community compatibility"
+image: https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80
+source: https://www.amazon.com/s?k=corsair+64gb+ddr5&tag=dare404-20
 faq_schema:
-  - question: "How much RAM do I need for local LLMs?"
-    answer: "7B models need 8-16GB, 13B models need 16-32GB, and 70B models need 48-64GB+ for CPU-only inference."
-review:
+- question: How much RAM do I need for local LLMs?
+  answer: 7B models need 8-16GB, 13B models need 16-32GB, and 70B models need 48-64GB+
+    for CPU-only inference.
+review: null
 verdict: High-capacity DDR5 kit ideal for model offloading and multi-agent workstations.
-
 last_verified: 2026-06-21
+attribution: Based on community compatibility
+ollama_score: N/A (enabler)
 ---
+
+
 ## Overview
 
 DDR5 has become the standard for new builds, and RAM is often the bottleneck for local LLM inference before GPU. 64GB allows running larger context windows or multiple models simultaneously on machines that support it.

@@ -1,25 +1,39 @@
 ---
 name: Antminer S21
-name_full: "Bitmain Antminer S21 (200Th/s, 3500W)"
+name_full: Bitmain Antminer S21 (200Th/s, 3500W)
 category: hardware-grid
 subcategory: mining
 price: 3499
-price_range: "3000-4000"
-amazon_link: "https://www.amazon.com/s?k=antminer+s21&ref=nb_sb_noss&tag=dare404-20"
-affiliate_tags: ["miner", "asic", "bitcoin", "mining", "bitmain", "high-wattage"]
-ihardware_tags: [200ths, 3500w, sha256, bitmain]
+price_range: 3000-4000
+amazon_link: https://www.amazon.com/s?k=antminer+s21&ref=nb_sb_noss&tag=dare404-20
+affiliate_tags:
+- miner
+- asic
+- bitcoin
+- mining
+- bitmain
+- high-wattage
+ihardware_tags:
+- 200ths
+- 3500w
+- sha256
+- bitmain
 featured: true
 sponsored: false
-image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600&q=80"
-source: "Based on manufacturer specs"
+image: https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600&q=80
+source: https://www.amazon.com/s?k=antminer+s21&ref=nb_sb_noss&tag=dare404-20
 faq_schema:
-  - question: "Is the Antminer S21 profitable?"
-    answer: "Profitability depends on your electricity rate, Bitcoin price, and pool fees. Use the mining ROI calculator at /crypto/roi before buying."
-review:
+- question: Is the Antminer S21 profitable?
+  answer: Profitability depends on your electricity rate, Bitcoin price, and pool
+    fees. Use the mining ROI calculator at /crypto/roi before buying.
+review: null
 verdict: Industrial Bitcoin miner for miners with cheap power and scale.
-
 last_verified: 2026-06-21
+attribution: Based on manufacturer specs
+ollama_score: N/A (enabler)
 ---
+
+
 ## Specifications
 
 | Metric | Value |

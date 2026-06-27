@@ -1,29 +1,37 @@
 ---
-name: "Ledger Nano X"
-name_full: "Ledger Nano X Hardware Wallet"
+name: Ledger Nano X
+name_full: Ledger Nano X Hardware Wallet
 category: hardware-grid
 subcategory: wallet
 price: 149
-price_range: "100-150"
-amazon_link: "https://shop.ledger.com/?r=ca1b30139f19"
-referral_link: "https://shop.ledger.com/?r=ca1b30139f19"
-ihardware_tags: [hardware-wallet, bluetooth, ledger]
+price_range: 100-150
+amazon_link: https://shop.ledger.com/?r=ca1b30139f19
+referral_link: https://shop.ledger.com/?r=ca1b30139f19
+ihardware_tags:
+- hardware-wallet
+- bluetooth
+- ledger
 featured: false
 sponsored: false
-image: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=600&q=80"
-source: "Based on manufacturer specs"
+image: https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=600&q=80
+source: https://shop.ledger.com/?r=ca1b30139f19
 faq_schema:
-  - question: "Is a hardware wallet necessary?"
-    answer: "For significant holdings, yes. Exchanges can be hacked or freeze withdrawals."
-  - question: "Ledger Nano X vs Nano S Plus?"
-    answer: "Nano X has Bluetooth and more storage for apps. Nano S Plus is cheaper and USB-only."
-  - question: "What if I lose the device?"
-    answer: "Your recovery seed (24 words) restores access. Never store it digitally or share it."
-review:
+- question: Is a hardware wallet necessary?
+  answer: For significant holdings, yes. Exchanges can be hacked or freeze withdrawals.
+- question: Ledger Nano X vs Nano S Plus?
+  answer: Nano X has Bluetooth and more storage for apps. Nano S Plus is cheaper and
+    USB-only.
+- question: What if I lose the device?
+  answer: Your recovery seed (24 words) restores access. Never store it digitally
+    or share it.
+review: null
 verdict: Most trusted hardware wallet for securing crypto mining payouts and holdings.
-
 last_verified: 2026-06-21
+attribution: Based on manufacturer specs
+ollama_score: N/A (enabler)
 ---
+
+
 ## Overview
 
 The Ledger Nano X is a hardware wallet that stores cryptocurrency private keys offline. It supports thousands of coins and connects via USB or Bluetooth to the Ledger Live mobile app.

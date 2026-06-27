@@ -1,10 +1,10 @@
 ---
-name: "Alpaca"
+name: Alpaca
 category: data-stack
 subcategory: broker
 price: 0
-price_range: "Free"
-referral_link: "https://alpaca.markets/"
+price_range: Free
+referral_link: https://alpaca.markets/
 tags:
 - brokerage
 - api
@@ -12,23 +12,30 @@ tags:
 - commission-free
 - python
 - paper-trading
-why_use: "The only commission-free brokerage with a real API. Build bots that execute real trades without paying $6.95 per trade."
-whats_new: "Just added Options API beta. Build multi-leg strategies programmatically."
-stack_position: "Execution layer — takes signals from TradingView and executes trades"
-commission_note: "Alpaca does not have a self-serve affiliate program. Contact partners@alpaca.markets for referral opportunities."
-source: "Based on official documentation and community use"
-image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80"
+why_use: The only commission-free brokerage with a real API. Build bots that execute
+  real trades without paying $6.95 per trade.
+whats_new: Just added Options API beta. Build multi-leg strategies programmatically.
+stack_position: "Execution layer \u2014 takes signals from TradingView and executes\
+  \ trades"
+commission_note: Alpaca does not have a self-serve affiliate program. Contact partners@alpaca.markets
+  for referral opportunities.
+source: https://alpaca.markets/
+image: https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80
 faq_schema:
-  - question: "Is Alpaca trading good for algorithmic agents?"
-    answer: "Alpaca offers commission-free API trading, making it popular for automated strategies and agent-based trading experiments in the U.S."
-review:
+- question: Is Alpaca trading good for algorithmic agents?
+  answer: Alpaca offers commission-free API trading, making it popular for automated
+    strategies and agent-based trading experiments in the U.S.
+review: null
 verdict: Best free brokerage API for paper trading and algorithmic strategy development.
-
 last_verified: 2026-06-21
 schema_type: SoftwareApplication
 applicationCategory: FinanceApplication
 operatingSystem: Web, Python SDK
+attribution: Based on official documentation and community use
+ollama_score: N/A (enabler)
 ---
+
+
 
 ## What It Is
 
