@@ -1,0 +1,171 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "Answer Engine Citation Tracker — Monitor Who Cites Your Content";
+const description = "Track whether ChatGPT, Perplexity, Gemini, and other answer engines cite your pages. Build your AEO monitoring workflow in minutes.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What are answer engine citations?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Answer engines like Perplexity, ChatGPT, Gemini, and Copilot sometimes include source links when they generate answers. These citations are the new SEO backlinks for the AI era." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I get my content cited by AI answer engines?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Use clear factual claims, schema.org structured data, concise answer-first paragraphs, and real source URLs. Being cited in directories, comparison tables, and FAQ pages increases the chance." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔗</div>
+        <h1 class="display-heading mb-4">Answer Engine Citation Tracker</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          The new SEO is being cited by AI. Track whether Perplexity, ChatGPT, Gemini, and others link to your pages.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Track Your URL</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">URL to monitor</label>
+              <input id="url" type="url" value="https://hermesdispatch.dev/" placeholder="https://yoursite.com/page" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Query to test</label>
+              <input id="query" type="text" value="best GPU for local LLM" placeholder="Ask a question your page answers" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+
+            <button id="generateLinks" type="button" class="btn-primary w-full">Generate test links</button>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Where to Check</h2>
+          <div id="links" class="space-y-3">
+            <p class="text-sm text-neutral-400">Enter a URL and query above, then click generate to get direct links to test Perplexity, ChatGPT, Gemini, and Bing Copilot.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-8">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Weekly Citation Log</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-neutral-500 border-b border-neutral-800">
+                <th class="pb-3">Engine</th>
+                <th class="pb-3">Status</th>
+                <th class="pb-3">Last checked</th>
+                <th class="pb-3">Notes</th>
+              </tr>
+            </thead>
+            <tbody id="log">
+              {[
+                { engine: "Perplexity", status: "Not checked", last: "—", notes: "Search query + inspect Sources" },
+                { engine: "ChatGPT / GPT-4o", status: "Not checked", last: "—", notes: "Browse with Bing may cite sources" },
+                { engine: "Gemini / Google SGE", status: "Not checked", last: "—", notes: "Check AI Overview links" },
+                { engine: "Microsoft Copilot", status: "Not checked", last: "—", notes: "Look for Learn more links" },
+                { engine: "Claude", status: "Not checked", last: "—", notes: "No web citations yet" },
+                { engine: "Perplexity Pages", status: "Not checked", last: "—", notes: "Persistent topic pages with sources" }
+              ].map(row => (
+                <tr class="border-b border-neutral-800/50">
+                  <td class="py-3 font-medium">{row.engine}</td>
+                  <td class="py-3">
+                    <select class="status-select bg-neutral-800 border border-neutral-700 rounded px-2 py-1 text-white">
+                      <option>Not checked</option>
+                      <option>Cited ✅</option>
+                      <option>Not cited ❌</option>
+                      <option>Partially cited ⚠️</option>
+                    </select>
+                  </td>
+                  <td class="py-3 log-date text-neutral-400">{row.last}</td>
+                  <td class="py-3 text-neutral-400">{row.notes}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <button id="saveLog" type="button" class="mt-4 px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 transition-colors text-sm">Mark checked today</button>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-3 text-brand-gold">How to increase citations</h2>
+          <ul class="space-y-2 text-sm text-neutral-300">
+            <li><strong class="text-white">Answer first:</strong> Put the direct answer in the first paragraph, then explain.</li>
+            <li><strong class="text-white">Schema.org:</strong> Use FAQPage, HowTo, and ItemList structured data.</li>
+            <li><strong class="text-white">Unique data:</strong> Original benchmarks, calculators, and comparisons get cited more.</li>
+            <li><strong class="text-white">Keep URLs stable:</strong> Changing slugs breaks citations.</li>
+          </ul>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-3 text-brand-gold">Automated monitoring</h2>
+          <p class="text-sm text-neutral-300 mb-4">For now, manual checks are the most reliable. We are building a scheduled scanner that will:</p>
+          <ul class="space-y-2 text-sm text-neutral-300">
+            <li>Run weekly Perplexity queries against your target list.</li>
+            <li>Screenshot and log citations in your Obsidian vault.</li>
+            <li>Alert you when new citations appear or disappear.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const urlInput = document.getElementById('url');
+    const queryInput = document.getElementById('query');
+    const linksDiv = document.getElementById('links');
+    const generateBtn = document.getElementById('generateLinks');
+    const saveBtn = document.getElementById('saveLog');
+
+    function encode(s) { return encodeURIComponent(s); }
+
+    function generate() {
+      const url = urlInput.value.trim();
+      const q = queryInput.value.trim();
+      if (!url || !q) return;
+
+      const links = [
+        { name: 'Perplexity', href: `https://www.perplexity.ai/search?q=${encode(q)}` },
+        { name: 'ChatGPT / Bing', href: `https://chat.openai.com/?q=${encode(q + ' ' + url)}` },
+        { name: 'Google Gemini', href: `https://gemini.google.com/app?q=${encode(q)}` },
+        { name: 'Microsoft Copilot', href: `https://copilot.microsoft.com/?q=${encode(q)}` }
+      ];
+
+      linksDiv.innerHTML = links.map(l => `
+        <a href="${l.href}" target="_blank" rel="noopener" class="flex items-center justify-between p-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 transition-colors">
+          <span class="font-medium">${l.name}</span>
+          <span class="text-brand-gold">Open →</span>
+        </a>
+      `).join('');
+    }
+
+    generateBtn.addEventListener('click', generate);
+
+    saveBtn.addEventListener('click', () => {
+      const today = new Date().toISOString().split('T')[0];
+      document.querySelectorAll('.log-date').forEach(td => {
+        const select = td.parentElement.querySelector('.status-select');
+        if (select.value !== 'Not checked') {
+          td.textContent = today;
+        }
+      });
+    });
+
+    generate();
+  </script>
+</Layout>
