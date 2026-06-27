@@ -1,0 +1,170 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "AI Agent Startup Cost Calculator — Build an AI-Native Business";
+const description = "Estimate monthly and first-year costs to launch an AI agent startup: LLM APIs, hosting, hardware, tools, and labor.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much does it cost to start an AI agent business?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A lean AI agent startup can launch for $200-1,000/month, covering API tokens, hosting, domain, and basic tools. A team with salaries, multi-agent infrastructure, and paid data sources can burn $5,000-20,000/month." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the biggest cost in running AI agents?",
+        "acceptedAnswer": { "@type": "Answer", "text": "LLM API usage is usually the largest variable cost. Token volume scales directly with users, so choosing efficient models and caching aggressively reduces burn." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🚀</div>
+        <h1 class="display-heading mb-4">AI Agent Startup Cost Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate what it actually costs to launch and run an AI-native business for the first year.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Team & Labor</h2>
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Founders (unpaid)</label>
+                <input id="founders" type="number" value="1" min="0" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Paid engineers</label>
+                <input id="engineers" type="number" value="0" min="0" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Avg engineer salary ($/yr)</label>
+                <input id="engineerSalary" type="number" value="120000" step="1000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Other monthly labor ($)</label>
+                <input id="otherLabor" type="number" value="0" step="100" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Infrastructure & Tools</h2>
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">LLM API spend ($/mo)</label>
+                <input id="apiSpend" type="number" value="500" step="50" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Hosting / VPS ($/mo)</label>
+                <input id="hosting" type="number" value="50" step="10" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Vector DB / storage ($/mo)</label>
+                <input id="storage" type="number" value="30" step="10" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Tools (GitHub, CI, domains) ($/mo)</label>
+                <input id="tools" type="number" value="100" step="10" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Local GPU hardware ($ one-time)</label>
+                <input id="hardware" type="number" value="0" step="100" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Data / API subscriptions ($/mo)</label>
+                <input id="data" type="number" value="0" step="10" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Cost Summary</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">Monthly burn</p>
+            <p id="monthlyBurn" class="text-2xl font-bold text-brand-gold">—</p>
+          </div>
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">First-year total</p>
+            <p id="firstYear" class="text-2xl font-bold text-white">—</p>
+          </div>
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">LLM % of burn</p>
+            <p id="apiPct" class="text-2xl font-bold text-white">—</p>
+          </div>
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">People % of burn</p>
+            <p id="peoplePct" class="text-2xl font-bold text-white">—</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-3 text-brand-gold">How to read this</h2>
+        <ul class="space-y-2 text-neutral-300 text-sm">
+          <li><strong class="text-white">Lean solo founder:</strong> $200-1,000/mo — APIs, hosting, and tools dominate.</li>
+          <li><strong class="text-white">Small team (2-3):</strong> $5,000-15,000/mo — salaries become the biggest line item fast.</li>
+          <li><strong class="text-white">Scaling:</strong> $20,000+/mo — add reliability, compliance, and multi-agent infrastructure.</li>
+          <li><strong class="text-white">Local hardware:</strong> One-time GPU cost amortized over the year. Compare with our <a href="/tools/llm-cost-calculator/" class="text-brand-gold hover:underline">LLM cost calculator</a>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const inputs = [
+      'founders', 'engineers', 'engineerSalary', 'otherLabor',
+      'apiSpend', 'hosting', 'storage', 'tools', 'hardware', 'data'
+    ].map(id => document.getElementById(id));
+
+    const fmt = n => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+
+    function calc() {
+      const founders = parseFloat(document.getElementById('founders').value) || 0;
+      const engineers = parseFloat(document.getElementById('engineers').value) || 0;
+      const engineerSalary = parseFloat(document.getElementById('engineerSalary').value) || 0;
+      const otherLabor = parseFloat(document.getElementById('otherLabor').value) || 0;
+      const apiSpend = parseFloat(document.getElementById('apiSpend').value) || 0;
+      const hosting = parseFloat(document.getElementById('hosting').value) || 0;
+      const storage = parseFloat(document.getElementById('storage').value) || 0;
+      const tools = parseFloat(document.getElementById('tools').value) || 0;
+      const hardware = parseFloat(document.getElementById('hardware').value) || 0;
+      const data = parseFloat(document.getElementById('data').value) || 0;
+
+      const peopleMonthly = (engineers * engineerSalary / 12) + otherLabor;
+      const infraMonthly = apiSpend + hosting + storage + tools + data;
+      const monthlyBurn = peopleMonthly + infraMonthly;
+      const firstYear = monthlyBurn * 12 + hardware;
+
+      document.getElementById('monthlyBurn').textContent = fmt(monthlyBurn);
+      document.getElementById('firstYear').textContent = fmt(firstYear);
+      document.getElementById('apiPct').textContent = monthlyBurn > 0 ? Math.round(apiSpend / monthlyBurn * 100) + '%' : '0%';
+      document.getElementById('peoplePct').textContent = monthlyBurn > 0 ? Math.round(peopleMonthly / monthlyBurn * 100) + '%' : '0%';
+    }
+
+    inputs.forEach(el => el.addEventListener('input', calc));
+    calc();
+  </script>
+</Layout>
