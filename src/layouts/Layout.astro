@@ -108,32 +108,9 @@ const fullCommit = versionData?.commit || 'local';
               </div>
             </div>
 
-            <!-- Learn dropdown -->
-            <div class="relative group" id="learn-dropdown">
-              <button type="button" aria-haspopup="true" aria-expanded="false" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm flex items-center gap-1">
-                Learn
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-              </button>
-              <div class="absolute left-0 top-full mt-0 w-56 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <a href="/answers" class="block px-4 py-2 text-sm hover:bg-neutral-800 first:rounded-t-lg">Answers (FAQ)</a>
-                <a href="/guides" class="block px-4 py-2 text-sm hover:bg-neutral-800">Guides</a>
-                <a href="/reviews" class="block px-4 py-2 text-sm hover:bg-neutral-800">Reviews</a>
-                <a href="/podcast" class="block px-4 py-2 text-sm hover:bg-neutral-800 last:rounded-b-lg">Podcast</a>
-              </div>
-            </div>
-
-            <!-- More dropdown -->
-            <div class="relative group" id="more-dropdown">
-              <button type="button" aria-haspopup="true" aria-expanded="false" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm flex items-center gap-1">
-                More
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-              </button>
-              <div class="absolute left-0 top-full mt-0 w-56 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <a href="/newsletter" class="block px-4 py-2 text-sm hover:bg-neutral-800 first:rounded-t-lg">Newsletter Archive</a>
-                <a href="/advertise" class="block px-4 py-2 text-sm hover:bg-neutral-800">Advertise</a>
-                <a href="/dashboard" class="block px-4 py-2 text-sm hover:bg-neutral-800 last:rounded-b-lg">Dashboard</a>
-              </div>
-            </div>
+            <a href="/answers" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Answers</a>
+            <a href="/podcast" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Podcast</a>
+            <a href="/newsletter" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Newsletter</a>
           </div>
           <a href="/subscribe" class="btn-primary text-sm">Subscribe</a>
         </div>
@@ -165,15 +142,15 @@ const fullCommit = versionData?.commit || 'local';
         <a href="/compare/recommend" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Recommender</a>
         <a href="/tools/mini-pc-recommender" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Mini PC Recommender</a>
         <a href="/tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">All Tools</a>
-        <p class="px-4 py-2 text-xs uppercase text-neutral-500">Learn</p>
-        <a href="/answers" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Answers (FAQ)</a>
-        <a href="/guides" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Guides</a>
-        <a href="/reviews" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Reviews</a>
-        <a href="/podcast" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Podcast</a>
-        <p class="px-4 py-2 text-xs uppercase text-neutral-500">More</p>
-        <a href="/newsletter" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Newsletter Archive</a>
-        <a href="/advertise" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Advertise</a>
-        <a href="/dashboard" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Dashboard</a>
+
+        <div class="border-t border-neutral-800 my-4"></div>
+        <a href="/answers" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Answers</a>
+        <a href="/podcast" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Podcast</a>
+        <a href="/newsletter" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Newsletter Archive</a>
+        <a href="/guides" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Guides</a>
+        <a href="/reviews" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Reviews</a>
+        <a href="/advertise" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Advertise</a>
+        <a href="/dashboard" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Dashboard</a>
       </div>
     </div>
     
