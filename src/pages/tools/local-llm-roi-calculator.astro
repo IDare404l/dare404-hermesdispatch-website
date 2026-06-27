@@ -1,0 +1,173 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "Local LLM ROI Calculator — When Does Buying Hardware Beat APIs?";
+const description = "Compare total cost of ownership for running LLMs locally vs cloud APIs over 1-3 years. Factor hardware, electricity, utilization, and model upgrades.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How long does it take for a local GPU to pay off vs LLM APIs?",
+        "acceptedAnswer": { "@type": "Answer", "text": "At moderate utilization, an RTX 4090 or Mac Studio M4 Max typically breaks even in 6-18 months compared to GPT-4o-class APIs. Higher utilization and cheaper electricity shorten payback." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the biggest hidden cost of local LLMs?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Electricity, cooling, maintenance, and downtime are the main hidden costs. Model upgrades can also require more VRAM, forcing hardware refreshes." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📊</div>
+        <h1 class="display-heading mb-4">Local LLM ROI Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Should you buy a GPU workstation or keep paying per token? Find your break-even point.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Local Hardware</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Hardware cost ($)</label>
+              <input id="hardwareCost" type="number" value="3500" step="100" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Power draw (W)</label>
+                <input id="powerW" type="number" value="450" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Electricity ($/kWh)</label>
+                <input id="electricity" type="number" value="0.12" step="0.01" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Hardware utilization (%)</label>
+              <input id="utilization" type="number" value="40" min="0" max="100" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Replacement / upgrade reserve ($/yr)</label>
+              <input id="upgradeReserve" type="number" value="300" step="50" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Cloud API Alternative</h2>
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Input tokens / mo (millions)</label>
+                <input id="inputM" type="number" value="50" step="10" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Output tokens / mo (millions)</label>
+                <input id="outputM" type="number" value="20" step="5" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">API input price ($/1M)</label>
+                <input id="apiInputPrice" type="number" value="2.50" step="0.10" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">API output price ($/1M)</label>
+                <input id="apiOutputPrice" type="number" value="10.00" step="0.50" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Forecast years</label>
+              <input id="years" type="number" value="3" min="1" max="5" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">3-Year TCO Comparison</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">Local TCO</p>
+            <p id="localTCO" class="text-2xl font-bold text-brand-gold">—</p>
+          </div>
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">Cloud TCO</p>
+            <p id="cloudTCO" class="text-2xl font-bold text-white">—</p>
+          </div>
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">Savings (local)</p>
+            <p id="savings" class="text-2xl font-bold text-emerald-400">—</p>
+          </div>
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">Break-even</p>
+            <p id="breakEven" class="text-2xl font-bold text-white">—</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-3 text-brand-gold">Why local wins or loses</h2>
+        <ul class="space-y-2 text-neutral-300 text-sm">
+          <li><strong class="text-white">Low volume:</strong> Cloud is cheaper until you hit steady, predictable token usage.</li>
+          <li><strong class="text-white">High utilization:</strong> Local hardware pays off faster when GPUs run most of the day.</li>
+          <li><strong class="text-white">Cheap electricity:</strong> At $0.06/kWh, local TCO drops significantly.</li>
+          <li><strong class="text-white">Privacy / latency:</strong> Local may win even at higher cost if you cannot send data to APIs or need sub-100ms responses.</li>
+          <li>Compare hardware options in our <a href="/compare/gpus/" class="text-brand-gold hover:underline">GPU comparison table</a>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const inputs = [
+      'hardwareCost', 'powerW', 'electricity', 'utilization', 'upgradeReserve',
+      'inputM', 'outputM', 'apiInputPrice', 'apiOutputPrice', 'years'
+    ].map(id => document.getElementById(id));
+
+    const fmt = n => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+
+    function calc() {
+      const hardware = parseFloat(document.getElementById('hardwareCost').value) || 0;
+      const powerW = parseFloat(document.getElementById('powerW').value) || 0;
+      const elec = parseFloat(document.getElementById('electricity').value) || 0;
+      const util = (parseFloat(document.getElementById('utilization').value) || 0) / 100;
+      const upgrade = parseFloat(document.getElementById('upgradeReserve').value) || 0;
+      const inputM = parseFloat(document.getElementById('inputM').value) || 0;
+      const outputM = parseFloat(document.getElementById('outputM').value) || 0;
+      const inPrice = parseFloat(document.getElementById('apiInputPrice').value) || 0;
+      const outPrice = parseFloat(document.getElementById('apiOutputPrice').value) || 0;
+      const years = parseFloat(document.getElementById('years').value) || 1;
+
+      const hoursPerYear = 365 * 24;
+      const electricityCostYear = (powerW / 1000) * hoursPerYear * elec * util;
+      const localTCO = hardware + (electricityCostYear + upgrade) * years;
+
+      const cloudMonthly = inputM * inPrice + outputM * outPrice;
+      const cloudTCO = cloudMonthly * 12 * years;
+
+      const savings = cloudTCO - localTCO;
+      const monthlySavings = cloudMonthly - (electricityCostYear + upgrade) / 12;
+      const breakEvenMonths = monthlySavings > 0 ? Math.ceil(hardware / monthlySavings) : '∞';
+
+      document.getElementById('localTCO').textContent = fmt(localTCO);
+      document.getElementById('cloudTCO').textContent = fmt(cloudTCO);
+      document.getElementById('savings').textContent = fmt(savings) + (savings >= 0 ? ' saved' : ' extra');
+      document.getElementById('breakEven').textContent = breakEvenMonths === '∞' ? breakEvenMonths : breakEvenMonths + ' mo';
+    }
+
+    inputs.forEach(el => el.addEventListener('input', calc));
+    calc();
+  </script>
+</Layout>
