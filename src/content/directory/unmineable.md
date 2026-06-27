@@ -13,7 +13,7 @@ affiliate_tags:
 featured: false
 sponsored: false
 source: https://unmineable.com/?ref=7k2l-4h7s
-image: https://images.unsplash.com/photo-1621761191319-c6ef620b8b84?w=600&q=80
+image: https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&q=80
 brand: UnMineable
 faq_schema:
 - question: What is UnMineable?

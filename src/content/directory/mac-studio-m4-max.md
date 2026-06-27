@@ -24,7 +24,7 @@ benchmark_model: llama3.2 3B Q4_K_M
 featured: false
 sponsored: false
 source: https://www.amazon.com/s?k=mac+studio+m4+max&tag=dare404-20
-image: https://images.unsplash.com/photo-1517336714731-489689fd1ca4?w=600&q=80
+image: https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80
 brand: Apple
 faq_schema:
 - question: Is the Mac Studio M4 Max good for local LLMs?

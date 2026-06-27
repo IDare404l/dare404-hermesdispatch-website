@@ -55,7 +55,7 @@ const pageDescription = "Compare NVIDIA RTX 4090, RTX 5090, Apple Silicon and mi
                 ))}
                 <td class="px-4 py-4">
                   {gpu.source ? (
-                    <a href={`/go/${slug}?url=${encodeURIComponent(gpu.source)}&source=compare-gpus`} class="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-gold/10 text-brand-gold text-sm hover:bg-brand-gold/20 transition-colors">
+                    <a href={`/go/${slug}/?url=${encodeURIComponent(gpu.source)}&source=compare-gpus`} class="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-gold/10 text-brand-gold text-sm hover:bg-brand-gold/20 transition-colors">
                       See deals →
                     </a>
                   ) : (
