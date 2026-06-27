@@ -1,0 +1,222 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import pivotData from '../../data/miner_pivot.json';
+
+const title = "Miner Pivot Calculator — Mine, Sell, or Run AI Inference?";
+const description = "Compare crypto mining profitability vs local LLM inference revenue for your GPU. Decide whether to keep mining, sell your rig, or pivot to AI hosting.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is it more profitable to mine crypto or run local LLM inference?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It depends on your electricity cost, GPU model, and inference utilization. High-VRAM cards like the RTX 4090 or 5090 often earn more from AI inference hosting at 30-50% utilization than from mining after electricity costs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much can I earn running a local LLM API on my GPU?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "At $0.10 per 1M output tokens and 40% utilization, an RTX 4090 running Llama 3 8B at ~64 tok/s can generate roughly $15-30/month after electricity, but revenue scales with utilization and pricing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I sell my mining rig or repurpose it for AI?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "If your GPUs have 16GB+ VRAM and mining profit is near or below break-even, repurposing for local LLM inference or selling to AI builders is usually the better play. Cards under 12GB VRAM are poor inference hosts and are better sold."
+        }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⛏️</div>
+        <h1 class="display-heading mb-4">Miner Pivot Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Should you keep mining crypto, sell your GPUs, or pivot to local LLM inference? Plug in your numbers and get a data-backed answer.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Your Rig</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">GPU model</label>
+              <select id="gpu" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {Object.entries(pivotData.gpus).map(([slug, gpu]) => (
+                  <option value={slug}>{gpu.name}</option>
+                ))}
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Hashrate (MH/s)</label>
+                <input id="hashrate" type="number" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Power draw (W)</label>
+                <input id="power" type="number" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Electricity ($/kWh)</label>
+                <input id="electricity" type="number" step="0.01" value={pivotData.defaults.electricity_cost_per_kwh} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Mining revenue ($/MH/day)</label>
+                <input id="miningRate" type="number" step="0.0001" value={pivotData.defaults.mining_revenue_per_mh_day} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Inference Pivot</h2>
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">8B model tok/s</label>
+                <input id="tokS" type="number" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">VRAM (GB)</label>
+                <input id="vram" type="number" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Price per 1M tokens ($)</label>
+                <input id="tokenPrice" type="number" step="0.01" value={pivotData.defaults.inference_price_per_1m_tokens} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Utilization (%)</label>
+                <input id="utilization" type="number" step="1" min="0" max="100" value={pivotData.defaults.utilization_pct * 100} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Monthly Verdict</h2>
+        <div id="verdict" class="text-2xl font-bold mb-4">Loading...</div>
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">Mining profit/mo</p>
+            <p id="miningProfit" class="text-xl font-semibold">—</p>
+          </div>
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">Inference revenue/mo</p>
+            <p id="inferenceProfit" class="text-xl font-semibold">—</p>
+          </div>
+          <div class="p-4 rounded-xl bg-neutral-800/50">
+            <p class="text-xs text-neutral-500 uppercase">Sell estimate</p>
+            <p id="sellEstimate" class="text-xl font-semibold">—</p>
+          </div>
+        </div>
+        <p class="text-sm text-neutral-400 mt-4">Sell estimate assumes a used GPU market value of ~55% of MSRP for cards 12GB+ and ~35% for cards under 12GB.</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">How this works</h2>
+        <ul class="space-y-3 text-neutral-300">
+          <li><strong class="text-white">Mining profit:</strong> revenue per MH/s × hashrate − (power × 24 × 30 × electricity rate).</li>
+          <li><strong class="text-white">Inference revenue:</strong> tokens/sec × 3600 × 24 × 30 × utilization × price per 1M tokens.</li>
+          <li><strong class="text-white">Sell:</strong> immediate one-time cash vs ongoing profit. Use this if your card lacks 16GB+ VRAM or mining is unprofitable.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ pivotData }}>
+    const gpuSelect = document.getElementById('gpu');
+    const hashrateInput = document.getElementById('hashrate');
+    const powerInput = document.getElementById('power');
+    const tokSInput = document.getElementById('tokS');
+    const vramInput = document.getElementById('vram');
+    const electricityInput = document.getElementById('electricity');
+    const miningRateInput = document.getElementById('miningRate');
+    const tokenPriceInput = document.getElementById('tokenPrice');
+    const utilizationInput = document.getElementById('utilization');
+    const verdictEl = document.getElementById('verdict');
+    const miningProfitEl = document.getElementById('miningProfit');
+    const inferenceProfitEl = document.getElementById('inferenceProfit');
+    const sellEstimateEl = document.getElementById('sellEstimate');
+
+    function fmt(n) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n || 0);
+    }
+
+    function loadGpu() {
+      const gpu = pivotData.gpus[gpuSelect.value];
+      if (!gpu) return;
+      hashrateInput.value = gpu.hashrate_mh;
+      powerInput.value = gpu.power_w;
+      tokSInput.value = gpu.inference_8b_tok_s;
+      vramInput.value = gpu.vram_gb;
+      calc();
+    }
+
+    function calc() {
+      const hashrate = parseFloat(hashrateInput.value) || 0;
+      const power = parseFloat(powerInput.value) || 0;
+      const tokS = parseFloat(tokSInput.value) || 0;
+      const vram = parseFloat(vramInput.value) || 0;
+      const electricity = parseFloat(electricityInput.value) || 0;
+      const miningRate = parseFloat(miningRateInput.value) || 0;
+      const tokenPrice = parseFloat(tokenPriceInput.value) || 0;
+      const utilization = (parseFloat(utilizationInput.value) || 0) / 100;
+
+      const days = 30;
+      const miningRevenue = hashrate * miningRate * days;
+      const miningPowerCost = (power / 1000) * 24 * days * electricity;
+      const miningProfit = miningRevenue - miningPowerCost;
+
+      const tokensPerDay = tokS * 3600 * 24;
+      const inferenceRevenue = tokensPerDay * days * utilization * (tokenPrice / 1_000_000);
+
+      const sellPct = vram >= 16 ? 0.55 : 0.35;
+      const gpu = pivotData.gpus[gpuSelect.value] || { market_price: 0 };
+      const sellEstimate = gpu.market_price * sellPct;
+
+      miningProfitEl.textContent = fmt(miningProfit);
+      inferenceProfitEl.textContent = fmt(inferenceRevenue);
+      sellEstimateEl.textContent = fmt(sellEstimate);
+
+      if (miningProfit <= 0 && inferenceRevenue <= 0) {
+        verdictEl.textContent = 'Sell the card';
+        verdictEl.className = 'text-2xl font-bold mb-4 text-red-400';
+      } else if (inferenceRevenue > miningProfit * 1.2) {
+        verdictEl.textContent = 'Pivot to AI inference';
+        verdictEl.className = 'text-2xl font-bold mb-4 text-emerald-400';
+      } else if (miningProfit > inferenceRevenue * 1.2) {
+        verdictEl.textContent = 'Keep mining';
+        verdictEl.className = 'text-2xl font-bold mb-4 text-amber-400';
+      } else {
+        verdictEl.textContent = 'Close call — test inference demand';
+        verdictEl.className = 'text-2xl font-bold mb-4 text-brand-gold';
+      }
+    }
+
+    [gpuSelect, hashrateInput, powerInput, tokSInput, vramInput, electricityInput, miningRateInput, tokenPriceInput, utilizationInput].forEach(el => {
+      el.addEventListener('input', calc);
+    });
+
+    loadGpu();
+  </script>
+</Layout>
