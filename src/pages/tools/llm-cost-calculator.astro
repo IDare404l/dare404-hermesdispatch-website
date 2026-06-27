@@ -1,0 +1,138 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "LLM Cost Calculator — API vs Local Inference per 1M Tokens";
+const description = "Compare token costs across OpenAI, Anthropic, Google, Groq, and local GPU inference. Find the cheapest way to run your AI workload.";
+
+const providers = [
+  { name: "OpenAI GPT-4o", input: 2.50, output: 10.00, context: 128000, speed: "fast", note: "Best general-purpose API" },
+  { name: "OpenAI GPT-4o mini", input: 0.15, output: 0.60, context: 128000, speed: "fast", note: "Cheapest OpenAI model" },
+  { name: "Anthropic Claude 3.5 Sonnet", input: 3.00, output: 15.00, context: 200000, speed: "fast", note: "Best coding / reasoning" },
+  { name: "Anthropic Claude 3 Haiku", input: 0.25, output: 1.25, context: 200000, speed: "fastest", note: "Fast Anthropic option" },
+  { name: "Google Gemini 1.5 Flash", input: 0.075, output: 0.30, context: 1000000, speed: "fast", note: "Lowest API cost, huge context" },
+  { name: "Google Gemini 1.5 Pro", input: 1.25, output: 5.00, context: 2000000, speed: "medium", note: "Largest context window" },
+  { name: "Groq Llama 3 70B", input: 0.59, output: 0.79, context: 8192, speed: "fastest", note: "Fastest API inference" },
+  { name: "Groq Mixtral 8x7B", input: 0.27, output: 0.27, context: 32000, speed: "fastest", note: "Fast and cheap" },
+  { name: "Local RTX 4090 (Llama 3 8B)", input: 0, output: 0, context: 8192, speed: "fast", note: "Hardware + electricity only" },
+  { name: "Local RTX 4090 (Llama 3 70B)", input: 0, output: 0, context: 8192, speed: "medium", note: "Requires quantization" },
+];
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is it cheaper to run LLMs locally or use an API?",
+        "acceptedAnswer": { "@type": "Answer", "text": "For low volume, APIs are cheaper. Above roughly 10-50 million tokens per month, a local GPU like an RTX 4090 can beat API pricing, especially for smaller models." }
+      },
+      {
+        "@type": "Question",
+        "name": "Which LLM API has the lowest cost per 1M tokens?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Google Gemini 1.5 Flash is currently the cheapest major API at $0.075 per 1M input tokens, followed by Groq Mixtral 8x7B at $0.27 per 1M tokens." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">💰</div>
+        <h1 class="display-heading mb-4">LLM Cost Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Compare token costs across cloud APIs and local GPU inference. See when it pays to own the hardware.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Input tokens per call</label>
+          <input id="inputTokens" type="number" value="4000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Output tokens per call</label>
+          <input id="outputTokens" type="number" value="1000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Calls per month</label>
+          <input id="callsPerMonth" type="number" value="10000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 mb-8 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-neutral-500 border-b border-neutral-800">
+              <th class="pb-3">Provider / Model</th>
+              <th class="pb-3">Input/$1M</th>
+              <th class="pb-3">Output/$1M</th>
+              <th class="pb-3">Monthly cost</th>
+              <th class="pb-3">Context</th>
+              <th class="pb-3">Note</th>
+            </tr>
+          </thead>
+          <tbody id="costTable">
+            {providers.map(p => (
+              <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" data-input={p.input} data-output={p.output}>
+                <td class="py-3 font-medium">{p.name}</td>
+                <td class="py-3">${p.input.toFixed(2)}</td>
+                <td class="py-3">${p.output.toFixed(2)}</td>
+                <td class="py-3 cost-cell font-semibold text-brand-gold">—</td>
+                <td class="py-3">{(p.context / 1000).toFixed(0)}K</td>
+                <td class="py-3 text-neutral-400">{p.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-3">When does local win?</h2>
+        <p class="text-neutral-300 mb-2">At your selected volume, cloud APIs cost roughly <span id="cloudAvg" class="text-brand-gold font-bold">—</span>/month.</p>
+        <p class="text-neutral-300 mb-4">A local <a href="/compare/gpus/" class="text-brand-gold hover:underline">RTX 4090 setup</a> breaks even in about <span id="breakEvenMonths" class="text-brand-gold font-bold">—</span> months if electricity is $0.12/kWh and the GPU is used 40% of the time.</p>
+        <p class="text-sm text-neutral-500">Local inference avoids per-token pricing but requires upfront hardware, maintenance, and uptime. Use this calculator to find your crossover point.</p>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ providers }}>
+    const inputEl = document.getElementById('inputTokens');
+    const outputEl = document.getElementById('outputTokens');
+    const callsEl = document.getElementById('callsPerMonth');
+    const cloudAvgEl = document.getElementById('cloudAvg');
+    const breakEvenEl = document.getElementById('breakEvenMonths');
+
+    function calc() {
+      const inputPerCall = parseFloat(inputEl.value) || 0;
+      const outputPerCall = parseFloat(outputEl.value) || 0;
+      const calls = parseFloat(callsEl.value) || 0;
+
+      const rows = document.querySelectorAll('#costTable tr');
+      let cloudCosts = [];
+      rows.forEach(row => {
+        const inputRate = parseFloat(row.dataset.input) || 0;
+        const outputRate = parseFloat(row.dataset.output) || 0;
+        const cost = (inputPerCall * inputRate / 1_000_000 + outputPerCall * outputRate / 1_000_000) * calls;
+        const cell = row.querySelector('.cost-cell');
+        cell.textContent = '$' + cost.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        if (inputRate > 0 || outputRate > 0) cloudCosts.push(cost);
+      });
+
+      const avg = cloudCosts.length ? cloudCosts.reduce((a, b) => a + b, 0) / cloudCosts.length : 0;
+      cloudAvgEl.textContent = '$' + avg.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+      // RTX 4090 TCO: $1700 hardware, ~320W, 40% utilization, $0.12/kWh
+      const hoursPerMonth = 730;
+      const powerCost = (320 / 1000) * hoursPerMonth * 0.12 * 0.40;
+      const months = avg > powerCost ? Math.round(1700 / (avg - powerCost)) : '>24';
+      breakEvenEl.textContent = months;
+    }
+
+    [inputEl, outputEl, callsEl].forEach(el => el.addEventListener('input', calc));
+    calc();
+  </script>
+</Layout>
