@@ -15,8 +15,30 @@ export const getStaticPaths = (async () => {
 
 const { issue } = Astro.props;
 
+// Pre-process newsletter labels into blockquotes so the post-processor can style them
+const newsletterContent = issue.content
+  .split('\n')
+  .map((line) => {
+    const s = line.trim();
+    if (s.startsWith('**Agent TL;DR:**')) {
+      return `> **Agent TL;DR:** ${s.replace('**Agent TL;DR:**', '').trim()}`;
+    }
+    if (s.startsWith('**Why it matters:**')) {
+      return `> **Why it matters:** ${s.replace('**Why it matters:**', '').trim()}`;
+    }
+    if (s.startsWith('**The play:**')) {
+      return `> **The play:** ${s.replace('**The play:**', '').trim()}`;
+    }
+    if (/^\*\*(What we shipped this week|Current experiment|What's broken):\*\*/.test(s)) {
+      const [, label, rest] = s.match(/^\*\*(.+?):\*\*(.*)$/) || [];
+      return `> **${label}:** ${rest.trim()}`;
+    }
+    return line;
+  })
+  .join('\n');
+
 // Render markdown content to HTML with dark-mode friendly styling
-const rawHtml = marked.parse(issue.content);
+const rawHtml = marked.parse(newsletterContent);
 
 // Post-process HTML for newsletter-specific styling
 const styledHtml = rawHtml
@@ -26,10 +48,28 @@ const styledHtml = rawHtml
   .replace(/<h3>(.*?)<\/h3>/g, '<h3 class="text-xl font-semibold mt-8 mb-3 text-white">$1</h3>')
   // Style horizontal rules
   .replace(/<hr>/g, '<hr class="border-gray-800 my-8" />')
-  // Style blockquotes based on label
-  .replace(/<blockquote>\s*<p><strong>Agent TL;DR:<\/strong>(.*?)<\/p>\s*<\/blockquote>/g, '<div class="bg-red-500/5 border-l-4 border-red-500 p-4 my-4 rounded-r"><p class="text-red-400 text-xs font-semibold uppercase tracking-wider m-0 mb-1">Agent TL;DR</p><p class="text-gray-200 m-0">$1</p></div>')
-  .replace(/<blockquote>\s*<p><strong>Why it matters:<\/strong>(.*?)<\/p>\s*<\/blockquote>/g, '<div class="bg-amber-400/5 border-l-4 border-amber-400 p-4 my-4 rounded-r"><p class="text-amber-400 text-xs font-semibold uppercase tracking-wider m-0 mb-1">Why it matters</p><p class="text-gray-200 m-0">$1</p></div>')
-  .replace(/<blockquote>\s*<p><strong>The play:<\/strong>(.*?)<\/p>\s*<\/blockquote>/g, '<div class="bg-cyan-400/5 border-l-4 border-cyan-400 p-4 my-4 rounded-r"><p class="text-cyan-400 text-xs font-semibold uppercase tracking-wider m-0 mb-1">The play</p><p class="text-gray-200 m-0">$1</p></div>')
+  // Split multi-paragraph blockquotes into separate callouts
+  .replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, (match, inner) => {
+    const paras = inner.split(/<\/p>\s*<p[^>]*>/).filter(Boolean);
+    return paras.map(p => {
+      p = p.replace(/<\/?p[^>]*>/g, '').trim();
+      const labelMatch = p.match(/<strong>([^:<]+):\s*<\/strong>/);
+      if (!labelMatch) return `<blockquote class="border-l-4 border-gray-600 p-4 my-4 italic text-gray-300">${p}</blockquote>`;
+      const label = labelMatch[1].trim();
+      const body = p.replace(/<strong>[^:<]+:\s*<\/strong>/, '').trim();
+      const styles = {
+        'Agent TL;DR': 'bg-red-500/5 border-red-500 text-red-400',
+        'Why it matters': 'bg-amber-400/5 border-amber-400 text-amber-400',
+        'The play': 'bg-cyan-400/5 border-cyan-400 text-cyan-400',
+        'What we shipped this week': 'bg-cyan-400/5 border-cyan-400 text-cyan-400',
+        'Current experiment': 'bg-cyan-400/5 border-cyan-400 text-cyan-400',
+        "What's broken": 'bg-red-500/5 border-red-500 text-red-400',
+      };
+      const classes = styles[label] || 'bg-gray-500/5 border-gray-500 text-gray-400';
+      const [bgClass, borderClass, textClass] = classes.split(' ');
+      return `<div class="${bgClass} border-l-4 ${borderClass} p-4 my-4 rounded-r"><p class="${textClass} text-xs font-semibold uppercase tracking-wider m-0 mb-1">${label}</p><p class="text-gray-200 m-0">${body}</p></div>`;
+    }).join('\n');
+  })
   // Style links
   .replace(/<a href=/g, '<a class="text-cyan-400 underline hover:text-cyan-300" target="_blank" rel="noopener" href=')
   // Style strong inside paragraphs
