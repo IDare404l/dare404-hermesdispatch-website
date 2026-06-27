@@ -86,14 +86,16 @@ const pageDescription = "Pick a model size and budget. We recommend the best GPU
       const budget = parseInt(document.getElementById('budget').value, 10);
       const lowPower = document.getElementById('low-power').checked;
 
+      const minVram = model.includes('70b') ? 40 : 8;
       const scored = gpus.map(g => {
         const price = MSRP[g.name] || 999999;
         const tps = g.ollama_tps?.[model] || 0;
         const fitsBudget = price <= budget;
-        const fitsModel = g.vram_gb >= (model.includes('70b') ? 40 : 8);
+        const fitsModel = g.vram_gb >= minVram;
         let score = 0;
-        if (fitsBudget) score += 1000;
-        if (fitsModel) score += 500;
+        // Hard requirement: must fit budget and model
+        if (!fitsBudget || !fitsModel) return { ...g, price, tps, fitsBudget, fitsModel, score: -999999 };
+        score += 1000;
         score += tps * 10;
         if (lowPower && g.tdp_w <= 100) score += 200;
         return { ...g, price, tps, fitsBudget, fitsModel, score };
@@ -101,19 +103,26 @@ const pageDescription = "Pick a model size and budget. We recommend the best GPU
 
       const top = scored.slice(0, 3);
 
-      cards.innerHTML = top.map(g => `
-        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border ${g.fitsBudget && g.fitsModel ? 'border-brand-gold/50' : 'border-red-500/30'}">
-          <div class="flex justify-between items-start mb-2">
-            <h3 class="text-lg font-semibold text-white">${g.name}</h3>
-            <span class="text-brand-gold font-mono">$${g.price}</span>
+      if (top.length === 0 || top[0].score < 0) {
+        cards.innerHTML = `
+          <div class="col-span-full p-6 rounded-2xl bg-brand-card border border-red-500/30 text-center">
+            <h3 class="text-lg font-semibold text-white mb-2">No matches at this budget</h3>
+            <p class="text-gray-400">Bump your budget or pick a smaller model. Running ${model} needs at least ${minVram} GB VRAM / unified memory.</p>
           </div>
-          <div class="text-sm text-gray-400 mb-3">${g.vram_gb} GB ${g.memory_type} • ${g.tdp_w} W • ${g.tps.toFixed(1)} tok/s on ${model}</div>
-          ${!g.fitsBudget ? '<div class="text-xs text-red-400 mb-2">Over budget</div>' : ''}
-          ${!g.fitsModel ? `<div class="text-xs text-red-400 mb-2">May not fit ${model} (needs ~${model.includes('70b') ? 40 : 8} GB)</div>` : ''}
-          ${g.notes ? `<p class="text-sm text-gray-400 mb-3">${g.notes}</p>` : ''}
-          <a href="/go/${slugify(g.name)}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-gold/10 text-brand-gold text-sm hover:bg-brand-gold/20 transition-colors">See deals →</a>
-        </div>
-      `).join('');
+        `;
+      } else {
+        cards.innerHTML = top.map(g => `
+          <div class="p-6 rounded-2xl bg-brand-card border border-brand-gold/50">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-lg font-semibold text-white">${g.name}</h3>
+              <span class="text-brand-gold font-mono">$${g.price}</span>
+            </div>
+            <div class="text-sm text-gray-400 mb-3">${g.vram_gb} GB ${g.memory_type} • ${g.tdp_w} W • ${g.tps.toFixed(1)} tok/s on ${model}</div>
+            ${g.notes ? `<p class="text-sm text-gray-400 mb-3">${g.notes}</p>` : ''}
+            <a href="/go/${slugify(g.name)}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-brand-gold/10 text-brand-gold text-sm hover:bg-brand-gold/20 transition-colors">See deals →</a>
+          </div>
+        `).join('');
+      }
 
       results.classList.remove('hidden');
       results.scrollIntoView({ behavior: 'smooth' });
