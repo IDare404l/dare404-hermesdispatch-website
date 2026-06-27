@@ -16,10 +16,10 @@ const API_ENDPOINT = "/api/subscribe/";
       </div>
     )}
     <h2 class={`heading ${inline ? 'text-xl mb-2' : 'display-heading text-white mb-4'}`}>
-      Join the <span class="text-gradient">Dispatch</span>
+      Get the <span class="text-gradient">AI Hardware & Crypto Directory</span> early
     </h2>
     <p class={`description ${inline ? 'text-sm mb-4' : 'text-lg mb-8'}`}>
-      Get <span class="text-brand-gold">Mission Freedom Daily</span> — AI automation, multi-agent orchestration, and building autonomous systems.
+      Join <span class="text-brand-gold">The Hermes Dispatch</span> — a 4-minute daily brief on AI hardware, crypto mining rigs, and the tools that actually ship. Plus instant access to the living directory.
     </p>
 
     <form
@@ -44,9 +44,15 @@ const API_ENDPOINT = "/api/subscribe/";
         id="submit-btn"
         class="btn-primary w-full whitespace-nowrap flex items-center justify-center gap-2"
       >
-        <span id="btn-text">Subscribe</span>
+        <span id="btn-text">Subscribe for free →</span>
       </button>
     </form>
+
+    <ul class="text-sm text-gray-400 mt-6 space-y-2 flex flex-col items-center">
+      <li class="flex items-center gap-2"><span class="text-brand-gold">✓</span> One email per day, no noise</li>
+      <li class="flex items-center gap-2"><span class="text-brand-gold">✓</span> Curated AI hardware & mining picks</li>
+      <li class="flex items-center gap-2"><span class="text-brand-gold">✓</span> One-click unsubscribe anytime</li>
+    </ul>
 
     <p class="text-gray-500 text-xs mt-6 flex flex-wrap items-center justify-center gap-4">
       <span class="flex items-center gap-1"><svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Daily at 15:00 MST</span>
@@ -58,7 +64,7 @@ const API_ENDPOINT = "/api/subscribe/";
   <div id="sub-success" class="sub-panel hidden">
     <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 mx-auto mb-6 flex items-center justify-center text-4xl shadow-lg shadow-emerald-500/30">✅</div>
     <h2 class="display-heading text-white mb-2">You're <span class="text-emerald-400">Subscribed</span></h2>
-    <p class="text-gray-300 text-lg mb-6">Check your inbox for the welcome email. First dispatch arrives tomorrow at 15:00 MST.</p>
+    <p class="text-gray-300 text-lg mb-6">Check your inbox for the welcome email with a link to the AI Hardware &amp; Crypto Directory. First dispatch arrives tomorrow at 15:00 MST.</p>
     <div class="bg-brand-card rounded-xl p-6 mb-6 text-left max-w-sm mx-auto">
       <p class="text-sm text-gray-400 mb-2">What you'll receive:</p>
       <ul class="space-y-2 text-sm text-gray-300">
@@ -130,10 +136,13 @@ const API_ENDPOINT = "/api/subscribe/";
       btn.disabled = true;
       btnText.textContent = 'Subscribing...';
 
+      var urlParams = new URLSearchParams(window.location.search);
+      var ref = urlParams.get('ref') || '';
+
       fetch(API_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email })
+        body: JSON.stringify({ email: email, ref: ref })
       }).then(function(r) {
         if (!r.ok) {
           // HTTP error: 503 (KV unavailable), 500 (server error), etc.

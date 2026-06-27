@@ -11,9 +11,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
   };
 
   try {
-    const body = await request.json() as { email?: string; source?: string };
+    const body = await request.json() as { email?: string; source?: string; ref?: string };
     const email = body.email?.toLowerCase().trim();
     const source = body.source || 'hermesmissionfreedom.ai';
+    const ref = body.ref?.toLowerCase().trim() || '';
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return new Response(JSON.stringify({ success: false, error: 'Invalid email address' }), {
@@ -52,7 +53,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     const data = JSON.stringify({
-      email, source,
+      email, source, ref,
       timestamp: new Date().toISOString(),
       status: 'pending',
       welcome_sent: false
