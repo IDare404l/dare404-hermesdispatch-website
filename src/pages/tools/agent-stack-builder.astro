@@ -1,0 +1,175 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import stacks from '../../data/agent_stacks.json';
+
+const title = "AI Agent Stack Builder — Pick Your Use Case, Get Your Stack";
+const description = "Build the right AI agent system for content, trading, support, coding, research, or multi-agent orchestration. Stack includes LLM, framework, hosting, and cost estimate.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What LLM should I use for my AI agent?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Use Claude 3.5 Sonnet or GPT-4o for reasoning-heavy tasks, GPT-4o mini or Claude 3 Haiku for high-volume cheap tasks, and local models like Llama 3 70B when data privacy matters." }
+      },
+      {
+        "@type": "Question",
+        "name": "What framework is best for building AI agents?",
+        "acceptedAnswer": { "@type": "Answer", "text": "LangGraph is best for stateful workflows, CrewAI for role-based multi-agent teams, and AutoGen for dynamic agent conversations. Beginners often start with LangChain or simple function calling." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🤖</div>
+        <h1 class="display-heading mb-4">AI Agent Stack Builder</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Choose your use case. Get the LLM, framework, vector store, hosting, and cost estimate. Build it today.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        {Object.entries(stacks).map(([slug, stack]) => (
+          <button
+            type="button"
+            data-slug={slug}
+            class="stack-card glass-card rounded-2xl p-5 text-left hover:border-brand-gold/50 transition-all"
+          >
+            <div class="text-3xl mb-3">{stack.icon}</div>
+            <h2 class="text-lg font-bold mb-1">{stack.name}</h2>
+            <p class="text-sm text-neutral-400">{stack.description}</p>
+            <div class="flex gap-2 mt-4">
+              <span class="text-xs px-2 py-1 rounded bg-neutral-800 text-neutral-300">{stack.difficulty}</span>
+              <span class="text-xs px-2 py-1 rounded bg-neutral-800 text-neutral-300">{stack.privacy}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <div id="stackDetail" class="hidden">
+        <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20">
+          <div class="flex items-center gap-4 mb-6">
+            <div id="detailIcon" class="text-4xl"></div>
+            <div>
+              <h2 id="detailName" class="text-2xl font-bold"></h2>
+              <p id="detailDesc" class="text-neutral-400"></p>
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase mb-1">LLM</p>
+              <p id="detailLLM" class="font-semibold"></p>
+              <p id="detailLLMWhy" class="text-sm text-neutral-400 mt-1"></p>
+              <p id="detailLLMCost" class="text-sm text-brand-gold mt-1"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Framework / Orchestration</p>
+              <p id="detailFramework" class="font-semibold"></p>
+              <p id="detailFrameworkWhy" class="text-sm text-neutral-400 mt-1"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Memory / Data</p>
+              <p id="detailData" class="font-semibold"></p>
+              <p id="detailDataWhy" class="text-sm text-neutral-400 mt-1"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Hosting / Infra</p>
+              <p id="detailHosting" class="font-semibold"></p>
+              <p id="detailHostingWhy" class="text-sm text-neutral-400 mt-1"></p>
+              <p id="detailHostingCost" class="text-sm text-brand-gold mt-1"></p>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold mb-3 text-brand-gold">Use Cases</h3>
+            <ul id="detailUseCases" class="flex flex-wrap gap-2"></ul>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold mb-3 text-brand-gold">Extras & Integrations</h3>
+            <ul id="detailExtras" class="grid sm:grid-cols-2 gap-2 text-sm text-neutral-300"></ul>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-xs text-neutral-500 uppercase">Recommended Hardware</p>
+              <p id="detailHardware" class="font-semibold text-white mt-1"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-xs text-neutral-500 uppercase">Monthly Cost Estimate</p>
+              <p id="detailEstimate" class="font-semibold text-brand-gold mt-1"></p>
+            </div>
+          </div>
+
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="/tools/llm-cost-calculator/" class="btn-primary text-sm">Compare API costs →</a>
+            <a href="/compare/mini-pcs/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Find local hardware →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ stacks }}>
+    const cards = document.querySelectorAll('.stack-card');
+    const detail = document.getElementById('stackDetail');
+
+    function select(slug) {
+      const stack = stacks[slug];
+      if (!stack) return;
+
+      cards.forEach(c => c.classList.remove('border-brand-gold'));
+      const active = document.querySelector(`[data-slug="${slug}"]`);
+      if (active) active.classList.add('border-brand-gold');
+
+      document.getElementById('detailIcon').textContent = stack.icon;
+      document.getElementById('detailName').textContent = stack.name;
+      document.getElementById('detailDesc').textContent = stack.description;
+
+      const c = stack.components;
+      document.getElementById('detailLLM').textContent = c.llm.name;
+      document.getElementById('detailLLMWhy').textContent = c.llm.why;
+      document.getElementById('detailLLMCost').textContent = c.llm.cost_per_1m || '';
+
+      document.getElementById('detailFramework').textContent = c.framework.name;
+      document.getElementById('detailFrameworkWhy').textContent = c.framework.why;
+
+      const dataName = c.vector_db ? c.vector_db.name : c.data.name;
+      const dataWhy = c.vector_db ? c.vector_db.why : c.data.why;
+      document.getElementById('detailData').textContent = dataName;
+      document.getElementById('detailDataWhy').textContent = dataWhy;
+
+      document.getElementById('detailHosting').textContent = c.hosting.name;
+      document.getElementById('detailHostingWhy').textContent = c.hosting.why;
+      document.getElementById('detailHostingCost').textContent = c.hosting.cost || '';
+
+      const useCases = document.getElementById('detailUseCases');
+      useCases.innerHTML = stack.use_cases.map(u => `<li class="text-sm px-3 py-1 rounded-full bg-neutral-800 text-neutral-300">${u}</li>`).join('');
+
+      const extras = document.getElementById('detailExtras');
+      extras.innerHTML = c.extras.map(e => `<li>${e}</li>`).join('');
+
+      document.getElementById('detailHardware').textContent = c.hardware;
+      document.getElementById('detailEstimate').textContent = c.monthly_estimate;
+
+      detail.classList.remove('hidden');
+      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => select(card.dataset.slug));
+    });
+
+    // Select first by default
+    if (cards.length) select(cards[0].dataset.slug);
+  </script>
+</Layout>

@@ -1,0 +1,231 @@
+{
+  "content-automation": {
+    "name": "Content Automation Engine",
+    "icon": "\u270d\ufe0f",
+    "description": "Generate, schedule, and syndicate blog posts, newsletters, and social snippets with minimal human oversight.",
+    "use_cases": [
+      "Newsletter pipeline",
+      "SEO blog automation",
+      "Social media scheduling"
+    ],
+    "components": {
+      "llm": {
+        "name": "Claude 3.5 Sonnet / GPT-4o",
+        "why": "Best long-form writing quality",
+        "cost_per_1m": "$3-10 input / $10-15 output"
+      },
+      "framework": {
+        "name": "LangGraph or CrewAI",
+        "why": "Workflow orchestration with human-in-the-loop checkpoints"
+      },
+      "vector_db": {
+        "name": "Pinecone / Chroma",
+        "why": "RAG memory for brand voice and source material"
+      },
+      "hosting": {
+        "name": "Railway / Render",
+        "why": "Easy scheduled cron jobs and API triggers",
+        "cost": "$20-80/mo"
+      },
+      "extras": [
+        "Zapier/Make.com for distribution",
+        "Grammarly API for polish",
+        "Airtable/Notion for editorial board"
+      ],
+      "hardware": "Cloud-only for text. A Mac Mini M4 64GB can run 70B models locally for draft generation.",
+      "monthly_estimate": "$50-300/mo at 100K output tokens/day"
+    },
+    "difficulty": "Medium",
+    "privacy": "API by default; local\u53ef\u9009 with quantized models"
+  },
+  "trading-bot": {
+    "name": "Autonomous Trading Agent",
+    "icon": "\ud83d\udcc8",
+    "description": "Analyze market data, generate signals, and route paper or live trades through broker APIs.",
+    "use_cases": [
+      "Crypto momentum strategies",
+      "Options flow analysis",
+      "Macro news sentiment trading"
+    ],
+    "components": {
+      "llm": {
+        "name": "GPT-4o / Claude 3.5 Sonnet",
+        "why": "Reasoning over financial reports and news sentiment"
+      },
+      "framework": {
+        "name": "LangGraph + vector memory",
+        "why": "State machines for risk checks and position sizing"
+      },
+      "data": {
+        "name": "Yahoo Finance, Alpaca, Coinbase Pro APIs",
+        "why": "Real-time price and order execution"
+      },
+      "hosting": {
+        "name": "VPS (Hetzner / DigitalOcean)",
+        "why": "Always-on execution near exchanges",
+        "cost": "$10-40/mo"
+      },
+      "extras": [
+        "Backtesting engine (Backtrader/Zipline)",
+        "Telegram/Discord alerts",
+        "Risk circuit breakers"
+      ],
+      "hardware": "Cloud VPS sufficient. GPU only if running large sentiment models locally.",
+      "monthly_estimate": "$30-150/mo plus API data fees"
+    },
+    "difficulty": "Hard",
+    "privacy": "Keep strategy signals on your own VPS"
+  },
+  "customer-support": {
+    "name": "AI Customer Support Agent",
+    "icon": "\ud83c\udfa7",
+    "description": "Answer tickets, draft replies, and escalate complex issues to humans.",
+    "use_cases": [
+      "Email auto-reply",
+      "Live chat bot",
+      "Knowledge-base RAG"
+    ],
+    "components": {
+      "llm": {
+        "name": "GPT-4o mini / Claude 3 Haiku",
+        "why": "Cheap, fast, and good enough for templated support"
+      },
+      "framework": {
+        "name": "LangChain RAG chain",
+        "why": "Retrieve from help docs then generate answer"
+      },
+      "vector_db": {
+        "name": "Chroma / pgvector",
+        "why": "Store support docs and past tickets"
+      },
+      "hosting": {
+        "name": "Vercel / Railway",
+        "why": "Low-latency chat endpoints",
+        "cost": "$20-60/mo"
+      },
+      "extras": [
+        "Intercom/Zendesk integration",
+        "Slack handoff",
+        "Sentiment classifier for escalation"
+      ],
+      "hardware": "Cloud. Local deployment viable with 16GB+ VRAM for privacy-sensitive sectors.",
+      "monthly_estimate": "$40-200/mo depending on ticket volume"
+    },
+    "difficulty": "Easy",
+    "privacy": "API or local depending on data sensitivity"
+  },
+  "coding-agent": {
+    "name": "Coding Assistant / Dev Agent",
+    "icon": "\ud83d\udcbb",
+    "description": "Generate, refactor, review, and test code inside your repo or CI pipeline.",
+    "use_cases": [
+      "PR review bot",
+      "Test generation",
+      "Legacy code migration"
+    ],
+    "components": {
+      "llm": {
+        "name": "Claude 3.5 Sonnet / o3-mini / DeepSeek Coder",
+        "why": "Strongest coding benchmarks"
+      },
+      "framework": {
+        "name": "Continue.dev / Aider / GitHub Copilot API",
+        "why": "IDE integration and diff generation"
+      },
+      "vector_db": {
+        "name": "Sourcegraph Cody / repo embeddings",
+        "why": "Codebase-wide context retrieval"
+      },
+      "hosting": {
+        "name": "Local or GitHub Actions",
+        "why": "Run in CI or developer machine",
+        "cost": "$0-30/mo"
+      },
+      "extras": [
+        "Static analysis tools (SonarQube)",
+        "Unit-test runner",
+        "GitHub/GitLab webhooks"
+      ],
+      "hardware": "MacBook Pro M4 Max or RTX 4090 for local code models. API is simpler for most teams.",
+      "monthly_estimate": "$20-100/mo per developer"
+    },
+    "difficulty": "Medium",
+    "privacy": "Local models preferred for proprietary code"
+  },
+  "research-intelligence": {
+    "name": "Research & Intelligence Agent",
+    "icon": "\ud83d\udd0d",
+    "description": "Scrape, summarize, and monitor news, papers, competitors, and markets.",
+    "use_cases": [
+      "Investment research",
+      "Competitive monitoring",
+      "Academic literature review"
+    ],
+    "components": {
+      "llm": {
+        "name": "Claude 3.5 Sonnet / Gemini 1.5 Pro",
+        "why": "Long context for documents and reports"
+      },
+      "framework": {
+        "name": "CrewAI / AutoGen multi-agent",
+        "why": "Assign scraper, summarizer, analyst roles"
+      },
+      "data": {
+        "name": "Firecrawl, SerpAPI, RSS feeds",
+        "why": "Structured web extraction and alerts"
+      },
+      "hosting": {
+        "name": "Railway / Hetzner",
+        "why": "Scheduled monitoring jobs",
+        "cost": "$15-50/mo"
+      },
+      "extras": [
+        "Notion/Airtable output sink",
+        "Slack/email digest",
+        "Duplicate detection"
+      ],
+      "hardware": "Cloud. Large document processing benefits from 24GB+ VRAM locally.",
+      "monthly_estimate": "$30-120/mo"
+    },
+    "difficulty": "Medium",
+    "privacy": "Local processing for sensitive research"
+  },
+  "multi-agent-orchestration": {
+    "name": "Multi-Agent Orchestration Platform",
+    "icon": "\ud83e\udd16",
+    "description": "Coordinate multiple agents with memory, planning, and human approvals for complex business workflows.",
+    "use_cases": [
+      "AI employee team",
+      "Autonomous business operations",
+      "Agent marketplace"
+    ],
+    "components": {
+      "llm": {
+        "name": "GPT-4o / Claude 3.5 Sonnet + router model",
+        "why": "Planner + executor split for reliability"
+      },
+      "framework": {
+        "name": "LangGraph / AutoGen / CrewAI",
+        "why": "Graph-based state and agent communication"
+      },
+      "memory": {
+        "name": "Neo4j / Pinecone + SQLite",
+        "why": "Long-term memory and relationship tracking"
+      },
+      "hosting": {
+        "name": "Kubernetes or dedicated server",
+        "why": "Scale multiple long-lived agents",
+        "cost": "$100-500/mo"
+      },
+      "extras": [
+        "Human-in-the-loop UI",
+        "Agent registry and audit log",
+        "Cost tracker per task"
+      ],
+      "hardware": "Multiple GPUs or cloud for concurrent agents. RTX 4090 cluster for local experiments.",
+      "monthly_estimate": "$200-1,000/mo at scale"
+    },
+    "difficulty": "Hard",
+    "privacy": "Hybrid: router in cloud, workers local if needed"
+  }
+}
