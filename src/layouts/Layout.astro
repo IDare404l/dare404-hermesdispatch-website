@@ -92,6 +92,7 @@ const fullCommit = versionData?.commit || 'local';
             <a href="/" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Home</a>
             <a href="/newsletter" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Newsletter</a>
             <a href="/podcast" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Podcast</a>
+            <a href="/directory" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Directory</a>
 
             <!-- Tools dropdown -->
             <div class="relative group" id="tools-dropdown">
@@ -110,7 +111,6 @@ const fullCommit = versionData?.commit || 'local';
               </div>
             </div>
 
-            <a href="/directory" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Directory</a>
             <a href="/answers" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Answers</a>
           </div>
           <a href="/subscribe" class="btn-primary text-sm">Subscribe</a>
@@ -137,6 +137,7 @@ const fullCommit = versionData?.commit || 'local';
         <a href="/" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Home</a>
         <a href="/newsletter" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Newsletter</a>
         <a href="/podcast" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Podcast</a>
+        <a href="/directory" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Directory</a>
 
         <p class="px-4 py-2 text-xs uppercase text-neutral-500">Tools</p>
         <a href="/tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">All Tools</a>
@@ -148,7 +149,6 @@ const fullCommit = versionData?.commit || 'local';
         <a href="/tools/mini-pc-recommender" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Mini PC Recommender</a>
 
         <div class="border-t border-neutral-800 my-4"></div>
-        <a href="/directory" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Directory</a>
         <a href="/answers" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Answers</a>
         <a href="/guides" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Guides</a>
         <a href="/reviews" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Reviews</a>
@@ -245,7 +245,7 @@ const fullCommit = versionData?.commit || 'local';
     
     <footer class="border-t border-neutral-800 mt-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
           <div class="md:col-span-2">
             <div class="flex items-center gap-2 mb-4">
               <div class="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-xs font-bold">H</div>
@@ -254,12 +254,21 @@ const fullCommit = versionData?.commit || 'local';
             <p class="text-neutral-400 text-sm max-w-sm">Documenting the journey of building AI agent automation systems. One person + AI skills toward Mission Freedom.</p>
           </div>
           <div>
-            <h4 class="font-semibold mb-4">Resources</h4>
+            <h4 class="font-semibold mb-4">Directory</h4>
             <ul class="space-y-2 text-sm text-neutral-400">
-              <li><a href="/tools" class="hover:text-neutral-200 transition-colors">Tools</a></li>
+              <li><a href="/directory" class="hover:text-neutral-200 transition-colors">All Hardware</a></li>
               <li><a href="/compare/gpus" class="hover:text-neutral-200 transition-colors">GPU Compare</a></li>
               <li><a href="/compare/mini-pcs" class="hover:text-neutral-200 transition-colors">Mini PC Compare</a></li>
               <li><a href="/about-dare404" class="hover:text-neutral-200 transition-colors">About dare404</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-semibold mb-4">Tools</h4>
+            <ul class="space-y-2 text-sm text-neutral-400">
+              <li><a href="/tools/vram-calculator" class="hover:text-neutral-200 transition-colors">VRAM Calculator</a></li>
+              <li><a href="/tools/mini-pc-recommender" class="hover:text-neutral-200 transition-colors">Mini PC Recommender</a></li>
+              <li><a href="/compare/recommend" class="hover:text-neutral-200 transition-colors">GPU Recommender</a></li>
+              <li><a href="/tools" class="hover:text-neutral-200 transition-colors">All Tools</a></li>
             </ul>
           </div>
           <div>
