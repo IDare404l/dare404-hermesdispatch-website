@@ -1,0 +1,286 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/affiliate_revenue.json';
+
+const title = "Affiliate Link Revenue Estimator — Estimate Clicks to Commission";
+const description = "Estimate affiliate earnings from monthly clicks, conversion rate, average order value, commission rate, refunds, network fees, and CPA. Built for AI hardware, SaaS, course, and finance affiliates.";
+const defaults = data.defaults;
+const presets = data.presets;
+const tiers = data.tiers;
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I estimate affiliate revenue from clicks?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Multiply monthly clicks by your conversion rate to get conversions. Multiply conversions by average order value and commission rate to get gross commission. Then subtract refunds, network fees, and any CPA or ad spend to estimate net revenue." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a realistic affiliate conversion rate?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Content-driven affiliate sites often convert 1-3% of clicks. High-intent comparison pages can reach 3-5%, while broad traffic may convert below 1%." }
+      },
+      {
+        "@type": "Question",
+        "name": "How much do AI hardware affiliates earn per sale?",
+        "acceptedAnswer": { "@type": "Answer", "text": "AI hardware like GPUs and mini PCs typically pay 1-4% commission on $300-1,500 orders. A single high-ticket sale can earn $10-60, so volume and targeting matter." }
+      },
+      {
+        "@type": "Question",
+        "name": "Do refunds reduce affiliate commissions?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Most programs claw back commissions on refunded orders. Factor your vertical's typical refund rate into net revenue estimates." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">💵</div>
+        <h1 class="display-heading mb-4">Affiliate Link Revenue Estimator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate how much affiliate income your traffic could generate. Adjust clicks, conversion, AOV, commission, refunds, and costs.
+        </p>
+      </div>
+
+      <!-- Presets -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+        {presets.map(p => (
+          <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-slug={p.slug}>
+            <div class="text-2xl mb-2">{p.icon}</div>
+            <h3 class="font-semibold text-sm">{p.name}</h3>
+          </button>
+        ))}
+      </div>
+
+      <!-- Traffic tiers -->
+      <div class="flex flex-wrap gap-2 mb-8">
+        <button type="button" class="tier-btn px-4 py-2 rounded-full text-sm border border-neutral-700 hover:bg-neutral-800 transition-colors" data-idx="0">Starter</button>
+        {tiers.map((t, i) => (
+          <button type="button" class="tier-btn px-4 py-2 rounded-full text-sm border border-neutral-700 hover:bg-neutral-800 transition-colors" data-idx={i}>{t.label}</button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <!-- Inputs -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Inputs</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Monthly clicks</label>
+              <input id="clicks" type="number" min="0" step="100" value={defaults.monthly_clicks} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Conversion rate (%)</label>
+                <input id="conversion" type="number" min="0" max="100" step="0.1" value={defaults.conversion_rate_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Avg order value ($)</label>
+                <input id="aov" type="number" min="0" step="1" value={defaults.aov} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Commission rate (%)</label>
+                <input id="commission" type="number" min="0" max="100" step="0.1" value={defaults.commission_rate_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Refund / clawback rate (%)</label>
+                <input id="refund" type="number" min="0" max="100" step="0.1" value={defaults.refund_rate_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Network / platform fee (%)</label>
+                <input id="networkFee" type="number" min="0" max="100" step="0.1" value={defaults.network_fee_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                <p class="text-xs text-neutral-500 mt-1">Some networks take a cut.</p>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">CPA / ad cost per conversion ($)</label>
+                <input id="cpa" type="number" min="0" step="1" value={defaults.cpa_per_conversion} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                <p class="text-xs text-neutral-500 mt-1">Optional: cost to generate one conversion.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outputs -->
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Monthly conversions</p>
+              <p id="conversions" class="text-2xl font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Gross revenue</p>
+              <p id="grossRevenue" class="text-2xl font-bold text-brand-gold">—</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-5 text-center border border-red-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Refunds / fees</p>
+              <p id="deductions" class="text-2xl font-bold text-red-400">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 text-center border border-emerald-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Net monthly revenue</p>
+              <p id="netRevenue" class="text-2xl font-bold text-emerald-400">—</p>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Revenue per 1,000 clicks (RPM)</p>
+            <p id="rpm" class="text-2xl font-bold">—</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Annual net revenue</p>
+            <p id="annualNet" class="text-3xl font-bold text-brand-gold">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sensitivity -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Conversion rate sensitivity</h2>
+        <p class="text-sm text-neutral-400 mb-4">Net monthly revenue at different conversion rates, holding your current clicks, AOV, commission, and costs.</p>
+        <div id="sensitivityGrid" class="grid sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the math works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Conversions</strong> = clicks × conversion rate.</li>
+            <li><strong class="text-white">Gross commission</strong> = conversions × AOV × commission rate.</li>
+            <li><strong class="text-white">Deductions</strong> = refunds + network fees + (CPA × conversions).</li>
+            <li><strong class="text-white">Net revenue</strong> = gross commission − deductions.</li>
+            <li><strong class="text-white">RPM</strong> = net revenue ÷ (clicks ÷ 1,000).</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Affiliate reality checks</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• AI hardware programs typically pay <strong class="text-white">1-4%</strong> on $300-1,500 orders.</li>
+            <li>• SaaS recurring programs can pay <strong class="text-white">20-50%</strong> of first-year revenue.</li>
+            <li>• Refund clawbacks usually remove <strong class="text-white">3-8%</strong> of commission.</li>
+            <li>• Higher conversion rate usually beats higher traffic if traffic quality is similar.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/ai-hardware-deal-tracker/" class="btn-primary text-sm">AI Hardware Deals →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ presets, tiers, defaults }}>
+    const inputs = {
+      clicks: document.getElementById('clicks'),
+      conversion: document.getElementById('conversion'),
+      aov: document.getElementById('aov'),
+      commission: document.getElementById('commission'),
+      refund: document.getElementById('refund'),
+      networkFee: document.getElementById('networkFee'),
+      cpa: document.getElementById('cpa'),
+    };
+    const outputs = {
+      conversions: document.getElementById('conversions'),
+      grossRevenue: document.getElementById('grossRevenue'),
+      deductions: document.getElementById('deductions'),
+      netRevenue: document.getElementById('netRevenue'),
+      rpm: document.getElementById('rpm'),
+      annualNet: document.getElementById('annualNet'),
+      sensitivity: document.getElementById('sensitivityGrid'),
+    };
+    const presetMap = Object.fromEntries(presets.map(p => [p.slug, p]));
+
+    function fmt(n) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n || 0);
+    }
+
+    function read() {
+      return {
+        clicks: parseFloat(inputs.clicks.value) || 0,
+        conversion: (parseFloat(inputs.conversion.value) || 0) / 100,
+        aov: parseFloat(inputs.aov.value) || 0,
+        commission: (parseFloat(inputs.commission.value) || 0) / 100,
+        refund: (parseFloat(inputs.refund.value) || 0) / 100,
+        networkFee: (parseFloat(inputs.networkFee.value) || 0) / 100,
+        cpa: parseFloat(inputs.cpa.value) || 0,
+      };
+    }
+
+    function calc() {
+      const v = read();
+      const conversions = v.clicks * v.conversion;
+      const gross = conversions * v.aov * v.commission;
+      const refundDeduction = gross * v.refund;
+      const feeDeduction = gross * v.networkFee;
+      const cpaDeduction = conversions * v.cpa;
+      const deductions = refundDeduction + feeDeduction + cpaDeduction;
+      const net = Math.max(0, gross - deductions);
+      const rpm = v.clicks > 0 ? (net / (v.clicks / 1000)) : 0;
+      const annual = net * 12;
+
+      outputs.conversions.textContent = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(conversions);
+      outputs.grossRevenue.textContent = fmt(gross);
+      outputs.deductions.textContent = fmt(deductions);
+      outputs.netRevenue.textContent = fmt(net);
+      outputs.rpm.textContent = fmt(rpm);
+      outputs.annualNet.textContent = fmt(annual);
+
+      const rates = [0.5, 1.0, 1.5, 2.0, 2.5, 3.0];
+      outputs.sensitivity.innerHTML = rates.map(rate => {
+        const convs = v.clicks * (rate / 100);
+        const gr = convs * v.aov * v.commission;
+        const ded = gr * v.refund + gr * v.networkFee + convs * v.cpa;
+        const nr = Math.max(0, gr - ded);
+        const active = Math.abs(rate - (v.conversion * 100)) < 0.05;
+        return `
+          <div class="p-3 rounded-xl border ${active ? 'border-brand-gold/50 bg-brand-gold/10' : 'border-neutral-700 bg-neutral-800/50'} text-center">
+            <p class="text-xs text-neutral-400 mb-1">${rate.toFixed(1)}% conv</p>
+            <p class="font-bold ${active ? 'text-brand-gold' : 'text-white'}">${fmt(nr)}</p>
+            <p class="text-[10px] text-neutral-500">net/mo</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    Object.values(inputs).forEach(el => el.addEventListener('input', calc));
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = presetMap[btn.dataset.slug];
+        if (!p) return;
+        inputs.conversion.value = p.conversion_rate_pct;
+        inputs.aov.value = p.aov;
+        inputs.commission.value = p.commission_rate_pct;
+        inputs.refund.value = p.refund_rate_pct;
+        inputs.networkFee.value = p.network_fee_pct;
+        calc();
+      });
+    });
+
+    document.querySelectorAll('.tier-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        const t = tiers[idx];
+        if (!t) return;
+        inputs.clicks.value = t.monthly_clicks;
+        inputs.conversion.value = t.conversion_rate_pct;
+        inputs.aov.value = t.aov;
+        inputs.commission.value = t.commission_rate_pct;
+        calc();
+      });
+    });
+
+    calc();
+  </script>
+</Layout>
