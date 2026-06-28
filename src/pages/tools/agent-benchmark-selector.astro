@@ -1,0 +1,152 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import categories from '../../data/agent_benchmarks.json';
+
+const title = "AI Agent Performance Benchmark Selector — Pick the Right Evaluation";
+const description = "Choose the best benchmark for your AI agent: coding (SWE-bench, HumanEval), reasoning (GAIA, MMLU), web (WebArena), desktop (OSWorld), multi-agent (AgentBench), and domain-specific tests.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What benchmark should I use to evaluate a coding agent?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Use SWE-bench or SWE-bench Verified for real-world repository-level evaluation. Use SWE-bench Lite for faster iteration, and HumanEval or MBPP for quick function-level capability checks." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the best benchmark for general AI assistants?",
+        "acceptedAnswer": { "@type": "Answer", "text": "GAIA is the leading benchmark for general AI assistants, testing reasoning, browsing, multimodality, and tool use across 466 real-world tasks." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I evaluate a web-browsing agent?",
+        "acceptedAnswer": { "@type": "Answer", "text": "WebArena provides reproducible self-hosted web tasks, WebVoyager tests live-site navigation, and Mind2Web covers broad cross-site generalization." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📊</div>
+        <h1 class="display-heading mb-4">AI Agent Benchmark Selector</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Pick the right evaluation for your agent. Coding, reasoning, web, desktop, multi-agent, and domain-specific benchmarks with effort, cost, and fit guidance.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        {Object.entries(categories).map(([slug, cat]) => (
+          <button
+            type="button"
+            data-slug={slug}
+            class="bench-card glass-card rounded-2xl p-5 text-left hover:border-brand-gold/50 transition-all"
+          >
+            <div class="text-3xl mb-3">{cat.icon}</div>
+            <h2 class="text-lg font-bold mb-2">{cat.name}</h2>
+            <p class="text-sm text-neutral-400">{cat.benchmarks.length} benchmarks</p>
+          </button>
+        ))}
+      </div>
+
+      <div id="benchDetail" class="hidden">
+        <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20">
+          <div class="flex items-center gap-4 mb-6">
+            <div id="detailIcon" class="text-4xl"></div>
+            <div>
+              <h2 id="detailName" class="text-2xl font-bold"></h2>
+              <p id="detailDesc" class="text-neutral-400"></p>
+            </div>
+          </div>
+
+          <div id="detailBenchmarks" class="space-y-4 mb-8"></div>
+
+          <div class="grid sm:grid-cols-2 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-xs text-neutral-500 uppercase mb-1">When to choose this category</p>
+              <p id="detailWhy" class="text-sm text-neutral-300"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Typical evaluation budget</p>
+              <p id="detailBudget" class="text-sm text-brand-gold"></p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <a href="/tools/agent-stack-builder/" class="btn-primary text-sm">Build your agent stack →</a>
+            <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Estimate API cost →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ categories }}>
+    const cards = document.querySelectorAll('.bench-card');
+    const detail = document.getElementById('benchDetail');
+
+    function effortBadge(effort) {
+      const colors = {
+        'Low': 'bg-green-500/10 text-green-400 border-green-500/20',
+        'Medium': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+        'High': 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+        'Very High': 'bg-red-500/10 text-red-400 border-red-500/20',
+      };
+      return colors[effort] || colors['Medium'];
+    }
+
+    function select(slug) {
+      const cat = categories[slug];
+      if (!cat) return;
+
+      cards.forEach(c => c.classList.remove('border-brand-gold'));
+      const active = document.querySelector(`[data-slug="${slug}"]`);
+      if (active) active.classList.add('border-brand-gold');
+
+      document.getElementById('detailIcon').textContent = cat.icon;
+      document.getElementById('detailName').textContent = cat.name;
+      document.getElementById('detailDesc').textContent = cat.description;
+
+      const container = document.getElementById('detailBenchmarks');
+      container.innerHTML = cat.benchmarks.map(b => `
+        <div class="p-4 rounded-xl bg-neutral-800/50 border border-neutral-700/50 hover:border-brand-gold/30 transition-colors">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-3">
+              <h3 class="text-lg font-bold text-white">${b.name}</h3>
+              <span class="text-xs px-2 py-1 rounded border ${effortBadge(b.effort)}">${b.effort} effort</span>
+            </div>
+            <span class="text-xs text-neutral-500">${b.cost}</span>
+          </div>
+          <p class="text-sm text-neutral-400 mb-3">${b.what}</p>
+          <div class="grid sm:grid-cols-2 gap-2 text-sm">
+            <p><span class="text-brand-gold">✓</span> ${b.pros}</p>
+            <p><span class="text-neutral-500">✗</span> ${b.cons}</p>
+          </div>
+          <p class="text-sm text-neutral-300 mt-3"><span class="text-brand-gold">Best for:</span> ${b.best_for}</p>
+        </div>
+      `).join('');
+
+      document.getElementById('detailWhy').textContent = cat.description;
+      const costs = cat.benchmarks.map(b => b.cost);
+      const hasHigh = cat.benchmarks.some(b => b.effort === 'High' || b.effort === 'Very High');
+      document.getElementById('detailBudget').textContent = hasHigh
+        ? `Expect $50-500+ per full evaluation run depending on model choice.`
+        : `Typically $1-50 per full run; easy to repeat frequently.`;
+
+      detail.classList.remove('hidden');
+      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => select(card.dataset.slug));
+    });
+
+    if (cards.length) select(cards[0].dataset.slug);
+  </script>
+</Layout>
