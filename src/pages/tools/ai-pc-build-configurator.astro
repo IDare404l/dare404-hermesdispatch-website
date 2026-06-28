@@ -1,0 +1,173 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import builds from '../../data/ai_pc_builds.json';
+
+const title = "AI PC Build Configurator — Pick the Right Hardware Stack";
+const description = "Choose an AI PC build by budget and use case: entry-level, enthusiast, pro workstation, silent home server, or Mac Studio route.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much does an AI PC cost?",
+        "acceptedAnswer": { "@type": "Answer", "text": "An entry-level AI PC capable of running 8B models costs $800-1,200. An enthusiast workstation with an RTX 4090 runs $2,500-3,500. Pro multi-GPU setups start at $6,000." }
+      },
+      {
+        "@type": "Question",
+        "name": "What GPU do I need for local LLMs?",
+        "acceptedAnswer": { "@type": "Answer", "text": "For 7B-8B models, 12GB VRAM is enough. For 70B quantized models, you need 24GB VRAM (RTX 4090) or more. For multi-user hosting, dual 4090s or an RTX 6000 Ada is ideal." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🛠️</div>
+        <h1 class="display-heading mb-4">AI PC Build Configurator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Pick a budget and use case. Get the CPU, GPU, RAM, PSU, case, OS, and software stack preconfigured.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        {Object.entries(builds).map(([slug, build]) => (
+          <button
+            type="button"
+            data-slug={slug}
+            class="build-card glass-card rounded-2xl p-5 text-left hover:border-brand-gold/50 transition-all"
+          >
+            <div class="flex justify-between items-start mb-3">
+              <h2 class="text-lg font-bold">{build.name}</h2>
+              <span class="text-xs px-2 py-1 rounded bg-brand-gold/10 text-brand-gold font-medium">{build.budget}</span>
+            </div>
+            <p class="text-sm text-neutral-400">{build.use_case}</p>
+            <div class="mt-4 flex gap-2">
+              <span class="text-xs px-2 py-1 rounded bg-neutral-800 text-neutral-300">8B: {build.expected_8b_tok_s} tok/s</span>
+              <span class="text-xs px-2 py-1 rounded bg-neutral-800 text-neutral-300">70B: {build.expected_70b}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <div id="buildDetail" class="hidden">
+        <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 id="detailName" class="text-2xl font-bold"></h2>
+              <p id="detailUseCase" class="text-neutral-400"></p>
+            </div>
+            <span id="detailBudget" class="self-start text-sm px-3 py-1 rounded-full bg-brand-gold/10 text-brand-gold font-semibold"></span>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">CPU</p>
+              <p id="detailCPU" class="font-semibold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">Motherboard / Platform</p>
+              <p id="detailMotherboard" class="font-semibold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">RAM</p>
+              <p id="detailRAM" class="font-semibold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">GPU</p>
+              <p id="detailGPU" class="font-semibold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">Storage</p>
+              <p id="detailStorage" class="font-semibold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">PSU / Power</p>
+              <p id="detailPSU" class="font-semibold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">Case / Form Factor</p>
+              <p id="detailCase" class="font-semibold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">Operating System</p>
+              <p id="detailOS" class="font-semibold"></p>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold mb-2 text-brand-gold">Recommended Software Stack</h3>
+            <p id="detailSoftware" class="text-neutral-300"></p>
+          </div>
+
+          <div class="grid sm:grid-cols-3 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-xs text-neutral-500 uppercase">8B model speed</p>
+              <p id="detail8B" class="text-xl font-bold text-brand-gold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-xs text-neutral-500 uppercase">70B model support</p>
+              <p id="detail70B" class="text-xl font-bold text-white"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-xs text-neutral-500 uppercase">Notes</p>
+              <p id="detailNotes" class="text-sm text-neutral-300"></p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <a href="/tools/llm-cost-calculator/" class="btn-primary text-sm">Compare API costs →</a>
+            <a href="/tools/local-llm-roi-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Calculate ROI →</a>
+            <a href="/compare/gpus/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compare GPUs →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ builds }}>
+    const cards = document.querySelectorAll('.build-card');
+    const detail = document.getElementById('buildDetail');
+
+    function select(slug) {
+      const b = builds[slug];
+      if (!b) return;
+
+      cards.forEach(c => c.classList.remove('border-brand-gold'));
+      const active = document.querySelector(`[data-slug="${slug}"]`);
+      if (active) active.classList.add('border-brand-gold');
+
+      document.getElementById('detailName').textContent = b.name;
+      document.getElementById('detailUseCase').textContent = b.use_case;
+      document.getElementById('detailBudget').textContent = b.budget;
+
+      document.getElementById('detailCPU').textContent = b.cpu;
+      document.getElementById('detailMotherboard').textContent = b.motherboard;
+      document.getElementById('detailRAM').textContent = b.ram;
+      document.getElementById('detailGPU').textContent = b.gpu;
+      document.getElementById('detailStorage').textContent = b.storage;
+      document.getElementById('detailPSU').textContent = b.psu;
+      document.getElementById('detailCase').textContent = b.case;
+      document.getElementById('detailOS').textContent = b.os;
+      document.getElementById('detailSoftware').textContent = b.software;
+      document.getElementById('detail8B').textContent = b.expected_8b_tok_s + ' tok/s';
+      document.getElementById('detail70B').textContent = b.expected_70b;
+      document.getElementById('detailNotes').textContent = b.notes;
+
+      detail.classList.remove('hidden');
+      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => select(card.dataset.slug));
+    });
+
+    if (cards.length) select(cards[0].dataset.slug);
+  </script>
+</Layout>
