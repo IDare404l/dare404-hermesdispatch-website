@@ -1,0 +1,119 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import deals from '../../data/deal_tracker.json';
+
+const title = "AI Hardware Deal Tracker — GPUs, Mini PCs, RAM, Storage";
+const description = "Track AI hardware prices for local LLM builds. Know MSRP, typical lows, where to check, and when to buy.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "When is the best time to buy AI hardware?",
+        "acceptedAnswer": { "@type": "Answer", "text": "GPU prices usually dip after major launches, during Black Friday, and when crypto mining demand falls. Track MSRP and historical lows before buying." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the most important spec for a local LLM GPU?",
+        "acceptedAnswer": { "@type": "Answer", "text": "VRAM is the bottleneck. 12GB handles 8B models, 24GB handles 70B quantized models, and 32GB+ is ideal for hosting or multi-user inference." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🏷️</div>
+        <h1 class="display-heading mb-4">AI Hardware Deal Tracker</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Watch prices on GPUs, mini PCs, CPUs, RAM, and SSDs for your local LLM or AI agent build.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-3 mb-6">
+        <button type="button" class="filter-btn active px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-sm" data-filter="all">All</button>
+        <button type="button" class="filter-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-sm" data-filter="GPU">GPUs</button>
+        <button type="button" class="filter-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-sm" data-filter="Mini PC">Mini PCs</button>
+        <button type="button" class="filter-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-sm" data-filter="CPU">CPUs</button>
+        <button type="button" class="filter-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-sm" data-filter="RAM">RAM</button>
+        <button type="button" class="filter-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-sm" data-filter="Storage">Storage</button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-neutral-500 border-b border-neutral-800">
+              <th class="pb-3">Product</th>
+              <th class="pb-3">Category</th>
+              <th class="pb-3">MSRP</th>
+              <th class="pb-3">Typical Low</th>
+              <th class="pb-3">Notes</th>
+              <th class="pb-3">Check Prices</th>
+            </tr>
+          </thead>
+          <tbody id="dealTable">
+            {Object.entries(deals).map(([slug, deal]) => (
+              <tr class="deal-row border-b border-neutral-800/50 hover:bg-neutral-800/30" data-category={deal.category}>
+                <td class="py-4 font-medium">{deal.name}</td>
+                <td class="py-4">{deal.category}</td>
+                <td class="py-4">${deal.msrp.toLocaleString()}</td>
+                <td class="py-4 text-emerald-400">${deal.typical_low.toLocaleString()}</td>
+                <td class="py-4 text-neutral-400 max-w-xs">{deal.note}</td>
+                <td class="py-4">
+                  <div class="flex gap-2">
+                    {deal.check_urls.map((url, idx) => (
+                      <a href={url} target="_blank" rel="noopener" class="text-brand-gold hover:underline">{idx === 0 ? 'Amazon' : 'Newegg'} →</a>
+                    ))}
+                    <a href={`/go/${deal.affiliate_slug}/`} class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold text-xs hover:bg-brand-gold/20 transition-colors">Deals</a>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mt-8">
+        <h2 class="text-xl font-bold mb-3 text-brand-gold">How to use this tracker</h2>
+        <ul class="space-y-2 text-sm text-neutral-300">
+          <li><strong class="text-white">MSRP</strong> is the manufacturer’s official price. Street prices often run higher during shortages.</li>
+          <li><strong class="text-white">Typical low</strong> is a realistic sale price based on deal history and price-drops.</li>
+          <li>Use the category filters to build a full stack: GPU → CPU → RAM → Storage → Mini PC.</li>
+          <li>Click "Deals" for current affiliate redirects. Prices update in real time at the retailer.</li>
+          <li>Pair with the <a href="/tools/ai-pc-build-configurator/" class="text-brand-gold hover:underline">AI PC configurator</a> to match hardware to your model-size goals.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const rows = document.querySelectorAll('.deal-row');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const filter = btn.dataset.filter;
+        filterBtns.forEach(b => {
+          b.classList.remove('bg-brand-gold', 'text-black');
+          b.classList.add('bg-neutral-800');
+        });
+        btn.classList.remove('bg-neutral-800');
+        btn.classList.add('bg-brand-gold', 'text-black');
+
+        rows.forEach(row => {
+          if (filter === 'all' || row.dataset.category === filter || (filter === 'Mini PC' && row.dataset.category.includes('Mini PC'))) {
+            row.classList.remove('hidden');
+          } else {
+            row.classList.add('hidden');
+          }
+        });
+      });
+    });
+  </script>
+</Layout>
