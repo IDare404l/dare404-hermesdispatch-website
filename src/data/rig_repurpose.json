@@ -1,0 +1,97 @@
+{
+  "asic-to-heat": {
+    "name": "ASIC \u2192 Space Heater + Bitcoin Mining",
+    "icon": "\ud83d\udd25",
+    "original": "Bitcoin ASIC miner (Antminer S19, Whatsminer M30S)",
+    "pivot": "Run it as a dedicated heater during cold months. Mine Bitcoin at breakeven or small profit while offsetting heating bills.",
+    "steps": [
+      "Relocate miner to a cold room, garage, or basement.",
+      "Add ducting or fans to move heat where you want it.",
+      "Use Braiins OS+ or VNish firmware to tune efficiency.",
+      "Join a low-fee mining pool (Ocean, Slush, ViaBTC).",
+      "Track kWh cost vs heat value; shut down if electricity spikes in summer."
+    ],
+    "revenue": "$50-400/mo depending on BTC price and electricity",
+    "capex": "$0-200 for ducts/fans",
+    "skills": "Basic electrical + cooling",
+    "difficulty": "Easy",
+    "ai_compatible": false,
+    "note": "ASICs cannot run AI. This is the best way to squeeze value from obsolete BTC miners in cold climates."
+  },
+  "gpu-rig-inference": {
+    "name": "GPU Mining Rig \u2192 Local LLM Inference Host",
+    "icon": "\ud83e\udde0",
+    "original": "Ethereum/PoW GPU rig with 6-12 NVIDIA cards",
+    "pivot": "Convert the rig into a local LLM inference cluster. Rent it out, run your own agents, or sell API access.",
+    "steps": [
+      "Inventory cards: only 12GB+ VRAM cards are viable (RTX 3060 12GB, 3080, 3090, 4090).",
+      "Install Ubuntu Server + NVIDIA drivers + CUDA.",
+      "Set up Ollama or vLLM for multi-GPU serving.",
+      "Expose via OpenAI-compatible API and route through a reverse proxy.",
+      "List capacity on inference marketplaces or sell access to developers."
+    ],
+    "revenue": "$100-2,000/mo depending on GPUs and utilization",
+    "capex": "$0-300 for SSDs, RAM, network upgrades",
+    "skills": "Linux, Docker, basic networking",
+    "difficulty": "Medium",
+    "ai_compatible": true,
+    "note": "The highest-value pivot for crypto miners. Use our Miner Pivot Calculator to compare vs continuing to mine altcoins."
+  },
+  "fpga-asic-sell": {
+    "name": "Sell FPGA / Niche ASIC Hardware to AI Builders",
+    "icon": "\ud83d\udcb5",
+    "original": "FPGA rigs, Kadena ASICs, Dogecoin/LTC miners",
+    "pivot": "Sell the hardware while it still has resale value. Use proceeds to buy NVIDIA GPUs or AI-focused mini PCs.",
+    "steps": [
+      "List on eBay, Facebook Marketplace, or mining forums.",
+      "Price at 40-60% of retail depending on condition.",
+      "Disclose hash rate, power consumption, and any issues.",
+      "Bundle PSUs and risers for GPU rigs to move faster.",
+      "Reinvest in RTX 4090s, Mac Studio M4 Max, or cloud credits."
+    ],
+    "revenue": "One-time: $500-5,000+ depending on rig",
+    "capex": "$0",
+    "skills": "Sales listing + shipping",
+    "difficulty": "Easy",
+    "ai_compatible": false,
+    "note": "Best for hardware that cannot be repurposed for AI. Cash out before resale values drop further."
+  },
+  "gpu-rig-render": {
+    "name": "GPU Rig \u2192 Render / AI Image / Video Farm",
+    "icon": "\ud83c\udfa8",
+    "original": "Multi-GPU NVIDIA rig",
+    "pivot": "Run render jobs (Blender, Octane), AI image generation (Stable Diffusion, Flux), or video upscaling.",
+    "steps": [
+      "Install ComfyUI, Automatic1111, or Render Network client.",
+      "Rent compute on Vast.ai, Salad, or Render Network.",
+      "Target workloads that need CUDA, not just gaming GPUs.",
+      "Ensure stable internet and uptime for marketplace ratings.",
+      "Track revenue per kWh to make sure you beat electricity costs."
+    ],
+    "revenue": "$50-800/mo depending on GPU model and demand",
+    "capex": "$0-100 for storage/RAM tweaks",
+    "skills": "Docker, Linux, GPU tuning",
+    "difficulty": "Medium",
+    "ai_compatible": true,
+    "note": "Good middle ground if LLM inference demand is low in your region."
+  },
+  "home-lab-storage": {
+    "name": "Mining Shed \u2192 Home Lab / Storage / Data Center",
+    "icon": "\ud83c\udfe0",
+    "original": "Mining shed or garage with 240V power and cooling",
+    "pivot": "Repurpose the space into a home data lab: NAS, Kubernetes cluster, backup infrastructure, or hosting.",
+    "steps": [
+      "Remove obsolete miners and clean dust filters.",
+      "Install a quiet server rack or mini PC cluster.",
+      "Run TrueNAS, Proxmox, or a Kubernetes homelab.",
+      "Host your own AI agents, backups, media server, and VPN.",
+      "Add solar if possible to cut electricity costs long-term."
+    ],
+    "revenue": "$0-200/mo saved in cloud hosting",
+    "capex": "$300-1,500 for servers and storage",
+    "skills": "Server admin, networking",
+    "difficulty": "Hard",
+    "ai_compatible": true,
+    "note": "Play the long game: own your infrastructure instead of renting it."
+  }
+}

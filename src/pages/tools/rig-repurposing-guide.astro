@@ -1,0 +1,149 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import rigs from '../../data/rig_repurpose.json';
+
+const title = "Crypto Mining Rig Repurposing Guide — From Crypto to AI";
+const description = "Five proven ways to repurpose crypto mining hardware: ASIC heaters, GPU inference clusters, render farms, home labs, and resale strategies.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can crypto mining rigs be used for AI?",
+        "acceptedAnswer": { "@type": "Answer", "text": "GPU mining rigs with NVIDIA cards of 12GB+ VRAM can be repurposed for local LLM inference, AI image generation, or render farms. ASIC miners cannot run AI but can still mine Bitcoin or act as space heaters." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the most profitable way to repurpose a GPU mining rig?",
+        "acceptedAnswer": { "@type": "Answer", "text": "High-VRAM NVIDIA cards are most profitable running local LLM inference clusters, either for your own AI agents or rented to others via marketplaces like Vast.ai." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔄</div>
+        <h1 class="display-heading mb-4">Crypto Mining Rig Repurposing Guide</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Your mining hardware is not dead. Pick your rig type and find the best pivot into AI, heat, render work, or cash.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        {Object.entries(rigs).map(([slug, rig]) => (
+          <button
+            type="button"
+            data-slug={slug}
+            class="rig-card glass-card rounded-2xl p-5 text-left hover:border-brand-gold/50 transition-all"
+          >
+            <div class="text-3xl mb-3">{rig.icon}</div>
+            <h2 class="text-lg font-bold mb-2">{rig.name}</h2>
+            <p class="text-sm text-neutral-400">{rig.pivot}</p>
+            <div class="mt-4 flex gap-2">
+              <span class={`text-xs px-2 py-1 rounded ${rig.ai_compatible ? 'bg-emerald-500/10 text-emerald-400' : 'bg-neutral-800 text-neutral-300'}`}>
+                {rig.ai_compatible ? 'AI-compatible' : 'Not AI'}
+              </span>
+              <span class="text-xs px-2 py-1 rounded bg-neutral-800 text-neutral-300">{rig.difficulty}</span>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <div id="rigDetail" class="hidden">
+        <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20">
+          <div class="flex items-center gap-4 mb-6">
+            <div id="detailIcon" class="text-4xl"></div>
+            <div>
+              <h2 id="detailName" class="text-2xl font-bold"></h2>
+              <p id="detailOriginal" class="text-neutral-400"></p>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold mb-2 text-brand-gold">The Pivot</h3>
+            <p id="detailPivot" class="text-neutral-300"></p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">Expected revenue</p>
+              <p id="detailRevenue" class="font-semibold text-brand-gold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">Extra capex</p>
+              <p id="detailCapex" class="font-semibold text-white"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">Skills needed</p>
+              <p id="detailSkills" class="font-semibold text-white"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50">
+              <p class="text-xs text-neutral-500 uppercase">Difficulty</p>
+              <p id="detailDifficulty" class="font-semibold text-white"></p>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="font-bold mb-3 text-brand-gold">Step-by-step</h3>
+            <ol id="detailSteps" class="space-y-2 text-neutral-300"></ol>
+          </div>
+
+          <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10 mb-6">
+            <p class="text-xs text-neutral-500 uppercase">Note</p>
+            <p id="detailNote" class="text-sm text-neutral-300 mt-1"></p>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <a href="/tools/miner-pivot-calculator/" class="btn-primary text-sm">Run the numbers →</a>
+            <a href="/tools/ai-pc-build-configurator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI PC builds →</a>
+            <a href="/compare/gpus/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compare GPUs →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ rigs }}>
+    const cards = document.querySelectorAll('.rig-card');
+    const detail = document.getElementById('rigDetail');
+
+    function select(slug) {
+      const r = rigs[slug];
+      if (!r) return;
+
+      cards.forEach(c => c.classList.remove('border-brand-gold'));
+      const active = document.querySelector(`[data-slug="${slug}"]`);
+      if (active) active.classList.add('border-brand-gold');
+
+      document.getElementById('detailIcon').textContent = r.icon;
+      document.getElementById('detailName').textContent = r.name;
+      document.getElementById('detailOriginal').textContent = r.original;
+      document.getElementById('detailPivot').textContent = r.pivot;
+      document.getElementById('detailRevenue').textContent = r.revenue;
+      document.getElementById('detailCapex').textContent = r.capex;
+      document.getElementById('detailSkills').textContent = r.skills;
+      document.getElementById('detailDifficulty').textContent = r.difficulty;
+
+      const steps = document.getElementById('detailSteps');
+      steps.innerHTML = r.steps.map(s => `<li>${s}</li>`).join('');
+
+      document.getElementById('detailNote').textContent = r.note;
+
+      detail.classList.remove('hidden');
+      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => select(card.dataset.slug));
+    });
+
+    if (cards.length) select(cards[0].dataset.slug);
+  </script>
+</Layout>
