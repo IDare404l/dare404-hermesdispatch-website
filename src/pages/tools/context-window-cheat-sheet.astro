@@ -1,0 +1,206 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/context_window_models.json';
+
+const title = "AI Model Context Window Cheat Sheet — Compare Token Limits";
+const description = "Compare input and output context windows for OpenAI, Anthropic, Google, Meta, Mistral, DeepSeek, xAI, and local quantized models. Find which model fits your document, codebase, or transcript.";
+const families = data.families;
+const presets = data.contextPresets;
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Which AI model has the largest context window?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Google Gemini 2.0 Pro/Flash advertises up to 2 million tokens, while Gemini 2.5 Pro and several OpenAI GPT-4.1 variants support 1 million tokens. Anthropic Claude, OpenAI o3, and many open models top out around 128K-200K tokens." }
+      },
+      {
+        "@type": "Question",
+        "name": "What counts against the context window?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The context window includes your system prompt, user messages, uploaded documents, tool results, and the model's own output. Output tokens reduce the remaining room for input." }
+      },
+      {
+        "@type": "Question",
+        "name": "How much context do I need for a codebase or transcript?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A short blog post is ~1,500 tokens, a research paper ~8,000 tokens, a book chapter ~25,000 tokens, a large codebase ~50,000-100,000 tokens, and a multi-hour transcript can exceed 100,000 tokens." }
+      },
+      {
+        "@type": "Question",
+        "name": "Does quantization reduce the context window?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The model's published context limit does not change with quantization, but the practical context you can run locally is limited by available VRAM/RAM for the KV cache. Tools like llama.cpp allow context scaling via KV-cache quantization." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📜</div>
+        <h1 class="display-heading mb-4">AI Model Context Window Cheat Sheet</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Compare how much text each model can ingest and return. Pick the right model for documents, codebases, transcripts, and agent memory.
+        </p>
+      </div>
+
+      <!-- Matcher -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
+        <h2 class="text-xl font-bold mb-4">What fits your content?</h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2">Content type</label>
+            <select id="presetSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
+              {presets.map(p => <option value={p.tokens}>{p.label} (~{p.tokens.toLocaleString()} tokens)</option>)}
+              <option value="custom">Custom token count</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2">Custom tokens</label>
+            <input id="customTokens" type="number" value="1500" min="1" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none" />
+          </div>
+          <div class="flex items-end">
+            <button id="matchBtn" type="button" class="btn-primary w-full">Find matching models</button>
+          </div>
+        </div>
+
+        <div id="matchResults" class="hidden">
+          <p class="text-sm text-neutral-400 mb-3">Models whose total window covers your content plus a reasonable output buffer (~25%):</p>
+          <div id="matchGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+      </div>
+
+      <!-- Family filters -->
+      <div class="flex flex-wrap gap-2 mb-6">
+        <button type="button" data-filter="all" class="family-filter px-4 py-2 rounded-full text-sm border border-neutral-700 hover:bg-neutral-800 transition-colors bg-brand-gold/10 text-brand-gold border-brand-gold/30">All families</button>
+        {Object.entries(families).map(([slug, fam]) => (
+          <button type="button" data-filter={slug} class="family-filter px-4 py-2 rounded-full text-sm border border-neutral-700 hover:bg-neutral-800 transition-colors">{fam.name}</button>
+        ))}
+      </div>
+
+      <!-- Cards -->
+      <div id="modelGrid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {Object.entries(families).map(([slug, fam]) => (
+          <div class="family-group glass-card rounded-2xl p-5 border border-neutral-800" data-family={slug}>
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-3xl">{fam.icon}</span>
+              <h2 class="text-xl font-bold">{fam.name}</h2>
+            </div>
+            <div class="space-y-3">
+              {fam.models.map(m => (
+                <div class="p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50">
+                  <div class="flex justify-between items-start gap-2 mb-1">
+                    <h3 class="font-semibold text-white">{m.name}</h3>
+                  </div>
+                  <div class="flex flex-wrap gap-2 text-xs mb-2">
+                    <span class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold border border-brand-gold/20">Context {m.context.toLocaleString()}</span>
+                    <span class="px-2 py-1 rounded bg-neutral-700 text-neutral-300">Output {m.output.toLocaleString()}</span>
+                  </div>
+                  <p class="text-xs text-neutral-400">{m.notes}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-12 glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-3">How to use this cheat sheet</h2>
+        <ul class="space-y-2 text-neutral-300 text-sm list-disc pl-5">
+          <li><strong>Context</strong> = total tokens the model can process (system + input + history + tools).</li>
+          <li><strong>Output</strong> = maximum tokens the model is allowed to generate in one response.</li>
+          <li>Local/quantized models are usually VRAM-limited; use the <a href="/tools/vram-calculator/" class="text-brand-gold hover:underline">VRAM calculator</a> to size the KV cache.</li>
+          <li>For agent memory that spans many turns, prefer models with high context and low API cost. Use the <a href="/tools/llm-cost-calculator/" class="text-brand-gold hover:underline">LLM cost calculator</a> to compare.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ families, presets }}>
+    const filterBtns = document.querySelectorAll('.family-filter');
+    const groups = document.querySelectorAll('.family-group');
+    const presetSelect = document.getElementById('presetSelect');
+    const customInput = document.getElementById('customTokens');
+    const matchBtn = document.getElementById('matchBtn');
+    const matchResults = document.getElementById('matchResults');
+    const matchGrid = document.getElementById('matchGrid');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => {
+          b.classList.remove('bg-brand-gold/10', 'text-brand-gold', 'border-brand-gold/30');
+          b.classList.add('border-neutral-700');
+        });
+        btn.classList.add('bg-brand-gold/10', 'text-brand-gold', 'border-brand-gold/30');
+        btn.classList.remove('border-neutral-700');
+
+        const filter = btn.dataset.filter;
+        groups.forEach(g => {
+          g.style.display = (filter === 'all' || g.dataset.family === filter) ? '' : 'none';
+        });
+      });
+    });
+
+    function getInputTokens() {
+      const val = presetSelect.value;
+      if (val === 'custom') {
+        return Math.max(1, parseInt(customInput.value, 10) || 0);
+      }
+      return parseInt(val, 10);
+    }
+
+    presetSelect.addEventListener('change', () => {
+      customInput.disabled = presetSelect.value !== 'custom';
+      customInput.classList.toggle('opacity-50', customInput.disabled);
+    });
+    presetSelect.dispatchEvent(new Event('change'));
+
+    function formatContext(n) {
+      if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 ? 2 : 0) + 'M';
+      if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 ? 1 : 0) + 'K';
+      return n.toString();
+    }
+
+    matchBtn.addEventListener('click', () => {
+      const inputTokens = getInputTokens();
+      const buffer = Math.round(inputTokens * 0.25);
+      const required = inputTokens + buffer;
+      const matches = [];
+
+      Object.entries(families).forEach(([slug, fam]) => {
+        fam.models.forEach(m => {
+          if (m.context >= required) {
+            matches.push({ ...m, family: fam.name, icon: fam.icon, slug });
+          }
+        });
+      });
+
+      matches.sort((a, b) => a.context - b.context);
+
+      if (!matches.length) {
+        matchGrid.innerHTML = `<p class="col-span-full text-sm text-neutral-400">No model covers ~${required.toLocaleString()} tokens in its context window. Split your content or use retrieval.</p>`;
+      } else {
+        matchGrid.innerHTML = matches.map(m => `
+          <div class="p-3 rounded-xl bg-neutral-800/50 border border-brand-gold/20">
+            <div class="flex items-center gap-2 mb-1">
+              <span>${m.icon}</span>
+              <span class="font-semibold text-white text-sm">${m.name}</span>
+            </div>
+            <p class="text-xs text-neutral-400 mb-2">${m.family}</p>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold border border-brand-gold/20">${formatContext(m.context)} ctx</span>
+              <span class="px-2 py-1 rounded bg-neutral-700 text-neutral-300">${formatContext(m.output)} out</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      matchResults.classList.remove('hidden');
+      matchResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  </script>
+</Layout>

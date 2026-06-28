@@ -1,0 +1,104 @@
+{
+  "families": {
+    "openai": {
+      "name": "OpenAI GPT",
+      "icon": "🌀",
+      "models": [
+        { "name": "GPT-4o", "context": 128000, "output": 16384, "notes": "Multimodal flagships; fast tokenizer." },
+        { "name": "GPT-4o-mini", "context": 128000, "output": 16384, "notes": "Cheaper, same context window as 4o." },
+        { "name": "o3 / o4-mini", "context": 200000, "output": 100000, "notes": "Reasoning models; large context for code/reasoning." },
+        { "name": "GPT-4.1 / GPT-4.1-mini", "context": 1000000, "output": 32768, "notes": "1M-token context for long-document analysis." },
+        { "name": "o1 / o1-mini", "context": 128000, "output": 32768, "notes": "Legacy reasoning series; smaller output cap." }
+      ]
+    },
+    "anthropic": {
+      "name": "Anthropic Claude",
+      "icon": "🟣",
+      "models": [
+        { "name": "Claude 4 Opus", "context": 200000, "output": 64000, "notes": "Highest reasoning quality; 200K context." },
+        { "name": "Claude 4 Sonnet", "context": 200000, "output": 64000, "notes": "Balanced speed and capability." },
+        { "name": "Claude 4 Haiku", "context": 200000, "output": 8192, "notes": "Fast and cheap; same context as larger siblings." },
+        { "name": "Claude 3.5 Sonnet", "context": 200000, "output": 8192, "notes": "Widely deployed; strong coding agent use." },
+        { "name": "Claude 3 Opus / Sonnet / Haiku", "context": 200000, "output": 4096, "notes": "Legacy Claude 3 family." }
+      ]
+    },
+    "google": {
+      "name": "Google Gemini",
+      "icon": "🔵",
+      "models": [
+        { "name": "Gemini 2.5 Pro", "context": 1000000, "output": 64000, "notes": "1M context; strong long-context retrieval." },
+        { "name": "Gemini 2.5 Flash", "context": 1000000, "output": 64000, "notes": "Fast multimodal with 1M context." },
+        { "name": "Gemini 2.0 Pro / Flash", "context": 2000000, "output": 8192, "notes": "Up to 2M tokens for video/audio docs." },
+        { "name": "Gemini 1.5 Pro / Flash", "context": 1000000, "output": 8192, "notes": "First mainstream 1M-context model." }
+      ]
+    },
+    "meta": {
+      "name": "Meta Llama",
+      "icon": "🦙",
+      "models": [
+        { "name": "Llama 4 Scout", "context": 128000, "output": 128000, "notes": "Multimodal MoE; long context for local." },
+        { "name": "Llama 4 Maverick", "context": 128000, "output": 128000, "notes": "Strong coding and reasoning." },
+        { "name": "Llama 3.3 70B", "context": 128000, "output": 128000, "notes": "Efficient instruction model." },
+        { "name": "Llama 3.1 8B / 70B / 405B", "context": 128000, "output": 128000, "notes": "128K standard across all sizes." },
+        { "name": "Llama 3.2 1B / 3B", "context": 128000, "output": 128000, "notes": "Tiny edge models with long context." }
+      ]
+    },
+    "alibaba": {
+      "name": "Alibaba Qwen",
+      "icon": "🟠",
+      "models": [
+        { "name": "Qwen3 235B / 32B / 30B / 14B / 8B / 4B", "context": 128000, "output": 8192, "notes": "128K context across dense and MoE variants." },
+        { "name": "Qwen2.5 72B / 32B / 14B / 7B", "context": 128000, "output": 8192, "notes": "Strong open models; 128K context." },
+        { "name": "Qwen2.5-VL", "context": 128000, "output": 8192, "notes": "Vision-language with long context." }
+      ]
+    },
+    "mistral": {
+      "name": "Mistral AI",
+      "icon": "🌬️",
+      "models": [
+        { "name": "Mistral Large 2", "context": 128000, "output": 128000, "notes": "Commercial flagship; 128K window." },
+        { "name": "Mistral Small 3.1 / 24B", "context": 128000, "output": 128000, "notes": "Open-weight small models with 128K." },
+        { "name": "Pixtral Large / 12B", "context": 128000, "output": 128000, "notes": "Vision model with 128K context." },
+        { "name": "Codestral", "context": 32000, "output": 32000, "notes": "Code-specialized; 32K context." }
+      ]
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "icon": "🐋",
+      "models": [
+        { "name": "DeepSeek-V3", "context": 64000, "output": 8192, "notes": "MoE generalist; 64K context." },
+        { "name": "DeepSeek-R1", "context": 64000, "output": 8192, "notes": "Open reasoning model; 64K context." },
+        { "name": "DeepSeek-V2", "context": 128000, "output": 8192, "notes": "Earlier version with 128K claim (often 64K practical)." }
+      ]
+    },
+    "xai": {
+      "name": "xAI Grok",
+      "icon": "⚫",
+      "models": [
+        { "name": "Grok 3 / Grok 3 Mini", "context": 131072, "output": 131072, "notes": "128K context for chat and coding." },
+        { "name": "Grok 2", "context": 131072, "output": 131072, "notes": "Prior generation with same 128K window." }
+      ]
+    },
+    "local": {
+      "name": "Local / Quantized",
+      "icon": "🏠",
+      "models": [
+        { "name": "Llama.cpp / Ollama", "context": 128000, "output": 128000, "notes": "Context limited by VRAM, not model; reduce KV cache with quantization." },
+        { "name": "vLLM", "context": 128000, "output": 128000, "notes": "Serves full-context models if GPU memory allows." },
+        { "name": "KTransformers / llamafile", "context": 128000, "output": 128000, "notes": "Offload-aware; effective context depends on RAM/VRAM." },
+        { "name": "MLX (Apple Silicon)", "context": 128000, "output": 128000, "notes": "Unified memory; large context possible on Macs with 32-128 GB RAM." }
+      ]
+    }
+  },
+  "contextPresets": [
+    { "label": "Tweet / short prompt", "tokens": 50 },
+    { "label": "Paragraph", "tokens": 200 },
+    { "label": "Blog post", "tokens": 1500 },
+    { "label": "Research paper", "tokens": 8000 },
+    { "label": "Book chapter", "tokens": 25000 },
+    { "label": "Long codebase", "tokens": 50000 },
+    { "label": "Full repo + docs", "tokens": 100000 },
+    { "label": "Multi-hour transcript", "tokens": 200000 },
+    { "label": "1M-token corpus", "tokens": 1000000 }
+  ]
+}
