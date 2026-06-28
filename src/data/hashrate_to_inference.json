@@ -1,0 +1,44 @@
+{
+  "defaults": {
+    "algorithm": "ethash",
+    "hashrate": 120,
+    "hashrate_unit": "mh",
+    "efficiency_j_mh": 0.35,
+    "electricity_cost_per_kwh": 0.12,
+    "utilization_pct": 80
+  },
+  "algorithms": {
+    "ethash": { "name": "Ethash / Etchash", "mh_per_ggflops": 0.02, "note": "Ethereum Classic, ETH historical. Memory-bound; flops per hash is low." },
+    "kawpow": { "name": "KawPow (RVN)", "mh_per_ggflops": 0.03, "note": "Ravencoin. GPU core heavy." },
+    "ergo": { "name": "Autolykos v2 (ERGO)", "mh_per_ggflops": 0.035, "note": "ERGO. Core and memory balanced." },
+    "beam": { "name": "BeamHashIII", "mh_per_ggflops": 0.04, "note": "BEAM. Memory-hard with core use." },
+    "zhash": { "name": "Equihash 125,4 / Zhash", "mh_per_ggflops": 0.05, "note": "Zhash variants. Core heavy." },
+    "firopow": { "name": "FiroPow", "mh_per_ggflops": 0.025, "note": "Firo. Modified ProgPow." },
+    "blake3": { "name": "SHA256 / Blake3 (solo / speculative)", "mh_per_ggflops": 0.5, "note": "Extremely core-bound; not representative of inference." }
+  },
+  "gpus": [
+    { "name": "RTX 4090", "typical_hashrate_mh_ethash": 125, "fp16_tflops": 82.6, "vram_gb": 24, "watts": 450 },
+    { "name": "RTX 4080 Super", "typical_hashrate_mh_ethash": 95, "fp16_tflops": 52.2, "vram_gb": 16, "watts": 320 },
+    { "name": "RTX 3090 Ti", "typical_hashrate_mh_ethash": 130, "fp16_tflops": 40.0, "vram_gb": 24, "watts": 450 },
+    { "name": "RTX 3090", "typical_hashrate_mh_ethash": 120, "fp16_tflops": 35.6, "vram_gb": 24, "watts": 350 },
+    { "name": "RTX 4070 Ti Super", "typical_hashrate_mh_ethash": 75, "fp16_tflops": 44.1, "vram_gb": 16, "watts": 285 },
+    { "name": "RX 7900 XTX", "typical_hashrate_mh_ethash": 110, "fp16_tflops": 61.4, "vram_gb": 24, "watts": 355 },
+    { "name": "RX 6950 XT", "typical_hashrate_mh_ethash": 65, "fp16_tflops": 23.7, "vram_gb": 16, "watts": 335 },
+    { "name": "RTX 3090 x4 rig", "typical_hashrate_mh_ethash": 480, "fp16_tflops": 142.4, "vram_gb": 96, "watts": 1400 }
+  ],
+  "models": [
+    { "name": "Llama 3.1 8B Q4", "tokens_per_second_per_tflops": 3.2, "vram_gb": 6.5, "label": "Fast local chat" },
+    { "name": "Llama 3.1 70B Q4", "tokens_per_second_per_tflops": 0.45, "vram_gb": 42, "label": "High-capability agent" },
+    { "name": "Qwen2.5 14B Q4", "tokens_per_second_per_tflops": 1.8, "vram_gb": 10, "label": "Balanced coding assistant" },
+    { "name": "DeepSeek-V3 / R1 Q4 (MoE)", "tokens_per_second_per_tflops": 0.25, "vram_gb": 75, "label": "Reasoning / coding heavy" },
+    { "name": "Mistral Small 22B Q4", "tokens_per_second_per_tflops": 1.1, "vram_gb": 15, "label": "Agentic reasoning" }
+  ],
+  "efficiency_help": {
+    "j_mh_min": 0.18,
+    "j_mh_max": 0.7,
+    "excellent": "<0.25 J/MH — latest NVIDIA Lovelace or tuned AMD cards",
+    "good": "0.25-0.40 J/MH — efficient Ampere/Lovelace setup",
+    "average": "0.40-0.60 J/MH — typical air-cooled rig",
+    "poor": ">0.60 J/MH — older cards, high voltage, or hot climate"
+  }
+}
