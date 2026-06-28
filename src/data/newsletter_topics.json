@@ -1,0 +1,72 @@
+{
+  "ai-hardware": {
+    "name": "AI Hardware",
+    "icon": "\ud83d\udda5\ufe0f",
+    "prompts": [
+      "Best GPU for Llama 3 70B under $2,000",
+      "Mac Mini M4 vs RTX 4090 for local LLMs",
+      "How much VRAM do I need for a 7B model?",
+      "Quietest mini PC for AI inference",
+      "RTX 5090 vs RTX 4090 tokens-per-second comparison",
+      "Best used GPU for local LLM hosting",
+      "AMD vs NVIDIA for AI agents in 2026",
+      "Should I build or buy an AI workstation?"
+    ]
+  },
+  "ai-agents": {
+    "name": "AI Agents",
+    "icon": "\ud83e\udd16",
+    "prompts": [
+      "Best framework for building AI agents: LangGraph vs CrewAI vs AutoGen",
+      "How to run an AI agent 24/7 cheaply",
+      "What LLM should I use for a coding agent?",
+      "AI agent stack for content automation",
+      "How much does it cost to run an AI agent business?",
+      "Privacy-first AI agent setup guide",
+      "Multi-agent orchestration for beginners",
+      "AI agent use cases that actually make money"
+    ]
+  },
+  "crypto-pivot": {
+    "name": "Crypto \u2192 AI Pivot",
+    "icon": "\u26cf\ufe0f",
+    "prompts": [
+      "Should I sell my GPU mining rig or repurpose it for AI?",
+      "Mining profitability vs AI inference revenue in 2026",
+      "How to turn a Bitcoin ASIC into a space heater",
+      "Best marketplace to rent GPU compute for AI",
+      "Crypto tax loss harvesting before pivoting to AI",
+      "GPU hashrate vs LLM inference capacity",
+      "What to do with obsolete crypto mining hardware",
+      "Is AI inference hosting more profitable than mining?"
+    ]
+  },
+  "investing-startups": {
+    "name": "Investing & Startups",
+    "icon": "\ud83d\ude80",
+    "prompts": [
+      "AI agent startup costs: first-year burn estimate",
+      "How many months of runway does my startup have?",
+      "Best AI hardware stocks to watch in 2026",
+      "ROI of local LLM hardware vs API spend",
+      "Funding alternatives for AI-native SaaS founders",
+      "How to price AI agent API access",
+      "Customer support automation ROI calculator",
+      "What metrics do AI agent investors look for?"
+    ]
+  },
+  "answer-engines": {
+    "name": "AEO & Citations",
+    "icon": "\ud83d\udd17",
+    "prompts": [
+      "How to get cited by Perplexity and ChatGPT",
+      "Schema.org types every AI directory needs",
+      "Why answer engine optimization beats traditional SEO",
+      "How to track AI citations to your website",
+      "Best FAQPage schema examples for tools",
+      "How often do AI search engines update citations?",
+      "What content formats get cited by answer engines?",
+      "Building an /answers page that ranks in AI search"
+    ]
+  }
+}

@@ -1,0 +1,118 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import topics from '../../data/newsletter_topics.json';
+
+const title = "Newsletter Topic Finder — High-Intent AI, Crypto, Investing Queries";
+const description = "Find your next newsletter angle fast. Browse proven high-intent topics for AI hardware, AI agents, crypto-to-AI pivots, investing, and AEO/citations.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What should an AI hardware newsletter write about?",
+        "acceptedAnswer": { "@type": "Answer", "text": "High-intent topics work best: GPU comparisons, VRAM requirements, mini PC benchmarks, local LLM setup costs, and ROI vs cloud APIs. These attract both human readers and AI answer engine citations." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I find newsletter topics that rank in AI search?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Target questions people ask in Reddit, search autocomplete, and answer engines. Use FAQPage schema, exact-match headings, and data-backed answers." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">💡</div>
+        <h1 class="display-heading mb-4">Newsletter Topic Finder</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Never run out of angles. Browse high-intent topics for AI hardware, agents, crypto pivots, investing, and AEO.
+        </p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <div class="flex flex-col md:flex-row gap-4 items-center">
+          <div class="flex-1">
+            <p class="text-sm text-neutral-400 mb-1">Random topic generator</p>
+            <p id="randomTopic" class="text-xl font-bold text-white">Click the button to get a topic.</p>
+          </div>
+          <button id="randomBtn" type="button" class="btn-primary">Generate topic ⚡</button>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+        {Object.entries(topics).map(([slug, cat]) => (
+          <button
+            type="button"
+            data-slug={slug}
+            class="topic-card glass-card rounded-2xl p-5 text-left hover:border-brand-gold/50 transition-all"
+          >
+            <div class="text-3xl mb-3">{cat.icon}</div>
+            <h2 class="text-lg font-bold mb-2">{cat.name}</h2>
+            <p class="text-sm text-neutral-400">{cat.prompts.length} topic ideas</p>
+          </button>
+        ))}
+      </div>
+
+      <div id="topicDetail" class="hidden">
+        <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20">
+          <div class="flex items-center gap-4 mb-6">
+            <div id="detailIcon" class="text-4xl"></div>
+            <h2 id="detailName" class="text-2xl font-bold"></h2>
+          </div>
+
+          <ul id="detailPrompts" class="space-y-3 mb-6"></ul>
+
+          <div class="flex flex-wrap gap-3">
+            <a href="/tools/answer-engine-citation-tracker/" class="btn-primary text-sm">Track citations →</a>
+            <a href="/newsletter/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Newsletter archive →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ topics }}>
+    const cards = document.querySelectorAll('.topic-card');
+    const detail = document.getElementById('topicDetail');
+    const randomBtn = document.getElementById('randomBtn');
+    const randomTopic = document.getElementById('randomTopic');
+
+    function select(slug) {
+      const cat = topics[slug];
+      if (!cat) return;
+
+      cards.forEach(c => c.classList.remove('border-brand-gold'));
+      const active = document.querySelector(`[data-slug="${slug}"]`);
+      if (active) active.classList.add('border-brand-gold');
+
+      document.getElementById('detailIcon').textContent = cat.icon;
+      document.getElementById('detailName').textContent = cat.name;
+
+      const ul = document.getElementById('detailPrompts');
+      ul.innerHTML = cat.prompts.map(p => `<li class="flex items-start gap-3 p-3 rounded-lg bg-neutral-800/50"><span class="text-brand-gold mt-0.5">•</span><span>${p}</span></li>`).join('');
+
+      detail.classList.remove('hidden');
+      detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => select(card.dataset.slug));
+    });
+
+    function randomize() {
+      const all = Object.values(topics).flatMap(c => c.prompts);
+      const pick = all[Math.floor(Math.random() * all.length)];
+      randomTopic.textContent = pick;
+    }
+
+    randomBtn.addEventListener('click', randomize);
+    randomize();
+  </script>
+</Layout>
