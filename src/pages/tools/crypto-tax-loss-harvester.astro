@@ -1,0 +1,338 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import taxData from '../../data/crypto_tax_loss.json';
+
+const title = "Crypto Tax Loss Harvesting Calculator — Estimate Harvested Losses & Tax Savings";
+const description = "Estimate how much you can save by harvesting crypto losses. Enter cost basis, current price, and tax rate to see realized losses, tax savings, and net portfolio impact.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does crypto tax loss harvesting work?",
+        "acceptedAnswer": { "@type": "Answer", "text": "You sell crypto that has dropped below your purchase price to realize a capital loss. That loss can offset capital gains and up to $3,000 of ordinary income per year, with excess losses carried forward." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the wash sale rule for crypto?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Current IRS wash-sale rules apply to securities, not property like crypto. However, legislation has been proposed to extend wash-sale treatment to crypto. Avoid repurchasing the same asset 30 days before or after the sale to stay safe." }
+      },
+      {
+        "@type": "Question",
+        "name": "How much can I save with tax loss harvesting?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Savings depend on the size of your realized losses, your marginal tax rate, and whether you have gains to offset. Use this calculator to estimate harvestable losses and tax savings for your portfolio." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧺</div>
+        <h1 class="display-heading mb-4">Crypto Tax Loss Harvesting Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Sell losing positions to harvest losses, offset gains, and reduce your tax bill. Estimate savings in seconds.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Your Positions</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-neutral-400 border-b border-neutral-700">
+                  <th class="pb-2 pr-3">Asset</th>
+                  <th class="pb-2 pr-3 text-right">Units</th>
+                  <th class="pb-2 pr-3 text-right">Cost basis</th>
+                  <th class="pb-2 pr-3 text-right">Price now</th>
+                  <th class="pb-2 text-right">Unrealized P/L</th>
+                </tr>
+              </thead>
+              <tbody id="positionsTable">
+                {taxData.coins.map((coin, idx) => (
+                  <tr class="border-b border-neutral-800 last:border-0 position-row" data-idx={idx}>
+                    <td class="py-3 pr-3">
+                      <div class="font-semibold">{coin.symbol}</div>
+                      <div class="text-xs text-neutral-500">{coin.name}</div>
+                    </td>
+                    <td class="py-3 pr-3 text-right">
+                      <input type="number" step="any" data-field="units" value={coin.units} class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-right text-white" />
+                    </td>
+                    <td class="py-3 pr-3 text-right">
+                      <input type="number" step="any" data-field="cost" value={coin.cost_basis} class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-right text-white" />
+                    </td>
+                    <td class="py-3 pr-3 text-right">
+                      <input type="number" step="any" data-field="price" value={coin.current_price} class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-right text-white" />
+                    </td>
+                    <td class="py-3 text-right font-semibold unrealized">—</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div class="flex gap-3 mt-4">
+            <button id="addRow" type="button" class="px-3 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">+ Add asset</button>
+            <button id="removeRow" type="button" class="px-3 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">− Remove last</button>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Tax Settings</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Annual income</label>
+              <input id="income" type="number" step="1000" value={taxData.defaults.annual_income} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Filing status</label>
+              <select id="filing" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {Object.entries(taxData.filing_statuses).map(([slug, status]) => (
+                  <option value={slug} selected={slug === taxData.defaults.tax_filing}>{status.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Short-term tax rate (%)</label>
+              <input id="shortRate" type="number" step="0.01" min="0" max="1" value={taxData.defaults.short_term_rate} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">Marginal rate for ordinary income / short-term gains.</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Long-term tax rate (%)</label>
+              <input id="longRate" type="number" step="0.01" min="0" max="1" value={taxData.defaults.long_term_rate} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">Typically 0%, 15%, or 20%.</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Existing capital gains to offset ($)</label>
+              <input id="existingGains" type="number" step="100" value="0" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Wash-sale buffer (%)</label>
+              <input id="washBuffer" type="number" step="1" min="0" max="100" value={taxData.defaults.wash_sale_buffer_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">If you must buy back in, reduce harvested loss by this percent.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Total portfolio value</p>
+          <p id="totalValue" class="text-2xl font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-red-500/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Harvestable losses</p>
+          <p id="harvestableLosses" class="text-2xl font-bold text-red-400">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-emerald-500/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Estimated tax savings</p>
+          <p id="taxSavings" class="text-2xl font-bold text-emerald-400">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Net portfolio after harvest</p>
+          <p id="netPortfolio" class="text-2xl font-bold">—</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Harvest strategy</h2>
+        <p id="strategyText" class="text-neutral-300 mb-4">Enter your positions to see a personalized strategy.</p>
+        <ul id="assetStrategy" class="space-y-2 text-sm text-neutral-300"></ul>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How this works</h2>
+          <ul class="space-y-3 text-neutral-300 text-sm">
+            <li><strong class="text-white">Unrealized loss:</strong> (cost basis − current price) × units. Only negative values can be harvested.</li>
+            <li><strong class="text-white">Harvested loss:</strong> sum of unrealized losses, optionally reduced by the wash-sale buffer.</li>
+            <li><strong class="text-white">Tax savings:</strong> losses first offset taxable capital gains, then up to $3,000 of ordinary income, at your entered rates.</li>
+            <li><strong class="text-white">Net portfolio:</strong> current portfolio value minus the estimated tax savings you realize this year.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Important notes</h2>
+          <ul class="space-y-3 text-neutral-300 text-sm">
+            <li>• IRS rules let you deduct up to <strong class="text-white">$3,000</strong> of net capital losses against ordinary income annually.</li>
+            <li>• Excess losses carry forward indefinitely to future tax years.</li>
+            <li>• {taxData.notes.wash_sale_warning}</li>
+            <li>• This is an estimate, not tax advice. Consult a CPA for your situation.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/miner-pivot-calculator/" class="btn-primary text-sm">Miner Pivot Calculator →</a>
+        <a href="/tools/ai-hardware-deal-tracker/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI Hardware Deals →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ taxData }}>
+    const incomeInput = document.getElementById('income');
+    const filingSelect = document.getElementById('filing');
+    const shortRateInput = document.getElementById('shortRate');
+    const longRateInput = document.getElementById('longRate');
+    const existingGainsInput = document.getElementById('existingGains');
+    const washBufferInput = document.getElementById('washBuffer');
+    const positionsTable = document.getElementById('positionsTable');
+    const addRowBtn = document.getElementById('addRow');
+    const removeRowBtn = document.getElementById('removeRow');
+
+    function fmt(n) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n || 0);
+    }
+
+    function fmtCoin(n) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 }).format(n || 0);
+    }
+
+    function readRows() {
+      return Array.from(positionsTable.querySelectorAll('.position-row')).map(row => {
+        const symbol = row.querySelector('td:first-child .font-semibold').textContent;
+        const name = row.querySelector('td:first-child .text-neutral-500').textContent;
+        return {
+          symbol,
+          name,
+          units: parseFloat(row.querySelector('[data-field="units"]').value) || 0,
+          cost: parseFloat(row.querySelector('[data-field="cost"]').value) || 0,
+          price: parseFloat(row.querySelector('[data-field="price"]').value) || 0,
+        };
+      });
+    }
+
+    function buildRow(coin, idx) {
+      const tr = document.createElement('tr');
+      tr.className = 'border-b border-neutral-800 last:border-0 position-row';
+      tr.dataset.idx = idx;
+      tr.innerHTML = `
+        <td class="py-3 pr-3">
+          <input type="text" data-field="symbol" value="${coin.symbol}" class="w-20 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white font-semibold" />
+          <input type="text" data-field="name" value="${coin.name}" class="w-20 mt-1 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs text-neutral-500" />
+        </td>
+        <td class="py-3 pr-3 text-right">
+          <input type="number" step="any" data-field="units" value="${coin.units}" class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-right text-white" />
+        </td>
+        <td class="py-3 pr-3 text-right">
+          <input type="number" step="any" data-field="cost" value="${coin.cost}" class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-right text-white" />
+        </td>
+        <td class="py-3 pr-3 text-right">
+          <input type="number" step="any" data-field="price" value="${coin.price}" class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-right text-white" />
+        </td>
+        <td class="py-3 text-right font-semibold unrealized">—</td>
+      `;
+      return tr;
+    }
+
+    function calc() {
+      const rows = readRows();
+      let totalValue = 0;
+      let totalCost = 0;
+      const details = rows.map(r => {
+        const value = r.units * r.price;
+        const cost = r.units * r.cost;
+        const pl = value - cost;
+        totalValue += value;
+        totalCost += cost;
+        return { ...r, value, cost, pl };
+      });
+
+      const shortRate = parseFloat(shortRateInput.value) || 0;
+      const longRate = parseFloat(longRateInput.value) || 0;
+      const existingGains = parseFloat(existingGainsInput.value) || 0;
+      const washBuffer = (parseFloat(washBufferInput.value) || 0) / 100;
+
+      const losses = details.filter(d => d.pl < 0).map(d => ({ ...d, loss: Math.abs(d.pl) }));
+      const grossHarvestable = losses.reduce((sum, d) => sum + d.loss, 0);
+      const harvestableLosses = grossHarvestable * (1 - washBuffer);
+
+      // Tax savings: offset gains first at long-term rate, then short-term rate; remainder up to $3k against ordinary income at short-term rate
+      const gainsOffset = Math.min(harvestableLosses, Math.max(0, existingGains));
+      const remainingLoss = harvestableLosses - gainsOffset;
+      const ordinaryOffset = Math.min(remainingLoss, 3000);
+      const carryForward = remainingLoss - ordinaryOffset;
+
+      const taxSavings = (gainsOffset * longRate) + (ordinaryOffset * shortRate);
+
+      const netPortfolio = totalValue + taxSavings;
+
+      document.getElementById('totalValue').textContent = fmt(totalValue);
+      document.getElementById('harvestableLosses').textContent = '-' + fmt(harvestableLosses);
+      document.getElementById('taxSavings').textContent = fmt(taxSavings);
+      document.getElementById('netPortfolio').textContent = fmt(netPortfolio);
+
+      // Update per-row P/L display
+      positionsTable.querySelectorAll('.position-row').forEach((row, i) => {
+        const d = details[i];
+        const cell = row.querySelector('.unrealized');
+        if (!d) return;
+        cell.textContent = (d.pl >= 0 ? '+' : '-') + fmt(Math.abs(d.pl));
+        cell.className = 'py-3 text-right font-semibold unrealized ' + (d.pl >= 0 ? 'text-emerald-400' : 'text-red-400');
+      });
+
+      // Strategy text
+      const strategyEl = document.getElementById('strategyText');
+      const assetStrategyEl = document.getElementById('assetStrategy');
+      if (losses.length === 0) {
+        strategyEl.textContent = 'No harvestable losses right now. You could wait for a dip or harvest only if you want to rebalance.';
+        assetStrategyEl.innerHTML = '';
+      } else {
+        strategyEl.textContent = `Harvest ${losses.length} losing position${losses.length === 1 ? '' : 's'} to realize ${fmt(harvestableLosses)} in losses. ${carryForward > 0 ? fmt(carryForward) + ' carries forward to next year.' : ''}`;
+        assetStrategyEl.innerHTML = losses.map(d => {
+          const lossAfterBuffer = d.loss * (1 - washBuffer);
+          return `<li><span class="text-brand-gold font-semibold">${d.symbol}</span>: sell ${d.units.toLocaleString()} units at ${fmtCoin(d.price)} to harvest ${fmt(lossAfterBuffer)} loss.</li>`;
+        }).join('');
+      }
+    }
+
+    function attachListeners() {
+      [incomeInput, filingSelect, shortRateInput, longRateInput, existingGainsInput, washBufferInput].forEach(el => {
+        el.removeEventListener('input', calc);
+        el.addEventListener('input', calc);
+      });
+      positionsTable.querySelectorAll('input').forEach(input => {
+        input.removeEventListener('input', calc);
+        input.addEventListener('input', calc);
+      });
+    }
+
+    addRowBtn.addEventListener('click', () => {
+      const idx = positionsTable.querySelectorAll('.position-row').length;
+      const row = buildRow({ symbol: 'COIN', name: 'Custom', units: 0, cost: 0, price: 0 }, idx);
+      positionsTable.appendChild(row);
+      attachListeners();
+      calc();
+    });
+
+    removeRowBtn.addEventListener('click', () => {
+      const rows = positionsTable.querySelectorAll('.position-row');
+      if (rows.length > 1) rows[rows.length - 1].remove();
+      attachListeners();
+      calc();
+    });
+
+    // Try to auto-estimate long-term rate from filing status + income (0/15/20 brackets simplified)
+    function updateRatesFromIncome() {
+      const income = parseFloat(incomeInput.value) || 0;
+      const filing = taxData.filing_statuses[filingSelect.value];
+      if (!filing) return;
+      let longRate = 0.15;
+      if (income <= filing.long_term_0_limit) longRate = 0;
+      else if (income > filing.long_term_15_limit) longRate = 0.20;
+      longRateInput.value = longRate;
+    }
+
+    incomeInput.addEventListener('input', updateRatesFromIncome);
+    filingSelect.addEventListener('change', updateRatesFromIncome);
+
+    attachListeners();
+    updateRatesFromIncome();
+    calc();
+  </script>
+</Layout>

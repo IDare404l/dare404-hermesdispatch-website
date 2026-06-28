@@ -1,0 +1,28 @@
+{
+  "defaults": {
+    "annual_income": 85000,
+    "tax_filing": "single",
+    "short_term_rate": 0.22,
+    "long_term_rate": 0.15,
+    "wash_sale_buffer_pct": 0
+  },
+  "filing_statuses": {
+    "single": { "name": "Single", "long_term_0_limit": 47125, "long_term_15_limit": 518900 },
+    "married_joint": { "name": "Married filing jointly", "long_term_0_limit": 94250, "long_term_15_limit": 583750 },
+    "married_separate": { "name": "Married filing separately", "long_term_0_limit": 47125, "long_term_15_limit": 291850 },
+    "head_household": { "name": "Head of household", "long_term_0_limit": 63100, "long_term_15_limit": 551350 }
+  },
+  "coins": [
+    { "symbol": "BTC", "name": "Bitcoin", "units": 0.5, "cost_basis": 48000, "current_price": 42000 },
+    { "symbol": "ETH", "name": "Ethereum", "units": 4, "cost_basis": 3200, "current_price": 2450 },
+    { "symbol": "SOL", "name": "Solana", "units": 25, "cost_basis": 145, "current_price": 88 },
+    { "symbol": "DOGE", "name": "Dogecoin", "units": 10000, "cost_basis": 0.18, "current_price": 0.09 },
+    { "symbol": "XRP", "name": "XRP", "units": 2000, "cost_basis": 1.1, "current_price": 0.55 }
+  ],
+  "notes": {
+    "deduction_limit": 3000,
+    "carryforward": true,
+    "wash_sale_warning": "If you rebuy the same or substantially identical crypto within 30 days before or after the sale, the loss may be deferred under wash-sale rules (currently proposed for crypto; track manually).",
+    "tax_rate_note": "Short-term capital gains are taxed as ordinary income. Long-term rates are 0%, 15%, or 20% depending on income. Enter your effective marginal rate for the most accurate estimate."
+  }
+}
