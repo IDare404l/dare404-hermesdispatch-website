@@ -47,6 +47,7 @@ export async function GET(context: APIContext) {
     { path: '/tools/rig-repurposing-guide/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/ai-hardware-deal-tracker/', changefreq: 'daily', priority: 0.8 },
     { path: '/tools/newsletter-topic-finder/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/agent-api-pricing-comparator/', changefreq: 'weekly', priority: 0.8 },
     { path: '/compare/gpus/', changefreq: 'weekly', priority: 0.8 },
     { path: '/compare/mini-pcs/', changefreq: 'weekly', priority: 0.8 },
     { path: '/compare/recommend/', changefreq: 'weekly', priority: 0.8 },
