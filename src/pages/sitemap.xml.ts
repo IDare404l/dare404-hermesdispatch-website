@@ -48,6 +48,8 @@ export async function GET(context: APIContext) {
     { path: '/tools/ai-hardware-deal-tracker/', changefreq: 'daily', priority: 0.8 },
     { path: '/tools/newsletter-topic-finder/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/agent-api-pricing-comparator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/api-access/', changefreq: 'monthly', priority: 0.7 },
+    { path: '/advertise/', changefreq: 'monthly', priority: 0.7 },
     { path: '/compare/gpus/', changefreq: 'weekly', priority: 0.8 },
     { path: '/compare/mini-pcs/', changefreq: 'weekly', priority: 0.8 },
     { path: '/compare/recommend/', changefreq: 'weekly', priority: 0.8 },

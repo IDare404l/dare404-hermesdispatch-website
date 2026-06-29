@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import LeadCapture from '../../components/LeadCapture.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import builds from '../../data/ai_pc_builds.json';
 
@@ -172,4 +173,6 @@ const description = "Choose an AI PC build by budget and use case: entry-level, 
 
     if (cards.length) select(cards[0].dataset.slug);
   </script>
+<LeadCapture toolName="your AI PC build" toolPath="/tools/ai-pc-build-configurator/" />
+
 </Layout>

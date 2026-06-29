@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ToolSchema from '../components/ToolSchema.astro';
+
+const title = "Hermes Dispatch Data API | Hermes Dispatch";
+const description = "Programmatic access to GPU benchmarks, AI hardware deals, mini PC specs, and agent tool data for developers and agents.";
+
+const endpoints = [
+  { path: "/api/gpu-benchmarks", desc: "Curated GPU benchmarks for local LLMs (tokens/sec, VRAM, TDP, price).", auth: "api-key", price: "$49/mo" },
+  { path: "/api/mini-pcs", desc: "Mini PC comparison dataset with RAM, bandwidth, and Ollama tokens/sec.", auth: "api-key", price: "$49/mo" },
+  { path: "/api/deals", desc: "AI hardware deals feed with MSRP, typical low price, and retailer links.", auth: "api-key", price: "$49/mo" },
+  { path: "/api/agent-stacks", desc: "Recommended agent stacks by use case with estimated monthly cost.", auth: "api-key", price: "$49/mo" },
+  { path: "/api/builds", desc: "Preconfigured AI PC builds with components, expected tok/s, and links.", auth: "api-key", price: "$49/mo" },
+  { path: "/api/commercial-license", desc: "Redistribution license for all datasets in commercial products.", auth: "contract", price: "From $499/mo" }
+];
+
+const faqs = [
+  { q: "What format is the data?", a: "All endpoints return JSON with stable schemas. Data is updated weekly for benchmarks and daily for deals when available." },
+  { q: "Can I use this for an AI agent?", a: "Yes. The API is designed for agents and developers who need structured, current AI hardware and agent tooling data. Include /llms.txt in your agent context for discovery." },
+  { q: "Is there a free tier?", a: "We offer a limited free tier for non-commercial use and evaluation. Contact us for an API key." },
+  { q: "How do I get an API key?", a: "Email api@hermesdispatch.dev with your use case, expected volume, and whether you need commercial redistribution rights." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Hermes Dispatch Data API" description={description} url="https://hermesdispatch.dev/api-access/" applicationCategory="BusinessApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4">Data API Access</h1>
+      <p class="text-slate-300 text-lg max-w-2xl mx-auto">Feed GPU benchmarks, AI hardware deals, mini PC specs, and agent stack data into your app, newsletter, or agent.</p>
+    </div>
+
+    <section class="grid md:grid-cols-2 gap-6 mb-12">
+      {endpoints.map(e => (
+        <div class="bg-slate-900/50 border border-slate-700 rounded-xl p-6">
+          <div class="flex justify-between items-start mb-2">
+            <div class="font-mono text-cyan-400 text-sm">{e.path}</div>
+            <div class="text-emerald-400 font-semibold text-sm">{e.price}</div>
+          </div>
+          <p class="text-slate-300 text-sm mb-3">{e.desc}</p>
+          <div class="text-xs text-slate-500 uppercase tracking-wide">Auth: {e.auth}</div>
+        </div>
+      ))}
+    </section>
+
+    <section class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-cyan-400 mb-4">Request access</h2>
+      <p class="text-slate-300 mb-4">Email <a href="mailto:api@hermesdispatch.dev" class="underline text-cyan-400">api@hermesdispatch.dev</a> with your use case, expected request volume, and whether you need commercial redistribution rights. We reply within one business day.</p>
+      <div class="text-sm text-slate-400">Pricing: $49/mo per dataset for up to 10,000 requests/month. Commercial licenses and higher limits available on request.</div>
+    </section>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-slate-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </main>
+</Layout>

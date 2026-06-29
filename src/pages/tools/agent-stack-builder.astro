@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import LeadCapture from '../../components/LeadCapture.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import stacks from '../../data/agent_stacks.json';
 
@@ -174,4 +175,6 @@ const description = "Build the right AI agent system for content, trading, suppo
     // Select first by default
     if (cards.length) select(cards[0].dataset.slug);
   </script>
+<LeadCapture toolName="your agent stack" toolPath="/tools/agent-stack-builder/" />
+
 </Layout>

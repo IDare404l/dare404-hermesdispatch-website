@@ -1,7 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
-import miniPcs from '../../data/mini_pcs.json';
+import miniPcsRaw from '../../data/mini_pcs.json';
+import miniPcSponsors from '../../data/mini_pc_sponsor_overlay.json';
+const miniPcs = miniPcsRaw.map(pc => ({ ...pc, ...(miniPcSponsors[pc.name] || {}) }));
 
 const title = "Mini PC for AI Comparison — Mac Mini M4 vs AMD AI Mini PCs (2026)";
 const description = "Compare mini PCs for local LLM inference: Mac Mini M4, Beelink GTR9 Pro, GMKtec EVO-X2, GEEKOM A8. Sort by RAM, bandwidth, tokens/sec, price, and power.";
@@ -55,7 +57,10 @@ const description = "Compare mini PCs for local LLM inference: Mac Mini M4, Beel
           {miniPcs.map((pc) => (
             <tr class="hover:bg-neutral-800/50" data-name={pc.name} data-ram={pc.ram_gb} data-bandwidth={pc.bandwidth_gbps} data-8b={pc.ollama_tps['8B']} data-price={pc.price_usd} data-tdp={pc.tdp_w}>
               <td class="px-4 py-3">
-                <div class="font-semibold">{pc.name}</div>
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold">{pc.name}</span>
+                  {pc.sponsored && <span class="px-2 py-0.5 rounded text-xs bg-cyan-400/20 text-cyan-400 border border-cyan-400/30">{pc.sponsor_badge || "Sponsored"}</span>}
+                </div>
                 <div class="text-sm text-gray-500">{pc.cpu}</div>
               </td>
               <td class="px-4 py-3">{pc.ram_gb} GB {pc.memory_type}</td>

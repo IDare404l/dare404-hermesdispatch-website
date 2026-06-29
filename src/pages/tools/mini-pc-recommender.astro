@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import LeadCapture from '../../components/LeadCapture.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import miniPcs from '../../data/mini_pcs.json';
 
@@ -103,4 +104,6 @@ const description = "Answer three questions and get a mini PC recommendation for
     silenceEl.addEventListener('change', update);
     update();
   </script>
+<LeadCapture toolName="your mini PC setup" toolPath="/tools/mini-pc-recommender/" />
+
 </Layout>

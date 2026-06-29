@@ -1,0 +1,63 @@
+---
+export interface Props {
+  toolName?: string;
+  toolPath?: string;
+  cta?: string;
+  requestTypes?: string[];
+}
+
+const { toolName = "this tool", toolPath = "/", cta = "Get a quote", requestTypes = ["Sourcing help", "Installation help", "Consulting"] } = Astro.props;
+---
+
+<div class="lead-capture mt-6 p-4 rounded-xl border border-cyan-400/30 bg-cyan-400/5" data-tool-path={toolPath}>
+  <h3 class="text-cyan-400 font-semibold mb-2">{cta}</h3>
+  <p class="text-slate-300 text-sm mb-4">Need help with {toolName}? Send a request and a partner will reply within 24 hours.</p>
+  <form class="space-y-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <input type="text" name="name" placeholder="Name" required class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm" />
+      <input type="email" name="email" placeholder="Email" required class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm" />
+    </div>
+    <select name="request_type" required class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm">
+      <option value="">What do you need?</option>
+      {requestTypes.map(t => <option value={t}>{t}</option>)}
+    </select>
+    <textarea name="message" placeholder="Details (optional)" rows="3" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm"></textarea>
+    <button type="submit" class="px-4 py-2 rounded bg-cyan-400 text-slate-900 font-medium text-sm hover:bg-cyan-300 transition">Send request</button>
+  </form>
+  <p class="status text-sm mt-2 hidden"></p>
+</div>
+
+<script>
+  document.querySelectorAll('.lead-capture').forEach(container => {
+    const form = container.querySelector('form');
+    const status = container.querySelector('.status');
+    const toolPath = container.dataset.toolPath;
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const body = {
+        tool_path: toolPath,
+        name: formData.get('name'),
+        email: formData.get('email'),
+        request_type: formData.get('request_type'),
+        message: formData.get('message')
+      };
+
+      try {
+        const res = await fetch('/api/lead-capture/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const json = await res.json();
+        status.textContent = json.ok ? 'Request sent. A partner will reply shortly.' : 'Failed to send. Please try again.';
+        status.className = 'status text-sm mt-2 ' + (json.ok ? 'text-emerald-400' : 'text-red-400');
+        if (json.ok) form.reset();
+      } catch (err) {
+        status.textContent = 'Failed to send. Please try again.';
+        status.className = 'status text-sm mt-2 text-red-400';
+      }
+    });
+  });
+</script>

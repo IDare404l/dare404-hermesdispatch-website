@@ -9,7 +9,9 @@
       "https://www.newegg.com/apple-rtx-4090"
     ],
     "note": "Flagship local LLM card. 24GB VRAM runs 70B quantized models.",
-    "affiliate_slug": "rtx-4090"
+    "affiliate_slug": "rtx-4090",
+    "sponsored": true,
+    "sponsor_badge": "Featured Deal"
   },
   "nvidia-rtx-5090": {
     "name": "NVIDIA GeForce RTX 5090",
@@ -20,7 +22,9 @@
       "https://www.amazon.com/s?k=rtx+5090"
     ],
     "note": "Next-gen 32GB flagship. Best for large models and inference hosting.",
-    "affiliate_slug": "rtx-5090"
+    "affiliate_slug": "rtx-5090",
+    "sponsored": false,
+    "sponsor_badge": ""
   },
   "mac-studio-m4-max": {
     "name": "Mac Studio M4 Max 64GB",
@@ -31,7 +35,9 @@
       "https://www.amazon.com/s?k=mac+studio+m4+max"
     ],
     "note": "Silent, efficient local inference. Great for developers and content agents.",
-    "affiliate_slug": "mac-studio-m4-max"
+    "affiliate_slug": "mac-studio-m4-max",
+    "sponsored": false,
+    "sponsor_badge": ""
   },
   "beelink-gtr9-pro": {
     "name": "Beelink GTR9 Pro",
@@ -42,7 +48,9 @@
       "https://www.amazon.com/s?k=beelink+gtr9+pro"
     ],
     "note": "Ryzen AI 9 HX 370 with strong NPU. Good portable AI box.",
-    "affiliate_slug": "beelink-gtr9-pro"
+    "affiliate_slug": "beelink-gtr9-pro",
+    "sponsored": false,
+    "sponsor_badge": ""
   },
   "gmktec-evo-x2": {
     "name": "GMKtec EVO-X2",
@@ -53,7 +61,9 @@
       "https://www.amazon.com/s?k=gmktec+evo+x2"
     ],
     "note": "Mini PC with dedicated GPU option for local LLMs.",
-    "affiliate_slug": "gmktec-evo-x2"
+    "affiliate_slug": "gmktec-evo-x2",
+    "sponsored": false,
+    "sponsor_badge": ""
   },
   "amd-ryzen-9-7950x3d": {
     "name": "AMD Ryzen 9 7950X3D",
@@ -64,7 +74,9 @@
       "https://www.amazon.com/s?k=ryzen+9+7950x3d"
     ],
     "note": "High-core CPU for CPU-fallback inference and data preprocessing.",
-    "affiliate_slug": "ryzen-9-7950x3d"
+    "affiliate_slug": "ryzen-9-7950x3d",
+    "sponsored": false,
+    "sponsor_badge": ""
   },
   "ddr5-64gb-kit": {
     "name": "64GB DDR5-6000 RAM Kit",
@@ -75,7 +87,9 @@
       "https://www.amazon.com/s?k=64gb+ddr5+6000"
     ],
     "note": "Minimum RAM for serious local LLM builds; 128GB preferred for 70B models.",
-    "affiliate_slug": "ddr5-64gb"
+    "affiliate_slug": "ddr5-64gb",
+    "sponsored": false,
+    "sponsor_badge": ""
   },
   "samsung-990-pro-2tb": {
     "name": "Samsung 990 Pro 2TB NVMe SSD",
@@ -86,6 +100,8 @@
       "https://www.amazon.com/s?k=samsung+990+pro+2tb"
     ],
     "note": "Fast storage matters for loading large models and datasets.",
-    "affiliate_slug": "samsung-990-pro-2tb"
+    "affiliate_slug": "samsung-990-pro-2tb",
+    "sponsored": false,
+    "sponsor_badge": ""
   }
 }

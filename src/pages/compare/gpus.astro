@@ -2,8 +2,13 @@
 import Layout from "../../layouts/Layout.astro";
 import ToolSchema from "../../components/ToolSchema.astro";
 import benchmarkData from "../../data/gpu_benchmarks.json";
+import sponsorOverlay from "../../data/sponsor_overlay.json";
 
-const gpus = Object.entries(benchmarkData.gpus).map(([name, d]) => ({ name, ...d }));
+const gpus = Object.entries(benchmarkData.gpus).map(([name, d]) => ({
+  name,
+  ...d,
+  ...(sponsorOverlay[name] || {})
+}));
 const models = Array.from(new Set(gpus.flatMap(g => Object.keys(g.ollama_tps || {})))).sort();
 const pageTitle = "GPU Benchmarks for Local LLMs (2026) | Hermes Dispatch";
 const pageDescription = "Compare NVIDIA RTX 4090, RTX 5090, Apple Silicon and mini PCs for running Ollama, vLLM and local LLMs. Tokens/sec, VRAM, TDP, and affiliate deals.";
@@ -44,7 +49,10 @@ const pageDescription = "Compare NVIDIA RTX 4090, RTX 5090, Apple Silicon and mi
             return (
               <tr class="border-b border-brand-border/50 hover:bg-brand-card/70 transition-colors">
                 <td class="px-4 py-4">
-                  <div class="font-medium text-white">{gpu.name}</div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-white">{gpu.name}</span>
+                    {gpu.sponsored && <span class="px-2 py-0.5 rounded text-xs bg-brand-gold/20 text-brand-gold border border-brand-gold/30">{gpu.sponsor_badge || "Sponsored"}</span>}
+                  </div>
                   {gpu.notes && <div class="text-xs text-gray-400 mt-1">{gpu.notes}</div>}
                 </td>
                 <td class="px-4 py-4 text-gray-300">{gpu.vram_gb} GB</td>
