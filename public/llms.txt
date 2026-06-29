@@ -12,12 +12,26 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: minimum VRAM, recommended VRAM
 - Audience: AI builders choosing GPUs
 
+### GPU Comparison Table
+- URL: https://hermesdispatch.dev/compare/gpus/
+- Description: Sortable comparison of GPUs for local AI inference by tokens/sec, VRAM, TDP, and price.
+- Inputs: sort key
+- Outputs: ranked GPU table, Agent Score
+- Audience: general
+
+### Mini PC Comparison Table
+- URL: https://hermesdispatch.dev/compare/mini-pcs/
+- Description: Sortable comparison of mini PCs for AI and home lab.
+- Inputs: sort key
+- Outputs: ranked mini PC table
+- Audience: general
+
 ### GPU Recommender
-- URL: https://hermesdispatch.dev/tools/gpu-recommender/
-- Description: Pick the right GPU for a target model size and budget.
-- Inputs: model size, budget, minimum FPS/throughput
-- Outputs: matching GPU, Agent Score, buy link
-- Audience: local LLM users
+- URL: https://hermesdispatch.dev/compare/recommend/
+- Description: Find the biggest model you can run given VRAM and budget.
+- Inputs: VRAM, budget, model size
+- Outputs: matching GPUs
+- Audience: general
 
 ### Mini PC Recommender
 - URL: https://hermesdispatch.dev/tools/mini-pc-recommender/
@@ -26,12 +40,26 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: recommended mini PC, Agent Score
 - Audience: AI home lab builders
 
+### Agent Hardware Sizer
+- URL: https://hermesdispatch.dev/tools/agent-hardware-sizer/
+- Description: Find the exact mini PC, GPU, and RAM config for local LLMs and AI agents.
+- Inputs: model size, quantization, speed target
+- Outputs: recommended hardware list, estimated load memory, target tok/s
+- Audience: local AI builders
+
 ### Miner Pivot Calculator
 - URL: https://hermesdispatch.dev/tools/miner-pivot-calculator/
 - Description: Compare mining profit vs AI inference revenue vs selling a GPU.
 - Inputs: GPU model, electricity cost, utilization
 - Outputs: verdict, mining profit/month, AI revenue/month, sell estimate
 - Audience: crypto miners pivoting to AI
+
+### GPU Hashrate to Inference Capacity Converter
+- URL: https://hermesdispatch.dev/tools/hashrate-to-inference-converter/
+- Description: Convert crypto-mining hashrate into estimated local LLM inference capacity.
+- Inputs: hashrate, algorithm, efficiency, electricity cost, utilization, available VRAM
+- Outputs: estimated FP16 compute, power cost, best-fit model, tok/s by model
+- Audience: crypto miners pivoting to AI inference
 
 ### LLM Cost Calculator
 - URL: https://hermesdispatch.dev/tools/llm-cost-calculator/
@@ -40,20 +68,6 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: monthly cost, local break-even months
 - Audience: AI builders
 
-### AI Agent Stack Builder
-- URL: https://hermesdispatch.dev/tools/agent-stack-builder/
-- Description: Pick an AI agent use case and get a component stack with cost estimates.
-- Inputs: use case
-- Outputs: component list, hosting cost, difficulty
-- Audience: agent builders
-
-### AI Agent Startup Cost Calculator
-- URL: https://hermesdispatch.dev/tools/ai-startup-cost-calculator/
-- Description: Estimate monthly burn and first-year cost for an AI-native business.
-- Inputs: founders, engineers, API spend, hosting, hardware
-- Outputs: monthly burn, first-year total
-- Audience: AI entrepreneurs
-
 ### Local LLM ROI Calculator
 - URL: https://hermesdispatch.dev/tools/local-llm-roi-calculator/
 - Description: Compare 3-year TCO of local GPU inference versus cloud API.
@@ -61,12 +75,61 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: local TCO, cloud TCO, break-even months
 - Audience: AI builders evaluating hardware
 
-### Answer Engine Citation Tracker
-- URL: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
-- Description: Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.
-- Inputs: page URL
-- Outputs: citation status, test links
-- Audience: AEO/content marketers
+### AI Agent Stack Builder
+- URL: https://hermesdispatch.dev/tools/agent-stack-builder/
+- Description: Pick an AI agent use case and get a component stack with cost estimates.
+- Inputs: use case
+- Outputs: component list, hosting cost, difficulty
+- Audience: agent builders
+
+### AI Agent Memory / RAG Cost Calculator
+- URL: https://hermesdispatch.dev/tools/agent-memory-cost-calculator/
+- Description: Estimate embedding, vector storage, query, and reranker costs for agent memory and RAG.
+- Inputs: documents, tokens per document/chunk, overlap, queries/month, cache hit rate, embedding model, vector DB, reranker toggle
+- Outputs: one-time embedding cost, monthly storage, monthly query cost, cost per 1k queries, storage GB
+- Audience: agent builders designing RAG
+
+### AI Agent Benchmark Selector
+- URL: https://hermesdispatch.dev/tools/agent-benchmark-selector/
+- Description: Pick the right benchmark for coding, reasoning, web, desktop, multi-agent, and domain-specific agents.
+- Inputs: agent category
+- Outputs: benchmark recommendations, effort level, typical cost
+- Audience: AI agent evaluators
+
+### AI Agent Privacy / Compliance Checker
+- URL: https://hermesdispatch.dev/tools/ai-agent-compliance-checker/
+- Description: Check which privacy and compliance requirements apply to your AI agent.
+- Inputs: region, use case, data type
+- Outputs: readiness score, checklist items, time-to-audit estimate
+- Audience: AI agent builders and operators
+
+### AI Agent Marketplace Fee Comparator
+- URL: https://hermesdispatch.dev/tools/agent-marketplace-fee-comparator/
+- Description: Compare platform take rates, revenue share, and audience fit across AI agent marketplaces.
+- Inputs: MAU, conversion rate, price, take rate, variable costs
+- Outputs: net revenue estimate by marketplace
+- Audience: agent builders planning monetization
+
+### AI Startup Cost Calculator
+- URL: https://hermesdispatch.dev/tools/ai-startup-cost-calculator/
+- Description: Estimate monthly burn and first-year cost for an AI-native business.
+- Inputs: founders, engineers, API spend, hosting, hardware
+- Outputs: monthly burn, first-year total
+- Audience: AI entrepreneurs
+
+### Startup Runway Calculator
+- URL: https://hermesdispatch.dev/tools/startup-runway-calculator/
+- Description: Calculate months of cash runway based on burn, revenue growth, fundraising target, and zero-cash date.
+- Inputs: cash on hand, monthly burn, monthly revenue, fundraising target, growth rates
+- Outputs: net burn, projected runway, zero-cash date, post-raise runway, 24-month forecast
+- Audience: startup founders
+
+### Affiliate Link Revenue Estimator
+- URL: https://hermesdispatch.dev/tools/affiliate-revenue-estimator/
+- Description: Estimate affiliate earnings from traffic and conversion assumptions.
+- Inputs: monthly clicks, conversion rate, AOV, commission rate, refund rate, network fee, CPA
+- Outputs: monthly conversions, gross revenue, net revenue, RPM, annual net
+- Audience: affiliate marketers and content creators
 
 ### AI PC Build Configurator
 - URL: https://hermesdispatch.dev/tools/ai-pc-build-configurator/
@@ -89,6 +152,13 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: deals, retailer links, price context
 - Audience: AI hardware buyers
 
+### Context Window Cheat Sheet
+- URL: https://hermesdispatch.dev/tools/context-window-cheat-sheet/
+- Description: Compare input and output token limits across major LLM families and local quantized models.
+- Inputs: model family, content type
+- Outputs: context limit, output buffer recommendation
+- Audience: AI builders selecting models
+
 ### Newsletter Topic Finder
 - URL: https://hermesdispatch.dev/tools/newsletter-topic-finder/
 - Description: Generate high-intent topic ideas for AI, crypto, and investing newsletters.
@@ -96,26 +166,40 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: topic ideas, angle, key questions
 - Audience: newsletter writers
 
-### GPU Comparison Table
-- URL: https://hermesdispatch.dev/compare/gpus/
-- Description: Sortable comparison of GPUs for local AI inference.
-- Inputs: sort key
-- Outputs: ranked GPU table, Agent Score
-- Audience: general
+### Daily Newsletter Prompt Generator
+- URL: https://hermesdispatch.dev/tools/newsletter-prompt-generator/
+- Description: Generate a DOC-id prompt draft for the day's Hermes Dispatch issue.
+- Inputs: issue date, category, hero topic, angle, tone, word count, CTA toggles
+- Outputs: persona, audience, issue brief, required sections, must-include items, CTA, voice rules
+- Audience: newsletter writers
 
-### Mini PC Comparison Table
-- URL: https://hermesdispatch.dev/compare/mini-pcs/
-- Description: Sortable comparison of mini PCs for AI and home lab.
-- Inputs: sort key
-- Outputs: ranked mini PC table
-- Audience: general
+### Answer Engine Citation Tracker
+- URL: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
+- Description: Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.
+- Inputs: page URL
+- Outputs: citation status, test links
+- Audience: AEO/content marketers
 
-### GPU Model Recommender
-- URL: https://hermesdispatch.dev/compare/recommend/
-- Description: Find the biggest model you can run given VRAM and budget.
-- Inputs: VRAM, budget, model size
-- Outputs: matching GPUs
-- Audience: general
+### Prompt Reliability Checker
+- URL: https://hermesdispatch.dev/tools/prompt-reliability-checker/
+- Description: Run a system prompt multiple times against a local LLM and score consistency, failure rate, and output variance.
+- Inputs: Ollama endpoint, model, runs, expected format, system prompt, user message
+- Outputs: consistency score, failure rate, average Levenshtein distance, per-run outputs
+- Audience: prompt engineers and agent builders
+
+### Claim Verifier
+- URL: https://hermesdispatch.dev/tools/claim-verifier/
+- Description: Verify a claim against web search results and get a confidence score plus a citable verdict.
+- Inputs: claim text, search depth
+- Outputs: confidence level, score, sources checked, ClaimReview JSON
+- Audience: fact-checkers and AI agents
+
+### Crypto Tax Loss Harvesting Calculator
+- URL: https://hermesdispatch.dev/tools/crypto-tax-loss-harvester/
+- Description: Estimate how much you can save by harvesting crypto losses against gains and income.
+- Inputs: asset positions, annual income, filing status, tax rates, existing gains, wash-sale buffer
+- Outputs: harvestable losses, estimated tax savings, carryforward, per-asset sell strategy
+- Audience: crypto investors
 
 ## Hub Pages
 
