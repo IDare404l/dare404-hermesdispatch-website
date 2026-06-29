@@ -1,0 +1,251 @@
+{
+  "currency": "USD",
+  "defaults": {
+    "documents": 10000,
+    "tokens_per_doc": 500,
+    "tokens_per_chunk": 512,
+    "overlap_pct": 10,
+    "query_tokens": 50,
+    "queries_per_month": 100000,
+    "cached_query_pct": 30,
+    "include_reranker": true,
+    "reranker": "cohere",
+    "embedding_model": "openai-text-embedding-3-small",
+    "vector_db": "pinecone",
+    "storage_months": 12
+  },
+  "presets": [
+    {
+      "slug": "support-bot",
+      "name": "Small support bot",
+      "icon": "💬",
+      "documents": 5000,
+      "tokens_per_doc": 300,
+      "queries_per_month": 50000,
+      "cached_query_pct": 40,
+      "vector_db": "qdrant",
+      "embedding_model": "openai-text-embedding-3-small",
+      "include_reranker": true,
+      "reranker": "cohere"
+    },
+    {
+      "slug": "research-assistant",
+      "name": "Research assistant",
+      "icon": "🔬",
+      "documents": 50000,
+      "tokens_per_doc": 1200,
+      "queries_per_month": 20000,
+      "cached_query_pct": 20,
+      "vector_db": "pinecone",
+      "embedding_model": "voyage-3",
+      "include_reranker": true,
+      "reranker": "cohere"
+    },
+    {
+      "slug": "enterprise-kb",
+      "name": "Enterprise knowledge base",
+      "icon": "🏢",
+      "documents": 250000,
+      "tokens_per_doc": 800,
+      "queries_per_month": 500000,
+      "cached_query_pct": 35,
+      "vector_db": "weaviate",
+      "embedding_model": "openai-text-embedding-3-large",
+      "include_reranker": true,
+      "reranker": "cohere"
+    },
+    {
+      "slug": "codebase-rag",
+      "name": "Codebase RAG",
+      "icon": "💻",
+      "documents": 100000,
+      "tokens_per_doc": 400,
+      "queries_per_month": 150000,
+      "cached_query_pct": 25,
+      "vector_db": "pgvector",
+      "embedding_model": "local-bge",
+      "include_reranker": false,
+      "reranker": "local"
+    }
+  ],
+  "embedding_models": [
+    {
+      "slug": "openai-text-embedding-3-small",
+      "name": "OpenAI text-embedding-3-small",
+      "provider": "OpenAI",
+      "dims": 1536,
+      "cost_per_1m_tokens_usd": 0.02,
+      "notes": "Cheap default; 1536 dims."
+    },
+    {
+      "slug": "openai-text-embedding-3-large",
+      "name": "OpenAI text-embedding-3-large",
+      "provider": "OpenAI",
+      "dims": 3072,
+      "cost_per_1m_tokens_usd": 0.13,
+      "notes": "Best retrieval quality; 3072 dims."
+    },
+    {
+      "slug": "cohere-embed-english-v3",
+      "name": "Cohere embed-english-v3",
+      "provider": "Cohere",
+      "dims": 1024,
+      "cost_per_1m_tokens_usd": 0.10,
+      "notes": "Good for classification and retrieval."
+    },
+    {
+      "slug": "voyage-3-lite",
+      "name": "Voyage-3-lite",
+      "provider": "Voyage AI",
+      "dims": 512,
+      "cost_per_1m_tokens_usd": 0.02,
+      "notes": "Strong small embedding model."
+    },
+    {
+      "slug": "voyage-3",
+      "name": "Voyage-3",
+      "provider": "Voyage AI",
+      "dims": 1024,
+      "cost_per_1m_tokens_usd": 0.10,
+      "notes": "High retrieval quality for agents."
+    },
+    {
+      "slug": "google-text-embedding-004",
+      "name": "Google text-embedding-004",
+      "provider": "Google",
+      "dims": 768,
+      "cost_per_1m_tokens_usd": 0.10,
+      "notes": "Vertex AI / Google Gen AI embedding."
+    },
+    {
+      "slug": "local-bge",
+      "name": "Local BGE-large / GTE (self-hosted)",
+      "provider": "Self-hosted",
+      "dims": 1024,
+      "cost_per_1m_tokens_usd": 0,
+      "notes": "No token API cost; GPU/CPU cost not included."
+    }
+  ],
+  "vector_dbs": [
+    {
+      "slug": "pinecone",
+      "name": "Pinecone Serverless",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.33,
+      "query_cost_per_1k_usd": 0.06,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Pay for stored vectors plus read units."
+    },
+    {
+      "slug": "weaviate",
+      "name": "Weaviate Cloud",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.25,
+      "query_cost_per_1k_usd": 0.05,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Managed vector database with hybrid search."
+    },
+    {
+      "slug": "qdrant",
+      "name": "Qdrant Cloud",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.20,
+      "query_cost_per_1k_usd": 0.03,
+      "free_gb": 1,
+      "free_queries": 10000,
+      "notes": "Generous free tier for small workloads."
+    },
+    {
+      "slug": "zilliz",
+      "name": "Zilliz / Milvus Cloud",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.15,
+      "query_cost_per_1k_usd": 0.04,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Milvus-as-a-service."
+    },
+    {
+      "slug": "redis",
+      "name": "Redis Cloud (vector search)",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.50,
+      "query_cost_per_1k_usd": 0.02,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Existing Redis stack pricing."
+    },
+    {
+      "slug": "pgvector",
+      "name": "pgvector (RDS / self-hosted)",
+      "type": "self-hosted",
+      "storage_cost_gb_month_usd": 0.12,
+      "query_cost_per_1k_usd": 0,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "DB compute cost is separate."
+    },
+    {
+      "slug": "chroma",
+      "name": "Chroma (self-hosted)",
+      "type": "self-hosted",
+      "storage_cost_gb_month_usd": 0,
+      "query_cost_per_1k_usd": 0,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Local disk only; hardware cost separate."
+    }
+  ],
+  "rerankers": [
+    {
+      "slug": "cohere",
+      "name": "Cohere Rerank v3",
+      "provider": "Cohere",
+      "cost_per_1k_queries_usd": 1.00,
+      "notes": "Per-query reranking of top-k results."
+    },
+    {
+      "slug": "mixedbread",
+      "name": "mixedbread.ai rerank",
+      "provider": "mixedbread",
+      "cost_per_1k_queries_usd": 0.20,
+      "notes": "Lower-cost hosted reranker."
+    },
+    {
+      "slug": "local",
+      "name": "Local cross-encoder",
+      "provider": "Self-hosted",
+      "cost_per_1k_queries_usd": 0,
+      "notes": "GPU/CPU cost separate."
+    }
+  ],
+  "chunking": {
+    "metadata_bytes_per_chunk": 250,
+    "vector_bytes_per_dim": 4,
+    "vector_overhead_pct": 15
+  },
+  "faq": [
+    {
+      "question": "How much does RAG memory cost for an AI agent?",
+      "answer": "RAG memory cost has three parts: a one-time embedding cost for your corpus, monthly vector storage, and per-query costs for embedding queries and searching the index. Reranking adds another per-query cost."
+    },
+    {
+      "question": "Which is cheaper: managed vector DB or self-hosted pgvector?",
+      "answer": "For small workloads, managed services like Qdrant Cloud have free tiers. At scale, self-hosted pgvector or Chroma can be cheaper if you already run a server, but you pay for compute and maintenance instead."
+    },
+    {
+      "question": "Does chunk size affect RAG cost?",
+      "answer": "Yes. Smaller chunks mean more chunks and slightly higher storage, but better retrieval. Larger chunks reduce chunk count but increase embedding tokens and can dilute relevance."
+    },
+    {
+      "question": "Should I include a reranker in my agent stack?",
+      "answer": "Rerankers improve answer quality by re-ordering retrieved chunks, but they add $0.20-1.00 per 1,000 queries. Use one if retrieval quality is business-critical; skip it for cost-sensitive prototypes."
+    },
+    {
+      "question": "What is the cheapest embedding model for RAG?",
+      "answer": "OpenAI text-embedding-3-small and Voyage-3-lite are roughly $0.02 per 1M tokens. Self-hosted models like BGE have no token API cost but need a GPU or CPU to run."
+    }
+  ]
+}

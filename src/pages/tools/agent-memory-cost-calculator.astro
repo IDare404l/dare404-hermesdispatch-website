@@ -1,0 +1,403 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/agent_memory_cost.json';
+
+const title = "AI Agent Memory / RAG Cost Calculator";
+const description = "Estimate vector DB and embedding costs for AI agent memory and RAG. Compare managed vs self-hosted vector databases, embedding models, and rerankers.";
+
+const { defaults, presets, embedding_models, vector_dbs, rerankers, chunking, faq } = data;
+const embeddingMap = Object.fromEntries(embedding_models.map(m => [m.slug, m]));
+const dbMap = Object.fromEntries(vector_dbs.map(d => [d.slug, d]));
+const rerankerMap = Object.fromEntries(rerankers.map(r => [r.slug, r]));
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({
+      "@type": "Question",
+      "name": f.question,
+      "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+    }))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧠</div>
+        <h1 class="display-heading mb-4">AI Agent Memory / RAG Cost Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate embedding, vector storage, and query costs for agent memory and RAG. Compare managed and self-hosted options side by side.
+        </p>
+      </div>
+
+      <!-- Presets -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {presets.map((preset, i) => (
+          <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">{preset.icon}</div>
+            <h3 class="font-semibold text-sm">{preset.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">{preset.documents.toLocaleString()} docs • {preset.queries_per_month.toLocaleString()} q/mo</p>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <!-- Inputs -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Corpus & workload</h2>
+          <div class="space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Documents</label>
+                <input id="documents" type="number" min="1" step="100" value={defaults.documents} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Tokens per document</label>
+                <input id="tokensPerDoc" type="number" min="1" step="10" value={defaults.tokens_per_doc} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Tokens per chunk</label>
+                <input id="tokensPerChunk" type="number" min="1" step="64" value={defaults.tokens_per_chunk} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Chunk overlap (%)</label>
+                <input id="overlapPct" type="number" min="0" max="90" step="5" value={defaults.overlap_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Queries per month</label>
+                <input id="queriesPerMonth" type="number" min="0" step="1000" value={defaults.queries_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Query tokens</label>
+                <input id="queryTokens" type="number" min="1" step="1" value={defaults.query_tokens} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Cache hit rate (% of queries)</label>
+              <input id="cachedQueryPct" type="number" min="0" max="100" step="5" value={defaults.cached_query_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">Cached queries skip the vector DB search and reranker.</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Embedding model</label>
+              <select id="embeddingModel" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {embedding_models.map(m => <option value={m.slug} selected={m.slug === defaults.embedding_model}>{m.name} — ${m.cost_per_1m_tokens_usd.toFixed(2)}/1M tokens</option>)}
+              </select>
+              <p id="embeddingNote" class="text-xs text-neutral-500 mt-1">{embeddingMap[defaults.embedding_model].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Vector database</label>
+              <select id="vectorDb" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {vector_dbs.map(d => <option value={d.slug} selected={d.slug === defaults.vector_db}>{d.name} — ${d.storage_cost_gb_month_usd.toFixed(2)}/GB/mo</option>)}
+              </select>
+              <p id="vectorDbNote" class="text-xs text-neutral-500 mt-1">{dbMap[defaults.vector_db].notes}</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <input id="includeReranker" type="checkbox" class="w-4 h-4 accent-brand-gold" checked={defaults.include_reranker} />
+              <label for="includeReranker" class="text-sm text-neutral-300">Include reranker</label>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Reranker</label>
+              <select id="reranker" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {rerankers.map(r => <option value={r.slug} selected={r.slug === defaults.reranker}>{r.name} — ${r.cost_per_1k_queries_usd.toFixed(2)}/1k queries</option>)}
+              </select>
+              <p id="rerankerNote" class="text-xs text-neutral-500 mt-1">{rerankerMap[defaults.reranker].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Projection period (months)</label>
+              <input id="storageMonths" type="number" min="1" max="60" step="1" value={defaults.storage_months} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="space-y-4">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Total first-period cost</p>
+            <p id="outTotalPeriod" class="text-3xl font-bold text-brand-gold">—</p>
+            <p id="outPeriodLabel" class="text-xs text-neutral-400 mt-1">Embedding + {defaults.storage_months} months of operation</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">One-time embedding</p>
+              <p id="outEmbeddingCost" class="text-xl font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Monthly total</p>
+              <p id="outTotalMonthly" class="text-xl font-bold text-brand-gold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Storage / mo</p>
+              <p id="outStorageMonthly" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Query cost / mo</p>
+              <p id="outQueryCostMonthly" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Reranker / mo</p>
+              <p id="outRerankerCost" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1k queries</p>
+              <p id="outCostPer1k" class="text-lg font-bold">—</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Effective chunks</p>
+              <p id="outChunks" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Vector storage</p>
+              <p id="outStorageGb" class="text-lg font-bold">—</p>
+            </div>
+          </div>
+          <p class="text-xs text-neutral-500 text-center">Prices are directional estimates. Check each provider's current pricing before budgeting.</p>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Vector DB cost comparison</h2>
+        <p class="text-sm text-neutral-400 mb-4">Same corpus, embedding model, and query volume across all databases. Includes storage, uncached query search, query embedding, and reranker costs.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Vector DB</th>
+                <th class="text-right py-2">Storage/mo</th>
+                <th class="text-right py-2">Search/mo</th>
+                <th class="text-right py-2">Query embed/mo</th>
+                <th class="text-right py-2">Reranker/mo</th>
+                <th class="text-right py-2 font-semibold text-white">Total/mo</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTable" class="divide-y divide-neutral-800">
+              {vector_dbs.map(d => (
+                <tr data-slug={d.slug} class="hover:bg-neutral-800/30">
+                  <td class="py-3">{d.name}<br><span class="text-xs text-neutral-500">{d.type}</span></td>
+                  <td class="py-3 text-right storage-cell">—</td>
+                  <td class="py-3 text-right search-cell">—</td>
+                  <td class="py-3 text-right query-embed-cell">—</td>
+                  <td class="py-3 text-right reranker-cell">—</td>
+                  <td class="py-3 text-right total-cell font-semibold text-brand-gold">—</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How it works / FAQ -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Chunks</strong>: total corpus tokens ÷ effective chunk size after overlap.</li>
+            <li><strong class="text-white">Storage</strong>: each chunk stores a vector (dims × 4 bytes) plus metadata.</li>
+            <li><strong class="text-white">Embedding cost</strong>: one-time charge to embed all corpus tokens, plus per-query embedding tokens for uncached searches.</li>
+            <li><strong class="text-white">Query cost</strong>: uncached searches are charged per 1,000 by the vector DB plus any reranker cost.</li>
+            <li><strong class="text-white">Cache</strong>: cached queries skip search and reranker entirely.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Where to cut costs</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• Use a cheaper embedding model if retrieval quality allows it.</li>
+            <li>• Raise cache hit rate with query embedding cache or response cache.</li>
+            <li>• Self-host pgvector or Chroma if you already run a server.</li>
+            <li>• Skip rerankers for internal prototypes; add them after product-market fit.</li>
+            <li>• Reduce dimensions or quantize vectors if your DB supports it.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/agent-stack-builder/" class="btn-primary text-sm">Agent Stack Builder →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+        <a href="/tools/context-window-cheat-sheet/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Context Window Cheat Sheet →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, presets, embedding_models, vector_dbs, rerankers, chunking }}>
+    const el = {
+      documents: document.getElementById('documents'),
+      tokensPerDoc: document.getElementById('tokensPerDoc'),
+      tokensPerChunk: document.getElementById('tokensPerChunk'),
+      overlapPct: document.getElementById('overlapPct'),
+      queriesPerMonth: document.getElementById('queriesPerMonth'),
+      queryTokens: document.getElementById('queryTokens'),
+      cachedQueryPct: document.getElementById('cachedQueryPct'),
+      embeddingModel: document.getElementById('embeddingModel'),
+      embeddingNote: document.getElementById('embeddingNote'),
+      vectorDb: document.getElementById('vectorDb'),
+      vectorDbNote: document.getElementById('vectorDbNote'),
+      includeReranker: document.getElementById('includeReranker'),
+      reranker: document.getElementById('reranker'),
+      rerankerNote: document.getElementById('rerankerNote'),
+      storageMonths: document.getElementById('storageMonths'),
+      outTotalPeriod: document.getElementById('outTotalPeriod'),
+      outPeriodLabel: document.getElementById('outPeriodLabel'),
+      outEmbeddingCost: document.getElementById('outEmbeddingCost'),
+      outTotalMonthly: document.getElementById('outTotalMonthly'),
+      outStorageMonthly: document.getElementById('outStorageMonthly'),
+      outQueryCostMonthly: document.getElementById('outQueryCostMonthly'),
+      outRerankerCost: document.getElementById('outRerankerCost'),
+      outCostPer1k: document.getElementById('outCostPer1k'),
+      outChunks: document.getElementById('outChunks'),
+      outStorageGb: document.getElementById('outStorageGb'),
+    };
+
+    const embeddingMap = Object.fromEntries(embedding_models.map(m => [m.slug, m]));
+    const dbMap = Object.fromEntries(vector_dbs.map(d => [d.slug, d]));
+    const rerankerMap = Object.fromEntries(rerankers.map(r => [r.slug, r]));
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (n < 0.01) return '$' + n.toFixed(4);
+      if (n < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+    const fmtNum = (n) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const fmtGb = (n) => n < 0.1 ? n.toFixed(3) + ' GB' : n.toFixed(2) + ' GB';
+
+    function getInputs() {
+      const docs = Math.max(1, parseFloat(el.documents.value) || 1);
+      const tokensPerDoc = Math.max(1, parseFloat(el.tokensPerDoc.value) || 1);
+      const tokensPerChunk = Math.max(1, parseFloat(el.tokensPerChunk.value) || 1);
+      const overlapPct = Math.max(0, Math.min(90, parseFloat(el.overlapPct.value) || 0));
+      const queriesPerMonth = Math.max(0, parseFloat(el.queriesPerMonth.value) || 0);
+      const queryTokens = Math.max(1, parseFloat(el.queryTokens.value) || 1);
+      const cachedQueryPct = Math.max(0, Math.min(100, parseFloat(el.cachedQueryPct.value) || 0));
+      const storageMonths = Math.max(1, parseInt(el.storageMonths.value, 10) || 1);
+      return { docs, tokensPerDoc, tokensPerChunk, overlapPct, queriesPerMonth, queryTokens, cachedQueryPct, storageMonths };
+    }
+
+    function compute(inputs, embeddingSlug, dbSlug, rerankerSlug, useReranker) {
+      const model = embeddingMap[embeddingSlug] || embedding_models[0];
+      const db = dbMap[dbSlug] || vector_dbs[0];
+      const reranker = rerankerMap[rerankerSlug] || rerankers[0];
+
+      const totalTokens = inputs.docs * inputs.tokensPerDoc;
+      const effectiveChunkSize = inputs.tokensPerChunk * (1 - inputs.overlapPct / 100);
+      const chunks = Math.max(1, Math.ceil(totalTokens / Math.max(1, effectiveChunkSize)));
+
+      const oneTimeEmbedCost = (totalTokens / 1_000_000) * model.cost_per_1m_tokens_usd;
+
+      const uncachedQueries = inputs.queriesPerMonth * (1 - inputs.cachedQueryPct / 100);
+      const queryEmbedCost = (uncachedQueries * inputs.queryTokens / 1_000_000) * model.cost_per_1m_tokens_usd;
+
+      const vectorBytes = model.dims * chunking.vector_bytes_per_dim * (1 + chunking.vector_overhead_pct / 100);
+      const bytesPerChunk = vectorBytes + chunking.metadata_bytes_per_chunk;
+      const storageGb = (chunks * bytesPerChunk) / 1_000_000_000;
+      const billableGb = Math.max(0, storageGb - db.free_gb);
+      const storageMonthly = billableGb * db.storage_cost_gb_month_usd;
+
+      const billableQueries = Math.max(0, uncachedQueries - db.free_queries);
+      const searchMonthly = (billableQueries / 1000) * db.query_cost_per_1k_usd;
+
+      const rerankerMonthly = useReranker ? (uncachedQueries / 1000) * reranker.cost_per_1k_queries_usd : 0;
+
+      const totalMonthly = storageMonthly + searchMonthly + queryEmbedCost + rerankerMonthly;
+
+      return {
+        model,
+        db,
+        reranker,
+        chunks,
+        storageGb,
+        oneTimeEmbedCost,
+        queryEmbedCost,
+        storageMonthly,
+        searchMonthly,
+        rerankerMonthly,
+        totalMonthly,
+        uncachedQueries,
+        totalPeriod: oneTimeEmbedCost + totalMonthly * inputs.storageMonths
+      };
+    }
+
+    function updateNotes() {
+      const model = embeddingMap[el.embeddingModel.value];
+      const db = dbMap[el.vectorDb.value];
+      const reranker = rerankerMap[el.reranker.value];
+      if (model && el.embeddingNote) el.embeddingNote.textContent = model.notes;
+      if (db && el.vectorDbNote) el.vectorDbNote.textContent = db.notes;
+      if (reranker && el.rerankerNote) el.rerankerNote.textContent = reranker.notes;
+    }
+
+    function calc() {
+      updateNotes();
+      const inputs = getInputs();
+      const useReranker = el.includeReranker.checked;
+      const selected = compute(inputs, el.embeddingModel.value, el.vectorDb.value, el.reranker.value, useReranker);
+
+      el.outChunks.textContent = fmtNum(selected.chunks);
+      el.outStorageGb.textContent = fmtGb(selected.storageGb);
+      el.outEmbeddingCost.textContent = fmtMoney(selected.oneTimeEmbedCost);
+      el.outStorageMonthly.textContent = fmtMoney(selected.storageMonthly);
+      el.outQueryCostMonthly.textContent = fmtMoney(selected.searchMonthly + selected.queryEmbedCost);
+      el.outRerankerCost.textContent = fmtMoney(selected.rerankerMonthly);
+      el.outTotalMonthly.textContent = fmtMoney(selected.totalMonthly);
+      el.outTotalPeriod.textContent = fmtMoney(selected.totalPeriod);
+      el.outPeriodLabel.textContent = `Embedding + ${inputs.storageMonths} month${inputs.storageMonths > 1 ? 's' : ''} of operation`;
+      el.outCostPer1k.textContent = inputs.queriesPerMonth > 0
+        ? fmtMoney(selected.totalMonthly / (inputs.queriesPerMonth / 1000))
+        : '—';
+
+      // comparison table
+      document.querySelectorAll('#comparisonTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const res = compute(inputs, el.embeddingModel.value, slug, el.reranker.value, useReranker);
+        row.querySelector('.storage-cell').textContent = fmtMoney(res.storageMonthly);
+        row.querySelector('.search-cell').textContent = fmtMoney(res.searchMonthly);
+        row.querySelector('.query-embed-cell').textContent = fmtMoney(res.queryEmbedCost);
+        row.querySelector('.reranker-cell').textContent = fmtMoney(res.rerankerMonthly);
+        row.querySelector('.total-cell').textContent = fmtMoney(res.totalMonthly);
+        if (slug === el.vectorDb.value) {
+          row.classList.add('bg-brand-gold/10');
+        } else {
+          row.classList.remove('bg-brand-gold/10');
+        }
+      });
+    }
+
+    function applyPreset(idx) {
+      const p = presets[idx];
+      if (!p) return;
+      el.documents.value = p.documents;
+      el.tokensPerDoc.value = p.tokens_per_doc;
+      el.queriesPerMonth.value = p.queries_per_month;
+      el.cachedQueryPct.value = p.cached_query_pct;
+      if (p.vector_db) el.vectorDb.value = p.vector_db;
+      if (p.embedding_model) el.embeddingModel.value = p.embedding_model;
+      el.includeReranker.checked = p.include_reranker;
+      if (p.reranker) el.reranker.value = p.reranker;
+      calc();
+    }
+
+    ['input', 'change'].forEach(evt => {
+      Object.values(el).forEach(input => {
+        if (input && (input.tagName === 'INPUT' || input.tagName === 'SELECT')) {
+          input.addEventListener(evt, calc);
+        }
+      });
+      el.includeReranker.addEventListener(evt, calc);
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(parseInt(btn.dataset.idx, 10)));
+    });
+
+    calc();
+  </script>
+</Layout>
