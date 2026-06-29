@@ -1,0 +1,97 @@
+{
+  "currency": "USD",
+  "defaults": {
+    "cash_on_hand": 100000,
+    "monthly_burn": 15000,
+    "monthly_revenue": 3000,
+    "fundraising_target": 0,
+    "target_runway_months": 18,
+    "burn_growth_rate_pct_per_month": 3.0,
+    "revenue_growth_rate_pct_per_month": 5.0
+  },
+  "scenarios": [
+    {
+      "slug": "bootstrap",
+      "name": "Bootstrap / pre-revenue",
+      "icon": "🥾",
+      "cash_on_hand": 50000,
+      "monthly_burn": 5000,
+      "monthly_revenue": 0,
+      "fundraising_target": 0,
+      "target_runway_months": 12,
+      "burn_growth_rate_pct_per_month": 2,
+      "revenue_growth_rate_pct_per_month": 0
+    },
+    {
+      "slug": "seed",
+      "name": "Seed-funded startup",
+      "icon": "🌱",
+      "cash_on_hand": 500000,
+      "monthly_burn": 35000,
+      "monthly_revenue": 8000,
+      "fundraising_target": 1000000,
+      "target_runway_months": 18,
+      "burn_growth_rate_pct_per_month": 4,
+      "revenue_growth_rate_pct_per_month": 6
+    },
+    {
+      "slug": "series_a",
+      "name": "Series A scale-up",
+      "icon": "🚀",
+      "cash_on_hand": 3000000,
+      "monthly_burn": 180000,
+      "monthly_revenue": 120000,
+      "fundraising_target": 5000000,
+      "target_runway_months": 24,
+      "burn_growth_rate_pct_per_month": 5,
+      "revenue_growth_rate_pct_per_month": 8
+    },
+    {
+      "slug": "ai_agent",
+      "name": "AI agent startup",
+      "icon": "🤖",
+      "cash_on_hand": 250000,
+      "monthly_burn": 22000,
+      "monthly_revenue": 4000,
+      "fundraising_target": 750000,
+      "target_runway_months": 18,
+      "burn_growth_rate_pct_per_month": 5,
+      "revenue_growth_rate_pct_per_month": 10
+    },
+    {
+      "slug": "crisis",
+      "name": "Cost-cutting mode",
+      "icon": "✂️",
+      "cash_on_hand": 120000,
+      "monthly_burn": 25000,
+      "monthly_revenue": 15000,
+      "fundraising_target": 0,
+      "target_runway_months": 9,
+      "burn_growth_rate_pct_per_month": -3,
+      "revenue_growth_rate_pct_per_month": 2
+    }
+  ],
+  "milestones": {
+    "zero_cash_date_format": "MMM YYYY",
+    "cash_low_warning_months": 3,
+    "fundraise_start_months_before_zero": 6
+  },
+  "faq": [
+    {
+      "question": "How do you calculate startup runway?",
+      "answer": "Runway is your cash on hand divided by your net monthly burn (burn minus revenue). Add growth rates to see how runway changes as expenses and revenue scale."
+    },
+    {
+      "question": "How much runway should a startup have?",
+      "answer": "Most seed and Series A startups aim for 12-24 months of runway. Plan to start fundraising at least 6 months before cash runs out."
+    },
+    {
+      "question": "What is a good monthly burn rate for an AI agent startup?",
+      "answer": "A lean AI agent startup can burn $5,000-20,000/month in early stages, with API spend and engineering salaries as the largest line items."
+    },
+    {
+      "question": "How does revenue growth extend runway?",
+      "answer": "Net burn shrinks as revenue grows, which extends runway. Even small monthly improvements in revenue growth can delay the need for a bridge round."
+    }
+  ]
+}
