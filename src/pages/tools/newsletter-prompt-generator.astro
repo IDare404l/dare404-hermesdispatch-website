@@ -1,0 +1,320 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/newsletter_prompt_generator.json';
+
+const title = "Daily Newsletter Prompt Generator — DOC-id Prompt Drafts";
+const description = "Generate a DOC-id prompt draft for today's Hermes Dispatch issue. Pick a category, angle, tone, and word count, then copy the prompt to your AI writer.";
+
+const categories = data.categories;
+const tones = data.tones;
+const sections = data.sections;
+const defaultDate = new Date().toISOString().slice(0, 10);
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a DOC-id prompt draft?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A DOC-id prompt draft is a structured generation prompt named by issue date (DOC-YYYY-MM-DD). It includes the newsletter persona, audience, hero topic, angle, tone, word count, required sections, and any cross-links or CTAs." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I write a daily AI newsletter fast?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Pick one high-intent topic, one angle, and one number or benchmark. Use a fixed structure: hook, insight, proof, tool link, gotcha, takeaway, CTA. Generate the draft with an AI writer using a detailed prompt, then edit for voice." }
+      },
+      {
+        "@type": "Question",
+        "name": "Which newsletter topics get cited by answer engines?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Topics with numeric answers, FAQPage schema, direct comparisons, and first-party data are most likely to be cited by Perplexity, ChatGPT, Gemini, and Copilot." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">✍️</div>
+        <h1 class="display-heading mb-4">Daily Newsletter Prompt Generator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Build a DOC-id prompt draft for today's Hermes Dispatch. Choose a category and angle, then copy the full prompt into your AI writer.
+        </p>
+      </div>
+
+      <!-- Generator form -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
+        <h2 class="text-xl font-bold mb-6">Issue settings</h2>
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="issueDate">Issue date</label>
+            <input id="issueDate" type="date" value={defaultDate} class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="categorySelect">Category</label>
+            <select id="categorySelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
+              {categories.map(c => <option value={c.slug}>{c.icon} {c.name}</option>)}
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm text-neutral-400 mb-2" for="topicInput">Hero topic</label>
+            <input id="topicInput" type="text" placeholder="e.g. Best GPU for Llama 3 70B under $2,000" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white placeholder-neutral-500 focus:border-brand-gold focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="angleSelect">Angle</label>
+            <select id="angleSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
+              <option value="">— pick an angle —</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="customAngle">Custom angle (optional)</label>
+            <input id="customAngle" type="text" placeholder="Overrides the dropdown if filled" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white placeholder-neutral-500 focus:border-brand-gold focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="toneSelect">Tone</label>
+            <select id="toneSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
+              {tones.map(t => <option value={t.slug}>{t.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="wordCount">Target word count</label>
+            <input id="wordCount" type="number" min="150" max="2000" value={data.default_word_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4 mb-6">
+          <label class="flex items-start gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 cursor-pointer hover:border-brand-gold/30 transition-colors">
+            <input id="includeAffiliate" type="checkbox" class="mt-1 w-4 h-4 accent-brand-gold" checked />
+            <div>
+              <p class="text-sm font-medium text-neutral-200">Include partner / affiliate CTA</p>
+              <p class="text-xs text-neutral-500">Adds a natural hardware or tool recommendation with a soft CTA.</p>
+            </div>
+          </label>
+          <label class="flex items-start gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 cursor-pointer hover:border-brand-gold/30 transition-colors">
+            <input id="includeToolLink" type="checkbox" class="mt-1 w-4 h-4 accent-brand-gold" checked />
+            <div>
+              <p class="text-sm font-medium text-neutral-200">Cross-link a Hermes tool</p>
+              <p class="text-xs text-neutral-500">Adds a relevant internal calculator, comparison, or guide link.</p>
+            </div>
+          </label>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button id="generateBtn" type="button" class="btn-primary">Generate prompt ⚡</button>
+          <button id="randomTopicBtn" type="button" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Random topic 🎲</button>
+          <button id="resetBtn" type="button" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Reset</button>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div id="outputCard" class="hidden mb-10">
+        <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <p class="text-xs text-neutral-500 uppercase mb-1">Prompt draft</p>
+              <h2 id="docId" class="text-2xl font-bold text-brand-gold font-mono"></h2>
+            </div>
+            <button id="copyBtn" type="button" class="btn-primary text-sm py-2 px-4">Copy prompt</button>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-4 mb-6 text-sm">
+            <div class="p-3 rounded-lg bg-neutral-800/50">
+              <span class="text-neutral-500 block text-xs">Category</span>
+              <span id="outCategory" class="font-medium"></span>
+            </div>
+            <div class="p-3 rounded-lg bg-neutral-800/50">
+              <span class="text-neutral-500 block text-xs">Tone</span>
+              <span id="outTone" class="font-medium"></span>
+            </div>
+            <div class="p-3 rounded-lg bg-neutral-800/50">
+              <span class="text-neutral-500 block text-xs">Target words</span>
+              <span id="outWords" class="font-medium"></span>
+            </div>
+          </div>
+
+          <pre id="promptOutput" class="whitespace-pre-wrap font-mono text-sm bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-neutral-300 max-h-[600px] overflow-y-auto"></pre>
+          <p id="copyFeedback" class="text-sm text-emerald-400 mt-3 hidden">Copied to clipboard ✓</p>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How to use the prompt</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• The DOC id keeps issues organized: <code class="text-brand-gold">DOC-YYYY-MM-DD</code>.</li>
+            <li>• Start with the category, then pick an angle that takes a side.</li>
+            <li>• Fill the hero topic with a real question people search for.</li>
+            <li>• Paste the final prompt into ChatGPT, Claude, or your own local model.</li>
+            <li>• Edit the output for voice before publishing — never ship raw AI.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">What makes a dispatch ship</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• <strong class="text-white">One insight</strong> — not a roundup of ten links.</li>
+            <li>• <strong class="text-white">One number</strong> — VRAM, tok/s, cost, runway, or ROI.</li>
+            <li>• <strong class="text-white">One tool</strong> — a Hermes calculator or external resource.</li>
+            <li>• <strong class="text-white">One gotcha</strong> — the thing the hype cycle ignores.</li>
+            <li>• <strong class="text-white">One action</strong> — the reader can do it before lunch.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/newsletter-topic-finder/" class="btn-primary text-sm">Newsletter Topic Finder →</a>
+        <a href="/tools/answer-engine-citation-tracker/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Citation Tracker →</a>
+        <a href="/subscribe/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Subscribe →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ data, sections, categories, tones }}>
+    const issueDate = document.getElementById('issueDate');
+    const categorySelect = document.getElementById('categorySelect');
+    const angleSelect = document.getElementById('angleSelect');
+    const customAngle = document.getElementById('customAngle');
+    const toneSelect = document.getElementById('toneSelect');
+    const wordCount = document.getElementById('wordCount');
+    const includeAffiliate = document.getElementById('includeAffiliate');
+    const includeToolLink = document.getElementById('includeToolLink');
+    const generateBtn = document.getElementById('generateBtn');
+    const randomTopicBtn = document.getElementById('randomTopicBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const outputCard = document.getElementById('outputCard');
+    const docId = document.getElementById('docId');
+    const outCategory = document.getElementById('outCategory');
+    const outTone = document.getElementById('outTone');
+    const outWords = document.getElementById('outWords');
+    const promptOutput = document.getElementById('promptOutput');
+    const copyBtn = document.getElementById('copyBtn');
+    const copyFeedback = document.getElementById('copyFeedback');
+
+    const categoryMap = Object.fromEntries(categories.map(c => [c.slug, c]));
+    const toneMap = Object.fromEntries(tones.map(t => [t.slug, t]));
+
+    function populateAngles() {
+      const cat = categoryMap[categorySelect.value];
+      angleSelect.innerHTML = '<option value="">— pick an angle —</option>' +
+        (cat?.angles || []).map(a => `<option value="${a}">${a}</option>`).join('') +
+        '<option value="custom">Other (custom)</option>';
+    }
+
+    function getAngle() {
+      return customAngle.value.trim() || (angleSelect.value !== 'custom' ? angleSelect.value : '') || '';
+    }
+
+    function getToolLink(categorySlug) {
+      const links = {
+        'ai-hardware': '/tools/vram-calculator/',
+        'ai-agents': '/tools/agent-stack-builder/',
+        'crypto-pivot': '/tools/miner-pivot-calculator/',
+        'investing-startups': '/tools/ai-startup-cost-calculator/',
+        'answer-engines': '/tools/answer-engine-citation-tracker/'
+      };
+      return links[categorySlug] || '/tools/';
+    }
+
+    function getRandomTopic() {
+      const cat = categoryMap[categorySelect.value];
+      if (!cat) return '';
+      return cat.sample_topics[Math.floor(Math.random() * cat.sample_topics.length)];
+    }
+
+    function generate() {
+      const date = issueDate.value || new Date().toISOString().slice(0, 10);
+      const cat = categoryMap[categorySelect.value];
+      const tone = toneMap[toneSelect.value];
+      const words = parseInt(wordCount.value, 10) || data.default_word_count;
+      const topic = document.getElementById('topicInput').value.trim() || getRandomTopic() || 'TBD';
+      const angle = getAngle() || 'What the headline misses';
+
+      const id = `DOC-${date}`;
+      const toolLink = getToolLink(cat.slug);
+
+      const prompt = `Generate the Hermes Dispatch issue ${id} for ${date}.
+
+PERSONA
+${data.persona}
+
+AUDIENCE
+${cat.audience}
+
+ISSUE BRIEF
+- Category: ${cat.name}
+- Hero topic: ${topic}
+- Angle: ${angle}
+- Tone: ${tone.name} — ${tone.description}
+- Target word count: ~${words} words
+
+REQUIRED SECTIONS
+${sections.map(s => `- ${s}`).join('\n')}
+
+MUST INCLUDE
+${cat.must_include.map(s => `- ${s}`).join('\n')}
+${includeToolLink.checked ? `\nCROSS-LINK\nReference or link to the relevant Hermes tool: https://hermesdispatch.dev${toolLink}` : ''}
+${includeAffiliate.checked ? `\nCTA\nEnd with a natural partner/affiliate recommendation where appropriate, plus a soft subscribe CTA to https://hermesdispatch.dev/subscribe/.` : ''}
+
+VOICE RULES
+- No generic AI fluff.
+- Every claim needs a number, source, or direct experience.
+- Paragraphs under 40 words.
+- One clear takeaway the reader can act on today.
+`;
+
+      docId.textContent = id;
+      outCategory.textContent = `${cat.icon} ${cat.name}`;
+      outTone.textContent = tone.name;
+      outWords.textContent = `${words} words`;
+      promptOutput.textContent = prompt;
+      outputCard.classList.remove('hidden');
+      outputCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      copyFeedback.classList.add('hidden');
+    }
+
+    async function copyPrompt() {
+      const text = promptOutput.textContent;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        copyFeedback.classList.remove('hidden');
+        setTimeout(() => copyFeedback.classList.add('hidden'), 2500);
+      } catch (e) {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        copyFeedback.classList.remove('hidden');
+        setTimeout(() => copyFeedback.classList.add('hidden'), 2500);
+      }
+    }
+
+    categorySelect.addEventListener('change', populateAngles);
+    generateBtn.addEventListener('click', generate);
+    copyBtn.addEventListener('click', copyPrompt);
+    randomTopicBtn.addEventListener('click', () => {
+      document.getElementById('topicInput').value = getRandomTopic();
+    });
+    resetBtn.addEventListener('click', () => {
+      issueDate.value = new Date().toISOString().slice(0, 10);
+      categorySelect.value = categories[0].slug;
+      populateAngles();
+      customAngle.value = '';
+      toneSelect.value = tones[0].slug;
+      wordCount.value = data.default_word_count;
+      includeAffiliate.checked = true;
+      includeToolLink.checked = true;
+      document.getElementById('topicInput').value = '';
+      outputCard.classList.add('hidden');
+    });
+
+    populateAngles();
+  </script>
+</Layout>

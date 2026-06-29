@@ -1,0 +1,140 @@
+{
+  "persona": "You are Hermes Dispatch — a terse, action-first daily newsletter about AI agent automation, local AI hardware, crypto-to-AI pivots, and answer-engine optimization. Each issue gives one concrete insight, one number or benchmark, one tool or resource, and one clear next step.",
+  "audience": "Solo builders, AI operators, crypto miners pivoting to inference, indie hackers, and newsletter writers who want to be cited by answer engines.",
+  "default_word_count": 500,
+  "tones": [
+    { "slug": "fast", "name": "Fast and direct", "description": "Short paragraphs, bullet takeaways, no filler." },
+    { "slug": "data", "name": "Data-driven", "description": "Lead with a number, benchmark, or comparison." },
+    { "slug": "skeptical", "name": "Skeptical but constructive", "description": "Call out hype, then give the practical fix." },
+    { "slug": "tutorial", "name": "Tutorial-style", "description": "Step-by-step so the reader can act today." },
+    { "slug": "opinion", "name": "Opinionated", "description": "Take a side, name names, and defend it with proof." },
+    { "slug": "curator", "name": "Curator's pick", "description": "One great find with why it matters." }
+  ],
+  "categories": [
+    {
+      "slug": "ai-hardware",
+      "name": "AI Hardware",
+      "icon": "🖥️",
+      "audience": "Local LLM builders who care about VRAM, watts, and tok/s per dollar.",
+      "sample_topics": [
+        "Best GPU for Llama 3 70B under $2,000",
+        "Mac Mini M4 vs RTX 4090 for local LLMs",
+        "How much VRAM do I need for a 7B model?",
+        "RTX 5090 vs RTX 4090 tokens-per-second comparison"
+      ],
+      "angles": [
+        "What the spec sheet does not tell you",
+        "The used-market sweet spot right now",
+        "Power, noise, and wife-acceptance factor",
+        "When to buy vs when to build"
+      ],
+      "must_include": [
+        "A concrete VRAM, TDP, or tok/s number",
+        "A link to the VRAM calculator or GPU comparison table",
+        "One buy-or-skip verdict"
+      ]
+    },
+    {
+      "slug": "ai-agents",
+      "name": "AI Agents",
+      "icon": "🤖",
+      "audience": "Builders shipping agents with memory, tools, and real API bills.",
+      "sample_topics": [
+        "Best framework for building AI agents",
+        "How to run an AI agent 24/7 cheaply",
+        "AI agent stack for content automation",
+        "Privacy-first AI agent setup guide"
+      ],
+      "angles": [
+        "The framework decision that locks you in",
+        "The hidden cost of long context",
+        "Why most agents fail after demo day",
+        "One tool swap that cut my bill 40%"
+      ],
+      "must_include": [
+        "A stack recommendation (LLM, framework, hosting)",
+        "A rough monthly cost figure",
+        "A compliance or privacy caveat"
+      ]
+    },
+    {
+      "slug": "crypto-pivot",
+      "name": "Crypto → AI Pivot",
+      "icon": "⛏️",
+      "audience": "Crypto miners and GPU owners looking for inference revenue instead of hash.",
+      "sample_topics": [
+        "Should I sell my GPU mining rig or repurpose it for AI?",
+        "Mining profitability vs AI inference revenue in 2026",
+        "Crypto tax loss harvesting before pivoting to AI",
+        "GPU hashrate vs LLM inference capacity"
+      ],
+      "angles": [
+        "Hashrate is not the only asset you own",
+        "The tax move to make before year-end",
+        "Repurpose, rent, or sell: the math",
+        "What ASIC owners can still do"
+      ],
+      "must_include": [
+        "A profitability or tax-saving number",
+        "A link to the miner pivot or rig repurposing guide",
+        "One practical next action for hardware owners"
+      ]
+    },
+    {
+      "slug": "investing-startups",
+      "name": "Investing & Startups",
+      "icon": "🚀",
+      "audience": "AI-native founders, indie hackers, and investors tracking agent economics.",
+      "sample_topics": [
+        "AI agent startup costs: first-year burn estimate",
+        "How many months of runway does my startup have?",
+        "ROI of local LLM hardware vs API spend",
+        "Customer support automation ROI calculator"
+      ],
+      "angles": [
+        "The burn category founders underestimate",
+        "Local hardware as a fundraising signal",
+        "When API spend is cheaper than headcount",
+        "The metric that actually matters to investors"
+      ],
+      "must_include": [
+        "A cost, runway, or ROI figure",
+        "A link to the startup cost or ROI calculator",
+        "One decision framework (build vs buy vs rent)"
+      ]
+    },
+    {
+      "slug": "answer-engines",
+      "name": "AEO & Citations",
+      "icon": "🔗",
+      "audience": "Writers and operators who want their content cited by Perplexity, ChatGPT, and Gemini.",
+      "sample_topics": [
+        "How to get cited by Perplexity and ChatGPT",
+        "Schema.org types every AI directory needs",
+        "Why answer engine optimization beats traditional SEO",
+        "How to track AI citations to your website"
+      ],
+      "angles": [
+        "The page type AI search engines cite most",
+        "One schema change that lifted citations",
+        "What most AEO advice gets wrong",
+        "Turn your FAQ into an answer-engine magnet"
+      ],
+      "must_include": [
+        "A specific schema type or content format",
+        "A link to the citation tracker or newsletter topic finder",
+        "One measurable test the reader can run today"
+      ]
+    }
+  ],
+  "sections": [
+    "Subject line (5 options, pick one)",
+    "Hook in 25 words or less",
+    "The one insight",
+    "Proof: number, benchmark, or example",
+    "Tool or resource link with short verdict",
+    "Counter-argument or gotcha",
+    "Actionable takeaway",
+    "Closing CTA"
+  ]
+}
