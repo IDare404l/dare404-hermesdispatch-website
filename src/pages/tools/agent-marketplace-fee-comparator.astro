@@ -1,0 +1,268 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/agent_marketplace_fees.json';
+
+const title = "AI Agent Marketplace Fee Comparator — Platform Take Rates & Revenue";
+const description = "Compare fees, revenue share, and take rates across AI agent marketplaces: OpenAI GPT Store, Anthropic Claude Marketplace, Poe, Salesforce Agentforce, Pickaxe, Relevance AI, GitHub, AWS, and Stripe.";
+const marketplaces = data.marketplaces;
+const defaults = data.defaults;
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Which AI agent marketplace has the lowest fees?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Anthropic's Claude Marketplace currently takes 0% commission, letting partners keep 100% of revenue. GitHub Marketplace paid extensions and AWS Marketplace SaaS listings are also low, typically 3-5%." }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does OpenAI's GPT Store pay creators?",
+        "acceptedAnswer": { "@type": "Answer", "text": "OpenAI shares a portion of ChatGPT Plus and Pro subscription revenue with GPT Store creators based on usage, but the exact payout formula is not public." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a typical platform take rate for AI agent marketplaces?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Marketplace take rates range from 0% on the Claude Marketplace and 3-5% on developer/cloud stores to roughly 15% on Salesforce AppExchange and 20-30%+ on no-code agent platforms." }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I build my own billing or use a marketplace?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Marketplaces offer distribution but take a cut and control customer relationships. Direct billing keeps 100% of revenue but requires your own marketing, support, and compliance infrastructure." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🏪</div>
+        <h1 class="display-heading mb-4">AI Agent Marketplace Fee Comparator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Compare platform take rates, revenue share models, and audience fit across the main AI agent marketplaces.
+        </p>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="overflow-x-auto mb-8">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-neutral-500 border-b border-neutral-800">
+              <th class="pb-3">Marketplace</th>
+              <th class="pb-3">Model</th>
+              <th class="pb-3">Take / Fee</th>
+              <th class="pb-3">Audience</th>
+              <th class="pb-3">Best for</th>
+            </tr>
+          </thead>
+          <tbody>
+            {marketplaces.map(m => (
+              <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30">
+                <td class="py-4 font-medium">
+                  <a href={m.source_url} target="_blank" rel="noopener" class="text-brand-gold hover:underline">{m.name}</a>
+                </td>
+                <td class="py-4 text-neutral-300">{m.model}</td>
+                <td class="py-4 font-semibold">{m.typical_take_pct}</td>
+                <td class="py-4 text-neutral-400">{m.audience}</td>
+                <td class="py-4 text-neutral-400 max-w-xs">{m.best_for}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Detail cards -->
+      <div class="grid md:grid-cols-2 gap-6 mb-10">
+        {marketplaces.map(m => (
+          <div class="glass-card rounded-2xl p-5 border border-brand-gold/10 hover:border-brand-gold/30 transition">
+            <div class="flex items-start justify-between mb-3">
+              <h2 class="text-lg font-bold">{m.name}</h2>
+              <span class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold text-xs font-semibold">{m.typical_take_pct}</span>
+            </div>
+            <p class="text-sm text-neutral-400 mb-3">{m.revenue_share_note}</p>
+            <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
+              <div>
+                <p class="text-xs text-neutral-500">Pros</p>
+                <ul class="list-disc list-inside text-neutral-300">
+                  {m.pros.map(p => <li>{p}</li>)}
+                </ul>
+              </div>
+              <div>
+                <p class="text-xs text-neutral-500">Cons</p>
+                <ul class="list-disc list-inside text-neutral-400">
+                  {m.cons.map(c => <li>{c}</li>)}
+                </ul>
+              </div>
+            </div>
+            <p class="text-xs text-neutral-500">Best for: <span class="text-neutral-300">{m.best_for}</span></p>
+          </div>
+        ))}
+      </div>
+
+      <!-- Revenue estimator -->
+      <div class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+        <h2 class="text-2xl font-bold mb-4 text-brand-gold">Marketplace revenue estimator</h2>
+        <p class="text-sm text-neutral-400 mb-6">Estimate monthly net revenue after platform take rate and variable costs.</p>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Monthly active users</label>
+              <input id="mau" type="number" min="0" step="100" value={defaults.monthly_active_users} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Conversion to paid (%)</label>
+              <input id="conversion" type="number" min="0" max="100" step="0.1" value={defaults.conversion_to_paid_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Price per paid user ($/mo)</label>
+              <input id="price" type="number" min="0" step="1" value={defaults.price_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Platform take rate (%)</label>
+              <input id="takeRate" type="number" min="0" max="100" step="0.1" value={defaults.take_rate_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Variable cost (% of revenue)</label>
+              <input id="variableCost" type="number" min="0" max="100" step="0.1" value={defaults.variable_cost_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">LLM tokens, hosting, support.</p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+                <p class="text-xs text-neutral-500 uppercase mb-1">Paid users</p>
+                <p id="paidUsers" class="text-2xl font-bold">—</p>
+              </div>
+              <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+                <p class="text-xs text-neutral-500 uppercase mb-1">Gross revenue</p>
+                <p id="grossRevenue" class="text-2xl font-bold text-brand-gold">—</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="glass-card rounded-2xl p-4 text-center border border-red-500/20">
+                <p class="text-xs text-neutral-500 uppercase mb-1">Platform fee</p>
+                <p id="platformFee" class="text-2xl font-bold text-red-400">—</p>
+              </div>
+              <div class="glass-card rounded-2xl p-4 text-center border border-red-500/20">
+                <p class="text-xs text-neutral-500 uppercase mb-1">Variable costs</p>
+                <p id="variableCosts" class="text-2xl font-bold text-red-400">—</p>
+              </div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 text-center border border-emerald-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Net monthly revenue</p>
+              <p id="netRevenue" class="text-3xl font-bold text-emerald-400">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Net per paid user</p>
+              <p id="netPerUser" class="text-2xl font-bold">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preset buttons -->
+        <div class="flex flex-wrap gap-2">
+          {marketplaces.map(m => (
+            <button type="button" class="marketplace-preset px-3 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm" data-take={m.typical_take_pct}>
+              {m.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Pricing models that work</h2>
+          <ul class="space-y-3 text-sm text-neutral-300">
+            {data.pricing_models.map(pm => (
+              <li><strong class="text-white">{pm.name}</strong> — {pm.note}</li>
+            ))}
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How to choose a marketplace</h2>
+          <ul class="space-y-2 text-sm text-neutral-300">
+            <li>• Prioritize <strong class="text-white">distribution fit</strong> over take rate. 70% of a big audience can beat 100% of none.</li>
+            <li>• <strong class="text-white">Enterprise marketplaces</strong> (Claude, Salesforce, AWS) have longer sales cycles but higher contract values.</li>
+            <li>• <strong class="text-white">No-code marketplaces</strong> (Pickaxe, Relevance AI) speed up launch but cap differentiation.</li>
+            <li>• <strong class="text-white">Developer/cloud stores</strong> (GitHub, AWS, Stripe) are best for agents with technical integrations.</li>
+            <li>• Consider <strong class="text-white">billing ownership</strong>: direct billing gives you customer data and higher margins.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/affiliate-revenue-estimator/" class="btn-primary text-sm">Affiliate Revenue Estimator →</a>
+        <a href="/tools/ai-startup-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI Startup Cost Calculator →</a>
+        <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ marketplaces, defaults }}>
+    const inputs = {
+      mau: document.getElementById('mau'),
+      conversion: document.getElementById('conversion'),
+      price: document.getElementById('price'),
+      takeRate: document.getElementById('takeRate'),
+      variableCost: document.getElementById('variableCost'),
+    };
+    const outputs = {
+      paidUsers: document.getElementById('paidUsers'),
+      grossRevenue: document.getElementById('grossRevenue'),
+      platformFee: document.getElementById('platformFee'),
+      variableCosts: document.getElementById('variableCosts'),
+      netRevenue: document.getElementById('netRevenue'),
+      netPerUser: document.getElementById('netPerUser'),
+    };
+
+    function parseTakeRate(str) {
+      if (!str) return defaults.take_rate_pct;
+      const match = str.toString().match(/[\d.]+/);
+      return match ? parseFloat(match[0]) : defaults.take_rate_pct;
+    }
+
+    function fmtCurrency(n) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n || 0);
+    }
+
+    function calc() {
+      const mau = parseFloat(inputs.mau.value) || 0;
+      const conversion = (parseFloat(inputs.conversion.value) || 0) / 100;
+      const price = parseFloat(inputs.price.value) || 0;
+      const takeRate = (parseFloat(inputs.takeRate.value) || 0) / 100;
+      const variableCost = (parseFloat(inputs.variableCost.value) || 0) / 100;
+
+      const paidUsers = mau * conversion;
+      const grossRevenue = paidUsers * price;
+      const platformFee = grossRevenue * takeRate;
+      const variableCosts = grossRevenue * variableCost;
+      const netRevenue = Math.max(0, grossRevenue - platformFee - variableCosts);
+      const netPerUser = paidUsers > 0 ? netRevenue / paidUsers : 0;
+
+      outputs.paidUsers.textContent = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(paidUsers);
+      outputs.grossRevenue.textContent = fmtCurrency(grossRevenue);
+      outputs.platformFee.textContent = fmtCurrency(platformFee);
+      outputs.variableCosts.textContent = fmtCurrency(variableCosts);
+      outputs.netRevenue.textContent = fmtCurrency(netRevenue);
+      outputs.netPerUser.textContent = fmtCurrency(netPerUser);
+    }
+
+    Object.values(inputs).forEach(el => el.addEventListener('input', calc));
+
+    document.querySelectorAll('.marketplace-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        inputs.takeRate.value = parseTakeRate(btn.dataset.take);
+        calc();
+      });
+    });
+
+    calc();
+  </script>
+</Layout>
