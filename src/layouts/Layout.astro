@@ -102,39 +102,17 @@ const fullCommit = versionData?.commit || 'local';
                 Tools
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
               </button>
-              <div class="absolute left-0 top-full mt-0 w-56 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                <a href="/tools" class="block px-4 py-2 text-sm hover:bg-neutral-800 first:rounded-t-lg">All Tools</a>
-                <a href="/tools/agent-api-pricing-comparator" class="block px-4 py-2 text-sm hover:bg-neutral-800">API Pricing Comparator</a>
-                <a href="/tools/gpu-cloud-vs-buy-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800">GPU Cloud vs Buy Calc</a>
-                <div class="border-t border-neutral-800"></div>
-                <a href="/tools/vram-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800">VRAM Calculator</a>
-                <a href="/compare/gpus" class="block px-4 py-2 text-sm hover:bg-neutral-800">GPU Comparison</a>
-                <a href="/compare/mini-pcs" class="block px-4 py-2 text-sm hover:bg-neutral-800">Mini PC Comparison</a>
-                <a href="/compare/recommend" class="block px-4 py-2 text-sm hover:bg-neutral-800">GPU Recommender</a>
-                <a href="/tools/mini-pc-recommender" class="block px-4 py-2 text-sm hover:bg-neutral-800">Mini PC Recommender</a>
-                <a href="/tools/agent-hardware-sizer" class="block px-4 py-2 text-sm hover:bg-neutral-800">Agent Hardware Sizer</a>
-                <a href="/tools/miner-pivot-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800">Miner Pivot Calculator</a>
-                <a href="/tools/hashrate-to-inference-converter" class="block px-4 py-2 text-sm hover:bg-neutral-800">Hashrate → Inference Converter</a>
-                <a href="/tools/llm-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800">LLM Cost Calculator</a>
-                <a href="/tools/local-llm-roi-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800">Local LLM ROI Calc</a>
-                <a href="/tools/agent-stack-builder" class="block px-4 py-2 text-sm hover:bg-neutral-800">Agent Stack Builder</a>
-                <a href="/tools/agent-memory-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800">Agent Memory / RAG Cost Calc</a>
-                <a href="/tools/agent-benchmark-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800">Agent Benchmark Selector</a>
-                <a href="/tools/ai-agent-compliance-checker" class="block px-4 py-2 text-sm hover:bg-neutral-800">AI Agent Compliance Checker</a>
-                <a href="/tools/agent-marketplace-fee-comparator" class="block px-4 py-2 text-sm hover:bg-neutral-800">Agent Marketplace Fee Comparator</a>
-                <a href="/tools/ai-startup-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800">Startup Cost Calc</a>
-                <a href="/tools/startup-runway-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800">Startup Runway Calculator</a>
-                <a href="/tools/affiliate-revenue-estimator" class="block px-4 py-2 text-sm hover:bg-neutral-800">Affiliate Revenue Estimator</a>
-                <a href="/tools/ai-pc-build-configurator" class="block px-4 py-2 text-sm hover:bg-neutral-800">AI PC Configurator</a>
-                <a href="/tools/rig-repurposing-guide" class="block px-4 py-2 text-sm hover:bg-neutral-800">Rig Repurposing Guide</a>
-                <a href="/tools/ai-hardware-deal-tracker" class="block px-4 py-2 text-sm hover:bg-neutral-800">AI Hardware Deals</a>
-                <a href="/tools/context-window-cheat-sheet" class="block px-4 py-2 text-sm hover:bg-neutral-800">Context Window Cheat Sheet</a>
-                <a href="/tools/newsletter-topic-finder" class="block px-4 py-2 text-sm hover:bg-neutral-800">Newsletter Topic Finder</a>
-                <a href="/tools/newsletter-prompt-generator" class="block px-4 py-2 text-sm hover:bg-neutral-800">Newsletter Prompt Generator</a>
-                <a href="/tools/answer-engine-citation-tracker" class="block px-4 py-2 text-sm hover:bg-neutral-800">Citation Tracker</a>
-                <a href="/tools/prompt-reliability-checker" class="block px-4 py-2 text-sm hover:bg-neutral-800">Prompt Reliability Checker</a>
-                <a href="/tools/claim-verifier" class="block px-4 py-2 text-sm hover:bg-neutral-800">Claim Verifier</a>
-                <a href="/tools/crypto-tax-loss-harvester" class="block px-4 py-2 text-sm hover:bg-neutral-800 last:rounded-b-lg">Crypto Tax Loss Harvester</a>
+              <div class="absolute left-0 top-full mt-0 w-64 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <a href="/tools" class="block px-4 py-2 text-sm hover:bg-neutral-800 first:rounded-t-lg font-medium text-cyan-400">All Tools</a>
+                <div class="border-t border-neutral-800 my-1"></div>
+                <a href="/tools/#ai-tools" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-gray-300">🤖 AI Tools</a>
+                <a href="/tools/#crypto-tools" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-gray-300">⛏️ Crypto Tools</a>
+                <a href="/tools/#investing-tools" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-gray-300">💰 Investing Tools</a>
+                <a href="/directory" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-gray-300">📁 Directory</a>
+                <div class="border-t border-neutral-800 my-1"></div>
+                <a href="/compare/gpus" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">GPU Comparison</a>
+                <a href="/compare/mini-pcs" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Mini PC Comparison</a>
+                <a href="/compare/recommend" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">GPU Recommender</a>
               </div>
             </div>
 
@@ -169,35 +147,14 @@ const fullCommit = versionData?.commit || 'local';
         <p class="px-4 py-2 text-xs uppercase text-neutral-500">Tools</p>
         <a href="/tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">All Tools</a>
         <div class="border-t border-neutral-800 my-2 mx-4"></div>
-        <a href="/tools/vram-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">VRAM Calculator</a>
+        <a href="/tools/#ai-tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">🤖 AI Tools</a>
+        <a href="/tools/#crypto-tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">⛏️ Crypto Tools</a>
+        <a href="/tools/#investing-tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">💰 Investing Tools</a>
+        <a href="/directory" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">📁 Directory</a>
+        <div class="border-t border-neutral-800 my-2 mx-4"></div>
         <a href="/compare/gpus" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Comparison</a>
         <a href="/compare/mini-pcs" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Mini PC Comparison</a>
         <a href="/compare/recommend" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Recommender</a>
-        <a href="/tools/mini-pc-recommender" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Mini PC Recommender</a>
-        <a href="/tools/agent-hardware-sizer" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Hardware Sizer</a>
-        <a href="/tools/miner-pivot-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Miner Pivot Calculator</a>
-        <a href="/tools/hashrate-to-inference-converter" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Hashrate → Inference Converter</a>
-        <a href="/tools/gpu-cloud-vs-buy-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Cloud vs Buy Calculator</a>
-        <a href="/tools/llm-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">LLM Cost Calculator</a>
-        <a href="/tools/local-llm-roi-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Local LLM ROI Calc</a>
-        <a href="/tools/agent-stack-builder" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Stack Builder</a>
-        <a href="/tools/agent-memory-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Memory / RAG Cost Calculator</a>
-        <a href="/tools/agent-benchmark-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Benchmark Selector</a>
-        <a href="/tools/ai-agent-compliance-checker" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Compliance Checker</a>
-        <a href="/tools/agent-marketplace-fee-comparator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Marketplace Fee Comparator</a>
-        <a href="/tools/ai-startup-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Startup Cost Calc</a>
-        <a href="/tools/startup-runway-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Startup Runway Calculator</a>
-        <a href="/tools/affiliate-revenue-estimator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Affiliate Revenue Estimator</a>
-        <a href="/tools/ai-pc-build-configurator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI PC Configurator</a>
-        <a href="/tools/rig-repurposing-guide" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Rig Repurposing Guide</a>
-        <a href="/tools/ai-hardware-deal-tracker" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Hardware Deals</a>
-        <a href="/tools/context-window-cheat-sheet" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Context Window Cheat Sheet</a>
-        <a href="/tools/newsletter-topic-finder" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Newsletter Topic Finder</a>
-        <a href="/tools/newsletter-prompt-generator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Newsletter Prompt Generator</a>
-        <a href="/tools/answer-engine-citation-tracker" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Citation Tracker</a>
-        <a href="/tools/prompt-reliability-checker" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Prompt Reliability Checker</a>
-        <a href="/tools/claim-verifier" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Claim Verifier</a>
-        <a href="/tools/crypto-tax-loss-harvester" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Crypto Tax Loss Harvester</a>
 
         <div class="border-t border-neutral-800 my-4"></div>
         <a href="/answers" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Answers</a>

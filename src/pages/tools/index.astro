@@ -1,52 +1,79 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 
-const title = "AI Hardware Tools — Calculators, Comparisons, and Recommenders";
-const description = "Free tools for local AI builders: VRAM calculator, GPU comparison table, GPU recommender, and mini PC for AI comparisons.";
+const title = "AI, Crypto, and Investing Tools | Hermes Dispatch";
+const description = "Free tools for AI builders, crypto miners, and investors. Calculators, comparisons, recommenders, and cost estimators.";
 
-const tools = [
-  { name: "LLM VRAM Calculator", path: "/tools/vram-calculator/", description: "Estimate GPU memory for any model size and quantization.", tags: ["VRAM", "LLM", "GPU"] },
-  { name: "GPU Comparison Table", path: "/compare/gpus/", description: "Sort local-LLM benchmarks by tokens/sec, VRAM, TDP, and price.", tags: ["GPU", "benchmarks", "LLM"] },
-  { name: "Mini PC for AI Comparison", path: "/compare/mini-pcs/", description: "Mac Mini M4 vs Beelink GTR9 Pro, GMKtec EVO-X2, GEEKOM A8. Sort by RAM, bandwidth, tok/s.", tags: ["mini PC", "AI", "compare"] },
-  { name: "GPU Recommender", path: "/compare/recommend/", description: "Pick a GPU by model size, budget, and power constraints.", tags: ["GPU", "recommender"] },
-  { name: "Mini PC Recommender", path: "/tools/mini-pc-recommender/", description: "Pick the best compact AI workstation by model size, budget, and noise tolerance.", tags: ["mini PC", "recommender"] },
-  { name: "Agent Hardware Sizer", path: "/tools/agent-hardware-sizer/", description: "Find the exact mini PC, GPU, and RAM config for local LLMs and AI agents.", tags: ["hardware", "sizing", "mini PC", "GPU"] },
-  { name: "Miner Pivot Calculator", path: "/tools/miner-pivot-calculator/", description: "Compare crypto mining profit vs local LLM inference revenue for your GPU.", tags: ["crypto", "mining", "inference", "pivot"] },
-  { name: "GPU Hashrate to Inference Capacity Converter", path: "/tools/hashrate-to-inference-converter/", description: "Convert crypto-mining hashrate into estimated local LLM inference capacity, tok/s, and power cost.", tags: ["crypto", "mining", "hashrate", "LLM", "inference", "GPU"] },
-  { name: "LLM Cost Calculator", path: "/tools/llm-cost-calculator/", description: "Compare cloud API token prices vs local GPU cost per 1M tokens.", tags: ["LLM", "API", "cost", "inference"] },
-  { name: "Local LLM ROI Calculator", path: "/tools/local-llm-roi-calculator/", description: "Compare 3-year total cost of ownership for local GPU vs cloud API.", tags: ["ROI", "TCO", "local LLM", "GPU"] },
-  { name: "AI Agent Stack Builder", path: "/tools/agent-stack-builder/", description: "Pick a use case and get the full LLM, framework, hosting, and cost stack.", tags: ["AI agents", "stack", "framework", "LLM"] },
-  { name: "AI Agent Memory / RAG Cost Calculator", path: "/tools/agent-memory-cost-calculator/", description: "Estimate embedding, vector storage, query, and reranker costs for AI agent memory and RAG. Compare managed vs self-hosted vector databases.", tags: ["AI agents", "RAG", "vector DB", "embeddings", "memory", "cost"] },
-  { name: "AI Agent Benchmark Selector", path: "/tools/agent-benchmark-selector/", description: "Pick the right benchmark for coding, reasoning, web, desktop, multi-agent, and domain-specific agents.", tags: ["AI agents", "benchmarks", "evaluation", "SWE-bench", "GAIA"] },
-  { name: "AI Agent Privacy / Compliance Checker", path: "/tools/ai-agent-compliance-checker/", description: "Check which privacy and compliance requirements apply to your AI agent based on region, use case, and data type.", tags: ["AI agents", "privacy", "GDPR", "SOC 2", "compliance"] },
-  { name: "AI Agent Marketplace Fee Comparator", path: "/tools/agent-marketplace-fee-comparator/", description: "Compare platform take rates, revenue share, and audience fit across AI agent marketplaces.", tags: ["AI agents", "marketplace", "fees", "revenue share", "monetization"] },
-  { name: "AI Startup Cost Calculator", path: "/tools/ai-startup-cost-calculator/", description: "Estimate monthly and first-year burn for an AI agent startup.", tags: ["startup", "cost", "AI agents", "business"] },
-  { name: "Startup Runway Calculator", path: "/tools/startup-runway-calculator/", description: "Calculate months of cash runway based on burn, revenue growth, fundraising target, and zero-cash date.", tags: ["startup", "runway", "burn", "fundraising", "cash"] },
-  { name: "Affiliate Link Revenue Estimator", path: "/tools/affiliate-revenue-estimator/", description: "Estimate affiliate earnings from monthly clicks, conversion rate, AOV, commission rate, refunds, network fees, and CPA.", tags: ["affiliate", "revenue", "earnings", "traffic", "monetization"] },
-  { name: "AI PC Build Configurator", path: "/tools/ai-pc-build-configurator/", description: "Preconfigured AI PC builds from budget to pro workstation.", tags: ["AI PC", "hardware", "build", "GPU"] },
-  { name: "Crypto Mining Rig Repurposing Guide", path: "/tools/rig-repurposing-guide/", description: "Five ways to turn crypto mining hardware into AI, heat, render, or cash.", tags: ["crypto", "mining", "repurpose", "GPU"] },
-  { name: "AI Hardware Deal Tracker", path: "/tools/ai-hardware-deal-tracker/", description: "Watch prices on GPUs, mini PCs, CPUs, RAM, and SSDs for AI builds.", tags: ["deals", "GPU", "mini PC", "hardware"] },
-  { name: "Context Window Cheat Sheet", path: "/tools/context-window-cheat-sheet/", description: "Compare input and output token limits across OpenAI, Anthropic, Google, Meta, Mistral, DeepSeek, xAI, and local quantized models.", tags: ["LLM", "context window", "tokens", "cheat sheet"] },
-  { name: "Newsletter Topic Finder", path: "/tools/newsletter-topic-finder/", description: "High-intent topic ideas for AI hardware, agents, crypto pivots, investing, and AEO.", tags: ["newsletter", "topics", "AI", "crypto", "investing"] },
-  { name: "AI Agent API Pricing Comparator", path: "/tools/agent-api-pricing-comparator/", description: "Compare per-token pricing across OpenAI, Anthropic, Google, Groq, Together AI, and Cohere for your agent workload.", tags: ["API", "pricing", "LLM", "agents", "cost"] },
-  { name: "GPU Cloud Rental vs Buy Calculator", path: "/tools/gpu-cloud-vs-buy-calculator/", description: "Compare hourly cloud GPU rental against buying local hardware: total cost, break-even, and verdict for your workload.", tags: ["GPU", "cloud", "rental", "buy", "TCO"] },
-  { name: "Daily Newsletter Prompt Generator", path: "/tools/newsletter-prompt-generator/", description: "Generate a DOC-id prompt draft for today's Hermes Dispatch issue with category, angle, tone, and cross-links.", tags: ["newsletter", "prompt", "writing", "AI agents", "AEO"] },
-  { name: "Answer Engine Citation Tracker", path: "/tools/answer-engine-citation-tracker/", description: "Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.", tags: ["AEO", "citations", "Perplexity", "SEO"] },
-  { name: "Prompt Reliability Checker", path: "/tools/prompt-reliability-checker/", description: "Run a system prompt multiple times against a local LLM and score consistency, failure rate, and output variance.", tags: ["prompt", "LLM", "testing", "reliability", "Ollama"] },
-  { name: "Claim Verifier", path: "/tools/claim-verifier/", description: "Verify a claim against web search results and get a confidence score plus a citable verdict.", tags: ["claim", "verification", "sources", "trust", "AI agents"] },
-  { name: "Crypto Tax Loss Harvesting Calculator", path: "/tools/crypto-tax-loss-harvester/", description: "Estimate how much you can save by harvesting crypto losses against gains and income.", tags: ["crypto", "taxes", "harvesting", "portfolio"] },
-  { name: "AI Hardware Directory", path: "/directory/", description: "Curated GPUs, mini PCs, wallets, miners, and exchanges.", tags: ["directory", "affiliate"] },
+const categories = [
+  {
+    name: "AI Tools",
+    description: "Calculators, comparators, and builders for local AI, agents, and LLM infrastructure.",
+    tools: [
+      { name: "LLM VRAM Calculator", path: "/tools/vram-calculator/", description: "Estimate GPU memory for any model size and quantization.", tags: ["VRAM", "LLM", "GPU"] },
+      { name: "GPU Comparison Table", path: "/compare/gpus/", description: "Sort local-LLM benchmarks by tokens/sec, VRAM, TDP, and price.", tags: ["GPU", "benchmarks", "LLM"] },
+      { name: "Mini PC for AI Comparison", path: "/compare/mini-pcs/", description: "Mac Mini M4 vs Beelink GTR9 Pro, GMKtec EVO-X2, GEEKOM A8. Sort by RAM, bandwidth, tok/s.", tags: ["mini PC", "AI", "compare"] },
+      { name: "GPU Recommender", path: "/compare/recommend/", description: "Pick a GPU by model size, budget, and power constraints.", tags: ["GPU", "recommender"] },
+      { name: "Mini PC Recommender", path: "/tools/mini-pc-recommender/", description: "Pick the best compact AI workstation by model size, budget, and noise tolerance.", tags: ["mini PC", "recommender"] },
+      { name: "Agent Hardware Sizer", path: "/tools/agent-hardware-sizer/", description: "Find the exact mini PC, GPU, and RAM config for local LLMs and AI agents.", tags: ["hardware", "sizing", "mini PC", "GPU"] },
+      { name: "LLM Cost Calculator", path: "/tools/llm-cost-calculator/", description: "Compare cloud API token prices vs local GPU cost per 1M tokens.", tags: ["LLM", "API", "cost", "inference"] },
+      { name: "Local LLM ROI Calculator", path: "/tools/local-llm-roi-calculator/", description: "Compare 3-year total cost of ownership for local GPU vs cloud API.", tags: ["ROI", "TCO", "local LLM", "GPU"] },
+      { name: "AI Agent Stack Builder", path: "/tools/agent-stack-builder/", description: "Pick a use case and get the full LLM, framework, hosting, and cost stack.", tags: ["AI agents", "stack", "framework", "LLM"] },
+      { name: "AI Agent Memory / RAG Cost Calculator", path: "/tools/agent-memory-cost-calculator/", description: "Estimate embedding, vector storage, query, and reranker costs for AI agent memory and RAG.", tags: ["AI agents", "RAG", "vector DB", "embeddings", "memory", "cost"] },
+      { name: "AI Agent Benchmark Selector", path: "/tools/agent-benchmark-selector/", description: "Pick the right benchmark for coding, reasoning, web, desktop, multi-agent, and domain-specific agents.", tags: ["AI agents", "benchmarks", "evaluation"] },
+      { name: "AI Agent Privacy / Compliance Checker", path: "/tools/ai-agent-compliance-checker/", description: "Check which privacy and compliance requirements apply to your AI agent.", tags: ["AI agents", "privacy", "GDPR", "SOC 2", "compliance"] },
+      { name: "AI Agent Marketplace Fee Comparator", path: "/tools/agent-marketplace-fee-comparator/", description: "Compare platform take rates, revenue share, and audience fit across AI agent marketplaces.", tags: ["AI agents", "marketplace", "fees", "revenue share", "monetization"] },
+      { name: "AI Startup Cost Calculator", path: "/tools/ai-startup-cost-calculator/", description: "Estimate monthly and first-year burn for an AI agent startup.", tags: ["startup", "cost", "AI agents", "business"] },
+      { name: "AI PC Build Configurator", path: "/tools/ai-pc-build-configurator/", description: "Preconfigured AI PC builds from budget to pro workstation.", tags: ["AI PC", "hardware", "build", "GPU"] },
+      { name: "Context Window Cheat Sheet", path: "/tools/context-window-cheat-sheet/", description: "Compare input and output token limits across major LLM providers.", tags: ["LLM", "context window", "tokens", "cheat sheet"] },
+      { name: "AI Agent API Pricing Comparator", path: "/tools/agent-api-pricing-comparator/", description: "Compare per-token pricing across OpenAI, Anthropic, Google, Groq, Together AI, and Cohere.", tags: ["API", "pricing", "LLM", "agents", "cost"] },
+      { name: "GPU Cloud Rental vs Buy Calculator", path: "/tools/gpu-cloud-vs-buy-calculator/", description: "Compare hourly cloud GPU rental against buying local hardware.", tags: ["GPU", "cloud", "rental", "buy", "TCO"] },
+      { name: "Answer Engine Citation Tracker", path: "/tools/answer-engine-citation-tracker/", description: "Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.", tags: ["AEO", "citations", "Perplexity", "SEO"] },
+      { name: "Prompt Reliability Checker", path: "/tools/prompt-reliability-checker/", description: "Run a system prompt multiple times against a local LLM and score consistency.", tags: ["prompt", "LLM", "testing", "reliability", "Ollama"] },
+      { name: "Claim Verifier", path: "/tools/claim-verifier/", description: "Verify a claim against web search results and get a confidence score plus a citable verdict.", tags: ["claim", "verification", "sources", "trust", "AI agents"] },
+    ]
+  },
+  {
+    name: "Crypto Tools",
+    description: "Mining, pivot, and tax tools for crypto-native operators moving into AI.",
+    tools: [
+      { name: "Miner Pivot Calculator", path: "/tools/miner-pivot-calculator/", description: "Compare crypto mining profit vs local LLM inference revenue for your GPU.", tags: ["crypto", "mining", "inference", "pivot"] },
+      { name: "GPU Hashrate to Inference Capacity Converter", path: "/tools/hashrate-to-inference-converter/", description: "Convert crypto-mining hashrate into estimated local LLM inference capacity and power cost.", tags: ["crypto", "mining", "hashrate", "LLM", "inference", "GPU"] },
+      { name: "Crypto Mining Rig Repurposing Guide", path: "/tools/rig-repurposing-guide/", description: "Five ways to turn crypto mining hardware into AI, heat, render, or cash.", tags: ["crypto", "mining", "repurpose", "GPU"] },
+      { name: "Crypto Tax Loss Harvesting Calculator", path: "/tools/crypto-tax-loss-harvester/", description: "Estimate how much you can save by harvesting crypto losses against gains and income.", tags: ["crypto", "taxes", "harvesting", "portfolio"] },
+    ]
+  },
+  {
+    name: "Investing Tools",
+    description: "Cost, revenue, and portfolio tools for AI, crypto, and trading investors.",
+    tools: [
+      { name: "AI Hardware Deal Tracker", path: "/tools/ai-hardware-deal-tracker/", description: "Watch prices on GPUs, mini PCs, CPUs, RAM, and SSDs for AI builds.", tags: ["deals", "GPU", "mini PC", "hardware"] },
+      { name: "Startup Runway Calculator", path: "/tools/startup-runway-calculator/", description: "Calculate months of cash runway based on burn, revenue growth, and fundraising target.", tags: ["startup", "runway", "burn", "fundraising", "cash"] },
+      { name: "Affiliate Link Revenue Estimator", path: "/tools/affiliate-revenue-estimator/", description: "Estimate affiliate earnings from monthly clicks, conversion rate, AOV, and commission rate.", tags: ["affiliate", "revenue", "earnings", "traffic", "monetization"] },
+      { name: "Newsletter Topic Finder", path: "/tools/newsletter-topic-finder/", description: "High-intent topic ideas for AI hardware, agents, crypto pivots, investing, and AEO.", tags: ["newsletter", "topics", "AI", "crypto", "investing"] },
+      { name: "Daily Newsletter Prompt Generator", path: "/tools/newsletter-prompt-generator/", description: "Generate a DOC-id prompt draft for today's Hermes Dispatch issue.", tags: ["newsletter", "prompt", "writing", "AI agents", "AEO"] },
+    ]
+  },
+  {
+    name: "Directory",
+    description: "Curated hardware, software, and exchange listings.",
+    tools: [
+      { name: "AI Hardware Directory", path: "/directory/", description: "Curated GPUs, mini PCs, wallets, miners, and exchanges.", tags: ["directory", "affiliate"] },
+    ]
+  },
 ];
+
+const allTools = categories.flatMap(c => c.tools.map(t => ({ ...t, category: c.name })));
 ---
 
 <Layout title={title} description={description}>
   <div class="bg-cyan-400/10 border border-cyan-400/30 rounded-lg p-4 mb-8">
     <p class="text-cyan-400 text-sm m-0">🤖 <strong>For AI agents:</strong> This page and every tool below are also listed in <a href="/llms.txt" class="underline">/llms.txt</a> with inputs, outputs, and URLs.</p>
   </div>
+
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "itemListElement": tools.map((t, i) => ({
+    "itemListElement": allTools.map((t, i) => ({
       "@type": "ListItem",
       "position": i + 1,
       "name": t.name,
@@ -55,24 +82,41 @@ const tools = [
     })),
   })} />
 
-  <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <article class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <header class="mb-12">
       <h1 class="text-4xl font-bold mb-4">{title}</h1>
-      <p class="text-xl text-gray-400">Free, practical tools for building a local AI rig or crypto-mining-to-AI pivot.</p>
+      <p class="text-xl text-gray-400">Free, practical tools for AI builders, crypto miners, and investors.</p>
     </header>
 
-    <div class="grid md:grid-cols-2 gap-6">
-      {tools.map((tool) => (
-        <a href={tool.path} class="block bg-neutral-900 border border-neutral-800 rounded-xl p-6 hover:border-cyan-400 transition">
-          <h2 class="text-xl font-semibold mb-2">{tool.name}</h2>
-          <p class="text-gray-400 mb-4">{tool.description}</p>
-          <div class="flex flex-wrap gap-2">
-            {tool.tags.map((tag) => (
-              <span class="text-xs bg-neutral-800 text-gray-300 px-2 py-1 rounded">{tag}</span>
-            ))}
-          </div>
+    <div class="flex flex-wrap gap-2 mb-10">
+      {categories.map((category) => (
+        <a href={`#${category.name.toLowerCase().replace(/\s+/g, '-')}`} class="px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 text-gray-300 hover:border-cyan-400 hover:text-cyan-400 transition">
+          {category.name}
         </a>
       ))}
     </div>
+
+    {categories.map((category) => (
+      <section id={category.name.toLowerCase().replace(/\s+/g, '-')} class="mb-16">
+        <div class="flex items-center gap-3 mb-6">
+          <h2 class="text-2xl font-bold">{category.name}</h2>
+          <span class="text-sm text-gray-500">{category.tools.length} tool{category.tools.length !== 1 ? 's' : ''}</span>
+        </div>
+        <p class="text-gray-400 mb-6">{category.description}</p>
+        <div class="grid md:grid-cols-2 gap-6">
+          {category.tools.map((tool) => (
+            <a href={tool.path} class="block bg-neutral-900 border border-neutral-800 rounded-xl p-6 hover:border-cyan-400 transition">
+              <h3 class="text-xl font-semibold mb-2">{tool.name}</h3>
+              <p class="text-gray-400 mb-4">{tool.description}</p>
+              <div class="flex flex-wrap gap-2">
+                {tool.tags.map((tag) => (
+                  <span class="text-xs bg-neutral-800 text-gray-300 px-2 py-1 rounded">{tag}</span>
+                ))}
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    ))}
   </article>
 </Layout>
