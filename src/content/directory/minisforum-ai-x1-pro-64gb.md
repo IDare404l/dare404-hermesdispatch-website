@@ -3,7 +3,7 @@ title: "Minisforum AI X1 Pro 64GB"
 category: compute-grid
 description: "Mid-range AMD AI mini PC with 64GB LPDDR5X and OCuLink. Strong for 30B-class models."
 price: "$1,299"
-image: "https://images.unsplash.com/photo-1558494949-ef526b0042a0?w=600&q=80"
+image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80"
 link: "https://www.minisforum.com/"
 affiliate: false
 rating: 4.5

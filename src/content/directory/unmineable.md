@@ -13,8 +13,8 @@ affiliate_tags:
 featured: false
 sponsored: false
 source: https://unmineable.com/?ref=7k2l-4h7s
-image: https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&q=80
 brand: UnMineable
+image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80"
 faq_schema:
 - question: What is UnMineable?
   answer: UnMineable is a mining pool that lets you mine with CPU or GPU power and

@@ -22,8 +22,8 @@ benchmark_model: llama3.2 3B Q4_K_M
 featured: false
 sponsored: false
 source: https://www.amazon.com/s?k=framework+desktop&tag=dare404-20
-image: https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&q=80
 brand: Framework
+image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80"
 faq_schema:
 - question: Can the Framework Desktop run a full-size GPU?
   answer: Yes. Framework designed the desktop to accept standard dual-slot GPUs, making

@@ -24,8 +24,8 @@ benchmark_model: llama3.2 3B Q4_K_M
 featured: true
 sponsored: false
 source: https://www.amazon.com/s?k=rtx+4090&tag=dare404-20
-image: https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=600&q=80
 brand: NVIDIA
+image: "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=600&q=80"
 faq_schema:
 - question: Is the NVIDIA RTX 4090 worth it for local LLMs?
   answer: If you need the fastest consumer inference and plan to run 30B+ models,

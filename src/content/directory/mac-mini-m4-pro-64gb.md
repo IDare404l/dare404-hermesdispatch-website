@@ -3,7 +3,7 @@ title: "Mac mini M4 Pro 64GB"
 category: compute-grid
 description: "Silent Apple Silicon mini PC with 64GB unified memory and 273 GB/s bandwidth. Best for 30B-class local LLMs."
 price: "$1,999–2,499"
-image: "https://images.unsplash.com/photo-1558494949-ef526b0042a0?w=600&q=80"
+image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80"
 link: "https://www.apple.com/mac-mini/"
 affiliate: false
 rating: 4.5

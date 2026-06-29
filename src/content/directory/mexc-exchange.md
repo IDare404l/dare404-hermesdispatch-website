@@ -14,8 +14,8 @@ affiliate_tags:
 featured: false
 sponsored: false
 source: https://www.mexc.com/register?inviteCode=mexc-AF-HERMES
-image: https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=600&q=80
 brand: MEXC
+image: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80"
 faq_schema:
 - question: Does MEXC require KYC?
   answer: MEXC allows limited trading without KYC, but withdrawal limits and feature
