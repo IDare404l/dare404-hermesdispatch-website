@@ -6,7 +6,7 @@
   if (!path.startsWith('/tools/') && !path.startsWith('/compare/')) return;
   // Avoid duplicate pings on SPA-style soft navigations (Astro does full page loads, so per load is fine)
   try {
-    fetch('/api/tool-usage', {
+    fetch('/api/tool-usage/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tool_path: path }),
