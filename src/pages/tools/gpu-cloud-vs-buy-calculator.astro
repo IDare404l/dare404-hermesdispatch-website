@@ -1,0 +1,398 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/gpu_cloud_vs_buy.json';
+
+const title = "GPU Cloud Rental vs Buy Calculator";
+const description = "Compare renting a cloud GPU by the hour against buying a local GPU for AI inference and training. See total cost, break-even months, and which option wins for your workload.";
+const instances = data.cloud_instances;
+const localGpus = data.local_gpus;
+const defaults = data.defaults;
+const utilHelp = data.utilization_help;
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is it cheaper to rent a GPU in the cloud or buy one?",
+        "acceptedAnswer": { "@type": "Answer", "text": "It depends on utilization. If you run a GPU only a few hours per week, renting is usually cheaper. If you run it daily for months, buying a local GPU often breaks even within 12-24 months and then costs much less." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do you calculate GPU cloud rental vs buy break-even?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Add up hourly cloud cost over your expected workload months. Compare that to local hardware cost plus electricity and subtract estimated resale value. The month where cumulative cloud spend equals local total cost is the break-even point." }
+      },
+      {
+        "@type": "Question",
+        "name": "What hidden costs make cloud GPUs more expensive?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Egress bandwidth, object storage, long-term contracts, idle minimums, premium support, and multi-GPU instance waste when you only need one GPU can all raise the real cloud bill above the listed hourly rate." }
+      },
+      {
+        "@type": "Question",
+        "name": "What hidden costs make owning a local GPU more expensive?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Electricity, cooling, noise, space, PSU/case/motherboard/CPU upgrades, maintenance, depreciation, and the risk of hardware obsolescence all add to the real cost of a local GPU." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">☁️</div>
+        <h1 class="display-heading mb-4">GPU Cloud Rental vs Buy Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Compare hourly cloud GPU rental against buying local hardware for your AI workload. Find your break-even month and the cheaper path.
+        </p>
+      </div>
+
+      <!-- Cloud presets -->
+      <h2 class="text-lg font-semibold mb-3 text-neutral-300">Pick a cloud instance</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {instances.map((inst, i) => (
+          <button type="button" class="cloud-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">🌩️</div>
+            <h3 class="font-semibold text-sm">{inst.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">${inst.hourly_usd.toFixed(2)}/hr • {inst.vram_gb} GB VRAM</p>
+          </button>
+        ))}
+      </div>
+
+      <!-- Local GPU presets -->
+      <h2 class="text-lg font-semibold mb-3 text-neutral-300">Pick a local GPU</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+        {localGpus.map((gpu, i) => (
+          <button type="button" class="local-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">🖥️</div>
+            <h3 class="font-semibold text-sm">{gpu.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">${gpu.cost_usd.toLocaleString()} • {gpu.vram_gb} GB • {gpu.typical_watts} W</p>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <!-- Inputs -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20 space-y-5">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Workload & costs</h2>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Hours per day</label>
+              <input id="hoursPerDay" type="number" min="0" max="24" step="0.5" value={defaults.hours_per_day} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Days per month</label>
+              <input id="daysPerMonth" type="number" min="1" max="31" step="1" value={defaults.days_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm text-neutral-400 mb-1">Projection (months)</label>
+            <input id="months" type="number" min="1" max="60" step="1" value={defaults.months} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+          </div>
+
+          <div class="border-t border-neutral-800 pt-4">
+            <h3 class="text-sm font-semibold text-neutral-300 mb-3">Cloud</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Hourly rate ($)</label>
+                <input id="cloudHourly" type="number" min="0" step="0.01" value={defaults.cloud_hourly} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Min monthly fee ($)</label>
+                <input id="cloudMinMonthly" type="number" min="0" step="1" value={defaults.cloud_min_monthly} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                <p class="text-xs text-neutral-500 mt-1">Storage / IP retention.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-neutral-800 pt-4">
+            <h3 class="text-sm font-semibold text-neutral-300 mb-3">Local</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">GPU cost ($)</label>
+                <input id="localGpuCost" type="number" min="0" step="10" value={defaults.local_gpu_cost} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">System cost ($)</label>
+                <input id="localSystemCost" type="number" min="0" step="10" value={defaults.local_system_cost} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                <p class="text-xs text-neutral-500 mt-1">PSU, case, CPU, RAM.</p>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">GPU power (W)</label>
+                <input id="localGpuWatts" type="number" min="0" step="5" value={defaults.local_gpu_watts} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Electricity ($/kWh)</label>
+                <input id="electricity" type="number" min="0" step="0.01" value={defaults.electricity_kwh} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Resale value (%)</label>
+                <input id="resalePct" type="number" min="0" max="100" step="1" value={defaults.resale_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                <p class="text-xs text-neutral-500 mt-1">After projection period.</p>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Utilization (%)</label>
+                <input id="utilization" type="number" min="10" max="100" step="5" value={80} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                <p class="text-xs text-neutral-500 mt-1">Typical: {utilHelp.range}%.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outputs -->
+        <div class="space-y-4">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Cloud total ({defaults.months} mo)</p>
+            <p id="cloudTotal" class="text-3xl font-bold text-brand-gold">—</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-4 text-center border border-emerald-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Local total</p>
+              <p id="localTotal" class="text-2xl font-bold text-emerald-400">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center border border-red-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Local electricity</p>
+              <p id="localPower" class="text-2xl font-bold text-red-400">—</p>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Effective $/hour (cloud)</p>
+            <p id="cloudEffectiveHourly" class="text-2xl font-bold">—</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-emerald-500/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Break-even</p>
+            <p id="breakEven" class="text-3xl font-bold text-emerald-400">—</p>
+            <p id="breakEvenSub" class="text-sm text-neutral-400 mt-1">—</p>
+          </div>
+          <div id="verdictCard" class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Verdict</p>
+            <p id="verdict" class="text-2xl font-bold">—</p>
+            <p id="verdictSub" class="text-sm text-neutral-400 mt-1">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Month-by-month table -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Month-by-month cost</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Month</th>
+                <th class="text-right py-2">Cloud cumulative</th>
+                <th class="text-right py-2">Local cumulative</th>
+                <th class="text-right py-2">Difference</th>
+                <th class="text-left py-2 pl-4">Status</th>
+              </tr>
+            </thead>
+            <tbody id="monthTable" class="divide-y divide-neutral-800"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cloud comparison table -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Cloud instance snapshot</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Instance</th>
+                <th class="text-left py-2">GPU</th>
+                <th class="text-right py-2">VRAM</th>
+                <th class="text-right py-2">$/hr</th>
+                <th class="text-right py-2">30-day 4hr/day</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-neutral-800">
+              {instances.map(inst => {
+                const monthly = inst.hourly_usd * 4 * 30 + inst.min_monthly_usd;
+                return (
+                  <tr class="hover:bg-neutral-800/30">
+                    <td class="py-3 font-medium"><a href={inst.source_url} target="_blank" rel="noopener" class="text-brand-gold hover:underline">{inst.name}</a></td>
+                    <td class="py-3 text-neutral-400">{inst.gpu}</td>
+                    <td class="py-3 text-right">{inst.vram_gb} GB</td>
+                    <td class="py-3 text-right">${inst.hourly_usd.toFixed(2)}</td>
+                    <td class="py-3 text-right">${monthly.toFixed(0)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Explanation -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">When cloud wins</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• Sporadic workloads (under ~2 hours/day).</li>
+            <li>• Need instant access to H100/A100 without upfront capital.</li>
+            <li>• Teams in different time zones sharing hardware.</li>
+            <li>• Scaling training jobs horizontally for short bursts.</li>
+            <li>• Want to avoid maintenance, noise, and power constraints.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">When buying wins</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• Daily inference or fine-tuning over many months.</li>
+            <li>• Low electricity rates and space for a local rig.</li>
+            <li>• Sensitive data that must stay on-premise.</li>
+            <li>• Want to resell GPU later to recover part of the cost.</li>
+            <li>• Can use the machine for other tasks when not training.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/local-llm-roi-calculator/" class="btn-primary text-sm">Local LLM ROI Calc →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+        <a href="/tools/ai-pc-build-configurator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI PC Configurator →</a>
+        <a href="/compare/gpus/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">GPU Comparison →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ instances, localGpus, defaults }}>
+    const fmt = (n, d = 0) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: d }).format(n || 0);
+    const fmtInt = (n) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n || 0);
+
+    const el = {
+      hoursPerDay: document.getElementById('hoursPerDay'),
+      daysPerMonth: document.getElementById('daysPerMonth'),
+      months: document.getElementById('months'),
+      cloudHourly: document.getElementById('cloudHourly'),
+      cloudMinMonthly: document.getElementById('cloudMinMonthly'),
+      localGpuCost: document.getElementById('localGpuCost'),
+      localSystemCost: document.getElementById('localSystemCost'),
+      localGpuWatts: document.getElementById('localGpuWatts'),
+      electricity: document.getElementById('electricity'),
+      resalePct: document.getElementById('resalePct'),
+      utilization: document.getElementById('utilization'),
+      cloudTotal: document.getElementById('cloudTotal'),
+      localTotal: document.getElementById('localTotal'),
+      localPower: document.getElementById('localPower'),
+      cloudEffectiveHourly: document.getElementById('cloudEffectiveHourly'),
+      breakEven: document.getElementById('breakEven'),
+      breakEvenSub: document.getElementById('breakEvenSub'),
+      verdict: document.getElementById('verdict'),
+      verdictSub: document.getElementById('verdictSub'),
+      monthTable: document.getElementById('monthTable'),
+    };
+
+    function calc() {
+      const hoursPerDay = parseFloat(el.hoursPerDay.value) || 0;
+      const daysPerMonth = parseFloat(el.daysPerMonth.value) || 0;
+      const months = parseInt(el.months.value, 10) || 1;
+      const cloudHourly = parseFloat(el.cloudHourly.value) || 0;
+      const cloudMinMonthly = parseFloat(el.cloudMinMonthly.value) || 0;
+      const localGpuCost = parseFloat(el.localGpuCost.value) || 0;
+      const localSystemCost = parseFloat(el.localSystemCost.value) || 0;
+      const localGpuWatts = parseFloat(el.localGpuWatts.value) || 0;
+      const electricity = parseFloat(el.electricity.value) || 0;
+      const resalePct = (parseFloat(el.resalePct.value) || 0) / 100;
+      const utilization = (parseFloat(el.utilization.value) || 0) / 100;
+
+      const hoursPerMonth = hoursPerDay * daysPerMonth;
+      const cloudMonthly = hoursPerMonth * cloudHourly + cloudMinMonthly;
+      const cloudTotalCost = cloudMonthly * months;
+
+      const localHardware = localGpuCost + localSystemCost;
+      const activeHoursPerMonth = hoursPerMonth * utilization;
+      const monthlyKwh = (localGpuWatts * activeHoursPerMonth) / 1000;
+      const localElectricityTotal = monthlyKwh * electricity * months;
+      const resaleValue = localHardware * resalePct;
+      const localNetTotal = Math.max(0, localHardware + localElectricityTotal - resaleValue);
+
+      el.cloudTotal.textContent = fmt(cloudTotalCost);
+      el.localTotal.textContent = fmt(localNetTotal);
+      el.localPower.textContent = fmt(localElectricityTotal);
+      el.cloudEffectiveHourly.textContent = hoursPerMonth > 0 ? fmt(cloudMonthly / hoursPerMonth, 2) + '/hr' : '—';
+
+      const monthlyLocalNet = localNetTotal / Math.max(months, 1);
+      const cloudMonthlyNet = cloudMonthly;
+
+      let breakEvenMonths;
+      if (cloudMonthlyNet <= 0) {
+        breakEvenMonths = Infinity;
+      } else if (localNetTotal <= 0) {
+        breakEvenMonths = 0;
+      } else {
+        breakEvenMonths = localHardware / (cloudMonthlyNet - monthlyKwh * electricity);
+      }
+      if (!isFinite(breakEvenMonths) || breakEvenMonths < 0 || breakEvenMonths > 600) {
+        el.breakEven.textContent = 'Never / N/A';
+        el.breakEvenSub.textContent = cloudMonthlyNet <= monthlyKwh * electricity ? 'Cloud is cheaper than local power' : 'Check inputs';
+      } else {
+        el.breakEven.textContent = fmtInt(breakEvenMonths) + ' mo';
+        el.breakEvenSub.textContent = `At ${hoursPerDay} hr/day, ${daysPerMonth} days/mo`;
+      }
+
+      const cheaper = cloudTotalCost < localNetTotal ? 'cloud' : 'local';
+      const savings = Math.abs(cloudTotalCost - localNetTotal);
+      if (cheaper === 'cloud') {
+        el.verdict.textContent = 'Rent in the cloud';
+        el.verdictSub.textContent = `Saves ${fmt(savings)} over ${months} months`;
+      } else {
+        el.verdict.textContent = 'Buy local hardware';
+        el.verdictSub.textContent = `Saves ${fmt(savings)} over ${months} months (after resale)`;
+      }
+
+      // Month table
+      let html = '';
+      for (let m = 1; m <= months; m += 1) {
+        if (m > 24 && m % 6 !== 0 && m !== months) continue;
+        const cloudCum = cloudMonthly * m;
+        const localCum = localHardware + (monthlyKwh * electricity * m) - resaleValue;
+        const diff = cloudCum - localCum;
+        const status = cloudCum < localCum
+          ? '<span class="status-badge status-active">Cloud cheaper</span>'
+          : '<span class="status-badge bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Local cheaper</span>';
+        html += `<tr>
+          <td class="py-3">${m}</td>
+          <td class="py-3 text-right">${fmt(cloudCum)}</td>
+          <td class="py-3 text-right">${fmt(localCum)}</td>
+          <td class="py-3 text-right ${diff < 0 ? 'text-brand-gold' : 'text-emerald-400'}">${diff < 0 ? '-' : '+'}${fmt(Math.abs(diff))}</td>
+          <td class="py-3 pl-4">${status}</td>
+        </tr>`;
+      }
+      el.monthTable.innerHTML = html;
+    }
+
+    Object.values(el).forEach(input => {
+      if (input && (input.tagName === 'INPUT')) {
+        input.addEventListener('input', calc);
+      }
+    });
+
+    document.querySelectorAll('.cloud-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const inst = instances[parseInt(btn.dataset.idx, 10)];
+        if (!inst) return;
+        el.cloudHourly.value = inst.hourly_usd;
+        el.cloudMinMonthly.value = inst.min_monthly_usd;
+        calc();
+      });
+    });
+
+    document.querySelectorAll('.local-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const gpu = localGpus[parseInt(btn.dataset.idx, 10)];
+        if (!gpu) return;
+        el.localGpuCost.value = gpu.cost_usd;
+        el.localGpuWatts.value = gpu.typical_watts;
+        calc();
+      });
+    });
+
+    calc();
+  </script>
+</Layout>

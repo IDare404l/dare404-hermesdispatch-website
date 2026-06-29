@@ -1,0 +1,136 @@
+{
+  "cloud_instances": [
+    {
+      "name": "RunPod RTX 4090 (Secure Cloud)",
+      "provider": "RunPod",
+      "gpu": "RTX 4090",
+      "vram_gb": 24,
+      "hourly_usd": 1.49,
+      "min_monthly_usd": 0,
+      "source_url": "https://www.runpod.io/gpu-instance/pricing"
+    },
+    {
+      "name": "Vast.ai RTX 4090 (spot-ish market)",
+      "provider": "Vast.ai",
+      "gpu": "RTX 4090",
+      "vram_gb": 24,
+      "hourly_usd": 0.79,
+      "min_monthly_usd": 0,
+      "source_url": "https://vast.ai/"
+    },
+    {
+      "name": "Lambda Cloud 1x A100 SXM",
+      "provider": "Lambda",
+      "gpu": "A100 80GB SXM",
+      "vram_gb": 80,
+      "hourly_usd": 1.99,
+      "min_monthly_usd": 0,
+      "source_url": "https://lambdalabs.com/service/gpu-cloud"
+    },
+    {
+      "name": "Lambda Cloud 1x H100 SXM",
+      "provider": "Lambda",
+      "gpu": "H100 80GB SXM",
+      "vram_gb": 80,
+      "hourly_usd": 2.49,
+      "min_monthly_usd": 0,
+      "source_url": "https://lambdalabs.com/service/gpu-cloud"
+    },
+    {
+      "name": "CoreWeave 1x A100",
+      "provider": "CoreWeave",
+      "gpu": "A100 80GB",
+      "vram_gb": 80,
+      "hourly_usd": 2.25,
+      "min_monthly_usd": 0,
+      "source_url": "https://coreweave.com/gpu-cloud-pricing"
+    },
+    {
+      "name": "CoreWeave 1x H100",
+      "provider": "CoreWeave",
+      "gpu": "H100 80GB",
+      "vram_gb": 80,
+      "hourly_usd": 2.99,
+      "min_monthly_usd": 0,
+      "source_url": "https://coreweave.com/gpu-cloud-pricing"
+    },
+    {
+      "name": "AWS g5.2xlarge (1x A10G)",
+      "provider": "AWS",
+      "gpu": "A10G 24GB",
+      "vram_gb": 24,
+      "hourly_usd": 1.006,
+      "min_monthly_usd": 0,
+      "source_url": "https://aws.amazon.com/ec2/instance-types/g5/"
+    },
+    {
+      "name": "AWS p4d.24xlarge (8x A100)",
+      "provider": "AWS",
+      "gpu": "8x A100 40GB",
+      "vram_gb": 320,
+      "hourly_usd": 32.77,
+      "min_monthly_usd": 0,
+      "source_url": "https://aws.amazon.com/ec2/instance-types/p4/"
+    },
+    {
+      "name": "AWS p5.48xlarge (8x H100)",
+      "provider": "AWS",
+      "gpu": "8x H100 80GB",
+      "vram_gb": 640,
+      "hourly_usd": 98.32,
+      "min_monthly_usd": 0,
+      "source_url": "https://aws.amazon.com/ec2/instance-types/p5/"
+    },
+    {
+      "name": "Google Cloud A3 VM (8x H100)",
+      "provider": "Google Cloud",
+      "gpu": "8x H100 80GB",
+      "vram_gb": 640,
+      "hourly_usd": 93.24,
+      "min_monthly_usd": 0,
+      "source_url": "https://cloud.google.com/compute/gpus-pricing"
+    },
+    {
+      "name": "Azure NC24ads A100 v4",
+      "provider": "Azure",
+      "gpu": "A100 80GB",
+      "vram_gb": 80,
+      "hourly_usd": 3.60,
+      "min_monthly_usd": 0,
+      "source_url": "https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/"
+    },
+    {
+      "name": "Azure ND96isr H100 v5",
+      "provider": "Azure",
+      "gpu": "8x H100 80GB",
+      "vram_gb": 640,
+      "hourly_usd": 99.12,
+      "min_monthly_usd": 0,
+      "source_url": "https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/"
+    }
+  ],
+  "local_gpus": [
+    { "name": "NVIDIA RTX 4090", "vram_gb": 24, "cost_usd": 1599, "typical_watts": 450, "source_url": "https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4090/" },
+    { "name": "NVIDIA RTX 3090 Ti", "vram_gb": 24, "cost_usd": 999, "typical_watts": 450, "source_url": "https://www.nvidia.com/" },
+    { "name": "NVIDIA RTX 5080", "vram_gb": 16, "cost_usd": 999, "typical_watts": 360, "source_url": "https://www.nvidia.com/" },
+    { "name": "NVIDIA RTX 5090", "vram_gb": 32, "cost_usd": 1999, "typical_watts": 575, "source_url": "https://www.nvidia.com/" },
+    { "name": "NVIDIA A100 80GB PCIe", "vram_gb": 80, "cost_usd": 10000, "typical_watts": 300, "source_url": "https://www.nvidia.com/en-us/data-center/a100/" },
+    { "name": "NVIDIA H100 80GB PCIe", "vram_gb": 80, "cost_usd": 25000, "typical_watts": 350, "source_url": "https://www.nvidia.com/en-us/data-center/h100/" }
+  ],
+  "defaults": {
+    "hours_per_day": 4,
+    "days_per_month": 30,
+    "months": 24,
+    "cloud_hourly": 1.49,
+    "cloud_min_monthly": 0,
+    "local_gpu_cost": 1599,
+    "local_gpu_watts": 450,
+    "electricity_kwh": 0.13,
+    "local_system_cost": 800,
+    "resale_pct": 40
+  },
+  "utilization_help": {
+    "range": "40-90",
+    "note": "Real inference rarely hits peak utilization 24/7. Training bursts are higher; chat workloads fluctuate."
+  }
+}
