@@ -1,0 +1,147 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import pricing from '../../data/agent_api_pricing.json';
+
+const title = "AI Agent API Pricing Comparator | Hermes Dispatch";
+const description = "Compare per-token and per-request pricing across OpenAI, Anthropic, Google, Groq, Together AI, and Cohere. Estimate monthly cost for your agent workload.";
+const providers = pricing.providers;
+const faqs = [
+  { q: "Which LLM API is cheapest for high-volume agents?", a: "For most high-volume text agents, GPT-4o-mini, Claude 3 Haiku, and Gemini 1.5 Flash are the cheapest per 1M tokens. Groq Llama 3.1 70B is competitive for fast open-weight inference. Use this calculator with your actual token counts to find the cheapest provider for your workload." },
+  { q: "How does cached input pricing work?", a: "OpenAI and Anthropic discount input tokens that hit a context cache. Enter your typical cache-hit percentage and the calculator applies the cached-input rate to that portion while billing the rest at the standard input rate." },
+  { q: "What is not included in this estimate?", a: "This estimate covers token and request fees only. It does not include image/audio tokens, fine-tuning, storage, bandwidth, vector DB, or fallback/retry overhead. Use the LLM Cost Calculator and Agent Memory Cost Calculator for full agent TCO." },
+  { q: "How often are prices updated?", a: "Prices are reviewed monthly. Last updated: " + pricing.last_updated + ". Always confirm current rates on the provider's pricing page before committing to a budget." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent API Pricing Comparator" description={description} url="https://hermesdispatch.dev/tools/agent-api-pricing-comparator/" applicationCategory="FinanceApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4">AI Agent API Pricing Comparator</h1>
+      <p class="text-slate-300 text-lg max-w-2xl mx-auto">Compare LLM API costs for your agent workload. Pick providers, set your token volume, and see the cheapest option ranked by monthly cost.</p>
+    </div>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-10">
+      <h2 class="text-xl font-semibold text-white mb-6">Workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-slate-300 text-sm">Requests / month</span>
+          <input id="requests" type="number" min="0" value="100000" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" value="2000" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" value="500" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Cached input %</span>
+          <input id="cacheHit" type="number" min="0" max="100" value="0" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-slate-400 text-sm mt-4">Prices per 1M tokens. Last updated: {pricing.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <section class="overflow-x-auto mb-12">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-600 text-slate-300 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider / Model</th>
+            <th class="py-3 pr-4">Input</th>
+            <th class="py-3 pr-4">Cached input</th>
+            <th class="py-3 pr-4">Output</th>
+            <th class="py-3 pr-4 text-right">Monthly cost</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-slate-200">
+          {providers.map(p => (
+            <tr class="border-b border-slate-700/50" data-provider={p.name}>
+              <td class="py-3 pr-4">
+                <div class="font-medium text-white">{p.name}</div>
+                <div class="text-xs text-slate-400">{p.model}</div>
+              </td>
+              <td class="py-3 pr-4">${p.input_per_1m.toFixed(2)}</td>
+              <td class="py-3 pr-4">{p.cached_input_per_1m ? `$${p.cached_input_per_1m.toFixed(3)}` : "—"}</td>
+              <td class="py-3 pr-4">${p.output_per_1m.toFixed(2)}</td>
+              <td class="py-3 pr-4 text-right font-mono cost-cell">—</td>
+              <td class="py-3 pr-4 text-sm">{p.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section id="summary" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+      <h2 class="text-lg font-semibold text-cyan-400 mb-2">Cheapest option</h2>
+      <p id="cheapestLine" class="text-white text-xl font-medium">Enter a workload to see the cheapest provider.</p>
+    </section>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-slate-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <p id="note" class="text-slate-500 text-sm">{pricing.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers) }}>
+    const data = JSON.parse(providers);
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+
+    function compute() {
+      const requests = parseFloat(document.getElementById('requests').value) || 0;
+      const inputTokens = parseFloat(document.getElementById('inputTokens').value) || 0;
+      const outputTokens = parseFloat(document.getElementById('outputTokens').value) || 0;
+      const cacheHit = Math.min(100, Math.max(0, parseFloat(document.getElementById('cacheHit').value) || 0)) / 100;
+
+      const rows = [];
+      data.forEach(p => {
+        const inputCost = (requests * inputTokens / 1_000_000) * ((1 - cacheHit) * p.input_per_1m + cacheHit * (p.cached_input_per_1m || p.input_per_1m));
+        const outputCost = (requests * outputTokens / 1_000_000) * p.output_per_1m;
+        const total = inputCost + outputCost + (requests * (p.request_fee || 0));
+        rows.push({ name: p.name, total, best_for: p.best_for });
+      });
+
+      rows.sort((a, b) => a.total - b.total);
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const name = tr.dataset.provider;
+        const row = rows.find(r => r.name === name);
+        const cell = tr.querySelector('.cost-cell');
+        if (cell && row) cell.textContent = fmt(row.total);
+        if (row && rows[0].name === name) {
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      document.getElementById('cheapestLine').textContent = rows.length
+        ? `${rows[0].name} — ${fmt(rows[0].total)} / month (${rows[0].best_for}).`
+        : 'Enter a workload to see the cheapest provider.';
+    }
+
+    ['requests', 'inputTokens', 'outputTokens', 'cacheHit'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+    compute();
+  </script>
+</Layout>
