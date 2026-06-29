@@ -10,3 +10,10 @@ id = "a5ba5ad4ec484e0d8e5242acb508fbda"
 [[kv_namespaces]]
 binding = "CLICKS_KV"
 id = "a5ba5ad4ec484e0d8e5242acb508fbda"
+
+[[kv_namespaces]]
+binding = "TOOL_USAGE"
+id = "a5ba5ad4ec484e0d8e5242acb508fbda"
+
+[vars]
+# ADMIN_TOKEN is set in the Cloudflare Pages dashboard as an encrypted secret.
