@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 
 const title = "LLM VRAM Calculator — How Much GPU Memory Do You Need?";
 const description = "Calculate how much VRAM you need to run Llama, Qwen, DeepSeek, and Mistral models locally. Pick model size and quantization.";
@@ -31,6 +32,7 @@ const quantizations = [
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="LLM VRAM Calculator" description="Estimate GPU memory required to run a large language model locally based on model size, quantization, context length, and batch size." url="https://hermesdispatch.dev/tools/vram-calculator/" />
   <!-- FAQPage Schema -->
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",

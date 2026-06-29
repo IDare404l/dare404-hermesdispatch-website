@@ -1,11 +1,13 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 
 const title = "Answer Engine Citation Tracker — Monitor Who Cites Your Content";
 const description = "Track whether ChatGPT, Perplexity, Gemini, and other answer engines cite your pages. Build your AEO monitoring workflow in minutes.";
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="Answer Engine Citation Tracker" description="Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages." url="https://hermesdispatch.dev/tools/answer-engine-citation-tracker/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 
 const title = "LLM Cost Calculator — API vs Local Inference per 1M Tokens";
 const description = "Compare token costs across OpenAI, Anthropic, Google, Groq, and local GPU inference. Find the cheapest way to run your AI workload.";
@@ -19,6 +20,7 @@ const providers = [
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="LLM Cost Calculator" description="Compare cloud LLM API costs versus running a local GPU for inference." url="https://hermesdispatch.dev/tools/llm-cost-calculator/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import topics from '../../data/newsletter_topics.json';
 
 const title = "Newsletter Topic Finder — High-Intent AI, Crypto, Investing Queries";
@@ -7,6 +8,7 @@ const description = "Find your next newsletter angle fast. Browse proven high-in
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="Newsletter Topic Finder" description="Generate high-intent topic ideas for AI, crypto, and investing newsletters." url="https://hermesdispatch.dev/tools/newsletter-topic-finder/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

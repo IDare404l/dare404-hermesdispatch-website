@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import builds from '../../data/ai_pc_builds.json';
 
 const title = "AI PC Build Configurator — Pick the Right Hardware Stack";
@@ -7,6 +8,7 @@ const description = "Choose an AI PC build by budget and use case: entry-level, 
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="AI PC Build Configurator" description="Choose a budget tier and get a full AI PC parts list with expected model throughput." url="https://hermesdispatch.dev/tools/ai-pc-build-configurator/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

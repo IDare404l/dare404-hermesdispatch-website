@@ -1,11 +1,13 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 
 const title = "AI Agent Startup Cost Calculator — Build an AI-Native Business";
 const description = "Estimate monthly and first-year costs to launch an AI agent startup: LLM APIs, hosting, hardware, tools, and labor.";
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Startup Cost Calculator" description="Estimate monthly burn and first-year cost for an AI-native business." url="https://hermesdispatch.dev/tools/ai-startup-cost-calculator/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

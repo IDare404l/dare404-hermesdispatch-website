@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import rigs from '../../data/rig_repurpose.json';
 
 const title = "Crypto Mining Rig Repurposing Guide — From Crypto to AI";
@@ -7,6 +8,7 @@ const description = "Five proven ways to repurpose crypto mining hardware: ASIC 
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="Crypto Mining Rig Repurposing Guide" description="Find the best way to repurpose crypto mining hardware for AI or other income." url="https://hermesdispatch.dev/tools/rig-repurposing-guide/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

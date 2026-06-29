@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import stacks from '../../data/agent_stacks.json';
 
 const title = "AI Agent Stack Builder — Pick Your Use Case, Get Your Stack";
@@ -7,6 +8,7 @@ const description = "Build the right AI agent system for content, trading, suppo
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Stack Builder" description="Pick an AI agent use case and get a complete component stack with cost estimates." url="https://hermesdispatch.dev/tools/agent-stack-builder/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

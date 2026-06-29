@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import miniPcs from '../../data/mini_pcs.json';
 
 const title = "Mini PC Recommender for Local AI";
@@ -7,6 +8,7 @@ const description = "Answer three questions and get a mini PC recommendation for
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="Mini PC Recommender" description="Find the best mini PC for AI inference, home lab, or desktop replacement by use case and budget." url="https://hermesdispatch.dev/tools/mini-pc-recommender/" />
   <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <header class="mb-10">
       <h1 class="text-4xl font-bold mb-4">{title}</h1>

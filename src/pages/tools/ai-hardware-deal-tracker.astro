@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import deals from '../../data/deal_tracker.json';
 
 const title = "AI Hardware Deal Tracker — GPUs, Mini PCs, RAM, Storage";
@@ -7,6 +8,7 @@ const description = "Track AI hardware prices for local LLM builds. Know MSRP, t
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="AI Hardware Deal Tracker" description="Track prices and deals on GPUs, mini PCs, CPUs, RAM, and storage for AI builds." url="https://hermesdispatch.dev/tools/ai-hardware-deal-tracker/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

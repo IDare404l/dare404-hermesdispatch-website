@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import ToolSchema from "../../components/ToolSchema.astro";
 import benchmarkData from "../../data/gpu_benchmarks.json";
 
 const gpus = Object.entries(benchmarkData.gpus).map(([name, d]) => ({ name, ...d }));
@@ -9,6 +10,7 @@ const pageDescription = "Compare NVIDIA RTX 4090, RTX 5090, Apple Silicon and mi
 ---
 
 <Layout title={pageTitle} description={pageDescription}>
+  <ToolSchema name="GPU Comparison Table" description="Sortable comparison of GPUs for local AI inference." url="https://hermesdispatch.dev/compare/gpus/" />
   <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <div class="text-center mb-12">
       <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">

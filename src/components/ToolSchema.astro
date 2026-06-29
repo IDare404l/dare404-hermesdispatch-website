@@ -1,0 +1,38 @@
+---
+export interface Props {
+  name: string;
+  description: string;
+  url: string;
+  category?: string;
+  operatingSystem?: string;
+  applicationCategory?: string;
+}
+
+const { name, description, url, category = "DeveloperApplication", operatingSystem = "Any", applicationCategory = "DeveloperApplication" } = Astro.props;
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": name,
+  "description": description,
+  "url": url,
+  "applicationCategory": applicationCategory,
+  "operatingSystem": operatingSystem,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "The Hermes Dispatch by Mission Freedom",
+    "url": "https://hermesdispatch.dev"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "dare404",
+    "url": "https://hermesdispatch.dev/about-dare404/"
+  }
+};
+---
+<script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />

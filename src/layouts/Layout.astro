@@ -25,6 +25,7 @@ const fullCommit = versionData?.commit || 'local';
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} | Hermes Mission Freedom</title>
     <link rel="canonical" href={`https://hermesdispatch.dev${Astro.url.pathname}`} />
+    <link rel="related" type="text/plain" href="/llms.txt" title="LLM/Agent tool index" />
     <meta property="og:title" content=`${title} | Hermes Mission Freedom` />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -329,6 +330,7 @@ const fullCommit = versionData?.commit || 'local';
               <li><a href="/tools/agent-marketplace-fee-comparator" class="hover:text-neutral-200 transition-colors">AI Agent Marketplace Fee Comparator</a></li>
               <li><a href="/compare/recommend" class="hover:text-neutral-200 transition-colors">GPU Recommender</a></li>
               <li><a href="/tools" class="hover:text-neutral-200 transition-colors">All Tools</a></li>
+              <li><a href="/llms.txt" class="hover:text-neutral-200 transition-colors">Tools for Agents (llms.txt)</a></li>
             </ul>
           </div>
           <div>

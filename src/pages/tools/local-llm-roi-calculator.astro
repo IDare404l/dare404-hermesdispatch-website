@@ -1,11 +1,13 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 
 const title = "Local LLM ROI Calculator — When Does Buying Hardware Beat APIs?";
 const description = "Compare total cost of ownership for running LLMs locally vs cloud APIs over 1-3 years. Factor hardware, electricity, utilization, and model upgrades.";
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="Local LLM ROI Calculator" description="Compare three-year total cost of ownership for local GPU inference versus cloud API." url="https://hermesdispatch.dev/tools/local-llm-roi-calculator/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

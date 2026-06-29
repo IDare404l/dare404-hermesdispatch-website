@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import pivotData from '../../data/miner_pivot.json';
 
 const title = "Miner Pivot Calculator — Mine, Sell, or Run AI Inference?";
@@ -7,6 +8,7 @@ const description = "Compare crypto mining profitability vs local LLM inference 
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="Miner Pivot Calculator" description="Compare crypto mining profit versus AI inference revenue versus selling a GPU." url="https://hermesdispatch.dev/tools/miner-pivot-calculator/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",

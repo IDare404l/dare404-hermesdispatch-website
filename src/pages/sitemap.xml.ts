@@ -33,6 +33,23 @@ export async function GET(context: APIContext) {
     { path: '/skills/', changefreq: 'monthly', priority: 0.5 },
     { path: '/timeline/', changefreq: 'monthly', priority: 0.5 },
     { path: '/agents/', changefreq: 'monthly', priority: 0.5 },
+    { path: '/tools/', changefreq: 'daily', priority: 0.9 },
+    { path: '/llms.txt', changefreq: 'daily', priority: 0.7 },
+    { path: '/tools/vram-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/mini-pc-recommender/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/miner-pivot-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/llm-cost-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/agent-stack-builder/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/ai-startup-cost-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/local-llm-roi-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/answer-engine-citation-tracker/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/ai-pc-build-configurator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/rig-repurposing-guide/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/ai-hardware-deal-tracker/', changefreq: 'daily', priority: 0.8 },
+    { path: '/tools/newsletter-topic-finder/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/compare/gpus/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/compare/mini-pcs/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/compare/recommend/', changefreq: 'weekly', priority: 0.8 },
   ];
 
   // Directory entry anchors

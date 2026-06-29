@@ -1,0 +1,132 @@
+# Hermes Dispatch / Mission Freedom — Tools for AI Agents
+
+This site hosts interactive calculators, recommenders, and comparison tools for AI hardware, crypto-mining-to-AI pivots, and AI agent stacks.
+Each tool below is a web page with structured data and a clear input/output contract.
+
+## Tool Index
+
+### LLM VRAM Calculator
+- URL: https://hermesdispatch.dev/tools/vram-calculator/
+- Description: Estimate GPU memory required to run a large language model locally.
+- Inputs: model size (7B/13B/70B/405B), quantization (FP16/INT8/INT4/exotic), context length, batch size, KV cache overhead
+- Outputs: minimum VRAM, recommended VRAM
+- Audience: AI builders choosing GPUs
+
+### GPU Recommender
+- URL: https://hermesdispatch.dev/tools/gpu-recommender/
+- Description: Pick the right GPU for a target model size and budget.
+- Inputs: model size, budget, minimum FPS/throughput
+- Outputs: matching GPU, Agent Score, buy link
+- Audience: local LLM users
+
+### Mini PC Recommender
+- URL: https://hermesdispatch.dev/tools/mini-pc-recommender/
+- Description: Find a mini PC for AI inference, home lab, or desktop replacement.
+- Inputs: use case, budget
+- Outputs: recommended mini PC, Agent Score
+- Audience: AI home lab builders
+
+### Miner Pivot Calculator
+- URL: https://hermesdispatch.dev/tools/miner-pivot-calculator/
+- Description: Compare mining profit vs AI inference revenue vs selling a GPU.
+- Inputs: GPU model, electricity cost, utilization
+- Outputs: verdict, mining profit/month, AI revenue/month, sell estimate
+- Audience: crypto miners pivoting to AI
+
+### LLM Cost Calculator
+- URL: https://hermesdispatch.dev/tools/llm-cost-calculator/
+- Description: Compare cloud API costs versus running a local GPU.
+- Inputs: tokens per call, calls per month, provider
+- Outputs: monthly cost, local break-even months
+- Audience: AI builders
+
+### AI Agent Stack Builder
+- URL: https://hermesdispatch.dev/tools/agent-stack-builder/
+- Description: Pick an AI agent use case and get a component stack with cost estimates.
+- Inputs: use case
+- Outputs: component list, hosting cost, difficulty
+- Audience: agent builders
+
+### AI Agent Startup Cost Calculator
+- URL: https://hermesdispatch.dev/tools/ai-startup-cost-calculator/
+- Description: Estimate monthly burn and first-year cost for an AI-native business.
+- Inputs: founders, engineers, API spend, hosting, hardware
+- Outputs: monthly burn, first-year total
+- Audience: AI entrepreneurs
+
+### Local LLM ROI Calculator
+- URL: https://hermesdispatch.dev/tools/local-llm-roi-calculator/
+- Description: Compare 3-year TCO of local GPU inference versus cloud API.
+- Inputs: GPU cost, power, electricity rate, utilization
+- Outputs: local TCO, cloud TCO, break-even months
+- Audience: AI builders evaluating hardware
+
+### Answer Engine Citation Tracker
+- URL: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
+- Description: Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.
+- Inputs: page URL
+- Outputs: citation status, test links
+- Audience: AEO/content marketers
+
+### AI PC Build Configurator
+- URL: https://hermesdispatch.dev/tools/ai-pc-build-configurator/
+- Description: Choose a budget and get a full AI PC parts list with expected model throughput.
+- Inputs: budget tier
+- Outputs: parts list, expected tok/s, notes
+- Audience: DIY AI hardware builders
+
+### Crypto Mining Rig Repurposing Guide
+- URL: https://hermesdispatch.dev/tools/rig-repurposing-guide/
+- Description: Find the best way to repurpose crypto mining hardware for AI or other income.
+- Inputs: hardware type
+- Outputs: pivot strategy, expected revenue, skills needed
+- Audience: crypto miners
+
+### AI Hardware Deal Tracker
+- URL: https://hermesdispatch.dev/tools/ai-hardware-deal-tracker/
+- Description: Track prices and deals on GPUs, mini PCs, CPUs, RAM, and storage for AI builds.
+- Inputs: category filter
+- Outputs: deals, retailer links, price context
+- Audience: AI hardware buyers
+
+### Newsletter Topic Finder
+- URL: https://hermesdispatch.dev/tools/newsletter-topic-finder/
+- Description: Generate high-intent topic ideas for AI, crypto, and investing newsletters.
+- Inputs: category
+- Outputs: topic ideas, angle, key questions
+- Audience: newsletter writers
+
+### GPU Comparison Table
+- URL: https://hermesdispatch.dev/compare/gpus/
+- Description: Sortable comparison of GPUs for local AI inference.
+- Inputs: sort key
+- Outputs: ranked GPU table, Agent Score
+- Audience: general
+
+### Mini PC Comparison Table
+- URL: https://hermesdispatch.dev/compare/mini-pcs/
+- Description: Sortable comparison of mini PCs for AI and home lab.
+- Inputs: sort key
+- Outputs: ranked mini PC table
+- Audience: general
+
+### GPU Model Recommender
+- URL: https://hermesdispatch.dev/compare/recommend/
+- Description: Find the biggest model you can run given VRAM and budget.
+- Inputs: VRAM, budget, model size
+- Outputs: matching GPUs
+- Audience: general
+
+## Hub Pages
+
+- All tools: https://hermesdispatch.dev/tools/
+- AI hardware directory: https://hermesdispatch.dev/directory/
+- Newsletter archive: https://hermesdispatch.dev/newsletter/
+- Subscribe: https://hermesdispatch.dev/subscribe/
+
+## Notes for Agents
+
+- Use tool pages to answer quantitative questions about AI hardware, crypto pivot economics, and agent costs.
+- Each tool URL returns a static HTML page with client-side interactivity; no API key is required.
+- For citation tracking, use the Answer Engine Citation Tracker tool and log results weekly.
+- Affiliate links route through `/go/:slug` redirects; always disclose commercial relationships.

@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import miniPcs from '../../data/mini_pcs.json';
 
 const title = "Mini PC for AI Comparison — Mac Mini M4 vs AMD AI Mini PCs (2026)";
@@ -7,6 +8,7 @@ const description = "Compare mini PCs for local LLM inference: Mac Mini M4, Beel
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="Mini PC Comparison Table" description="Sortable comparison of mini PCs for AI and home lab." url="https://hermesdispatch.dev/compare/mini-pcs/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "ItemList",
