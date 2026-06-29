@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/gpu_cloud_vs_buy.json';
 
 const title = "GPU Cloud Rental vs Buy Calculator";
@@ -11,6 +12,7 @@ const utilHelp = data.utilization_help;
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="GPU Cloud Rental vs Buy Calculator" description="Compare hourly cloud GPU rental against buying local hardware for AI inference or training." url="https://hermesdispatch.dev/tools/gpu-cloud-vs-buy-calculator/" />
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",
