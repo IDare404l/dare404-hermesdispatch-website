@@ -1,0 +1,275 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/ai_agent_compliance.json';
+
+const title = "AI Agent Privacy & Compliance Checker";
+const description = "Check which privacy and compliance requirements apply to your AI agent. Covers GDPR, SOC 2, CCPA/CPRA, EU AI Act, HIPAA, DORA, PIPEDA, and more.";
+const regions = data.regions;
+const useCases = data.use_cases;
+const dataTypes = data.data_types;
+const checklist = data.checklist;
+const readiness = data.readiness;
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Which compliance frameworks apply to an AI agent?",
+        "acceptedAnswer": { "@type": "Answer", "text": "At minimum, AI agents processing personal data usually need to consider GDPR (EU/UK), SOC 2 (security trust), and CCPA/CPRA (California). High-risk use cases may also trigger HIPAA, DORA, the EU AI Act, NIS2, or sector-specific financial and employment regulations." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is an AI chatbot required to disclose that it is not human?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes under the EU AI Act and under most consumer transparency laws. California, Colorado, and several platform terms also require clear AI disclosure in customer-facing contexts." }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need a Data Processing Addendum with my LLM vendor?",
+        "acceptedAnswer": { "@type": "Answer", "text": "If you send personal data of EU/UK/CA/AU users to an LLM provider, you generally need a DPA or equivalent contract terms covering subprocessing, security, and restricted use for training." }
+      },
+      {
+        "@type": "Question",
+        "name": "What makes an AI system high-risk under the EU AI Act?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Use cases like credit scoring, recruitment, medical diagnosis support, biometric identification, and systems that affect safety or fundamental rights are generally classified as high-risk and require risk management, data governance, human oversight, and CE marking." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🛡️</div>
+        <h1 class="display-heading mb-4">AI Agent Privacy & Compliance Checker</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Pick your region, use case, and data types to see which privacy and compliance checklist items apply to your AI agent.
+        </p>
+      </div>
+
+      <!-- Configuration -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
+        <h2 class="text-xl font-bold mb-6">1. Configure your agent</h2>
+        <div class="grid md:grid-cols-3 gap-6 mb-6">
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2">Primary region</label>
+            <select id="regionSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
+              {regions.map(r => <option value={r.slug}>{r.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2">Use case</label>
+            <select id="useCaseSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
+              {useCases.map(u => <option value={u.slug}>{u.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2">Highest-risk data handled</label>
+            <select id="dataTypeSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
+              <option value="">General / no special data</option>
+              {dataTypes.map(d => <option value={d.slug}>{d.name}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10 mb-6">
+          <p class="text-sm text-neutral-400 mb-1">Likely frameworks to consider</p>
+          <div id="frameworkList" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button id="checkBtn" type="button" class="btn-primary">Generate checklist</button>
+          <button id="resetBtn" type="button" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Reset</button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="results" class="hidden mb-10">
+        <div class="grid lg:grid-cols-3 gap-6 mb-8">
+          <div class="lg:col-span-2">
+            <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+              <h2 class="text-xl font-bold mb-4">Applicable checklist items</h2>
+              <p class="text-sm text-neutral-400 mb-4">Check the items you have already implemented. The readiness score updates in real time.</p>
+              <div id="checklistContainer" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Readiness score</p>
+              <p id="scoreValue" class="text-4xl font-bold text-brand-gold">0%</p>
+              <p id="scoreLabel" class="text-sm text-neutral-400 mt-1">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-emerald-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Estimated time to audit-ready</p>
+              <p id="timeEstimate" class="text-lg font-bold text-emerald-400">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-red-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Open P0 items</p>
+              <p id="openP0" class="text-2xl font-bold text-red-400">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Total applicable items</p>
+              <p id="totalItems" class="text-2xl font-bold">—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Explanations -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How this checker works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Region</strong> determines which privacy laws, AI acts, and sector rules are in scope.</li>
+            <li><strong class="text-white">Use case</strong> drives the EU AI Act risk class and default framework set.</li>
+            <li><strong class="text-white">Data type</strong> adds extra safeguards for health, financial, biometric, or children's data.</li>
+            <li><strong class="text-white">Checklist</strong> is filtered by applicability, not a generic one-size-fits-all list.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Next steps after the check</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• Export the open items into a Jira/Linear project or Notion tracker.</li>
+            <li>• Engage a privacy lawyer for high-risk use cases (healthcare, finance, hiring).</li>
+            <li>• Pair this with the <a href="/tools/agent-stack-builder/" class="text-brand-gold hover:underline">Agent Stack Builder</a> to pick security-first vendors.</li>
+            <li>• Re-run the checker whenever your region, use case, or vendor stack changes.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/agent-stack-builder/" class="btn-primary text-sm">Agent Stack Builder →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ regions, useCases, dataTypes, checklist, readiness }}>
+    const regionSelect = document.getElementById('regionSelect');
+    const useCaseSelect = document.getElementById('useCaseSelect');
+    const dataTypeSelect = document.getElementById('dataTypeSelect');
+    const frameworkList = document.getElementById('frameworkList');
+    const results = document.getElementById('results');
+    const checklistContainer = document.getElementById('checklistContainer');
+    const scoreValue = document.getElementById('scoreValue');
+    const scoreLabel = document.getElementById('scoreLabel');
+    const timeEstimate = document.getElementById('timeEstimate');
+    const openP0 = document.getElementById('openP0');
+    const totalItems = document.getElementById('totalItems');
+    const checkBtn = document.getElementById('checkBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const regionMap = Object.fromEntries(regions.map(r => [r.slug, r]));
+    const useCaseMap = Object.fromEntries(useCases.map(u => [u.slug, u]));
+    const dataTypeMap = Object.fromEntries(dataTypes.map(d => [d.slug, d]));
+
+    function getFrameworks() {
+      const r = regionMap[regionSelect.value];
+      const u = useCaseMap[useCaseSelect.value];
+      const d = dataTypeMap[dataTypeSelect.value];
+      const set = new Set([...(r?.frameworks || []), ...(u?.default_frameworks || [])]);
+      if (d?.high_risk) {
+        if (d.slug === 'health') set.add('HIPAA');
+        if (d.slug === 'financial') set.add('GLBA / PCI-DSS');
+        if (d.slug === 'children') set.add('COPPA / GDPR child rules');
+        if (d.slug === 'biometric') set.add('BIPA / GDPR special category');
+      }
+      return [...set];
+    }
+
+    function updateFrameworks() {
+      const frameworks = getFrameworks();
+      frameworkList.innerHTML = frameworks.map(f => `
+        <span class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold border border-brand-gold/20 text-xs font-medium">${f}</span>
+      `).join('');
+    }
+
+    function applicable(item) {
+      const r = regionMap[regionSelect.value];
+      const u = useCaseMap[useCaseSelect.value];
+      const d = dataTypeMap[dataTypeSelect.value];
+      if (!item.regions.includes(regionSelect.value) && !item.regions.includes('global')) return false;
+      if (u?.risk_level === 'high' && item.priority === 'P2') return false;
+      if (d?.high_risk) return true;
+      if (item.id === 'ai-act-risk' && regionSelect.value !== 'eu' && !item.regions.includes(regionSelect.value)) return false;
+      return true;
+    }
+
+    function renderChecklist() {
+      const items = checklist.filter(applicable);
+      checklistContainer.innerHTML = items.map((item, i) => `
+        <label class="flex items-start gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 hover:border-brand-gold/30 transition-colors cursor-pointer">
+          <input type="checkbox" class="check-item mt-1 w-4 h-4 accent-brand-gold" data-idx="${i}" data-priority="${item.priority}">
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span class="text-xs px-2 py-0.5 rounded border ${priorityClass(item.priority)}">${item.priority}</span>
+              <span class="text-xs text-neutral-500">${item.category}</span>
+            </div>
+            <p class="text-sm text-neutral-200">${item.text}</p>
+            <p class="text-xs text-neutral-500 mt-1">${item.frameworks.join(' • ')}</p>
+          </div>
+        </label>
+      `).join('');
+
+      totalItems.textContent = items.length;
+      updateScore();
+    }
+
+    function priorityClass(p) {
+      if (p === 'P0') return 'bg-red-500/10 text-red-400 border-red-500/20';
+      if (p === 'P1') return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+      return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+    }
+
+    function updateScore() {
+      const items = checklist.filter(applicable);
+      const checked = [...document.querySelectorAll('.check-item:checked')];
+      const totalWeight = items.reduce((sum, it) => sum + (it.priority === 'P0' ? 3 : it.priority === 'P1' ? 2 : 1), 0);
+      const checkedWeight = items.reduce((sum, it, i) => {
+        const cb = document.querySelector(`.check-item[data-idx="${i}"]`);
+        return sum + (cb?.checked ? (it.priority === 'P0' ? 3 : it.priority === 'P1' ? 2 : 1) : 0);
+      }, 0);
+      const score = totalWeight > 0 ? Math.round((checkedWeight / totalWeight) * 100) : 0;
+      scoreValue.textContent = `${score}%`;
+
+      let band = readiness.high_risk;
+      if (score >= readiness.excellent.min) band = readiness.excellent;
+      else if (score >= readiness.good.min) band = readiness.good;
+      else if (score >= readiness.needs_work.min) band = readiness.needs_work;
+
+      scoreLabel.textContent = band.label;
+      timeEstimate.textContent = band.weeks;
+
+      const open = items.filter((it, i) => {
+        const cb = document.querySelector(`.check-item[data-idx="${i}"]`);
+        return it.priority === 'P0' && !cb?.checked;
+      }).length;
+      openP0.textContent = open;
+    }
+
+    function generate() {
+      updateFrameworks();
+      renderChecklist();
+      results.classList.remove('hidden');
+      results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    [regionSelect, useCaseSelect, dataTypeSelect].forEach(el => el.addEventListener('change', updateFrameworks));
+    checklistContainer.addEventListener('change', updateScore);
+    checkBtn.addEventListener('click', generate);
+    resetBtn.addEventListener('click', () => {
+      regionSelect.value = 'us';
+      useCaseSelect.value = 'customer-support';
+      dataTypeSelect.value = '';
+      updateFrameworks();
+      results.classList.add('hidden');
+    });
+
+    updateFrameworks();
+  </script>
+</Layout>
