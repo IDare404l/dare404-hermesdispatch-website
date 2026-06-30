@@ -1,0 +1,294 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+
+const title = "AI Account Setup Assistant | Generate Signup Checklists + Autofill Profiles";
+const description = "Describe your AI project and get a personalized checklist of accounts to create, an autofill profile, and step-by-step setup instructions with official signup links.";
+
+const categories = [
+  {
+    name: "AI Infrastructure",
+    accounts: [
+      { name: "OpenAI", url: "https://platform.openai.com/signup", fields: ["email", "password", "phone"], purpose: "GPT-4o / embeddings / fine-tuning API", freeTier: "$5 starter credit (3 months)" },
+      { name: "Anthropic", url: "https://console.anthropic.com/login?selectAccount=true", fields: ["email", "password", "phone"], purpose: "Claude 3.5 Sonnet / Haiku API", freeTier: "$5 starter credit" },
+      { name: "Google AI Studio", url: "https://aistudio.google.com/app/apikey", fields: ["google account"], purpose: "Gemini 1.5 Pro / Flash API", freeTier: "60 requests/min free tier" },
+      { name: "Groq", url: "https://console.groq.com/login", fields: ["email", "password"], purpose: "Fast LLaMA / Mixtral inference", freeTier: "Free tier with rate limits" },
+      { name: "Together AI", url: "https://api.together.xyz/signup", fields: ["email", "password"], purpose: "Open-source model inference + fine-tuning", freeTier: "Initial free credits" },
+      { name: "Cohere", url: "https://cohere.com/login", fields: ["email", "password"], purpose: "Command R+ / embeddings / rerank", freeTier: "Trial credits" },
+      { name: "xAI", url: "https://console.x.ai/", fields: ["email", "password"], purpose: "Grok API", freeTier: "Paid-only" },
+    ]
+  },
+  {
+    name: "Cloud & Hosting",
+    accounts: [
+      { name: "Vercel", url: "https://vercel.com/signup", fields: ["email", "password", "github"], purpose: "Deploy frontends and serverless functions", freeTier: "Generous hobby tier" },
+      { name: "AWS", url: "https://aws.amazon.com/free/", fields: ["email", "password", "phone", "credit/debit card"], purpose: "GPU instances (EC2/G4/G5), S3, Lambda", freeTier: "12 months free tier" },
+      { name: "Google Cloud", url: "https://cloud.google.com/free", fields: ["google account", "billing"], purpose: "TPUs, GPUs, Vertex AI", freeTier: "$300 free credits" },
+      { name: "Azure", url: "https://azure.microsoft.com/en-us/free/", fields: ["microsoft account", "phone", "credit/debit card"], purpose: "OpenAI Service, VMs, GPU clusters", freeTier: "$200 free credits" },
+      { name: "RunPod", url: "https://www.runpod.io/console/signup", fields: ["email", "password"], purpose: "Serverless GPU inference", freeTier: "Pay-as-you-go" },
+      { name: "Lambda Cloud", url: "https://lambdalabs.com/service/gpu-cloud", fields: ["email", "password"], purpose: "GPU cloud training / inference", freeTier: "On-demand billing" },
+    ]
+  },
+  {
+    name: "Data & Vector Storage",
+    accounts: [
+      { name: "Pinecone", url: "https://www.pinecone.io/", fields: ["email", "password"], purpose: "Managed vector database", freeTier: "1 pod free" },
+      { name: "Weaviate Cloud", url: "https://console.weaviate.cloud/", fields: ["email", "password"], purpose: "Vector search + hybrid retrieval", freeTier: "Free sandbox" },
+      { name: "Supabase", url: "https://supabase.com/dashboard/sign-up", fields: ["email", "password"], purpose: "Postgres + vector extension", freeTier: "Generous free tier" },
+      { name: "Neon", url: "https://neon.tech/signup", fields: ["email", "password"], purpose: "Serverless Postgres", freeTier: "Free tier" },
+      { name: "MongoDB Atlas", url: "https://www.mongodb.com/atlas", fields: ["email", "password"], purpose: "Document DB + vector search", freeTier: "Free tier" },
+    ]
+  },
+  {
+    name: "Development & Agents",
+    accounts: [
+      { name: "GitHub", url: "https://github.com/signup", fields: ["email", "password", "username"], purpose: "Code repos, Actions, Copilot", freeTier: "Free public repos" },
+      { name: "GitLab", url: "https://gitlab.com/users/sign_up", fields: ["email", "password", "username"], purpose: "CI/CD + repos", freeTier: "Free tier" },
+      { name: "LangSmith", url: "https://smith.langchain.com/", fields: ["email", "password"], purpose: "Trace and evaluate LLM apps", freeTier: "Free tier" },
+      { name: "Weights & Biases", url: "https://wandb.ai/login", fields: ["email", "password"], purpose: "ML experiment tracking", freeTier: "Free personal tier" },
+      { name: "Hugging Face", url: "https://huggingface.co/join", fields: ["email", "password", "username"], purpose: "Models, datasets, inference endpoints", freeTier: "Free tier" },
+    ]
+  },
+  {
+    name: "Monetization & Operations",
+    accounts: [
+      { name: "Stripe", url: "https://dashboard.stripe.com/register", fields: ["email", "password", "business info"], purpose: "Payments, subscriptions, billing", freeTier: "Pay per transaction" },
+      { name: "Resend", url: "https://resend.com/signup", fields: ["email", "password"], purpose: "Transactional email", freeTier: "3,000 emails/month" },
+      { name: "Postmark", url: "https://account.postmarkapp.com/sign_up", fields: ["email", "password"], purpose: "Transactional email deliverability", freeTier: "Free trial" },
+      { name: "Cloudflare", url: "https://dash.cloudflare.com/sign-up", fields: ["email", "password"], purpose: "CDN, DNS, Workers, KV", freeTier: "Generous free tier" },
+    ]
+  },
+];
+
+const projectTypes = [
+  { id: "agent-saas", label: "AI Agent SaaS", needs: ["OpenAI", "Anthropic", "Vercel", "Supabase", "Stripe", "Resend", "GitHub", "LangSmith"] },
+  { id: "rag-chatbot", label: "RAG Chatbot", needs: ["OpenAI", "Pinecone", "Vercel", "Supabase", "GitHub"] },
+  { id: "local-llm", label: "Local LLM + Inference", needs: ["Hugging Face", "RunPod", "GitHub", "Weights & Biases"] },
+  { id: "crypto-ai", label: "Crypto → AI Pivot", needs: ["AWS", "Hugging Face", "GitHub", "Together AI"] },
+  { id: "newsletter-media", label: "AI-Powered Newsletter", needs: ["OpenAI", "Resend", "Vercel", "GitHub", "Supabase"] },
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema
+    name="AI Account Setup Assistant"
+    description={description}
+    url="https://hermesdispatch.dev/tools/ai-account-setup-assistant/"
+    category="AI Tools"
+    operatingSystem="Any"
+    applicationCategory="BusinessApplication"
+    price="0"
+    priceCurrency="USD"
+  />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can this tool create accounts automatically?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. It generates a personalized checklist and autofill profile, then guides you through each official signup page. You complete the human-required steps like CAPTCHA and phone verification."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which AI services does it cover?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "OpenAI, Anthropic, Google AI Studio, Groq, Together AI, Cohere, xAI, Vercel, AWS, Google Cloud, Azure, RunPod, Lambda Cloud, Pinecone, Weaviate, Supabase, Neon, MongoDB Atlas, GitHub, GitLab, LangSmith, Weights & Biases, Hugging Face, Stripe, Resend, Postmark, and Cloudflare."
+        }
+      }
+    ]
+  })} />
+
+  <article class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <header class="mb-10">
+      <h1 class="text-4xl font-bold mb-4">AI Account Setup Assistant</h1>
+      <p class="text-xl text-gray-400">Describe your AI project and get a personalized signup checklist, an autofill profile, and official links to every account you need.</p>
+    </header>
+
+    <div class="bg-cyan-400/10 border border-cyan-400/30 rounded-lg p-4 mb-10">
+      <p class="text-cyan-400 text-sm m-0">🤖 <strong>Human-in-the-loop:</strong> This tool does NOT create accounts automatically. It prepares everything so you can create them safely and legally in under 10 minutes.</p>
+    </div>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-6">1. Pick a project type</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="project-cards">
+        {projectTypes.map((pt) => (
+          <button
+            type="button"
+            data-project={pt.id}
+            class="project-card text-left bg-neutral-900 border border-neutral-800 rounded-xl p-5 hover:border-cyan-400 transition"
+          >
+            <span class="text-2xl mb-2 block">{pt.id === 'agent-saas' ? '🤖' : pt.id === 'rag-chatbot' ? '💬' : pt.id === 'local-llm' ? '🖥️' : pt.id === 'crypto-ai' ? '⛏️' : '📰'}</span>
+            <h3 class="font-semibold mb-1">{pt.label}</h3>
+            <p class="text-sm text-gray-400">{pt.needs.slice(0, 5).join(', ')}...</p>
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-4">2. Your autofill profile</h2>
+      <p class="text-gray-400 mb-4">Fill once. Use across all signups. Nothing is stored on our servers.</p>
+      <form id="profile-form" class="grid md:grid-cols-2 gap-4 bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+        <label class="block">
+          <span class="text-sm text-gray-400">Full name</span>
+          <input type="text" id="fullName" class="w-full mt-1 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white" placeholder="dare404" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-400">Email</span>
+          <input type="email" id="email" class="w-full mt-1 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white" placeholder="you@example.com" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-400">Preferred username</span>
+          <input type="text" id="username" class="w-full mt-1 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white" placeholder="dare404" />
+        </label>
+        <label class="block">
+          <span class="text-sm text-gray-400">Project / company name</span>
+          <input type="text" id="company" class="w-full mt-1 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white" placeholder="Hermes Mission Freedom" />
+        </label>
+        <label class="block md:col-span-2">
+          <span class="text-sm text-gray-400">Billing country</span>
+          <input type="text" id="country" class="w-full mt-1 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white" placeholder="United States" />
+        </label>
+      </form>
+    </section>
+
+    <section class="mb-12">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold">3. Your account checklist</h2>
+        <button id="copy-checklist" type="button" class="text-sm px-3 py-1 rounded border border-neutral-700 hover:border-cyan-400 text-gray-300">Copy checklist</button>
+      </div>
+      <div id="checklist" class="space-y-8">
+        <p class="text-gray-400">Select a project type above to generate your checklist.</p>
+      </div>
+    </section>
+
+    <section class="mb-12">
+      <h2 class="text-2xl font-bold mb-4">Frequently asked questions</h2>
+      <details class="group bg-neutral-900 border border-neutral-800 rounded-lg mb-3">
+        <summary class="cursor-pointer p-4 font-medium">Does this create accounts for me?</summary>
+        <div class="p-4 pt-0 text-gray-400">No. Most platforms prohibit automated signup. This tool gives you a checklist and autofill profile so you can create accounts yourself in minutes.</div>
+      </details>
+      <details class="group bg-neutral-900 border border-neutral-800 rounded-lg mb-3">
+        <summary class="cursor-pointer p-4 font-medium">Is my profile data stored?</summary>
+        <div class="p-4 pt-0 text-gray-400">No. Everything stays in your browser. No data is sent to our servers.</div>
+      </details>
+      <details class="group bg-neutral-900 border border-neutral-800 rounded-lg mb-3">
+        <summary class="cursor-pointer p-4 font-medium">Can I add custom accounts?</summary>
+        <div class="p-4 pt-0 text-gray-400">Yes. Use the custom account input at the bottom of your generated checklist to add any service we missed.</div>
+      </details>
+    </section>
+  </article>
+
+  <script define:vars={{ categories, projectTypes }}>
+    const projectCards = document.querySelectorAll('.project-card');
+    const checklistEl = document.getElementById('checklist');
+    const profileForm = document.getElementById('profile-form');
+    const copyBtn = document.getElementById('copy-checklist');
+    let selectedProject = null;
+
+    const allAccounts = categories.flatMap(c => c.accounts.map(a => ({ ...a, category: c.name })));
+
+    function renderChecklist(projectId) {
+      selectedProject = projectTypes.find(p => p.id === projectId);
+      if (!selectedProject) return;
+
+      // Highlight selected card
+      projectCards.forEach(card => {
+        card.classList.toggle('border-cyan-400', card.dataset.project === projectId);
+        card.classList.toggle('bg-neutral-800', card.dataset.project === projectId);
+      });
+
+      const needed = allAccounts.filter(a => selectedProject.needs.includes(a.name));
+      const grouped = needed.reduce((acc, a) => {
+        acc[a.category] = acc[a.category] || [];
+        acc[a.category].push(a);
+        return acc;
+      }, {});
+
+      let html = '';
+      for (const [category, accounts] of Object.entries(grouped)) {
+        html += `
+          <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
+            <h3 class="text-lg font-semibold mb-4 text-cyan-400">${category}</h3>
+            <div class="space-y-3">
+              ${accounts.map((a, i) => `
+                <div class="flex items-start gap-3">
+                  <input type="checkbox" id="acct-${projectId}-${i}" class="mt-1 w-4 h-4 accent-cyan-400">
+                  <div class="flex-1">
+                    <label for="acct-${projectId}-${i}" class="font-medium cursor-pointer">${a.name}</label>
+                    <p class="text-sm text-gray-400 mb-1">${a.purpose}</p>
+                    <p class="text-xs text-gray-500 mb-2">Fields: ${a.fields.join(', ')} · Free tier: ${a.freeTier}</p>
+                    <a href="${a.url}" target="_blank" rel="noopener" class="inline-block text-sm px-3 py-1.5 rounded bg-cyan-400 text-neutral-900 font-medium hover:bg-cyan-300 transition">Open signup →</a>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      html += `
+        <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5">
+          <h3 class="text-lg font-semibold mb-3">Custom account</h3>
+          <div class="flex gap-2">
+            <input type="text" id="custom-account" class="flex-1 px-3 py-2 bg-neutral-800 border border-neutral-700 rounded text-white" placeholder="Add a service we missed..." >
+            <button type="button" id="add-custom" class="px-4 py-2 rounded bg-neutral-800 border border-neutral-700 hover:border-cyan-400 text-gray-300">Add</button>
+          </div>
+          <ul id="custom-list" class="mt-3 space-y-2"></ul>
+        </div>
+      `;
+
+      checklistEl.innerHTML = html;
+
+      // Custom account logic
+      document.getElementById('add-custom').addEventListener('click', () => {
+        const input = document.getElementById('custom-account');
+        const val = input.value.trim();
+        if (!val) return;
+        const list = document.getElementById('custom-list');
+        const li = document.createElement('li');
+        li.innerHTML = `<input type="checkbox" class="mr-2 w-4 h-4 accent-cyan-400"> <span class="text-gray-300">${val}</span>`;
+        list.appendChild(li);
+        input.value = '';
+      });
+    }
+
+    projectCards.forEach(card => {
+      card.addEventListener('click', () => renderChecklist(card.dataset.project));
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const profile = {
+        fullName: document.getElementById('fullName').value,
+        email: document.getElementById('email').value,
+        username: document.getElementById('username').value,
+        company: document.getElementById('company').value,
+        country: document.getElementById('country').value,
+      };
+      const project = selectedProject ? selectedProject.label : 'Project';
+      const text = `${project} Account Setup Checklist\n\nProfile:\n${Object.entries(profile).filter(([,v]) => v).map(([k,v]) => `${k}: ${v}`).join('\n')}\n\nAccounts:\n${Array.from(document.querySelectorAll('#checklist input[type=checkbox]')).map(cb => {
+        const label = cb.closest('div')?.querySelector('label')?.textContent || cb.nextElementSibling?.textContent || '';
+        return `- [${cb.checked ? 'x' : ' '}] ${label}`;
+      }).join('\n')}`;
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = 'Copy checklist', 1500);
+      });
+    });
+
+    // Autofill helpers: copy single field on focus
+    profileForm.querySelectorAll('input').forEach(input => {
+      input.addEventListener('focus', () => {
+        if (input.value) {
+          navigator.clipboard.writeText(input.value).catch(() => {});
+        }
+      });
+    });
+  </script>
+</Layout>

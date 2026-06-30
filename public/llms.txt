@@ -228,3 +228,9 @@ Description: Compare hourly cloud GPU rental against buying local hardware for A
 Inputs: hours per day, days per month, projection months, cloud hourly rate, local GPU cost, system cost, power, electricity rate, resale value, utilization
 Outputs: cloud total, local total, electricity cost, break-even months, verdict, month-by-month comparison
 Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
+
+## AI Account Setup Assistant
+- URL: https://hermesdispatch.dev/tools/ai-account-setup-assistant/
+- Inputs: project type, full name, email, username, company, country
+- Outputs: categorized signup checklist, official signup links, autofill profile, copyable checklist
+- Notes: human-in-the-loop; does not create accounts automatically; covers 25+ AI/cloud/dev services

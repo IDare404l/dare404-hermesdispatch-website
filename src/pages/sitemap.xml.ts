@@ -43,6 +43,7 @@ export async function GET(context: APIContext) {
     { path: '/tools/ai-startup-cost-calculator/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/local-llm-roi-calculator/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/answer-engine-citation-tracker/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/ai-account-setup-assistant/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/ai-pc-build-configurator/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/rig-repurposing-guide/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/ai-hardware-deal-tracker/', changefreq: 'daily', priority: 0.8 },
