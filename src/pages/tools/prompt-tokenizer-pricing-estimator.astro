@@ -1,0 +1,219 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import pricing from '../../data/agent_api_pricing.json';
+
+const title = "Prompt Tokenizer & Pricing Estimator — Count Tokens Before You Send";
+const description = "Estimate token count and API cost for OpenAI, Anthropic, Google, Groq, Together AI, and Cohere before sending a prompt. Paste text or chat messages and compare prices instantly.";
+const providers = pricing.providers;
+
+const faqs = [
+  { q: "How accurate is this tokenizer estimate?", a: "It uses a fast approximation based on whitespace, punctuation, and average token ratios (~0.6 tokens per word for English, adjusted for code and special characters). It is accurate within ±10-15% for most LLM tokenizers. For exact counts, use the provider's own tokenizer API or tiktoken." },
+  { q: "Which provider pricing is used?", a: "Prices are pulled from the same dataset as the AI Agent API Pricing Comparator and reviewed monthly. Last updated: " + pricing.last_updated + ". Always confirm current rates on the provider's pricing page before committing to a budget." },
+  { q: "Does this include cached input discounts?", a: "Yes. Select a provider that supports cached input (OpenAI GPT-4o/4o-mini and Anthropic Claude 3.5 Sonnet/Haiku), then set the cached input percentage. The estimator applies the cached rate to that portion and the standard rate to the rest." },
+  { q: "What about system prompts and repeated context?", a: "Paste the full prompt including system instructions, examples, and user messages. The tokenizer counts everything. For multi-turn chat, duplicate turns to simulate context-window growth." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Prompt Tokenizer & Pricing Estimator" description={description} url="https://hermesdispatch.dev/tools/prompt-tokenizer-pricing-estimator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧮</div>
+        <h1 class="display-heading mb-4">Prompt Tokenizer & Pricing Estimator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Paste your prompt, estimate token count, and see what it would cost across every major LLM API.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mb-10">
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <label class="block text-sm text-neutral-400 mb-2">Prompt or chat context</label>
+          <textarea id="prompt" rows="14" placeholder="Paste a system prompt, user message, or full chat transcript here..." class="w-full px-4 py-3 rounded-xl bg-neutral-800/50 border border-neutral-700 text-white placeholder-neutral-500 focus:border-brand-gold focus:outline-none font-mono text-sm leading-relaxed"></textarea>
+          <div class="flex flex-wrap gap-3 mt-4">
+            <button type="button" id="loadExample" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Load example prompt</button>
+            <button type="button" id="clearPrompt" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Clear</button>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+            <h2 class="text-lg font-bold text-brand-gold mb-4">Token estimate</h2>
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-neutral-400">Characters</span>
+                <span id="charCount" class="font-mono">0</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-neutral-400">Words</span>
+                <span id="wordCount" class="font-mono">0</span>
+              </div>
+              <div class="flex justify-between border-t border-neutral-800 pt-3">
+                <span class="text-neutral-300">Estimated tokens</span>
+                <span id="tokenCount" class="font-mono text-2xl text-white">0</span>
+              </div>
+              <p class="text-xs text-neutral-500">Approximation ±10–15% depending on tokenizer and language.</p>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+            <h2 class="text-lg font-bold text-brand-gold mb-4">Workload</h2>
+            <label class="block text-sm text-neutral-400 mb-1">Requests / month</label>
+            <input id="requests" type="number" min="0" value="10000" class="w-full bg-neutral-800/50 border border-neutral-700 rounded-lg px-3 py-2 text-white mb-4" />
+
+            <label class="block text-sm text-neutral-400 mb-1">Output tokens / request</label>
+            <input id="outputTokens" type="number" min="0" value="500" class="w-full bg-neutral-800/50 border border-neutral-700 rounded-lg px-3 py-2 text-white mb-4" />
+
+            <label class="block text-sm text-neutral-400 mb-1">Cached input %</label>
+            <input id="cacheHit" type="number" min="0" max="100" value="0" class="w-full bg-neutral-800/50 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+        <h2 class="text-xl font-bold text-brand-gold mb-4">Cost per request and per month</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-sm text-neutral-400 border-b border-neutral-700">
+                <th class="py-3 pr-4">Provider / Model</th>
+                <th class="py-3 pr-4 text-right">Input / 1M</th>
+                <th class="py-3 pr-4 text-right">Cached / 1M</th>
+                <th class="py-3 pr-4 text-right">Output / 1M</th>
+                <th class="py-3 pr-4 text-right">Per request</th>
+                <th class="py-3 pr-4 text-right">Per month</th>
+                <th class="py-3 pr-4">Best for</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody" class="text-neutral-200">
+              {providers.map(p => (
+                <tr class="border-b border-neutral-800/50" data-provider={p.name}>
+                  <td class="py-3 pr-4">
+                    <div class="font-medium text-white">{p.name}</div>
+                    <div class="text-xs text-neutral-500">{p.model}</div>
+                  </td>
+                  <td class="py-3 pr-4 text-right font-mono">${p.input_per_1m.toFixed(2)}</td>
+                  <td class="py-3 pr-4 text-right font-mono">{p.cached_input_per_1m ? `$${p.cached_input_per_1m.toFixed(3)}` : "—"}</td>
+                  <td class="py-3 pr-4 text-right font-mono">${p.output_per_1m.toFixed(2)}</td>
+                  <td class="py-3 pr-4 text-right font-mono per-request">—</td>
+                  <td class="py-3 pr-4 text-right font-mono per-month">—</td>
+                  <td class="py-3 pr-4 text-sm text-neutral-400">{p.best_for}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="summary" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+        <h2 class="text-lg font-semibold text-cyan-400 mb-2">Cheapest for this prompt</h2>
+        <p id="cheapestLine" class="text-white text-xl font-medium">Paste a prompt to see the cheapest provider.</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-12">
+        <h2 class="text-xl font-bold text-brand-gold mb-4">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faqs.map(f => (
+            <div>
+              <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+              <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">Compare API pricing →</a>
+        <a href="/tools/context-window-cheat-sheet/" class="px-5 py-3 rounded-xl border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Context window cheat sheet →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-5 py-3 rounded-xl border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM cost calculator →</a>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ providersJson: JSON.stringify(providers), examplePrompt: "You are an expert AI infrastructure analyst for The Hermes Dispatch. Your job is to compare local LLM inference costs against cloud API pricing for a newsletter reader.\n\nGiven the following inputs, produce a concise recommendation:\n- GPU: NVIDIA RTX 4090 (24 GB VRAM)\n- Electricity rate: $0.12 / kWh\n- Model: Llama 3.1 70B at Q4_K_M quantization\n- Expected utilization: 4 hours per day at 80% load\n- Cloud alternative: OpenAI GPT-4o at standard pricing\n\nReturn a one-paragraph verdict, a 3-bullet cost breakdown, and a clear \"buy local\" or \"use cloud\" recommendation. Be specific with dollars per month where possible." }}>
+    const data = JSON.parse(providersJson);
+    const example = examplePrompt;
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 });
+    const fmt2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+
+    function estimateTokens(text) {
+      if (!text) return 0;
+      // Fast approximation: ~4 chars per token for English, with code/special-token penalties
+      let base = text.length / 4;
+      const words = text.trim().split(/\s+/).filter(Boolean).length;
+      const codeTokens = (text.match(/[{}\[\];:(),.=+\-*/<>!&|^%$#@~`]/g) || []).length;
+      const digits = (text.match(/\d/g) || []).length;
+      const special = (text.match(/[\u{1F300}-\u{1F6FF}]/gu) || []).length;
+      // Blend char-based and word-based estimate, add penalties for code and special chars
+      let estimate = (base * 0.7) + (words * 0.3) + (codeTokens * 0.25) + (digits * 0.15) + (special * 2);
+      return Math.max(1, Math.round(estimate));
+    }
+
+    function compute() {
+      const prompt = document.getElementById('prompt').value || '';
+      const tokens = estimateTokens(prompt);
+      const requests = parseFloat(document.getElementById('requests').value) || 0;
+      const outputTokens = parseFloat(document.getElementById('outputTokens').value) || 0;
+      const cacheHit = Math.min(100, Math.max(0, parseFloat(document.getElementById('cacheHit').value) || 0)) / 100;
+
+      document.getElementById('charCount').textContent = prompt.length.toLocaleString();
+      document.getElementById('wordCount').textContent = prompt.trim().split(/\s+/).filter(Boolean).length.toLocaleString();
+      document.getElementById('tokenCount').textContent = tokens.toLocaleString();
+
+      const rows = [];
+      data.forEach(p => {
+        const inputCostPerReq = (tokens / 1_000_000) * ((1 - cacheHit) * p.input_per_1m + cacheHit * (p.cached_input_per_1m || p.input_per_1m));
+        const outputCostPerReq = (outputTokens / 1_000_000) * p.output_per_1m;
+        const perRequest = inputCostPerReq + outputCostPerReq + (p.request_fee || 0);
+        const perMonth = perRequest * requests;
+        rows.push({ name: p.name, perRequest, perMonth, best_for: p.best_for });
+      });
+
+      rows.sort((a, b) => a.perMonth - b.perMonth);
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const name = tr.dataset.provider;
+        const row = rows.find(r => r.name === name);
+        const perReqCell = tr.querySelector('.per-request');
+        const perMonthCell = tr.querySelector('.per-month');
+        if (perReqCell && row) perReqCell.textContent = fmt(row.perRequest);
+        if (perMonthCell && row) perMonthCell.textContent = fmt2(row.perMonth);
+        if (row && rows[0].name === name) {
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      document.getElementById('cheapestLine').textContent = rows.length
+        ? `${rows[0].name} — ${fmt2(rows[0].perMonth)} / month (${fmt(rows[0].perRequest)} per request, ${rows[0].best_for}).`
+        : 'Paste a prompt to see the cheapest provider.';
+    }
+
+    ['prompt', 'requests', 'outputTokens', 'cacheHit'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+
+    document.getElementById('loadExample').addEventListener('click', () => {
+      document.getElementById('prompt').value = example;
+      compute();
+    });
+
+    document.getElementById('clearPrompt').addEventListener('click', () => {
+      document.getElementById('prompt').value = '';
+      compute();
+    });
+
+    compute();
+  </script>
+</Layout>

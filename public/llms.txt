@@ -279,6 +279,13 @@ Inputs: monthly requests, input tokens per request, output tokens per request, c
 Outputs: ranked monthly cost table, cheapest provider, cost per 1k requests
 Audience: AI agent builders choosing an inference API
 
+## Prompt Tokenizer & Pricing Estimator
+URL: https://hermesdispatch.dev/tools/prompt-tokenizer-pricing-estimator/
+Description: Paste a prompt, estimate token count, and see per-request and monthly cost across every major LLM API.
+Inputs: prompt text, requests per month, output tokens per request, cached input percentage
+Outputs: estimated tokens, per-request cost, monthly cost, cheapest provider
+Audience: AI agent builders and prompt engineers budgeting API spend
+
 ## GPU Cloud Rental vs Buy Calculator
 URL: https://hermesdispatch.dev/tools/gpu-cloud-vs-buy-calculator/
 Description: Compare hourly cloud GPU rental against buying local hardware for AI inference or training.
