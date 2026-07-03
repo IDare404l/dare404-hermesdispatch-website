@@ -1,0 +1,279 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_observability_cost.json';
+
+const title = "AI Agent Observability Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring. Compare Langfuse, LangSmith, Helicone, Datadog, Sentry, Grafana Cloud, and more.";
+const providers = data.providers;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "Which observability tool is cheapest for a new AI agent?", a: "For prototypes and small agents, free tiers from Langfuse, Helicone, Arize Phoenix, or Sentry cover millions of observations or thousands of errors per month. This calculator shows when you will outgrow the free tier and what the next tier costs." },
+  { q: "How does sampling affect cost?", a: "Most observability platforms charge per event, span, or GB ingested. Sampling 10% of traces cuts ingest by roughly 90% while still giving you a representative view of failures and latency." },
+  { q: "What is an 'observation' or 'span' in LLM observability?", a: "A span is one traced operation. An LLM request with tool calls, retrieval, and reranking can produce 3–10 spans. The calculator multiplies requests by traces per request to estimate total monthly observations." },
+  { q: "Are seat prices included?", a: "Yes, when the provider charges per seat (e.g., Sentry, New Relic, Helicone Growth) the calculator adds seat cost to the monthly total based on the team size you enter." },
+  { q: "Does this include log storage beyond the retention window?", a: "No. The retention field is used to sanity-check whether the provider's default retention fits your needs. Long-term archival storage is typically billed separately and is not modeled here." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Observability Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-observability-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">👁️</div>
+      <h1 class="display-heading mb-4">AI Agent Observability Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring.</p>
+    </div>
+
+    <!-- Presets -->
+    <div class="grid sm:grid-cols-3 gap-3 mb-8">
+      <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset="prototype">
+        <div class="text-2xl mb-2">🧪</div>
+        <h3 class="font-semibold text-sm">Prototype agent</h3>
+        <p class="text-xs text-neutral-400 mt-1">10k req/mo • 3 traces/req • 1 seat</p>
+      </button>
+      <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset="growth">
+        <div class="text-2xl mb-2">🚀</div>
+        <h3 class="font-semibold text-sm">Growth agent</h3>
+        <p class="text-xs text-neutral-400 mt-1">1M req/mo • 5 traces/req • 5 seats</p>
+      </button>
+      <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset="enterprise">
+        <div class="text-2xl mb-2">🏢</div>
+        <h3 class="font-semibold text-sm">Enterprise fleet</h3>
+        <p class="text-xs text-neutral-400 mt-1">10M req/mo • 8 traces/req • 20 seats</p>
+      </button>
+    </div>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests / month</span>
+          <input id="requests" type="number" min="0" step="1000" value={defaults.requests_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Traces / request</span>
+          <input id="tracesPerRequest" type="number" min="1" value={defaults.traces_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Events / request</span>
+          <input id="eventsPerRequest" type="number" min="0" value={defaults.events_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Avg trace size (KB)</span>
+          <input id="traceSizeKb" type="number" min="1" value={defaults.avg_trace_size_kb} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retention (days)</span>
+          <input id="retentionDays" type="number" min="1" value={defaults.retention_days} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sampling %</span>
+          <input id="samplingPct" type="number" min="1" max="100" value={defaults.sampling_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Team seats</span>
+          <input id="seats" type="number" min="1" value={defaults.seats} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Error events / month</span>
+          <input id="errorEvents" type="number" min="0" step="1000" value={defaults.error_events_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Uptime checks / month</span>
+          <input id="uptimeChecks" type="number" min="0" step="1000" value={defaults.uptime_checks_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Prices are directional estimates in USD. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Cheapest option -->
+    <section id="summary" class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/30 text-center">
+      <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest observability stack estimate</p>
+      <p id="cheapestLine" class="text-2xl font-bold text-brand-gold">Enter a workload to see the cheapest option.</p>
+      <p id="periodLine" class="text-sm text-neutral-400 mt-1">—</p>
+    </section>
+
+    <!-- Results table -->
+    <section class="overflow-x-auto mb-12">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4">Category</th>
+            <th class="py-3 pr-4">Pricing model</th>
+            <th class="py-3 pr-4 text-right">Monthly cost</th>
+            <th class="py-3 pr-4 text-right">Per 1M requests</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {providers.map(p => (
+            <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" data-provider={p.slug}>
+              <td class="py-3 pr-4">
+                <div class="font-medium text-white">{p.name}</div>
+                <div class="text-xs text-neutral-500">{p.free_tier}</div>
+              </td>
+              <td class="py-3 pr-4 text-sm">{p.category}</td>
+              <td class="py-3 pr-4 text-sm">{p.model}</td>
+              <td class="py-3 pr-4 text-right font-mono cost-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono unit-cell">—</td>
+              <td class="py-3 pr-4 text-sm">{p.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-stack-builder/" class="btn-primary text-sm">Agent Stack Builder →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Memory / RAG Cost Calc →</a>
+      <a href="/tools/ai-startup-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers) }}>
+    const data = JSON.parse(providers);
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+
+    const PRESETS = {
+      prototype: { requests: 10000, tracesPerRequest: 3, eventsPerRequest: 1, traceSizeKb: 8, retentionDays: 14, samplingPct: 100, seats: 1, errorEvents: 500, uptimeChecks: 500, projectionMonths: 12 },
+      growth: { requests: 1000000, tracesPerRequest: 5, eventsPerRequest: 2, traceSizeKb: 12, retentionDays: 30, samplingPct: 50, seats: 5, errorEvents: 50000, uptimeChecks: 10000, projectionMonths: 12 },
+      enterprise: { requests: 10000000, tracesPerRequest: 8, eventsPerRequest: 3, traceSizeKb: 16, retentionDays: 90, samplingPct: 25, seats: 20, errorEvents: 500000, uptimeChecks: 100000, projectionMonths: 12 }
+    };
+
+    function getInputs() {
+      return {
+        requests: Math.max(0, parseFloat(document.getElementById('requests').value) || 0),
+        tracesPerRequest: Math.max(1, parseFloat(document.getElementById('tracesPerRequest').value) || 1),
+        eventsPerRequest: Math.max(0, parseFloat(document.getElementById('eventsPerRequest').value) || 0),
+        traceSizeKb: Math.max(1, parseFloat(document.getElementById('traceSizeKb').value) || 1),
+        retentionDays: Math.max(1, parseFloat(document.getElementById('retentionDays').value) || 1),
+        samplingPct: Math.min(100, Math.max(1, parseFloat(document.getElementById('samplingPct').value) || 100)) / 100,
+        seats: Math.max(1, parseFloat(document.getElementById('seats').value) || 1),
+        errorEvents: Math.max(0, parseFloat(document.getElementById('errorEvents').value) || 0),
+        uptimeChecks: Math.max(0, parseFloat(document.getElementById('uptimeChecks').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function monthlyGBIngested(inputs) {
+      const effectiveObservations = inputs.requests * inputs.tracesPerRequest * inputs.samplingPct;
+      const gbPerMonth = effectiveObservations * inputs.traceSizeKb / 1024 / 1024;
+      // Rough retention multiplier: storing 30 days at steady state ≈ 1x monthly ingest on disk
+      return gbPerMonth * Math.min(inputs.retentionDays / 30, 3);
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const observations = inps.requests * inps.tracesPerRequest * inps.samplingPct;
+      const spansM = observations / 1_000_000;
+      const requestsM = inps.requests / 1_000_000;
+      const eventsM = inps.errorEvents / 1_000_000;
+      const gb = monthlyGBIngested(inps);
+
+      const rows = data.map(p => {
+        let cost = 0;
+        // Seat cost
+        if (p.per_seat) cost += p.per_seat * inps.seats;
+        // Base cost
+        if (p.base_monthly) cost += p.base_monthly;
+        // Per observation / trace / span
+        if (p.per_1m_observations) cost += spansM * p.per_1m_observations;
+        if (p.per_1m_traces) cost += spansM * p.per_1m_traces;
+        if (p.per_1m_spans) cost += spansM * p.per_1m_spans;
+        // Per request (Helicone style)
+        if (p.per_1m_requests) cost += requestsM * p.per_1m_requests;
+        // Per GB ingested
+        if (p.per_gb_ingested) cost += gb * p.per_gb_ingested;
+        // Error events (Sentry style)
+        if (p.per_1m_events) cost += eventsM * p.per_1m_events;
+        // Uptime checks
+        if (p.per_check_month) cost += inps.uptimeChecks * p.per_check_month;
+        // Overages
+        if (p.overage_observations_per_1m) cost += Math.max(0, spansM - (p.free_observations_m || 0)) * p.overage_observations_per_1m;
+
+        return { slug: p.slug, name: p.name, cost, best_for: p.best_for };
+      });
+
+      rows.sort((a, b) => a.cost - b.cost);
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const slug = tr.dataset.provider;
+        const row = rows.find(r => r.slug === slug);
+        const costCell = tr.querySelector('.cost-cell');
+        const unitCell = tr.querySelector('.unit-cell');
+        if (costCell && row) costCell.textContent = fmt(row.cost);
+        if (unitCell && row) unitCell.textContent = inps.requests > 0 ? fmt(row.cost / (inps.requests / 1_000_000)) : '—';
+        if (row && rows[0].slug === slug) {
+          tr.classList.add('bg-brand-gold/10');
+        } else {
+          tr.classList.remove('bg-brand-gold/10');
+        }
+      });
+
+      const cheapest = rows[0];
+      const periodCost = cheapest ? cheapest.cost * inps.projectionMonths : 0;
+      document.getElementById('cheapestLine').textContent = cheapest
+        ? `${cheapest.name} — ${fmt(cheapest.cost)} / month (${cheapest.best_for}).`
+        : 'Enter a workload to see the cheapest option.';
+      document.getElementById('periodLine').textContent = cheapest
+        ? `Projected ${inps.projectionMonths}-month cost: ${fmt(periodCost)} for the cheapest option.`
+        : '—';
+    }
+
+    ['requests','tracesPerRequest','eventsPerRequest','traceSizeKb','retentionDays','samplingPct','seats','errorEvents','uptimeChecks','projectionMonths'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = PRESETS[btn.dataset.preset];
+        if (!p) return;
+        document.getElementById('requests').value = p.requests;
+        document.getElementById('tracesPerRequest').value = p.tracesPerRequest;
+        document.getElementById('eventsPerRequest').value = p.eventsPerRequest;
+        document.getElementById('traceSizeKb').value = p.traceSizeKb;
+        document.getElementById('retentionDays').value = p.retentionDays;
+        document.getElementById('samplingPct').value = p.samplingPct;
+        document.getElementById('seats').value = p.seats;
+        document.getElementById('errorEvents').value = p.errorEvents;
+        document.getElementById('uptimeChecks').value = p.uptimeChecks;
+        document.getElementById('projectionMonths').value = p.projectionMonths;
+        compute();
+      });
+    });
+
+    compute();
+  </script>
+</Layout>

@@ -241,3 +241,10 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Inputs: GPU model, marketplace, hourly rental rate, hours online per day, utilization %, electricity rate, power draw, platform fee %, maintenance, hardware cost
 - Outputs: gross revenue, platform fees, electricity cost, net monthly profit, net $/rented hour, break-even months, annual profit after hardware, verdict
 - Audience: crypto miners pivoting to AI inference and AI hardware owners considering GPU hosting
+
+## AI Agent Observability Cost Calculator
+- URL: https://hermesdispatch.dev/tools/agent-observability-cost-calculator/
+- Description: Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring.
+- Inputs: requests/month, traces/request, events/request, avg trace size (KB), retention days, sampling %, team seats, error events/month, uptime checks/month, projection months
+- Outputs: monthly cost per provider, cheapest option, cost per 1M requests, total period cost
+- Audience: AI agent builders budgeting observability and monitoring stack
