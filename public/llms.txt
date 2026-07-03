@@ -255,3 +255,10 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Inputs: requests/minute, input tokens, output tokens, retrieval enabled/queries/latency, tool calls/latency, network RTT, target P50/P95 latency
 - Outputs: P50 latency, P95 latency, full response time, target status per provider
 - Audience: AI agent builders optimizing response time and user experience
+
+## AI Agent SLA / Uptime Calculator
+- URL: https://hermesdispatch.dev/tools/agent-sla-calculator/
+- Description: Convert uptime targets into allowed downtime, compare provider SLAs, and estimate revenue at risk for an AI agent.
+- Inputs: target SLA (%), monthly revenue, requests/month, cost per minute of downtime, projection months
+- Outputs: allowed downtime per month/year, revenue at risk, availability class, provider SLA comparison table with credit tiers
+- Audience: AI agent builders setting reliability targets and choosing providers

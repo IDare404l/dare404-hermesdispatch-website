@@ -1,0 +1,228 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_sla.json';
+
+const title = "AI Agent SLA / Uptime Calculator | Hermes Dispatch";
+const description = "Convert uptime targets into allowed downtime, compare provider SLAs, and estimate the revenue at risk when an AI agent goes down.";
+const providers = data.providers;
+const classes = data.availability_classes;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does 99.9% uptime actually mean?", a: "99.9% availability allows roughly 43.8 minutes of downtime per month, or 8.76 hours per year. A single bad deployment or cloud region outage can consume that budget quickly." },
+  { q: "How is revenue at risk calculated?", a: "We divide your monthly revenue by the number of minutes in a month, then multiply by the expected downtime minutes at your target SLA. This is a directional estimate of revenue exposed to outages." },
+  { q: "Do provider SLA credits cover lost revenue?", a: "Almost never. SLA credits are usually a small percentage of the API or hosting bill, not a reimbursement for your lost revenue, churn, or reputational damage." },
+  { q: "What is the difference between availability and latency SLAs?", a: "Availability SLA measures whether the service responds at all. Latency or response-time SLAs measure how fast it responds. This tool focuses on availability; pair it with the Agent Latency Budget Calculator for speed targets." },
+  { q: "Should I aim for four nines (99.99%) or three nines (99.9%)?", a: "99.99% allows only ~4.3 minutes of downtime per month and usually requires multi-region failover, redundancy, and a runbook. 99.9% is typical for production AI agents without hard real-time requirements." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent SLA / Uptime Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-sla-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⏱️</div>
+      <h1 class="display-heading mb-4">AI Agent SLA / Uptime Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Convert uptime targets into allowed downtime, compare provider SLAs, and estimate the revenue at risk when an AI agent goes down.</p>
+    </div>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload & Target</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Target SLA (%)</span>
+          <input id="targetSla" type="number" min="90" max="99.9999" step="0.01" value={defaults.target_sla_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly revenue ($)</span>
+          <input id="monthlyRevenue" type="number" min="0" step="100" value={defaults.monthly_revenue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests / month</span>
+          <input id="requestsPerMonth" type="number" min="0" step="1000" value={defaults.requests_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cost per minute of downtime ($)</span>
+          <input id="costPerMinute" type="number" min="0" step="0.01" value={defaults.cost_per_minute} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- SLA summary -->
+    <section id="summary" class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Allowed downtime / month</p>
+        <p id="monthlyDowntime" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Allowed downtime / year</p>
+        <p id="yearlyDowntime" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Revenue at risk / period</p>
+        <p id="revenueAtRisk" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Availability class -->
+    <section id="classSummary" class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Availability class</h2>
+      <p id="classLine" class="text-lg">—</p>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="overflow-x-auto mb-12">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4">Category</th>
+            <th class="py-3 pr-4 text-right">Published SLA</th>
+            <th class="py-3 pr-4 text-right">Max monthly downtime</th>
+            <th class="py-3 pr-4 text-right">Revenue at risk / mo</th>
+            <th class="py-3 pr-4">SLA credit tier</th>
+            <th class="py-3 pr-4">Notes</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {providers.map(p => (
+            <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" data-provider={p.slug}>
+              <td class="py-3 pr-4 font-medium text-white">{p.name}</td>
+              <td class="py-3 pr-4 text-sm">{p.category}</td>
+              <td class="py-3 pr-4 text-right font-mono sla-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono downtime-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono risk-cell">—</td>
+              <td class="py-3 pr-4 text-sm credit-cell">—</td>
+              <td class="py-3 pr-4 text-sm text-neutral-500">{p.notes}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-latency-budget-calculator/" class="btn-primary text-sm">Latency Budget Calc →</a>
+      <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost Calc →</a>
+      <a href="/tools/startup-runway-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Runway Calc →</a>
+      <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), classes: JSON.stringify(classes) }}>
+    const data = JSON.parse(providers);
+    const classData = JSON.parse(classes);
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtPct = n => n.toFixed(3) + '%';
+
+    function minutesPerMonth(pct) {
+      // 30.44 days * 24 * 60
+      return (1 - pct / 100) * 30.44 * 24 * 60;
+    }
+
+    function formatDuration(minutes) {
+      if (minutes < 1) return (minutes * 60).toFixed(1) + ' s';
+      if (minutes < 60) return minutes.toFixed(1) + ' min';
+      const h = Math.floor(minutes / 60);
+      const m = (minutes % 60).toFixed(0);
+      return `${h}h ${m}m`;
+    }
+
+    function getInputs() {
+      return {
+        targetSla: Math.min(99.9999, Math.max(90, parseFloat(document.getElementById('targetSla').value) || 99.9)),
+        monthlyRevenue: Math.max(0, parseFloat(document.getElementById('monthlyRevenue').value) || 0),
+        requestsPerMonth: Math.max(0, parseFloat(document.getElementById('requestsPerMonth').value) || 0),
+        costPerMinute: Math.max(0, parseFloat(document.getElementById('costPerMinute').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function revenueAtRisk(monthlyRevenue, downtimeMinutes) {
+      const minutesPerMo = 30.44 * 24 * 60;
+      return monthlyRevenue * (downtimeMinutes / minutesPerMo);
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const allowedMinMonthly = minutesPerMonth(inps.targetSla);
+      const allowedMinYearly = allowedMinMonthly * 12;
+      const riskPerMonth = revenueAtRisk(inps.monthlyRevenue, allowedMinMonthly);
+      const riskPeriod = riskPerMonth * inps.projectionMonths;
+      const costDowntime = inps.costPerMinute * allowedMinMonthly * inps.projectionMonths;
+      const totalRisk = riskPeriod + costDowntime;
+
+      document.getElementById('monthlyDowntime').textContent = formatDuration(allowedMinMonthly);
+      document.getElementById('yearlyDowntime').textContent = formatDuration(allowedMinYearly);
+      document.getElementById('revenueAtRisk').textContent = fmtMoney(totalRisk);
+
+      const matchedClass = classData.find(c => inps.targetSla >= c.min) || classData[classData.length - 1];
+      document.getElementById('classLine').innerHTML = `Your target of <span class="text-white font-semibold">${fmtPct(inps.targetSla)}</span> is <span class="text-brand-gold font-semibold">${matchedClass.name}</span> (${matchedClass.class}).`;
+
+      const rows = data.map(p => {
+        const pDowntimeMin = minutesPerMonth(p.published_sla);
+        const pRisk = revenueAtRisk(inps.monthlyRevenue, pDowntimeMin);
+        const creditText = p.credit_tiers && p.credit_tiers.length
+          ? p.credit_tiers.map(t => `${t.credit_pct}% credit below ${t.threshold}%`).join('; ')
+          : 'No SLA credits listed';
+        const meetsTarget = p.published_sla >= inps.targetSla;
+        return { ...p, downtimeMin: pDowntimeMin, risk: pRisk, creditText, meetsTarget };
+      });
+
+      rows.sort((a, b) => b.published_sla - a.published_sla);
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const slug = tr.dataset.provider;
+        const row = rows.find(r => r.slug === slug);
+        const slaCell = tr.querySelector('.sla-cell');
+        const downtimeCell = tr.querySelector('.downtime-cell');
+        const riskCell = tr.querySelector('.risk-cell');
+        const creditCell = tr.querySelector('.credit-cell');
+        if (slaCell && row) slaCell.textContent = fmtPct(row.published_sla);
+        if (downtimeCell && row) downtimeCell.textContent = formatDuration(row.downtimeMin);
+        if (riskCell && row) riskCell.textContent = fmtMoney(row.risk);
+        if (creditCell && row) creditCell.textContent = row.creditText;
+        if (row && row.meetsTarget) {
+          tr.classList.add('bg-brand-gold/10');
+        } else {
+          tr.classList.remove('bg-brand-gold/10');
+        }
+      });
+    }
+
+    ['targetSla','monthlyRevenue','requestsPerMonth','costPerMinute','projectionMonths'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+
+    compute();
+  </script>
+</Layout>

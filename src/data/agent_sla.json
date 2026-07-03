@@ -1,0 +1,146 @@
+{
+  "last_updated": "2026-07-03",
+  "note": "SLA uptime percentages and credit policies are typical but not guaranteed. Always read the current provider SLA before committing to a service level target.",
+  "defaults": {
+    "target_sla_pct": 99.9,
+    "monthly_revenue": 50000,
+    "requests_per_month": 1000000,
+    "projection_months": 12,
+    "cost_per_minute": 0
+  },
+  "availability_classes": [
+    { "min": 99.999, "name": "Five nines", "class": "Mission-critical" },
+    { "min": 99.99, "name": "Four nines", "class": "Enterprise" },
+    { "min": 99.9, "name": "Three nines", "class": "Production" },
+    { "min": 99.5, "name": "Two nines", "class": "Standard SaaS" },
+    { "min": 99.0, "name": "One nine", "class": "Best effort" }
+  ],
+  "providers": [
+    {
+      "slug": "openai",
+      "name": "OpenAI API",
+      "category": "Frontier API",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 },
+        { "threshold": 95.0, "credit_pct": 25 },
+        { "threshold": 90.0, "credit_pct": 50 }
+      ],
+      "notes": "Enterprise SLA may offer 99.99% with committed use."
+    },
+    {
+      "slug": "anthropic",
+      "name": "Anthropic API",
+      "category": "Frontier API",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 },
+        { "threshold": 95.0, "credit_pct": 25 }
+      ],
+      "notes": "Standard SLA; enterprise terms available."
+    },
+    {
+      "slug": "google-gemini",
+      "name": "Google Gemini API",
+      "category": "Frontier API",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 },
+        { "threshold": 95.0, "credit_pct": 25 }
+      ],
+      "notes": "Google Cloud SLA may apply to paid tiers."
+    },
+    {
+      "slug": "groq",
+      "name": "Groq",
+      "category": "Fast inference",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 }
+      ],
+      "notes": "High-throughput SLA; verify enterprise terms."
+    },
+    {
+      "slug": "together-ai",
+      "name": "Together AI",
+      "category": "Open model API",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 }
+      ],
+      "notes": "Dedicated deployments may offer higher SLA."
+    },
+    {
+      "slug": "aws-bedrock",
+      "name": "AWS Bedrock",
+      "category": "Cloud platform",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 },
+        { "threshold": 95.0, "credit_pct": 25 },
+        { "threshold": 90.0, "credit_pct": 50 }
+      ],
+      "notes": "AWS global infrastructure; higher SLAs for multi-region."
+    },
+    {
+      "slug": "azure-openai",
+      "name": "Azure OpenAI Service",
+      "category": "Cloud platform",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 },
+        { "threshold": 95.0, "credit_pct": 25 },
+        { "threshold": 90.0, "credit_pct": 50 }
+      ],
+      "notes": "Uptime SLA tied to Azure region and provisioning model."
+    },
+    {
+      "slug": "gcp-vertex",
+      "name": "Google Cloud Vertex AI",
+      "category": "Cloud platform",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 },
+        { "threshold": 95.0, "credit_pct": 25 },
+        { "threshold": 90.0, "credit_pct": 50 }
+      ],
+      "notes": "Regional SLAs can be improved with multi-region deployments."
+    },
+    {
+      "slug": "cloudflare-workers",
+      "name": "Cloudflare Workers AI",
+      "category": "Edge inference",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 }
+      ],
+      "notes": "Edge network; often lower latency and strong uptime."
+    },
+    {
+      "slug": "vast-ai",
+      "name": "Vast.ai",
+      "category": "GPU cloud rental",
+      "published_sla": 99.5,
+      "credit_tiers": [],
+      "notes": "Marketplace uptime depends on individual host reliability."
+    },
+    {
+      "slug": "runpod",
+      "name": "RunPod",
+      "category": "GPU cloud rental",
+      "published_sla": 99.9,
+      "credit_tiers": [
+        { "threshold": 99.0, "credit_pct": 10 }
+      ],
+      "notes": "Serverless pods can have cold-start downtime."
+    },
+    {
+      "slug": "self-hosted",
+      "name": "Self-hosted / local",
+      "category": "Self-managed",
+      "published_sla": 99.0,
+      "credit_tiers": [],
+      "notes": "You own the availability; depends on power, network, and hardware."
+    }
+  ]
+}
