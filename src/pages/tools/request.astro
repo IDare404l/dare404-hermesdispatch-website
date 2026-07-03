@@ -1,0 +1,157 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "Request a Tool | Hermes Dispatch";
+const description = "Submit a tool request for Hermes Dispatch. Humans and AI agents can describe a problem and the tool that would solve it.";
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": title,
+  "description": description,
+  "url": "https://hermesdispatch.dev/tools/request/",
+};
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+  <section class="relative pt-24 pb-16 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🛠️</div>
+        <h1 class="display-heading mb-4">Request a Tool</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Tell us what problem you're trying to solve. Humans and AI agents can submit requests; the best ones become Hermes Agent-compatible tools.
+        </p>
+      </div>
+
+      <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-4 mb-8">
+        <p class="text-cyan-400 text-sm m-0">
+          🤖 <strong>For AI agents:</strong> POST a JSON request to <code class="text-cyan-300 bg-cyan-950/50 px-1 rounded">https://hermesdispatch.dev/api/tool-request/</code> with <code class="text-cyan-300 bg-cyan-950/50 px-1 rounded">problem</code>, <code class="text-cyan-300 bg-cyan-950/50 px-1 rounded">audience</code>, and optional <code class="text-cyan-300 bg-cyan-950/50 px-1 rounded">agent_name</code>.
+        </p>
+      </div>
+
+      <form id="tool-request-form" class="glass-card rounded-2xl p-8 space-y-6">
+        <div>
+          <label for="name" class="block text-sm font-medium text-neutral-300 mb-1">Your name or agent name</label>
+          <input id="name" name="name" type="text" placeholder="dare404 or Agent-GPT-7" class="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-cyan-400 focus:outline-none" />
+        </div>
+
+        <div>
+          <label for="role" class="block text-sm font-medium text-neutral-300 mb-1">Who are you?</label>
+          <select id="role" name="role" class="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-cyan-400 focus:outline-none">
+            <option value="human">Human visitor</option>
+            <option value="agent">AI agent / automation</option>
+            <option value="builder">Tool builder</option>
+            <option value="subscriber">Newsletter subscriber</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="problem" class="block text-sm font-medium text-neutral-300 mb-1">What problem should the tool solve?</label>
+          <textarea id="problem" name="problem" required rows="4" placeholder="I need a calculator that compares ..." class="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-cyan-400 focus:outline-none"></textarea>
+          <p class="text-xs text-neutral-500 mt-1">Be specific. Include inputs, expected outputs, and why existing tools don't work.</p>
+        </div>
+
+        <div>
+          <label for="inputs" class="block text-sm font-medium text-neutral-300 mb-1">Expected inputs</label>
+          <input id="inputs" name="inputs" type="text" placeholder="GPU model, electricity cost, token price" class="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-cyan-400 focus:outline-none" />
+        </div>
+
+        <div>
+          <label for="outputs" class="block text-sm font-medium text-neutral-300 mb-1">Expected outputs</label>
+          <input id="outputs" name="outputs" type="text" placeholder="Verdict, monthly savings, recommended hardware" class="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-cyan-400 focus:outline-none" />
+        </div>
+
+        <div>
+          <label for="audience" class="block text-sm font-medium text-neutral-300 mb-1">Who is this tool for?</label>
+          <select id="audience" name="audience" class="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:border-cyan-400 focus:outline-none">
+            <option value="ai-builders">AI builders</option>
+            <option value="crypto-miners">Crypto miners</option>
+            <option value="investors">Investors</option>
+            <option value="ai-agents">AI agents / automations</option>
+            <option value="content-creators">Content creators</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="contact" class="block text-sm font-medium text-neutral-300 mb-1">Contact (optional)</label>
+          <input id="contact" name="contact" type="text" placeholder="Email, Telegram, or leave blank for anonymous" class="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:border-cyan-400 focus:outline-none" />
+          <p class="text-xs text-neutral-500 mt-1">Only used if we have a follow-up question. Never shared.</p>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <input id="agent_ready" name="agent_ready" type="checkbox" class="mt-1 w-5 h-5 rounded border-neutral-700 bg-neutral-800 text-cyan-400 focus:ring-cyan-400" />
+          <label for="agent_ready" class="text-sm text-neutral-300">
+            This should be available as a downloadable Hermes Agent tool script.
+          </label>
+        </div>
+
+        <button type="submit" id="submit-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+          <span>Submit tool request</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+        </button>
+
+        <div id="form-message" class="hidden rounded-lg p-4 text-sm"></div>
+      </form>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function() {
+      const form = document.getElementById('tool-request-form');
+      const btn = document.getElementById('submit-btn');
+      const msg = document.getElementById('form-message');
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        btn.disabled = true;
+        btn.querySelector('span').textContent = 'Submitting...';
+        msg.className = 'hidden';
+
+        const payload = {
+          name: form.name.value.trim() || 'Anonymous',
+          role: form.role.value,
+          problem: form.problem.value.trim(),
+          inputs: form.inputs.value.trim(),
+          outputs: form.outputs.value.trim(),
+          audience: form.audience.value,
+          contact: form.contact.value.trim(),
+          agent_ready: form.agent_ready.checked,
+          source: window.location.pathname,
+          submitted_at: new Date().toISOString()
+        };
+
+        try {
+          const res = await fetch('/api/tool-request/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+
+          msg.classList.remove('hidden');
+          if (data.success) {
+            msg.className = 'rounded-lg p-4 text-sm bg-emerald-500/10 border border-emerald-500/30 text-emerald-400';
+            msg.textContent = data.message || 'Request received. If it ships, you’ll see it in the Agent Toolkit.';
+            form.reset();
+          } else {
+            msg.className = 'rounded-lg p-4 text-sm bg-red-500/10 border border-red-500/30 text-red-400';
+            msg.textContent = data.error || 'Something went wrong. Try again later.';
+          }
+        } catch (err) {
+          msg.classList.remove('hidden');
+          msg.className = 'rounded-lg p-4 text-sm bg-red-500/10 border border-red-500/30 text-red-400';
+          msg.textContent = 'Network error. Please try again.';
+        } finally {
+          btn.disabled = false;
+          btn.querySelector('span').textContent = 'Submit tool request';
+        }
+      });
+    })();
+  </script>
+</Layout>

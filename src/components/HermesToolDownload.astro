@@ -1,0 +1,114 @@
+---
+export interface Props {
+  toolName: string;
+  toolPath: string;
+  scriptUrl: string;
+  description: string;
+  locked?: boolean;
+  unlockDate?: string;
+}
+
+const {
+  toolName,
+  toolPath,
+  scriptUrl,
+  description,
+  locked = false,
+  unlockDate,
+} = Astro.props;
+
+const nowIso = new Date().toISOString().slice(0, 10);
+const isLocked = locked && (!unlockDate || unlockDate > nowIso);
+const unlockDisplay = unlockDate
+  ? new Date(unlockDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  : undefined;
+const subscribeUrl = `/subscribe?ref=hermes-tool-lock-${toolPath.replace(/^\/|\/$/g, '').replace(/\//g, '-')}`;
+const fullScriptUrl = scriptUrl.startsWith('http') ? scriptUrl : `https://hermesdispatch.dev${scriptUrl}`;
+---
+
+<section class="hermes-tool-download mt-10 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6" aria-labelledby={`hermes-download-heading-${toolPath.replace(/\//g, '-')}`}>
+  <div class="flex items-center justify-between mb-4">
+    <h2 id={`hermes-download-heading-${toolPath.replace(/\//g, '-')}`} class="text-xl font-bold text-white flex items-center gap-2">
+      <span>⚡</span> Use in Hermes Agent
+    </h2>
+    {isLocked ? (
+      <span class="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium">🔒 Subscriber early access</span>
+    ) : (
+      <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium">✓ Hermes-ready</span>
+    )}
+  </div>
+
+  <p class="text-gray-400 text-sm mb-4">
+    {isLocked
+      ? `This tool is available as a Hermes Agent Python script. Public download unlocks ${unlockDisplay}; subscribers get it now.`
+      : `Download the Hermes Agent Python script for "${toolName}". Drop it into your Hermes tools folder or register it with the Hermes registry so other agents can call it directly.`}
+  </p>
+
+  {isLocked ? (
+    <div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 text-center">
+      <div class="text-4xl mb-3">🔐</div>
+      <h3 class="text-lg font-semibold text-white mb-2">Hermes script locked</h3>
+      <p class="text-gray-400 text-sm mb-4 max-w-md mx-auto">
+        {unlockDate ? `Unlocks publicly on ${unlockDisplay}.` : 'Unlocks for all visitors soon.'} Subscribers get the .py file today.
+      </p>
+      <a href={subscribeUrl} class="btn-primary inline-flex items-center gap-2">
+        <span>Subscribe to unlock</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+      </a>
+    </div>
+  ) : (
+    <div class="flex flex-col sm:flex-row gap-3">
+      <a href={fullScriptUrl} download class="btn-primary inline-flex items-center justify-center gap-2 flex-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+        <span>Download Hermes tool script (.py)</span>
+      </a>
+      <button
+        type="button"
+        class="hermes-copy-url px-4 py-2 rounded-lg border border-purple-500/30 text-purple-400 hover:bg-purple-500/10 transition text-sm font-medium"
+        data-url={fullScriptUrl}
+      >
+        Copy script URL
+      </button>
+    </div>
+  )}
+
+  {!isLocked && (
+    <div class="mt-4 p-4 rounded-xl bg-neutral-900/50 border border-neutral-800">
+      <p class="text-xs text-gray-500 uppercase mb-2">Quick install</p>
+      <pre class="text-sm font-mono text-gray-300 overflow-x-auto"><code># Option 1: download and place in Hermes tools folder
+curl -O {fullScriptUrl}
+mv $(basename {fullScriptUrl}) ~/.hermes/hermes-agent/tools/
+
+# Option 2: register via registry.py (edit tools/registry.py)
+from tools.{toolPath.replace(/^\/|\/$/g, '').replace(/\//g, '_')} import register
+register()</code></pre>
+    </div>
+  )}
+</section>
+
+<script is:inline>
+(function() {
+  function initHermesDownloads() {
+    document.querySelectorAll('.hermes-tool-download').forEach(function(block) {
+      var btn = block.querySelector('.hermes-copy-url');
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        var url = btn.getAttribute('data-url');
+        navigator.clipboard.writeText(url).then(function() {
+          var original = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(function() { btn.textContent = original; }, 1500);
+        }).catch(function() {
+          btn.textContent = 'Failed';
+          setTimeout(function() { btn.textContent = 'Copy script URL'; }, 1500);
+        });
+      });
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHermesDownloads);
+  } else {
+    initHermesDownloads();
+  }
+})();
+</script>

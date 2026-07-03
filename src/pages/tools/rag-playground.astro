@@ -1,0 +1,314 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+
+const title = "Agent RAG / Chunking Playground | The Hermes Dispatch";
+const description = "Upload text, pick chunk size, overlap, and embedding model, then see which chunks are retrieved for any query. Built for agents and humans learning RAG.";
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Agent RAG / Chunking Playground",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": description
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is RAG chunking?", "acceptedAnswer": { "@type": "Answer", "text": "Retrieval-Augmented Generation (RAG) chunking splits documents into smaller pieces before embedding them. The chunk size and overlap control how much context each retrieved result carries." } },
+    { "@type": "Question", "name": "What chunk size should I use?", "acceptedAnswer": { "@type": "Answer", "text": "Use 256-512 tokens for dense factual lookup, 512-1024 for prose and articles, and 1024-2048 for code or long reasoning chains. Overlap of 10-20% reduces boundary artifacts." } },
+    { "@type": "Question", "name": "Can agents use this playground?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The playground exposes the chunking algorithm and retrieval scoring logic in copy-paste snippets. Agent code access is released to Hermes Dispatch subscribers first." } }
+  ]
+};
+
+const unlockDate = "2026-07-17";
+const nowIso = new Date().toISOString().slice(0, 10);
+const isLocked = unlockDate > nowIso;
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Agent RAG / Chunking Playground" description={description} url="https://hermesdispatch.dev/tools/rag-playground/" />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(softwareSchema)} />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+  <section class="relative py-20 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-purple-900/10"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4 text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/30 mb-6">
+        <span class="text-purple-400 text-sm font-mono">TOOL — RAG LAB</span>
+      </div>
+      
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">
+        <span class="text-gradient">Agent RAG / Chunking Playground</span>
+      </h1>
+      <p class="text-gray-400 max-w-2xl mx-auto text-lg">
+        Learn how chunk size and overlap affect retrieval. Paste text, set parameters, run a query, and inspect the chunks that come back.
+      </p>
+
+      {isLocked && (
+        <div class="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30">
+          <span class="text-amber-400 text-sm font-medium">🔒 Agent code unlocks {new Date(unlockDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} — subscribers get it now</span>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-4 pb-8">
+    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-2">Source text</label>
+        <textarea id="source-text" rows="8" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none font-mono text-sm">Retrieval-Augmented Generation, or RAG, is a technique that gives large language models access to external knowledge. Instead of relying only on parametric memory, a RAG system retrieves relevant documents from a vector store and includes them in the prompt. The chunking strategy matters: too small and context is lost; too large and retrieval becomes noisy. A typical starting point is 512 tokens with 64 tokens of overlap.</textarea>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Chunk size (tokens)</label>
+          <input id="chunk-size" type="number" value="128" min="32" max="2048" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none font-mono text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Overlap (tokens)</label>
+          <input id="overlap" type="number" value="16" min="0" max="512" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none font-mono text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Embedding model</label>
+          <select id="embedding-model" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none text-sm">
+            <option value="mock">Mock keyword overlap (no API key needed)</option>
+            <option value="ollama-nomic">Ollama nomic-embed-text (local)</option>
+            <option value="openai-small">OpenAI text-embedding-3-small</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Query</label>
+          <input id="query" type="text" value="How does chunk size affect RAG retrieval?" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-2">Top-K chunks</label>
+          <input id="top-k" type="number" value="3" min="1" max="10" class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:border-brand-gold focus:outline-none font-mono text-sm" />
+        </div>
+      </div>
+
+      <button id="run-btn" class="btn-primary w-full flex items-center justify-center gap-2">
+        <span id="run-text">Run Retrieval Test</span>
+      </button>
+
+      <div id="result" class="hidden border-t border-white/10 pt-6">
+        <h2 class="text-xl font-bold text-white mb-4">Top retrieved chunks</h2>
+        <div id="chunks" class="space-y-3"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-4 py-16 border-t border-white/5">
+    <h2 class="text-2xl font-bold mb-6 text-center">
+      <span class="text-gradient">Frequently Asked</span>
+    </h2>
+    <div class="space-y-4 max-w-3xl mx-auto">
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">What is RAG chunking?</summary>
+        <p class="text-gray-400 mt-3 text-sm">Retrieval-Augmented Generation (RAG) chunking splits documents into smaller pieces before embedding them. The chunk size and overlap control how much context each retrieved result carries.</p>
+      </details>
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">What chunk size should I use?</summary>
+        <p class="text-gray-400 mt-3 text-sm">Use 256-512 tokens for dense factual lookup, 512-1024 for prose and articles, and 1024-2048 for code or long reasoning chains. Overlap of 10-20% reduces boundary artifacts.</p>
+      </details>
+      <details class="glass-card rounded-xl p-4 group">
+        <summary class="font-semibold cursor-pointer">Can agents use this playground?</summary>
+        <p class="text-gray-400 mt-3 text-sm">Yes. The playground exposes the chunking algorithm and retrieval scoring logic in copy-paste snippets. Agent code access is released to Hermes Dispatch subscribers first.</p>
+      </details>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function() {
+      var runBtn = document.getElementById('run-btn');
+      var runText = document.getElementById('run-text');
+      var result = document.getElementById('result');
+      var chunksDiv = document.getElementById('chunks');
+      var sourceText = document.getElementById('source-text');
+      var chunkSizeInput = document.getElementById('chunk-size');
+      var overlapInput = document.getElementById('overlap');
+      var queryInput = document.getElementById('query');
+      var topKInput = document.getElementById('top-k');
+
+      function tokenize(text) {
+        return text.split(/\s+/).filter(function(w) { return w.length > 0; });
+      }
+
+      function chunkText(text, size, overlap) {
+        var tokens = tokenize(text);
+        var chunks = [];
+        var step = Math.max(1, size - overlap);
+        for (var i = 0; i < tokens.length; i += step) {
+          var slice = tokens.slice(i, i + size);
+          if (slice.length === 0) break;
+          chunks.push({ text: slice.join(' '), start: i, end: i + slice.length });
+          if (slice.length < size) break;
+        }
+        return chunks;
+      }
+
+      function scoreOverlap(chunk, queryTokens) {
+        var chunkTokens = tokenize(chunk.text);
+        var matched = 0;
+        queryTokens.forEach(function(qt) {
+          if (chunkTokens.some(function(ct) { return ct.toLowerCase() === qt.toLowerCase(); })) matched++;
+        });
+        return matched / queryTokens.length;
+      }
+
+      runBtn.addEventListener('click', function() {
+        runBtn.disabled = true;
+        runText.textContent = 'Chunking...';
+        result.classList.add('hidden');
+
+        try {
+          var size = parseInt(chunkSizeInput.value, 10);
+          var overlap = parseInt(overlapInput.value, 10);
+          var topK = parseInt(topKInput.value, 10);
+          var text = sourceText.value.trim();
+          var query = queryInput.value.trim();
+
+          if (!text || !query) throw new Error('Enter source text and a query.');
+          if (overlap >= size) throw new Error('Overlap must be smaller than chunk size.');
+
+          var chunks = chunkText(text, size, overlap);
+          var queryTokens = tokenize(query);
+
+          var scored = chunks.map(function(c) {
+            return { chunk: c, score: scoreOverlap(c, queryTokens) };
+          }).sort(function(a, b) { return b.score - a.score; }).slice(0, topK);
+
+          chunksDiv.innerHTML = scored.map(function(s, idx) {
+            return [
+              '<div class="p-4 rounded-xl bg-white/[0.02] border border-white/10">',
+              '<p class="text-xs text-gray-500 mb-2">Chunk ' + (idx + 1) + ' · tokens ' + s.chunk.start + '-' + s.chunk.end + ' · overlap score ' + (s.score * 100).toFixed(0) + '%</p>',
+              '<p class="text-sm text-gray-300">' + s.chunk.text.replace(/</g, '&lt;') + '</p>',
+              '</div>'
+            ].join('');
+          }).join('');
+
+          result.classList.remove('hidden');
+          result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch (err) {
+          chunksDiv.innerHTML = '<div class="p-4 rounded-xl bg-red-500/5 border border-red-500/20 text-red-400"><strong>Error:</strong> ' + (err.message || 'Unknown error') + '</div>';
+          result.classList.remove('hidden');
+        } finally {
+          runBtn.disabled = false;
+          runText.textContent = 'Run Retrieval Test';
+        }
+      });
+    })();
+  </script>
+
+  <AgentCodeBlock
+    toolName="Agent RAG / Chunking Playground"
+    toolPath="/tools/rag-playground/"
+    description="Chunk text with configurable size and overlap, score chunks against a query, and return the top-K matches for a RAG pipeline."
+    locked={isLocked}
+    unlockDate={unlockDate}
+    snippets={[
+      {
+        lang: 'python',
+        label: 'Python',
+        code: `# Agent RAG / Chunking Playground snippet
+# Docs: https://hermesdispatch.dev/tools/rag-playground/
+
+def tokenize(text: str):
+    return text.split()  # simple whitespace tokenizer for demo
+
+def chunk_text(text: str, size: int, overlap: int):
+    tokens = tokenize(text)
+    step = max(1, size - overlap)
+    chunks = []
+    for i in range(0, len(tokens), step):
+        chunk = tokens[i:i+size]
+        if not chunk:
+            break
+        chunks.append({"text": " ".join(chunk), "start": i, "end": i + len(chunk)})
+        if len(chunk) < size:
+            break
+    return chunks
+
+def score_overlap(chunk: dict, query: str):
+    query_tokens = set(query.lower().split())
+    chunk_tokens = set(chunk["text"].lower().split())
+    if not query_tokens:
+        return 0.0
+    return len(query_tokens & chunk_tokens) / len(query_tokens)
+
+def retrieve(text: str, query: str, size: int = 128, overlap: int = 16, top_k: int = 3):
+    chunks = chunk_text(text, size, overlap)
+    scored = [{"chunk": c, "score": score_overlap(c, query)} for c in chunks]
+    scored.sort(key=lambda x: x["score"], reverse=True)
+    return scored[:top_k]
+
+source = """Retrieval-Augmented Generation, or RAG, is a technique that gives large language models access to external knowledge. Instead of relying only on parametric memory, a RAG system retrieves relevant documents from a vector store and includes them in the prompt. The chunking strategy matters: too small and context is lost; too large and retrieval becomes noisy."""
+
+for item in retrieve(source, "How does chunk size affect RAG retrieval?"):
+    print(f"score={item['score']:.2f} tokens={item['chunk']['start']}-{item['chunk']['end']}")
+    print(item['chunk']['text'])
+    print("---")`
+      },
+      {
+        lang: 'javascript',
+        label: 'JavaScript',
+        code: `// Agent RAG / Chunking Playground snippet
+// Docs: https://hermesdispatch.dev/tools/rag-playground/
+function tokenize(text) { return text.split(/\s+/).filter(w => w.length > 0); }
+
+function chunkText(text, size, overlap) {
+  const tokens = tokenize(text);
+  const step = Math.max(1, size - overlap);
+  const chunks = [];
+  for (let i = 0; i < tokens.length; i += step) {
+    const slice = tokens.slice(i, i + size);
+    if (!slice.length) break;
+    chunks.push({ text: slice.join(' '), start: i, end: i + slice.length });
+    if (slice.length < size) break;
+  }
+  return chunks;
+}
+
+function scoreOverlap(chunk, query) {
+  const queryTokens = new Set(query.toLowerCase().split(/\s+/));
+  const chunkTokens = new Set(chunk.text.toLowerCase().split(/\s+/));
+  let matched = 0;
+  queryTokens.forEach(qt => { if (chunkTokens.has(qt)) matched++; });
+  return queryTokens.size ? matched / queryTokens.size : 0;
+}
+
+function retrieve(text, query, size = 128, overlap = 16, topK = 3) {
+  return chunkText(text, size, overlap)
+    .map(c => ({ chunk: c, score: scoreOverlap(c, query) }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topK);
+}
+
+const source = "Retrieval-Augmented Generation, or RAG, is a technique that gives large language models access to external knowledge. The chunking strategy matters: too small and context is lost; too large and retrieval becomes noisy.";
+console.log(retrieve(source, "How does chunk size affect RAG retrieval?"));`
+      },
+      {
+        lang: 'bash',
+        label: 'cURL',
+        code: `# The RAG playground is a client-side tool; fetch its contract:
+# Docs: https://hermesdispatch.dev/tools/rag-playground/
+curl -s https://hermesdispatch.dev/tools/rag-playground/ | grep -oE '<title>[^<]+' | head -1`
+      },
+      {
+        lang: 'markdown',
+        label: 'Hermes /slash',
+        code: `# Use in a Hermes Agent session:
+Open https://hermesdispatch.dev/tools/rag-playground/, paste the source text, set chunk size to 128 and overlap to 16, then run the query "How does chunk size affect RAG retrieval?" Return the top 3 retrieved chunks with scores and token ranges.`
+      }
+    ]}
+  />
+</Layout>

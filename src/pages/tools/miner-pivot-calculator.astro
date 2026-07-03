@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
+import HermesToolDownload from '../../components/HermesToolDownload.astro';
 import pivotData from '../../data/miner_pivot.json';
 
 const title = "Miner Pivot Calculator — Mine, Sell, or Run AI Inference?";
@@ -221,4 +222,12 @@ const description = "Compare crypto mining profitability vs local LLM inference 
 
     loadGpu();
   </script>
+
+  <HermesToolDownload
+    toolName="Miner Pivot Calculator"
+    toolPath="/tools/miner-pivot-calculator/"
+    scriptUrl="/hermes-tools/miner_pivot_calculator.py"
+    description="Compare crypto mining profit vs local LLM inference revenue vs selling a GPU."
+    locked={false}
+  />
 </Layout>

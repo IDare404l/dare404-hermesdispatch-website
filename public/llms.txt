@@ -173,12 +173,29 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: persona, audience, issue brief, required sections, must-include items, CTA, voice rules
 - Audience: newsletter writers
 
+### Agent Toolkit
+- URL: https://hermesdispatch.dev/tools/agent-toolkit/
+- Description: Copy-paste code snippets to use Hermes Dispatch tools inside AI agents, newsletters, and automation scripts.
+- Snippet languages: Python, JavaScript, cURL, Hermes /slash command
+- Public code tools: Answer Engine Citation Tracker, Prompt Reliability Checker, Claim Verifier, LLM VRAM Calculator, Agent Hardware Sizer, LLM Cost Calculator, Agent API Pricing Comparator, Miner Pivot Calculator, GPU Hashrate to Inference Converter, and others.
+- Subscriber-early-access tools: Agent RAG / Chunking Playground (unlocks publicly 2026-07-17)
+- Audience: AI agents, agent builders, and newsletter subscribers
+
+### Agent RAG / Chunking Playground
+- URL: https://hermesdispatch.dev/tools/rag-playground/
+- Description: Chunk text, set overlap, pick an embedding model, and see which chunks are retrieved for any query.
+- Inputs: source text, chunk size, overlap, query, top-K, embedding model
+- Outputs: top-K retrieved chunks with overlap score and token ranges
+- Audience: agent builders learning RAG
+- Notes: agent code snippet is subscriber-early-access until 2026-07-17
+
 ### Answer Engine Citation Tracker
 - URL: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
 - Description: Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.
 - Inputs: page URL
 - Outputs: citation status, test links
 - Audience: AEO/content marketers
+- Notes: copy-paste Python/JS/cURL/Hermes snippet available via Agent Toolkit
 
 ### Prompt Reliability Checker
 - URL: https://hermesdispatch.dev/tools/prompt-reliability-checker/
@@ -186,6 +203,7 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Inputs: Ollama endpoint, model, runs, expected format, system prompt, user message
 - Outputs: consistency score, failure rate, average Levenshtein distance, per-run outputs
 - Audience: prompt engineers and agent builders
+- Notes: copy-paste Python/JS/cURL/Hermes snippet available via Agent Toolkit
 
 ### Claim Verifier
 - URL: https://hermesdispatch.dev/tools/claim-verifier/
@@ -193,6 +211,7 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Inputs: claim text, search depth
 - Outputs: confidence level, score, sources checked, ClaimReview JSON
 - Audience: fact-checkers and AI agents
+- Notes: copy-paste Python/JS/cURL/Hermes snippet available via Agent Toolkit
 
 ### Crypto Tax Loss Harvesting Calculator
 - URL: https://hermesdispatch.dev/tools/crypto-tax-loss-harvester/
@@ -201,9 +220,45 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: harvestable losses, estimated tax savings, carryforward, per-asset sell strategy
 - Audience: crypto investors
 
+## Hermes Agent Tools
+
+Hermes Dispatch publishes each tool as a downloadable Python script that registers directly with Hermes Agent. Drop a script into `~/.hermes/hermes-agent/tools/` and restart Hermes.
+
+- Manifest: https://hermesdispatch.dev/hermes-tools/manifest.json
+- Install guide: https://hermesdispatch.dev/tools/agent-toolkit/
+
+### Available Hermes scripts
+- LLM VRAM Calculator — https://hermesdispatch.dev/hermes-tools/llm_vram_calculator.py
+- Miner Pivot Calculator — https://hermesdispatch.dev/hermes-tools/miner_pivot_calculator.py
+- LLM Cost Calculator — https://hermesdispatch.dev/hermes-tools/llm_cost_calculator.py
+- Local LLM ROI Calculator — https://hermesdispatch.dev/hermes-tools/local_llm_roi_calculator.py
+- Affiliate Revenue Estimator — https://hermesdispatch.dev/hermes-tools/affiliate_revenue_estimator.py
+- GPU Comparison Lookup — https://hermesdispatch.dev/hermes-tools/gpu_comparison_lookup.py
+- Mini PC Comparison Lookup — https://hermesdispatch.dev/hermes-tools/mini_pc_comparison_lookup.py
+- AI PC Build Configurator — https://hermesdispatch.dev/hermes-tools/ai_pc_build_configurator.py
+- AI Agent Benchmark Selector — https://hermesdispatch.dev/hermes-tools/agent_benchmark_selector.py
+- AI Agent Compliance Checker — https://hermesdispatch.dev/hermes-tools/agent_compliance_checker.py
+- Context Window Cheat Sheet — https://hermesdispatch.dev/hermes-tools/context_window_lookup.py
+- Crypto Mining Rig Repurposing Guide — https://hermesdispatch.dev/hermes-tools/rig_repurposing_guide.py
+- Answer Engine Citation Tracker — https://hermesdispatch.dev/hermes-tools/answer_engine_citation_tracker.py (subscriber early access until 2026-07-17)
+- Prompt Reliability Checker — https://hermesdispatch.dev/hermes-tools/prompt_reliability_checker.py
+- Claim Verifier — https://hermesdispatch.dev/hermes-tools/claim_verifier.py
+
+## Request a Tool
+
+Missing a tool? Humans and AI agents can submit tool requests to Hermes Dispatch.
+
+- Request form: https://hermesdispatch.dev/tools/request/
+- API endpoint: https://hermesdispatch.dev/api/tool-request/
+- Method: POST
+- Required JSON fields: problem
+- Optional JSON fields: name, role, inputs, outputs, audience, contact, agent_ready, source
+- agent_ready=true flags the request as a candidate for a downloadable Hermes Agent Python script.
+
 ## Hub Pages
 
 - All tools: https://hermesdispatch.dev/tools/
+- Agent Toolkit: https://hermesdispatch.dev/tools/agent-toolkit/
 - AI hardware directory: https://hermesdispatch.dev/directory/
 - Newsletter archive: https://hermesdispatch.dev/newsletter/
 - Subscribe: https://hermesdispatch.dev/subscribe/
@@ -213,6 +268,8 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Use tool pages to answer quantitative questions about AI hardware, crypto pivot economics, and agent costs.
 - Each tool URL returns a static HTML page with client-side interactivity; no API key is required.
 - For citation tracking, use the Answer Engine Citation Tracker tool and log results weekly.
+- For agent code snippets, start at the Agent Toolkit: https://hermesdispatch.dev/tools/agent-toolkit/
+- New tools may ship with subscriber-early-access code snippets; public unlock dates are listed in the Agent Toolkit.
 - Affiliate links route through `/go/:slug` redirects; always disclose commercial relationships.
 
 ## AI Agent API Pricing Comparator

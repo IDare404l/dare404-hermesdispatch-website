@@ -1,0 +1,224 @@
+---
+export interface Snippet {
+  lang: string;
+  label: string;
+  code: string;
+}
+
+export interface Props {
+  toolName: string;
+  toolPath: string;
+  description: string;
+  snippets: Snippet[];
+  locked?: boolean;
+  unlockDate?: string; // ISO date string, e.g. "2026-07-17"
+  lockReason?: string;
+}
+
+const {
+  toolName,
+  toolPath,
+  description,
+  snippets,
+  locked = false,
+  unlockDate,
+  lockReason = "Agent code snippets for this tool are exclusive to Hermes Dispatch subscribers for early access. Subscribe to unlock the copy-paste code."
+} = Astro.props;
+
+const nowIso = new Date().toISOString().slice(0, 10);
+const isLocked = locked && (!unlockDate || unlockDate > nowIso);
+const unlockDisplay = unlockDate ? new Date(unlockDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : undefined;
+
+const defaultSnippets: Snippet[] = [
+  {
+    lang: 'python',
+    label: 'Python',
+    code: `# Use ${toolName} from hermesdispatch.dev
+# Docs: https://hermesdispatch.dev${toolPath}
+print("${toolName} agent snippet coming soon")`
+  },
+  {
+    lang: 'javascript',
+    label: 'JavaScript',
+    code: `// Use ${toolName} from hermesdispatch.dev
+// Docs: https://hermesdispatch.dev${toolPath}
+console.log("${toolName} agent snippet coming soon");`
+  },
+  {
+    lang: 'bash',
+    label: 'cURL',
+    code: `# ${toolName} from hermesdispatch.dev
+# Docs: https://hermesdispatch.dev${toolPath}
+curl -s "https://hermesdispatch.dev${toolPath}" \
+  -H "Accept: text/html"`
+  },
+  {
+    lang: 'markdown',
+    label: 'Hermes /slash',
+    code: `# Copy into a Hermes Agent session:
+Use the ${toolName} at https://hermesdispatch.dev${toolPath} to ${description.toLowerCase()}.`
+  }
+];
+
+const activeSnippets = snippets.length > 0 ? snippets : defaultSnippets;
+const subscribeUrl = `/subscribe?ref=tool-lock-${toolPath.replace(/^\/|\/$/g, '').replace(/\//g, '-')}`;
+---
+
+<section class="agent-code-block mt-10" aria-labelledby={`agent-code-heading-${toolPath.replace(/\//g, '-')}`}>
+  <div class="flex items-center justify-between mb-4">
+    <h2 id={`agent-code-heading-${toolPath.replace(/\//g, '-')}`} class="text-xl font-bold text-white flex items-center gap-2">
+      <span>🤖</span> Use this tool in your agent
+    </h2>
+    {isLocked && (
+      <span class="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium">
+        🔒 Subscriber early access
+      </span>
+    )}
+    {!isLocked && (
+      <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium">
+        ✓ Agent-ready code
+      </span>
+    )}
+  </div>
+
+  <p class="text-gray-400 text-sm mb-4">
+    {isLocked ? lockReason : `Copy the snippet below into your agent, newsletter, or script. The tool page at hermesdispatch.dev${toolPath} is the canonical contract: inputs, outputs, and formulas.`}
+  </p>
+
+  {isLocked && (
+    <div class="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6 text-center mb-6">
+      <div class="text-4xl mb-3">🔐</div>
+      <h3 class="text-lg font-semibold text-white mb-2">Code snippet locked</h3>
+      <p class="text-gray-400 text-sm mb-4 max-w-md mx-auto">
+        {unlockDate ? `Unlocks publicly on ${unlockDisplay}.` : 'Unlocks for all visitors soon.'} Subscribers get it today.
+      </p>
+      <a href={subscribeUrl} class="btn-primary inline-flex items-center gap-2">
+        <span>Subscribe to unlock</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+      </a>
+    </div>
+  )}
+
+  <div class={`space-y-4 ${isLocked ? 'blur-sm select-none pointer-events-none opacity-60' : ''}`}>
+    <div class="flex flex-wrap gap-2" role="tablist" aria-label="Code snippet languages">
+      {activeSnippets.map((snippet, index) => (
+        <button
+          type="button"
+          class="agent-code-tab px-4 py-2 rounded-lg text-sm font-medium border border-neutral-700 bg-neutral-900 text-gray-300 hover:border-cyan-400 hover:text-cyan-400 transition"
+          data-index={index}
+          role="tab"
+          aria-selected={index === 0 ? 'true' : 'false'}
+          aria-controls={`agent-code-panel-${toolPath.replace(/\//g, '-')}-${index}`}
+        >
+          {snippet.label}
+        </button>
+      ))}
+    </div>
+
+    {activeSnippets.map((snippet, index) => (
+      <div
+        id={`agent-code-panel-${toolPath.replace(/\//g, '-')}-${index}`}
+        class={`agent-code-panel relative rounded-xl border border-neutral-800 bg-neutral-950 ${index === 0 ? '' : 'hidden'}`}
+        role="tabpanel"
+        aria-labelledby={`agent-code-tab-${toolPath.replace(/\//g, '-')}-${index}`}
+      >
+        <div class="flex items-center justify-between px-4 py-2 border-b border-neutral-800">
+          <span class="text-xs text-gray-500 font-mono uppercase">{snippet.lang}</span>
+          <button
+            type="button"
+            class="agent-copy-btn text-xs text-gray-400 hover:text-white flex items-center gap-1 transition"
+            aria-label={`Copy ${snippet.label} snippet`}
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+            <span>Copy</span>
+          </button>
+        </div>
+        <pre class="p-4 overflow-x-auto"><code class="text-sm font-mono text-gray-300 whitespace-pre">{snippet.code}</code></pre>
+      </div>
+    ))}
+  </div>
+
+  {!isLocked && (
+    <p class="text-xs text-gray-500 mt-4">
+      Want early access to the next locked tool? <a href="/subscribe" class="text-cyan-400 hover:underline">Subscribe to The Hermes Dispatch</a>.
+    </p>
+  )}
+</section>
+
+<script is:inline>
+(function() {
+  function initAgentCodeBlocks() {
+    document.querySelectorAll('.agent-code-block').forEach(function(block) {
+      var tabs = block.querySelectorAll('.agent-code-tab');
+      var panels = block.querySelectorAll('.agent-code-panel');
+      var copyBtns = block.querySelectorAll('.agent-copy-btn');
+
+      function activateTab(targetIndex) {
+        tabs.forEach(function(tab, i) {
+          var isActive = i === targetIndex;
+          tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          if (isActive) {
+            tab.classList.add('border-cyan-400', 'text-cyan-400');
+            tab.classList.remove('border-neutral-700', 'text-gray-300');
+          } else {
+            tab.classList.remove('border-cyan-400', 'text-cyan-400');
+            tab.classList.add('border-neutral-700', 'text-gray-300');
+          }
+        });
+        panels.forEach(function(panel, i) {
+          if (i === targetIndex) {
+            panel.classList.remove('hidden');
+          } else {
+            panel.classList.add('hidden');
+          }
+        });
+      }
+
+      tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          var idx = parseInt(tab.getAttribute('data-index'), 10);
+          activateTab(idx);
+        });
+      });
+
+      copyBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var panel = btn.closest('.agent-code-panel');
+          var codeEl = panel.querySelector('code');
+          if (!codeEl) return;
+          var text = codeEl.textContent || '';
+          navigator.clipboard.writeText(text).then(function() {
+            var span = btn.querySelector('span');
+            var original = span ? span.textContent : 'Copy';
+            if (span) span.textContent = 'Copied!';
+            setTimeout(function() {
+              if (span) span.textContent = original;
+            }, 1500);
+          }).catch(function() {
+            var span = btn.querySelector('span');
+            if (span) span.textContent = 'Failed';
+            setTimeout(function() {
+              if (span) span.textContent = 'Copy';
+            }, 1500);
+          });
+        });
+      });
+
+      activateTab(0);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAgentCodeBlocks);
+  } else {
+    initAgentCodeBlocks();
+  }
+})();
+</script>
+
+<style>
+  .agent-code-tab[aria-selected="true"] {
+    border-color: rgba(34, 211, 238, 1);
+    color: rgba(34, 211, 238, 1);
+  }
+</style>

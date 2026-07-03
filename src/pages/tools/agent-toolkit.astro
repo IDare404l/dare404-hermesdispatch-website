@@ -1,0 +1,284 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+
+const title = "Agent Toolkit | Hermes Dispatch";
+const description = "Copy-paste code snippets to use Hermes Dispatch tools inside AI agents, newsletters, and automation scripts. Subscriber-early-access tools unlock first for newsletter readers.";
+
+const nowIso = new Date().toISOString().slice(0, 10);
+
+const toolkits = [
+  {
+    name: "Citation & QA",
+    description: "Track and verify what AI answer engines say about your content.",
+    tools: [
+      {
+        name: "Answer Engine Citation Tracker",
+        path: "/tools/answer-engine-citation-tracker/",
+        description: "Generate test links for Perplexity, ChatGPT, Gemini, and Copilot to check if your pages are cited.",
+        locked: false,
+      },
+      {
+        name: "Prompt Reliability Checker",
+        path: "/tools/prompt-reliability-checker/",
+        description: "Run a system prompt N times against a local LLM and score consistency, failure rate, and output variance.",
+        locked: false,
+      },
+      {
+        name: "Claim Verifier",
+        path: "/tools/claim-verifier/",
+        description: "Verify a claim against web search results with a confidence score and source list.",
+        locked: false,
+      }
+    ]
+  },
+  {
+    name: "Agent Infrastructure",
+    description: "Size hardware, compare APIs, and estimate costs for AI agents.",
+    tools: [
+      {
+        name: "LLM VRAM Calculator",
+        path: "/tools/vram-calculator/",
+        description: "Estimate GPU memory for any model size and quantization.",
+        locked: false,
+      },
+      {
+        name: "Agent Hardware Sizer",
+        path: "/tools/agent-hardware-sizer/",
+        description: "Find the exact mini PC, GPU, and RAM config for local LLMs and AI agents.",
+        locked: false,
+      },
+      {
+        name: "LLM Cost Calculator",
+        path: "/tools/llm-cost-calculator/",
+        description: "Compare cloud API token prices versus local GPU cost per 1M tokens.",
+        locked: false,
+      },
+      {
+        name: "Agent API Pricing Comparator",
+        path: "/tools/agent-api-pricing-comparator/",
+        description: "Compare per-token pricing across OpenAI, Anthropic, Google, Groq, Together AI, and Cohere.",
+        locked: false,
+      }
+    ]
+  },
+  {
+    name: "Crypto & Mining Pivots",
+    description: "Turn mining hardware into AI inference revenue.",
+    tools: [
+      {
+        name: "Miner Pivot Calculator",
+        path: "/tools/miner-pivot-calculator/",
+        description: "Compare crypto mining profit vs local LLM inference revenue vs selling a GPU.",
+        locked: false,
+      },
+      {
+        name: "GPU Hashrate to Inference Converter",
+        path: "/tools/hashrate-to-inference-converter/",
+        description: "Convert crypto-mining hashrate into estimated local LLM inference capacity.",
+        locked: false,
+      }
+    ]
+  },
+  {
+    name: "Hermes Agent Scripts",
+    description: "Downloadable Python tools that register directly with Hermes Agent. Drop them into ~/.hermes/hermes-agent/tools/.",
+    tools: [
+      { name: "LLM VRAM Calculator", path: "/tools/vram-calculator/", description: "Estimate GPU memory for any model size and quantization.", locked: false, hermesScript: "/hermes-tools/llm_vram_calculator.py" },
+      { name: "Miner Pivot Calculator", path: "/tools/miner-pivot-calculator/", description: "Compare crypto mining profit vs local LLM inference revenue vs selling a GPU.", locked: false, hermesScript: "/hermes-tools/miner_pivot_calculator.py" },
+      { name: "LLM Cost Calculator", path: "/tools/llm-cost-calculator/", description: "Compare cloud API token prices versus local GPU cost per 1M tokens.", locked: false, hermesScript: "/hermes-tools/llm_cost_calculator.py" },
+      { name: "Local LLM ROI Calculator", path: "/tools/local-llm-roi-calculator/", description: "Compare 3-year TCO of local GPU inference versus cloud API.", locked: false, hermesScript: "/hermes-tools/local_llm_roi_calculator.py" },
+      { name: "Affiliate Revenue Estimator", path: "/tools/affiliate-revenue-estimator/", description: "Estimate affiliate earnings from traffic and conversion assumptions.", locked: false, hermesScript: "/hermes-tools/affiliate_revenue_estimator.py" },
+      { name: "GPU Comparison Lookup", path: "/compare/gpus/", description: "Look up benchmark, VRAM, TDP, and price for a GPU from the database.", locked: false, hermesScript: "/hermes-tools/gpu_comparison_lookup.py" },
+      { name: "Mini PC Comparison Lookup", path: "/compare/mini-pcs/", description: "Look up RAM, bandwidth, and AI suitability for a mini PC.", locked: false, hermesScript: "/hermes-tools/mini_pc_comparison_lookup.py" },
+      { name: "AI PC Build Configurator", path: "/tools/ai-pc-build-configurator/", description: "Return a preconfigured AI PC parts list for a budget tier.", locked: false, hermesScript: "/hermes-tools/ai_pc_build_configurator.py" },
+      { name: "AI Agent Benchmark Selector", path: "/tools/agent-benchmark-selector/", description: "Pick the right benchmark for an agent category.", locked: false, hermesScript: "/hermes-tools/agent_benchmark_selector.py" },
+      { name: "AI Agent Compliance Checker", path: "/tools/ai-agent-compliance-checker/", description: "Return compliance checklist and readiness score for a region/use case.", locked: false, hermesScript: "/hermes-tools/agent_compliance_checker.py" },
+      { name: "Context Window Cheat Sheet", path: "/tools/context-window-cheat-sheet/", description: "Return context-window limits for a model family.", locked: false, hermesScript: "/hermes-tools/context_window_lookup.py" },
+      { name: "Crypto Mining Rig Repurposing Guide", path: "/tools/rig-repurposing-guide/", description: "Return repurposing strategies for a mining hardware type.", locked: false, hermesScript: "/hermes-tools/rig_repurposing_guide.py" },
+    ]
+  },
+  {
+    name: "Subscriber Early Access",
+    description: "New tool code snippets released to subscribers first.",
+    tools: [
+      {
+        name: "Agent RAG / Chunking Playground",
+        path: "/tools/rag-playground/",
+        description: "Upload text, pick chunk size + overlap + embedding model, and see retrieved chunks for a query.",
+        locked: true,
+        unlockDate: "2026-07-17"
+      }
+    ]
+  }
+];
+
+const allTools = toolkits.flatMap(k => k.tools);
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": title,
+  "description": description,
+  "url": "https://hermesdispatch.dev/tools/agent-toolkit/",
+  "mainEntity": {
+    "@type": "ItemList",
+    "itemListElement": allTools.map((t, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": t.name,
+      "url": `https://hermesdispatch.dev${t.path}`,
+      "description": t.description
+    }))
+  }
+};
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+  <section class="relative py-16 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-cyan-900/10"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-6">
+          <span class="text-cyan-400 text-sm font-mono">AGENT INTEGRATION KIT</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+          <span class="text-gradient-cool">Agent Toolkit</span>
+        </h1>
+        <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+          Copy-paste code snippets so AI agents can use Hermes Dispatch tools directly. Subscribers get early access to new tool integrations before they unlock publicly.
+        </p>
+      </div>
+
+      {toolkits.map((kit) => (
+        <div class="mb-16">
+          <div class="flex items-center gap-3 mb-6">
+            <h2 class="text-2xl font-bold text-white">{kit.name}</h2>
+            <div class="h-px flex-1 bg-neutral-800"></div>
+          </div>
+          
+          <p class="text-gray-400 mb-6">{kit.description}</p>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            {kit.tools.map((tool) => (
+              <div
+                class={`glass-card rounded-xl p-6 hover:border-cyan-400/40 transition group block ${tool.locked ? 'border-amber-500/20 bg-amber-500/5' : ''}`}
+              >
+                <a href={tool.path} class="block mb-3">
+                  <div class="flex items-start justify-between">
+                    <h3 class="text-lg font-semibold text-white group-hover:text-cyan-400 transition">{tool.name}</h3>
+                    {tool.locked ? (
+                      <span class="px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs">🔒 Locked until {tool.unlockDate}</span>
+                    ) : (
+                      <span class="px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs">✓ Free code</span>
+                    )}
+                  </div>
+                  <p class="text-sm text-gray-400 mt-2">{tool.description}</p>
+                  <div class="mt-4 text-sm text-cyan-400 flex items-center gap-1">
+                    <span>View tool</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                  </div>
+                </a>
+                {tool.hermesScript && !tool.locked && (
+                  <a
+                    href={`https://hermesdispatch.dev${tool.hermesScript}`}
+                    download
+                    class="mt-4 inline-flex items-center gap-2 text-sm font-medium text-purple-400 hover:text-purple-300 border border-purple-500/30 rounded-lg px-4 py-2 hover:bg-purple-500/10 transition"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    <span>Download Hermes script (.py)</span>
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <div class="rounded-2xl border border-brand-gold/30 bg-brand-gold/5 p-8 text-center">
+        <div class="text-4xl mb-4">🚀</div>
+        <h2 class="text-2xl font-bold text-white mb-3">Get early access to every new tool snippet</h2>
+        <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
+          New tools launch with locked agent code. Hermes Dispatch subscribers receive the snippet first. Public unlock happens 14 days later.
+        </p>
+        <a href="/subscribe?ref=agent-toolkit" class="btn-primary inline-flex items-center gap-2">
+          <span>Subscribe to unlock</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+        </a>
+      </div>
+
+      <div class="mt-12 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-8 text-center">
+        <div class="text-4xl mb-4">🛠️</div>
+        <h2 class="text-2xl font-bold text-white mb-3">Don't see the tool you need?</h2>
+        <p class="text-gray-400 mb-6 max-w-2xl mx-auto">
+          Humans and agents can request new tools. Describe the problem, audience, and expected inputs/outputs; the best requests become Hermes Agent-compatible tools.
+        </p>
+        <a href="/tools/request" class="btn-primary inline-flex items-center gap-2">
+          <span>Request a tool</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+        </a>
+      </div>
+
+      <AgentCodeBlock
+        toolName="Answer Engine Citation Tracker"
+        toolPath="/tools/answer-engine-citation-tracker/"
+        description="Generate test links for Perplexity, ChatGPT, Gemini, and Copilot to check if your pages are cited."
+        locked={false}
+        snippets={[
+          {
+            lang: 'python',
+            label: 'Python',
+            code: `# Answer Engine Citation Tracker snippet
+# Docs: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
+import urllib.parse
+
+def citation_test_links(url: str, query: str):
+    encoded = urllib.parse.quote(query)
+    return {
+        "perplexity": f"https://www.perplexity.ai/?q={encoded}",
+        "chatgpt": f"https://chat.openai.com/?q={encoded}",
+        "gemini": f"https://gemini.google.com/app?q={encoded}",
+        "copilot": f"https://copilot.microsoft.com/?q={encoded}"
+    }
+
+print(citation_test_links("https://hermesdispatch.dev/", "best GPU for local LLM"))`
+          },
+          {
+            lang: 'javascript',
+            label: 'JavaScript',
+            code: `// Answer Engine Citation Tracker snippet
+// Docs: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
+function citationTestLinks(url, query) {
+  const encoded = encodeURIComponent(query);
+  return {
+    perplexity: 'https://www.perplexity.ai/?q=' + encoded,
+    chatgpt: 'https://chat.openai.com/?q=' + encoded,
+    gemini: 'https://gemini.google.com/app?q=' + encoded,
+    copilot: 'https://copilot.microsoft.com/?q=' + encoded
+  };
+}
+
+console.log(citationTestLinks("https://hermesdispatch.dev/", "best GPU for local LLM"));`
+          },
+          {
+            lang: 'bash',
+            label: 'cURL',
+            code: `# Test citation links via curl (opens in browser)
+# Docs: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
+QUERY="best GPU for local LLM"
+ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$QUERY'))")
+curl -sI "https://www.perplexity.ai/?q=$ENCODED" | head -1`
+          },
+          {
+            lang: 'markdown',
+            label: 'Hermes /slash',
+            code: `# Use in a Hermes Agent session:
+Open https://hermesdispatch.dev/tools/answer-engine-citation-tracker/, enter the URL to monitor and the query to test, then generate the Perplexity, ChatGPT, Gemini, and Copilot test links. Log the citation status for each engine.`
+          }
+        ]}
+      />
+    </div>
+  </section>
+</Layout>
