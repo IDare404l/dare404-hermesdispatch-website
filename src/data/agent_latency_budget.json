@@ -1,0 +1,126 @@
+{
+  "last_updated": "2026-07-03",
+  "note": "Latency estimates are directional and assume HTTP/TCP overhead, no queuing, and ideal network conditions. Add 20-40% headroom for production variance.",
+  "defaults": {
+    "requests_per_minute": 100,
+    "input_tokens": 2000,
+    "output_tokens": 500,
+    "retrieval_enabled": true,
+    "retrieval_queries": 1,
+    "retrieval_latency_ms": 120,
+    "tool_calls": 1,
+    "tool_latency_ms": 250,
+    "network_rtt_ms": 50,
+    "target_p50_ms": 1500,
+    "target_p95_ms": 3000,
+    "projection_months": 12
+  },
+  "providers": [
+    {
+      "slug": "openai-gpt-4o",
+      "name": "OpenAI GPT-4o",
+      "category": "Frontier API",
+      "ttft_ms": 300,
+      "tbt_ms": 12,
+      "notes": "Fast TTFT; good throughput under light load."
+    },
+    {
+      "slug": "anthropic-claude-3-5-sonnet",
+      "name": "Anthropic Claude 3.5 Sonnet",
+      "category": "Frontier API",
+      "ttft_ms": 450,
+      "tbt_ms": 18,
+      "notes": "Slightly higher TTFT; strong for long-context reasoning."
+    },
+    {
+      "slug": "google-gemini-1-5-pro",
+      "name": "Google Gemini 1.5 Pro",
+      "category": "Frontier API",
+      "ttft_ms": 350,
+      "tbt_ms": 14,
+      "notes": "Competitive throughput; long-context TTFT scales with input."
+    },
+    {
+      "slug": "groq-llama-3-1-70b",
+      "name": "Groq Llama 3.1 70B",
+      "category": "Fast inference",
+      "ttft_ms": 150,
+      "tbt_ms": 5,
+      "notes": "Very low TBT; excellent for streaming UX."
+    },
+    {
+      "slug": "together-llama-3-1-70b",
+      "name": "Together AI Llama 3.1 70B",
+      "category": "Open model API",
+      "ttft_ms": 400,
+      "tbt_ms": 16,
+      "notes": "Cost-efficient; latency varies by load."
+    },
+    {
+      "slug": "local-rtx-4090",
+      "name": "Local RTX 4090 (Q4_K_M 70B)",
+      "category": "Local GPU",
+      "ttft_ms": 600,
+      "tbt_ms": 20,
+      "notes": "No network RTT; TTFT limited by prompt processing."
+    },
+    {
+      "slug": "local-rtx-3090",
+      "name": "Local RTX 3090 (Q4_K_M 70B)",
+      "category": "Local GPU",
+      "ttft_ms": 850,
+      "tbt_ms": 28,
+      "notes": "Slower prompt processing and decode than 4090."
+    },
+    {
+      "slug": "vast-ai-rtx-4090",
+      "name": "Vast.ai RTX 4090",
+      "category": "GPU cloud rental",
+      "ttft_ms": 650,
+      "tbt_ms": 22,
+      "notes": "Add 30-100ms network RTT depending on data center."
+    },
+    {
+      "slug": "runpod-rtx-4090",
+      "name": "RunPod RTX 4090",
+      "category": "GPU cloud rental",
+      "ttft_ms": 700,
+      "tbt_ms": 24,
+      "notes": "Cold-start can add seconds if not pre-warmed."
+    }
+  ],
+  "architectures": [
+    {
+      "slug": "single-shot",
+      "name": "Single-shot agent",
+      "description": "One LLM call, no retrieval or tools.",
+      "overhead_multiplier": 1.0,
+      "retrieval": false,
+      "tools": false
+    },
+    {
+      "slug": "rag",
+      "name": "RAG agent",
+      "description": "Retrieve context before generation; single LLM call.",
+      "overhead_multiplier": 1.05,
+      "retrieval": true,
+      "tools": false
+    },
+    {
+      "slug": "tool-calling",
+      "name": "Tool-calling agent",
+      "description": "LLM generates tool calls, executes them, then generates final answer.",
+      "overhead_multiplier": 1.1,
+      "retrieval": false,
+      "tools": true
+    },
+    {
+      "slug": "multi-turn",
+      "name": "Multi-turn reasoning agent",
+      "description": "Several reflection or planning turns before final output.",
+      "overhead_multiplier": 1.25,
+      "retrieval": true,
+      "tools": true
+    }
+  ]
+}

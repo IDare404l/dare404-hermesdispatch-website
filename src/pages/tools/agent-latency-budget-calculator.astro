@@ -1,0 +1,290 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_latency_budget.json';
+
+const title = "AI Agent Latency Budget Calculator | Hermes Dispatch";
+const description = "Estimate end-to-end AI agent response latency across OpenAI, Anthropic, Google, Groq, Together AI, and local/cloud GPUs. Model TTFT, time-between-tokens, retrieval, tool calls, and network RTT.";
+const providers = data.providers;
+const architectures = data.architectures;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does TTFT mean?", a: "Time To First Token (TTFT) is the delay from sending a request to receiving the first generated token. It is dominated by prompt processing and network round-trip time." },
+  { q: "What is TBT?", a: "Time Between Tokens (TBT) is the average delay between each generated output token. Lower TBT means smoother streaming and faster total response times." },
+  { q: "How does retrieval affect latency?", a: "Each retrieval step (vector search, rerank, document fetch) adds its own latency before the LLM can start generating. The calculator adds retrieval time before TTFT." },
+  { q: "How do tool calls affect latency?", a: "A tool-calling agent typically emits a tool request, waits for the tool to execute, then generates the final answer. The calculator models that round-trip once per tool call." },
+  { q: "Why is local hardware slower on TTFT?", a: "Local GPUs have no network latency, but prompt processing throughput on a single consumer GPU is lower than frontier API clusters. The trade-off is full control and lower per-token cost." },
+  { q: "How should I use the P50 and P95 targets?", a: "Set P50 to your desired typical user experience and P95 to the worst acceptable case. The calculator flags when a provider or architecture likely breaches either target." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Latency Budget Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-latency-budget-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚡</div>
+      <h1 class="display-heading mb-4">AI Agent Latency Budget Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate end-to-end agent response time across providers, architectures, and deployment models.</p>
+    </div>
+
+    <!-- Architecture presets -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {architectures.map(arch => (
+        <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset={arch.slug}>
+          <div class="text-2xl mb-2">
+            {arch.slug === 'single-shot' && '🔮'}
+            {arch.slug === 'rag' && '🔍'}
+            {arch.slug === 'tool-calling' && '🛠️'}
+            {arch.slug === 'multi-turn' && '🧠'}
+          </div>
+          <h3 class="font-semibold text-sm">{arch.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1">{arch.description}</p>
+        </button>
+      ))}
+    </div>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload & Architecture</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests / minute</span>
+          <input id="rpm" type="number" min="1" value={defaults.requests_per_minute} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens</span>
+          <input id="inputTokens" type="number" min="1" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens</span>
+          <input id="outputTokens" type="number" min="1" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="flex items-center gap-3 mt-2">
+          <input id="retrievalEnabled" type="checkbox" checked={defaults.retrieval_enabled} class="w-5 h-5 rounded border-neutral-700 bg-neutral-900 text-brand-gold" />
+          <span class="text-neutral-400 text-sm">Enable retrieval step</span>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retrieval queries</span>
+          <input id="retrievalQueries" type="number" min="0" value={defaults.retrieval_queries} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retrieval latency (ms each)</span>
+          <input id="retrievalLatency" type="number" min="0" value={defaults.retrieval_latency_ms} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tool calls / request</span>
+          <input id="toolCalls" type="number" min="0" value={defaults.tool_calls} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tool latency (ms each)</span>
+          <input id="toolLatency" type="number" min="0" value={defaults.tool_latency_ms} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Network RTT (ms)</span>
+          <input id="networkRtt" type="number" min="0" value={defaults.network_rtt_ms} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Target P50 latency (ms)</span>
+          <input id="targetP50" type="number" min="1" value={defaults.target_p50_ms} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Target P95 latency (ms)</span>
+          <input id="targetP95" type="number" min="1" value={defaults.target_p95_ms} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Architecture overhead</span>
+          <input id="overhead" type="number" min="1" step="0.05" value={1.0} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/30 text-center">
+      <p class="text-xs text-neutral-500 uppercase mb-1">Fastest option under your target</p>
+      <p id="fastestLine" class="text-2xl font-bold text-brand-gold">Enter workload to see fastest provider.</p>
+      <p id="targetLine" class="text-sm text-neutral-400 mt-1">—</p>
+    </section>
+
+    <!-- Results table -->
+    <section class="overflow-x-auto mb-12">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4">Category</th>
+            <th class="py-3 pr-4 text-right">P50 (ms)</th>
+            <th class="py-3 pr-4 text-right">P95 (ms)</th>
+            <th class="py-3 pr-4 text-right">Time to full response</th>
+            <th class="py-3 pr-4">Status</th>
+            <th class="py-3 pr-4">Notes</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {providers.map(p => (
+            <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" data-provider={p.slug}>
+              <td class="py-3 pr-4">
+                <div class="font-medium text-white">{p.name}</div>
+              </td>
+              <td class="py-3 pr-4 text-sm">{p.category}</td>
+              <td class="py-3 pr-4 text-right font-mono p50-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono p95-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono full-cell">—</td>
+              <td class="py-3 pr-4 status-cell">—</td>
+              <td class="py-3 pr-4 text-sm text-neutral-500">{p.notes}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-stack-builder/" class="btn-primary text-sm">Agent Stack Builder →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Memory / RAG Cost Calc →</a>
+      <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost Calc →</a>
+      <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), architectures: JSON.stringify(architectures) }}>
+    const data = JSON.parse(providers);
+    const archData = JSON.parse(architectures);
+    const fmtMs = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' ms';
+    const fmtSec = n => (n / 1000).toFixed(2) + ' s';
+
+    function getInputs() {
+      return {
+        rpm: Math.max(1, parseFloat(document.getElementById('rpm').value) || 1),
+        inputTokens: Math.max(1, parseFloat(document.getElementById('inputTokens').value) || 1),
+        outputTokens: Math.max(1, parseFloat(document.getElementById('outputTokens').value) || 1),
+        retrievalEnabled: document.getElementById('retrievalEnabled').checked,
+        retrievalQueries: Math.max(0, parseFloat(document.getElementById('retrievalQueries').value) || 0),
+        retrievalLatency: Math.max(0, parseFloat(document.getElementById('retrievalLatency').value) || 0),
+        toolCalls: Math.max(0, parseFloat(document.getElementById('toolCalls').value) || 0),
+        toolLatency: Math.max(0, parseFloat(document.getElementById('toolLatency').value) || 0),
+        networkRtt: Math.max(0, parseFloat(document.getElementById('networkRtt').value) || 0),
+        targetP50: Math.max(1, parseFloat(document.getElementById('targetP50').value) || 1),
+        targetP95: Math.max(1, parseFloat(document.getElementById('targetP95').value) || 1),
+        overhead: Math.max(1, parseFloat(document.getElementById('overhead').value) || 1)
+      };
+    }
+
+    function estimateLatency(p, inps) {
+      // Input processing: assume 1 token ≈ prompt processing time proportional to TTFT at ~4k input
+      const inputScale = inps.inputTokens / 4000;
+      const scaledTtft = p.ttft_ms * Math.max(0.6, inputScale);
+
+      // Network RTT is only for remote providers; local GPUs have 0
+      const isLocal = p.category === 'Local GPU';
+      const rtt = isLocal ? 0 : inps.networkRtt;
+
+      // Retrieval happens before generation
+      const retrievalMs = inps.retrievalEnabled ? (inps.retrievalQueries * inps.retrievalLatency) : 0;
+
+      // Generation time
+      const generationMs = inps.outputTokens * p.tbt_ms;
+
+      // Tool calls: one round-trip per tool call (excluding final generation counted above)
+      const toolMs = inps.toolCalls * inps.toolLatency;
+
+      // Base P50
+      const p50 = (scaledTtft + rtt + retrievalMs + generationMs + toolMs) * inps.overhead;
+      // P95 adds ~30% headroom plus tool/retrieval variance
+      const p95 = p50 * 1.35;
+      const full = p50; // full response time in single-stream model ≈ P50
+
+      return { p50, p95, full };
+    }
+
+    function status(inps, p50, p95) {
+      if (p95 <= inps.targetP50) return { text: 'Comfortable ✅', cls: 'text-emerald-400' };
+      if (p50 <= inps.targetP50 && p95 <= inps.targetP95) return { text: 'Meets P50 ⚠️', cls: 'text-amber-400' };
+      if (p50 <= inps.targetP95) return { text: 'Within P95 🟡', cls: 'text-yellow-400' };
+      return { text: 'Over budget ❌', cls: 'text-rose-400' };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const rows = data.map(p => {
+        const lat = estimateLatency(p, inps);
+        const st = status(inps, lat.p50, lat.p95);
+        return { ...p, ...lat, status: st, full: lat.full };
+      });
+
+      rows.sort((a, b) => a.p50 - b.p50);
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const slug = tr.dataset.provider;
+        const row = rows.find(r => r.slug === slug);
+        const p50Cell = tr.querySelector('.p50-cell');
+        const p95Cell = tr.querySelector('.p95-cell');
+        const fullCell = tr.querySelector('.full-cell');
+        const statusCell = tr.querySelector('.status-cell');
+        if (p50Cell && row) p50Cell.textContent = fmtMs(row.p50);
+        if (p95Cell && row) p95Cell.textContent = fmtMs(row.p95);
+        if (fullCell && row) fullCell.textContent = fmtSec(row.full);
+        if (statusCell && row) {
+          statusCell.innerHTML = `<span class="${row.status.cls} font-medium">${row.status.text}</span>`;
+        }
+        if (row && rows[0].slug === slug) {
+          tr.classList.add('bg-brand-gold/10');
+        } else {
+          tr.classList.remove('bg-brand-gold/10');
+        }
+      });
+
+      const fastest = rows[0];
+      document.getElementById('fastestLine').textContent = fastest
+        ? `${fastest.name} — ${fmtMs(fastest.p50)} P50`
+        : 'Enter workload to see fastest provider.';
+
+      const withinBudget = rows.filter(r => r.p50 <= inps.targetP50).length;
+      document.getElementById('targetLine').textContent = fastest
+        ? `${withinBudget} of ${rows.length} providers hit your P50 target (${fmtMs(inps.targetP50)}).`
+        : '—';
+    }
+
+    ['rpm','inputTokens','outputTokens','retrievalQueries','retrievalLatency','toolCalls','toolLatency','networkRtt','targetP50','targetP95','overhead'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+    document.getElementById('retrievalEnabled').addEventListener('change', compute);
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const arch = archData.find(a => a.slug === btn.dataset.preset);
+        if (!arch) return;
+        document.getElementById('retrievalEnabled').checked = arch.retrieval;
+        document.getElementById('toolCalls').value = arch.tools ? 1 : 0;
+        document.getElementById('overhead').value = arch.overhead_multiplier;
+        compute();
+      });
+    });
+
+    compute();
+  </script>
+</Layout>

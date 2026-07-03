@@ -248,3 +248,10 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Inputs: requests/month, traces/request, events/request, avg trace size (KB), retention days, sampling %, team seats, error events/month, uptime checks/month, projection months
 - Outputs: monthly cost per provider, cheapest option, cost per 1M requests, total period cost
 - Audience: AI agent builders budgeting observability and monitoring stack
+
+## AI Agent Latency Budget Calculator
+- URL: https://hermesdispatch.dev/tools/agent-latency-budget-calculator/
+- Description: Estimate end-to-end AI agent response latency across providers, architectures, and deployment models.
+- Inputs: requests/minute, input tokens, output tokens, retrieval enabled/queries/latency, tool calls/latency, network RTT, target P50/P95 latency
+- Outputs: P50 latency, P95 latency, full response time, target status per provider
+- Audience: AI agent builders optimizing response time and user experience
