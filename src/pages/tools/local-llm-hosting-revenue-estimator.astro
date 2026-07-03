@@ -1,0 +1,413 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/local_llm_hosting_revenue.json';
+
+const title = "Local LLM Hosting Revenue Estimator — Rent Your GPU";
+const description = "Estimate monthly profit from renting out your GPU for local LLM inference on Vast.ai, RunPod, Lambda, and other GPU marketplaces. Includes power, platform fees, and break-even.";
+
+const defaults = data.defaults;
+const gpus = data.gpus;
+const platforms = data.platforms;
+const presets = data.presets;
+const url = "https://hermesdispatch.dev/tools/local-llm-hosting-revenue-estimator/";
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema
+    name={title}
+    description={description}
+    url={url}
+    applicationCategory="FinanceApplication"
+    operatingSystem="Linux,Windows,macOS"
+  />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much can I earn renting out a GPU for local LLM inference?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Revenue depends on your GPU, the hourly rate you can charge, utilization, platform fees, and electricity. A 24 GB NVIDIA RTX 4090 at $1.50/hour with 65% utilization can generate roughly $585/month gross before fees and power." }
+      },
+      {
+        "@type": "Question",
+        "name": "Which GPU is most profitable for LLM hosting?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Consumer cards with 24 GB VRAM (RTX 3090, RTX 4090) dominate peer-to-peer rental demand. They balance memory capacity, token throughput, and acquisition cost. Datacenter cards like A100 and H100 earn more per hour but have higher upfront cost." }
+      },
+      {
+        "@type": "Question",
+        "name": "What are typical platform fees for GPU hosting?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Vast.ai typically charges hosts around 15%. Managed marketplaces like RunPod, Lambda, and FluidStack often take 18-25%. Self-hosted direct customers pay only payment processing (~3%)." }
+      },
+      {
+        "@type": "Question",
+        "name": "How does this compare to crypto mining profit?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Use the Miner Pivot Calculator to compare directly. In many regions, LLM inference can earn more per kWh than proof-of-work mining because compute is sold by the hour rather than tied to volatile token prices and network difficulty." }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does it take to break even on a GPU bought for hosting?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Break-even months = hardware cost ÷ monthly net profit. A $1,200 RTX 3090 earning $250/month net breaks even in roughly 5 months. Higher utilization and lower electricity accelerate payback." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🖥️</div>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Local LLM Hosting Revenue Estimator</h1>
+        <p class="text-xl text-neutral-400 max-w-3xl mx-auto">
+          Estimate monthly profit from renting your GPU for LLM inference. Pick a GPU, marketplace, utilization, and electricity rate to see net revenue, $/hour, and break-even months.
+        </p>
+      </div>
+
+      <!-- Presets -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {presets.map(p => (
+          <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-slug={p.slug}>
+            <div class="text-2xl mb-2">{p.icon}</div>
+            <h3 class="font-semibold text-sm">{p.name}</h3>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <!-- Inputs -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Inputs</h2>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">GPU model</label>
+              <select id="gpuModel" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {gpus.map(g => <option value={g.slug} data-power={g.power_w} data-rate={g.typical_rate} data-cost={g.hardware_cost}>{g.name} — ${g.typical_rate.toFixed(2)}/hr typical</option>)}
+              </select>
+              <p id="gpuNotes" class="text-xs text-neutral-500 mt-1">{gpus[0].notes}</p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Marketplace / platform</label>
+                <select id="platform" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {platforms.map(p => <option value={p.slug} data-fee={p.fee_pct}>{p.name} — {p.fee_pct}% fee</option>)}
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Hourly rental rate ($)</label>
+                <input id="hourlyRate" type="number" min="0" step="0.05" value={defaults.hourly_rate} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Hours online per day</label>
+                <input id="hoursPerDay" type="number" min="0" max="24" step="1" value={defaults.hours_per_day} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Days per month</label>
+                <input id="daysPerMonth" type="number" min="1" max="31" step="1" value={defaults.days_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Utilization (% rented)</label>
+                <input id="utilization" type="number" min="0" max="100" step="1" value={defaults.utilization_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Downtime reserve (%)</label>
+                <input id="downtime" type="number" min="0" max="100" step="1" value={defaults.downtime_reserve_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                <p class="text-xs text-neutral-500 mt-1">Reboots, updates, relocations.</p>
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">GPU power draw (W)</label>
+                <input id="powerW" type="number" min="0" step="10" value={defaults.gpu_power_w} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Electricity rate ($/kWh)</label>
+                <input id="electricityRate" type="number" min="0" step="0.01" value={defaults.electricity_rate} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Platform fee (%)</label>
+                <input id="platformFee" type="number" min="0" max="100" step="1" value={defaults.platform_fee_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Maintenance / internet ($/mo)</label>
+                <input id="maintenance" type="number" min="0" step="5" value={defaults.maintenance_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Total hardware cost ($)</label>
+              <input id="hardwareCost" type="number" min="0" step="50" value={defaults.hardware_cost} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">GPU + system used for break-even.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outputs -->
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Gross monthly revenue</p>
+              <p id="grossRevenue" class="text-2xl font-bold text-brand-gold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 text-center border border-red-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Platform fees</p>
+              <p id="platformFees" class="text-2xl font-bold text-red-400">—</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-5 text-center border border-orange-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Electricity cost</p>
+              <p id="electricityCost" class="text-2xl font-bold text-orange-400">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 text-center border border-emerald-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Net monthly profit</p>
+              <p id="netProfit" class="text-2xl font-bold text-emerald-400">—</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Net $ per rented hour</p>
+              <p id="netPerHour" class="text-2xl font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Break-even months</p>
+              <p id="breakEven" class="text-2xl font-bold">—</p>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Annual net profit (after hardware)</p>
+            <p id="annualProfit" class="text-3xl font-bold text-brand-gold">—</p>
+          </div>
+          <div id="verdict" class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-sm text-neutral-400">Verdict</p>
+            <p class="text-xl font-semibold mt-1">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Utilization sensitivity -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Utilization sensitivity</h2>
+        <p class="text-sm text-neutral-400 mb-4">Net monthly profit at different utilization rates, holding your current hourly rate, power, and fees.</p>
+        <div id="sensitivityGrid" class="grid sm:grid-cols-3 lg:grid-cols-6 gap-3"></div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-10">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the math works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Rentable hours</strong> = hours/day × days/month × (1 − downtime reserve).</li>
+            <li><strong class="text-white">Gross revenue</strong> = rentable hours × utilization × hourly rate.</li>
+            <li><strong class="text-white">Platform fees</strong> = gross revenue × platform fee %.</li>
+            <li><strong class="text-white">Electricity</strong> = hours online × power (kW) × electricity rate.</li>
+            <li><strong class="text-white">Net profit</strong> = gross − fees − electricity − maintenance.</li>
+            <li><strong class="text-white">Break-even</strong> = hardware cost ÷ monthly net profit.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Hosting reality checks</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• 24 GB cards (RTX 3090/4090) are the sweet spot for local LLM rentals.</li>
+            <li>• Typical consumer rates: <strong class="text-white">$0.70-2.00/hr</strong> depending on VRAM and demand.</li>
+            <li>• Utilization above <strong class="text-white">70%</strong> is excellent; below <strong class="text-white">40%</strong> is hard to justify vs selling the hardware.</li>
+            <li>• Power costs dominate in regions above <strong class="text-white">$0.20/kWh</strong>.</li>
+            <li>• Self-hosting direct customers keeps the most margin but requires support.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-3">
+        <a href="/tools/miner-pivot-calculator/" class="btn-primary text-sm">Miner Pivot Calculator →</a>
+        <a href="/tools/local-llm-roi-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Local LLM ROI Calc →</a>
+        <a href="/tools/hashrate-to-inference-converter/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Hashrate → Inference →</a>
+        <a href="/compare/gpus/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">GPU Comparison →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ gpus, platforms, presets, defaults }}>
+    const gpuMap = Object.fromEntries(gpus.map(g => [g.slug, g]));
+    const platformMap = Object.fromEntries(platforms.map(p => [p.slug, p]));
+    const presetMap = Object.fromEntries(presets.map(p => [p.slug, p]));
+
+    const el = id => document.getElementById(id);
+
+    const inputs = {
+      gpuModel: el('gpuModel'),
+      platform: el('platform'),
+      hourlyRate: el('hourlyRate'),
+      hoursPerDay: el('hoursPerDay'),
+      daysPerMonth: el('daysPerMonth'),
+      utilization: el('utilization'),
+      downtime: el('downtime'),
+      powerW: el('powerW'),
+      electricityRate: el('electricityRate'),
+      platformFee: el('platformFee'),
+      maintenance: el('maintenance'),
+      hardwareCost: el('hardwareCost'),
+    };
+
+    const outputs = {
+      grossRevenue: el('grossRevenue'),
+      platformFees: el('platformFees'),
+      electricityCost: el('electricityCost'),
+      netProfit: el('netProfit'),
+      netPerHour: el('netPerHour'),
+      breakEven: el('breakEven'),
+      annualProfit: el('annualProfit'),
+      verdict: el('verdict'),
+      sensitivity: el('sensitivityGrid'),
+      gpuNotes: el('gpuNotes'),
+    };
+
+    function fmtCurrency(n) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n || 0);
+    }
+
+    function fmtNumber(n, digits = 1) {
+      return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: digits }).format(n || 0);
+    }
+
+    function getSelectedOption(select) {
+      return select.options[select.selectedIndex];
+    }
+
+    function read() {
+      const gpu = gpuMap[inputs.gpuModel.value] || gpus[0];
+      const platform = platformMap[inputs.platform.value] || platforms[0];
+      return {
+        gpu,
+        platform,
+        hourlyRate: parseFloat(inputs.hourlyRate.value) || 0,
+        hoursPerDay: parseFloat(inputs.hoursPerDay.value) || 0,
+        daysPerMonth: parseFloat(inputs.daysPerMonth.value) || 0,
+        utilization: (parseFloat(inputs.utilization.value) || 0) / 100,
+        downtime: (parseFloat(inputs.downtime.value) || 0) / 100,
+        powerW: parseFloat(inputs.powerW.value) || 0,
+        electricityRate: parseFloat(inputs.electricityRate.value) || 0,
+        platformFee: (parseFloat(inputs.platformFee.value) || 0) / 100,
+        maintenance: parseFloat(inputs.maintenance.value) || 0,
+        hardwareCost: parseFloat(inputs.hardwareCost.value) || 0,
+      };
+    }
+
+    function calc() {
+      const v = read();
+      outputs.gpuNotes.textContent = v.gpu.notes;
+
+      const onlineHours = v.hoursPerDay * v.daysPerMonth;
+      const rentableHours = onlineHours * (1 - v.downtime);
+      const rentedHours = rentableHours * v.utilization;
+      const gross = rentedHours * v.hourlyRate;
+      const platformFees = gross * v.platformFee;
+      const electricityCost = onlineHours * (v.powerW / 1000) * v.electricityRate;
+      const net = Math.max(0, gross - platformFees - electricityCost - v.maintenance);
+      const netPerRentedHour = rentedHours > 0 ? net / rentedHours : 0;
+      const breakEven = net > 0 ? v.hardwareCost / net : Infinity;
+      const annualNet = net * 12;
+      const annualProfitAfterHardware = annualNet - v.hardwareCost;
+
+      outputs.grossRevenue.textContent = fmtCurrency(gross);
+      outputs.platformFees.textContent = fmtCurrency(platformFees);
+      outputs.electricityCost.textContent = fmtCurrency(electricityCost);
+      outputs.netProfit.textContent = fmtCurrency(net);
+      outputs.netPerHour.textContent = fmtCurrency(netPerRentedHour);
+      outputs.breakEven.textContent = isFinite(breakEven) ? fmtNumber(breakEven) + ' mo' : '∞';
+      outputs.annualProfit.textContent = fmtCurrency(annualProfitAfterHardware);
+
+      // Verdict
+      const verdictEl = outputs.verdict.querySelector('p:last-child');
+      if (net <= 0) {
+        outputs.verdict.className = 'glass-card rounded-2xl p-5 text-center border border-red-500/30 bg-red-500/10';
+        verdictEl.textContent = 'Not profitable at these settings';
+      } else if (breakEven <= 6) {
+        outputs.verdict.className = 'glass-card rounded-2xl p-5 text-center border border-emerald-500/30 bg-emerald-500/10';
+        verdictEl.textContent = 'Strong hosting candidate';
+      } else if (breakEven <= 18) {
+        outputs.verdict.className = 'glass-card rounded-2xl p-5 text-center border border-brand-gold/30 bg-brand-gold/10';
+        verdictEl.textContent = 'Viable with patience';
+      } else {
+        outputs.verdict.className = 'glass-card rounded-2xl p-5 text-center border border-orange-500/30 bg-orange-500/10';
+        verdictEl.textContent = 'Marginal — consider cheaper GPU or higher rate';
+      }
+
+      // Sensitivity
+      const rates = [30, 40, 50, 60, 70, 80];
+      outputs.sensitivity.innerHTML = rates.map(rate => {
+        const rented = rentableHours * (rate / 100);
+        const gr = rented * v.hourlyRate;
+        const fees = gr * v.platformFee;
+        const n = Math.max(0, gr - fees - electricityCost - v.maintenance);
+        const active = Math.abs(rate - (v.utilization * 100)) < 2;
+        return `
+          <div class="p-3 rounded-xl border ${active ? 'border-brand-gold/50 bg-brand-gold/10' : 'border-neutral-700 bg-neutral-800/50'} text-center">
+            <p class="text-xs text-neutral-400 mb-1">${rate}% util</p>
+            <p class="font-bold ${active ? 'text-brand-gold' : 'text-white'}">${fmtCurrency(n)}</p>
+            <p class="text-[10px] text-neutral-500">net/mo</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    Object.values(inputs).forEach(input => input.addEventListener('input', calc));
+
+    inputs.gpuModel.addEventListener('change', () => {
+      const opt = getSelectedOption(inputs.gpuModel);
+      const g = gpuMap[inputs.gpuModel.value];
+      if (g) {
+        inputs.powerW.value = g.power_w;
+        inputs.hardwareCost.value = g.hardware_cost;
+        // Only overwrite rate if user hasn't typed a custom one, but for simplicity set typical rate
+        inputs.hourlyRate.value = g.typical_rate.toFixed(2);
+      }
+      calc();
+    });
+
+    inputs.platform.addEventListener('change', () => {
+      const p = platformMap[inputs.platform.value];
+      if (p) {
+        inputs.platformFee.value = p.fee_pct;
+      }
+      calc();
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const p = presetMap[btn.dataset.slug];
+        if (!p) return;
+        inputs.gpuModel.value = p.gpu_slug;
+        inputs.platform.value = platforms.find(pl => pl.fee_pct === p.platform_fee_pct)?.slug || 'vastai';
+        inputs.hourlyRate.value = p.hourly_rate;
+        inputs.hoursPerDay.value = p.hours_per_day;
+        inputs.daysPerMonth.value = 30;
+        inputs.utilization.value = p.utilization_pct;
+        inputs.downtime.value = p.downtime_reserve_pct;
+        inputs.electricityRate.value = p.electricity_rate;
+        inputs.platformFee.value = p.platform_fee_pct;
+        inputs.maintenance.value = p.maintenance_per_month;
+        const g = gpuMap[p.gpu_slug];
+        if (g) {
+          inputs.powerW.value = g.power_w;
+          inputs.hardwareCost.value = g.hardware_cost;
+        }
+        calc();
+      });
+    });
+
+    calc();
+  </script>
+</Layout>

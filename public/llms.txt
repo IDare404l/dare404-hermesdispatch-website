@@ -234,3 +234,10 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Inputs: project type, full name, email, username, company, country
 - Outputs: categorized signup checklist, official signup links, autofill profile, copyable checklist
 - Notes: human-in-the-loop; does not create accounts automatically; covers 25+ AI/cloud/dev services
+
+## Local LLM Hosting Revenue Estimator
+- URL: https://hermesdispatch.dev/tools/local-llm-hosting-revenue-estimator/
+- Description: Estimate monthly profit from renting out a GPU for local LLM inference on peer-to-peer or managed GPU marketplaces.
+- Inputs: GPU model, marketplace, hourly rental rate, hours online per day, utilization %, electricity rate, power draw, platform fee %, maintenance, hardware cost
+- Outputs: gross revenue, platform fees, electricity cost, net monthly profit, net $/rented hour, break-even months, annual profit after hardware, verdict
+- Audience: crypto miners pivoting to AI inference and AI hardware owners considering GPU hosting
