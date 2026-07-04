@@ -1,0 +1,236 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_eval_plan.json';
+
+const title = "AI Agent Evaluation Planner | Hermes Dispatch";
+const description = "Choose the right benchmark, budget, and timeline for evaluating an AI agent. Filter by agent type, readiness level, and per-run budget.";
+
+const agentTypes = data.agent_types;
+const readinessLevels = data.readiness_levels;
+const budgets = data.budgets;
+const benchmarks = data.benchmarks;
+
+const faqs = [
+  { q: "Which benchmark is best for a coding agent?", a: "Start with HumanEval or MBPP for a fast capability check. For real-world evaluation, use SWE-bench Lite for iteration and SWE-bench Verified for a trustworthy release score." },
+  { q: "How much does a typical agent benchmark run cost?", a: "Small function-level suites like HumanEval cost under $1. Full SWE-bench or OSWorld runs can cost $1,000-5,000+ depending on model choice and retries." },
+  { q: "What benchmark should I use for a web-browsing agent?", a: "Use Mind2Web for generalization, WebArena for reproducible self-hosted tasks, and WebVoyager for live-site resilience." },
+  { q: "Can I benchmark a voice agent?", a: "Text dialogue benchmarks like MultiWOZ cover task completion. Air-Bench tests audio understanding. Add real telephony latency/ASR tests for production voice validation." },
+  { q: "When should I run a leaderboard benchmark?", a: "Run leaderboard benchmarks when you need a credible public number for marketing, investors, or research. Otherwise, prioritize cheaper internal suites for iteration." }
+];
+
+function money(n) {
+  return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+function effortClass(effort) {
+  return {
+    'Low': 'bg-green-500/10 text-green-400 border-green-500/20',
+    'Medium': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    'High': 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+    'Very High': 'bg-red-500/10 text-red-400 border-red-500/20'
+  }[effort] || 'bg-neutral-800 text-neutral-300 border-neutral-700';
+}
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Evaluation Planner" description={description} url="https://hermesdispatch.dev/tools/agent-evaluation-planner/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧪</div>
+      <h1 class="display-heading mb-4">AI Agent Evaluation Planner</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Pick the right benchmark, estimate the cost, and plan the timeline for evaluating any AI agent.</p>
+    </div>
+
+    <!-- Filters -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Evaluation context</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Agent type</span>
+          <select id="agentType" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            <option value="all">Any / all agent types</option>
+            {agentTypes.map(t => <option value={t.slug}>{t.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Readiness goal</span>
+          <select id="readiness" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            <option value="all">Any readiness level</option>
+            {readinessLevels.map(r => <option value={r.slug}>{r.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Max budget per run</span>
+          <select id="budget" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {budgets.map(b => <option value={b.slug} selected={b.slug === 'unlimited'}>{b.name}</option>)}
+          </select>
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Matching benchmarks</p>
+        <p id="matchCount" class="text-4xl font-bold text-brand-gold">{benchmarks.length}</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest match</p>
+        <p id="cheapestMatch" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Fastest match</p>
+        <p id="fastestMatch" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Best release benchmark</p>
+        <p id="releaseMatch" class="text-lg font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="results" class="space-y-4 mb-12">
+      {benchmarks.map((b, i) => (
+        <div class="bench-row glass-card rounded-2xl p-5 border border-neutral-800 hover:border-brand-gold/30 transition" data-slug={b.slug} data-categories={JSON.stringify(b.best_for)} data-readiness={JSON.stringify(b.readiness)} data-budget={b.budget.join(',')}>
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-3">
+            <div>
+              <div class="flex items-center gap-3 mb-1">
+                <h3 class="text-lg font-bold text-white">{b.name}</h3>
+                <span class="text-xs px-2 py-1 rounded border {effortClass(b.effort)}">{b.effort} effort</span>
+              </div>
+              <p class="text-sm text-neutral-400">{b.what}</p>
+            </div>
+            <div class="flex flex-wrap gap-2 lg:justify-end">
+              <span class="text-xs bg-neutral-800 text-neutral-300 px-2 py-1 rounded">{money(b.usd_per_task * b.task_count)} full run</span>
+              <span class="text-xs bg-neutral-800 text-neutral-300 px-2 py-1 rounded">~{b.time_hours}h setup</span>
+              <span class="text-xs bg-neutral-800 text-neutral-300 px-2 py-1 rounded">{b.task_count.toLocaleString()} tasks</span>
+            </div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-2 text-sm mb-3">
+            <p><span class="text-brand-gold">✓</span> {b.pros}</p>
+            <p><span class="text-neutral-500">✗</span> {b.cons}</p>
+          </div>
+          <p class="text-sm text-neutral-300 mb-3"><span class="text-brand-gold">Best for:</span> {b.best_for.map(slug => agentTypes.find(t => t.slug === slug)?.name || slug).join(', ')} • {b.readiness.map(slug => readinessLevels.find(r => r.slug === slug)?.name || slug).join(', ')}</p>
+          <div class="flex flex-wrap gap-2">
+            <a href={b.link} target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-xs transition-colors">View benchmark →</a>
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <!-- Build-your-plan box -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Recommended evaluation plan</h2>
+      <div id="planText" class="text-neutral-300 text-sm space-y-2">
+        <p>Select filters above to generate a tailored evaluation plan.</p>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-benchmark-selector/" class="btn-primary text-sm">Benchmark Selector →</a>
+      <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+      <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calc →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ agentTypes: JSON.stringify(agentTypes), readinessLevels: JSON.stringify(readinessLevels), budgets: JSON.stringify(budgets), benchmarks: JSON.stringify(benchmarks) }}>
+    const types = JSON.parse(agentTypes);
+    const readiness = JSON.parse(readinessLevels);
+    const budgetList = JSON.parse(budgets);
+    const benchList = JSON.parse(benchmarks);
+
+    function money(n) {
+      return '$' + Math.round(n).toLocaleString();
+    }
+
+    function matches(b, typeSlug, readinessSlug, budgetSlug) {
+      const typeOk = typeSlug === 'all' || b.best_for.includes(typeSlug);
+      const readinessOk = readinessSlug === 'all' || b.readiness.includes(readinessSlug);
+      const budgetMax = budgetList.find(x => x.slug === budgetSlug)?.max || 100000;
+      const runCost = b.usd_per_task * b.task_count;
+      const budgetOk = runCost <= budgetMax;
+      return typeOk && readinessOk && budgetOk;
+    }
+
+    function update() {
+      const type = document.getElementById('agentType').value;
+      const ready = document.getElementById('readiness').value;
+      const budget = document.getElementById('budget').value;
+
+      let visible = 0;
+      let cheapest = null;
+      let fastest = null;
+      let release = null;
+
+      document.querySelectorAll('.bench-row').forEach(row => {
+        const slug = row.dataset.slug;
+        const b = benchList.find(x => x.slug === slug);
+        const ok = matches(b, type, ready, budget);
+        row.style.display = ok ? '' : 'none';
+        if (ok) {
+          visible++;
+          const cost = b.usd_per_task * b.task_count;
+          if (!cheapest || cost < cheapest.cost) cheapest = { b, cost };
+          if (!fastest || b.time_hours < fastest.hours) fastest = { b, hours: b.time_hours };
+          if (b.readiness.includes('release') && (!release || cost < release.cost)) release = { b, cost };
+        }
+      });
+
+      document.getElementById('matchCount').textContent = visible;
+      document.getElementById('cheapestMatch').textContent = cheapest ? money(cheapest.cost) : '—';
+      document.getElementById('fastestMatch').textContent = fastest ? `~${fastest.hours}h` : '—';
+      document.getElementById('releaseMatch').textContent = release ? release.b.name : '—';
+
+      const planBox = document.getElementById('planText');
+      if (visible === 0) {
+        planBox.innerHTML = '<p>No benchmarks match your current filters. Try raising the budget or broadening the agent type.</p>';
+      } else {
+        const typeName = types.find(t => t.slug === type)?.name || 'your agent';
+        const readyName = readiness.find(r => r.slug === ready)?.name || 'any readiness level';
+        const budgetName = budgetList.find(b => b.slug === budget)?.name || 'unlimited budget';
+        let html = `<p><strong>Context:</strong> ${typeName}, ${readyName}, ${budgetName}.</p>`;
+        if (cheapest && fastest) {
+          html += `<p><strong>Quick/cheap start:</strong> Run <a href="${fastest.b.link}" target="_blank" rel="noopener" class="text-cyan-400 underline">${fastest.b.name}</a> (~${fastest.b.time_hours}h, ${money(fastest.b.usd_per_task * fastest.b.task_count)}) for a fast signal.</p>`;
+        }
+        if (release && release.b.slug !== (fastest?.b.slug)) {
+          html += `<p><strong>Release validation:</strong> Add <a href="${release.b.link}" target="_blank" rel="noopener" class="text-cyan-400 underline">${release.b.name}</a> (${money(release.cost)}) for a credible pre-launch score.</p>`;
+        }
+        if (cheapest && cheapest.b.slug !== (fastest?.b.slug) && cheapest.b.slug !== release?.b.slug) {
+          html += `<p><strong>Cheapest option:</strong> <a href="${cheapest.b.link}" target="_blank" rel="noopener" class="text-cyan-400 underline">${cheapest.b.name}</a> at ${money(cheapest.cost)}.</p>`;
+        }
+        planBox.innerHTML = html;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('#agentType, #readiness, #budget').forEach(el => el.addEventListener('change', update));
+      update();
+    });
+  </script>
+</Layout>
