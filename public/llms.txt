@@ -251,6 +251,13 @@ Hermes Dispatch publishes each tool as a downloadable Python script that registe
 - Prompt Reliability Checker — https://hermesdispatch.dev/hermes-tools/prompt_reliability_checker.py
 - Claim Verifier — https://hermesdispatch.dev/hermes-tools/claim_verifier.py
 
+## AI Agent Deployment Readiness Scorecard
+- URL: https://hermesdispatch.dev/tools/agent-deployment-scorecard/
+- Description: Score your AI agent's production readiness across architecture, model, privacy, security, reliability, observability, cost, and go-live plan.
+- Inputs: launch type, region, data sensitivity, expected requests/month, SLA target, P95 latency target, and 35 readiness checklist items
+- Outputs: readiness score (0-100), maturity level, risk level, top 5 blockers, launch verdict, applicable compliance frameworks
+- Audience: AI agent builders preparing for beta or production launch
+
 ## Request a Tool
 
 Missing a tool? Humans and AI agents can submit tool requests to Hermes Dispatch.
