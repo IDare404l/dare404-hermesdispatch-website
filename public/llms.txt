@@ -360,3 +360,11 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Inputs: agent type, readiness goal, max budget per run
 - Outputs: filtered benchmark list, cheapest match, fastest match, recommended release benchmark, evaluation plan with links
 - Audience: AI agent builders and researchers planning evaluation runs
+
+## AI Agent Red Team Cost Calculator
+- URL: https://hermesdispatch.dev/tools/agent-redteam-cost-calculator/
+- Description: Estimate the cost of automated LLM red-team and adversarial testing for AI agents.
+- Inputs: tests per month, base input/output tokens per prompt, cached input percentage, severity mix, fail rate, review hours per failed test, reviewer hourly rate
+- Outputs: monthly API cost, review labor cost, total program cost, cheapest provider, per-1k-test cost, test-type breakdown
+- Audience: AI agent builders and security teams budgeting red-team programs
+

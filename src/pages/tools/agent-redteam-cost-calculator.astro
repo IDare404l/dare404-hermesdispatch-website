@@ -1,0 +1,276 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_redteam_cost.json';
+
+const title = "AI Agent Red Team Cost Calculator | Hermes Dispatch";
+const description = "Estimate the monthly cost of automated LLM red-team and adversarial testing for AI agents. Compare prompt injection, jailbreak, fuzzing, and multimodal tests across providers.";
+
+const providers = data.providers;
+const testTypes = data.test_types;
+const severityMix = data.severity_mix;
+
+const faqs = [
+  { q: "How much does automated LLM red-teaming cost per month?", a: "For a small agent with 1,000 tests per month, costs usually run $50-500. A production agent with 50,000+ adversarial tests can cost $2,000-20,000/month in API tokens alone, before labor and platform fees." },
+  { q: "Which test type drives the most cost?", a: "Multimodal adversarial tests and policy/PII compliance tests drive the highest per-test cost because they use longer prompts and require larger outputs. High-volume fuzzing is usually the cheapest per-test category." },
+  { q: "Does this include human red-team labor?", a: "No. The calculator adds an optional review-hours estimate based on failed-test rate. Add your own security engineer, bug-bounty, or managed red-team fees on top." },
+  { q: "What tools can run these tests?", a: "Open-source options include Garak, PyRIT, TextAttack, and AutoDAN. Commercial layers such as Lakera Guard, Arthur Shield, and Robust Intelligence add policy and detection on top of raw generation cost." }
+];
+
+function money(n) {
+  return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Red Team Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-redteam-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🛡️</div>
+      <h1 class="display-heading mb-4">AI Agent Red Team Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate what it costs to continuously adversarial-test an AI agent across prompt injection, jailbreak, fuzzing, and multimodal attack surfaces.</p>
+    </div>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Test program</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tests / month</span>
+          <input id="tests" type="number" min="0" value="5000" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Base input tokens / prompt</span>
+          <input id="baseInput" type="number" min="0" value="800" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Base output tokens / prompt</span>
+          <input id="baseOutput" type="number" min="0" value="300" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input %</span>
+          <input id="cacheHit" type="number" min="0" max="100" value="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Severity mix</span>
+          <select id="severity" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            <option value="quick">Quick scan</option>
+            <option value="balanced" selected>Balanced</option>
+            <option value="deep">Deep audit</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fail rate % (human review)</span>
+          <input id="failRate" type="number" min="0" max="100" value="5" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review hours / failed test</span>
+          <input id="reviewHours" type="number" min="0" step="0.05" value="0.15" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly rate ($)</span>
+          <input id="reviewRate" type="number" min="0" value="150" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly API cost</p>
+        <p id="apiCost" class="text-4xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Review labor cost</p>
+        <p id="laborCost" class="text-4xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total program cost</p>
+        <p id="totalCost" class="text-4xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest provider</p>
+        <p id="cheapestProvider" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Cost table -->
+    <section class="overflow-x-auto mb-12">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider / Model</th>
+            <th class="py-3 pr-4">Input / 1M</th>
+            <th class="py-3 pr-4">Cached / 1M</th>
+            <th class="py-3 pr-4">Output / 1M</th>
+            <th class="py-3 pr-4 text-right">Monthly API</th>
+            <th class="py-3 pr-4 text-right">Per 1k tests</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {providers.map(p => (
+            <tr class="border-b border-neutral-800/50" data-provider={p.name}>
+              <td class="py-3 pr-4">
+                <div class="font-medium text-white">{p.name}</div>
+                <div class="text-xs text-neutral-400">{p.model}</div>
+              </td>
+              <td class="py-3 pr-4">${p.input_per_1m.toFixed(2)}</td>
+              <td class="py-3 pr-4">{p.cached_input_per_1m ? `$${p.cached_input_per_1m.toFixed(3)}` : "—"}</td>
+              <td class="py-3 pr-4">${p.output_per_1m.toFixed(2)}</td>
+              <td class="py-3 pr-4 text-right font-mono cost-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono per-k-cell">—</td>
+              <td class="py-3 pr-4 text-sm text-neutral-400">{p.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Breakdown by test type -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Test-type breakdown</h2>
+      <p class="text-neutral-400 text-sm mb-4">Shows how the severity mix distributes tests and weighted tokens across categories.</p>
+      <div id="typeBreakdown" class="space-y-3">
+        {testTypes.map(t => (
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b border-neutral-800/50 type-row" data-slug={t.slug}>
+            <div>
+              <p class="font-medium text-white">{t.name}</p>
+              <p class="text-xs text-neutral-500">{t.description}</p>
+            </div>
+            <div class="text-sm text-neutral-300 text-right">
+              <span class="type-share">0%</span> of tests • <span class="type-effort text-xs px-2 py-0.5 rounded border border-neutral-700">{t.effort} effort</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/ai-agent-compliance-checker/" class="btn-primary text-sm">Compliance Checker →</a>
+      <a href="/tools/agent-deployment-scorecard/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Deployment Scorecard →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), testTypes: JSON.stringify(testTypes), severityMix: JSON.stringify(severityMix) }}>
+    const providerList = JSON.parse(providers);
+    const typeList = JSON.parse(testTypes);
+    const mixMap = JSON.parse(severityMix);
+    const fmt = n => '$' + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+    function getNum(id) {
+      const el = document.getElementById(id);
+      return el ? parseFloat(el.value) || 0 : 0;
+    }
+
+    function compute() {
+      const tests = getNum('tests');
+      const baseInput = getNum('baseInput');
+      const baseOutput = getNum('baseOutput');
+      const cacheHit = Math.min(100, Math.max(0, getNum('cacheHit'))) / 100;
+      const severity = document.getElementById('severity').value;
+      const failRate = Math.min(100, Math.max(0, getNum('failRate'))) / 100;
+      const reviewHours = getNum('reviewHours');
+      const reviewRate = getNum('reviewRate');
+      const mix = mixMap[severity] || mixMap.balanced;
+
+      let cheapest = null;
+      let cheapestCost = Infinity;
+      const rows = [];
+
+      providerList.forEach(p => {
+        let totalInputTokens = 0;
+        let totalOutputTokens = 0;
+        let totalTests = 0;
+
+        typeList.forEach(t => {
+          const share = mix[t.slug.replace(/-/g, '_')] || 0;
+          const typeTests = tests * share;
+          const inputTokens = typeTests * baseInput * t.input_multiplier;
+          const outputTokens = typeTests * baseOutput * t.output_multiplier;
+          const retries = 1 + t.retry_rate;
+          totalInputTokens += inputTokens * retries;
+          totalOutputTokens += outputTokens * retries;
+          totalTests += typeTests * retries;
+        });
+
+        const inputCost = (totalInputTokens / 1_000_000) * ((1 - cacheHit) * p.input_per_1m + cacheHit * (p.cached_input_per_1m || p.input_per_1m));
+        const outputCost = (totalOutputTokens / 1_000_000) * p.output_per_1m;
+        const requestCost = (totalTests * (p.request_fee || 0));
+        const monthly = inputCost + outputCost + requestCost;
+        const perK = totalTests > 0 ? (monthly / (totalTests / 1000)) : 0;
+
+        rows.push({ name: p.name, monthly, perK });
+        if (monthly < cheapestCost) {
+          cheapestCost = monthly;
+          cheapest = p.name;
+        }
+      });
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const name = tr.dataset.provider;
+        const row = rows.find(r => r.name === name);
+        const costCell = tr.querySelector('.cost-cell');
+        const perKCell = tr.querySelector('.per-k-cell');
+        if (costCell && row) costCell.textContent = fmt(row.monthly);
+        if (perKCell && row) perKCell.textContent = fmt(row.perK);
+        if (row && cheapest === name) {
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      const totalApi = rows.reduce((sum, r) => sum + r.monthly, 0) / rows.length;
+      const failedTests = tests * failRate;
+      const laborCost = failedTests * reviewHours * reviewRate;
+      const totalCost = totalApi + laborCost;
+
+      document.getElementById('apiCost').textContent = fmt(totalApi);
+      document.getElementById('laborCost').textContent = fmt(laborCost);
+      document.getElementById('totalCost').textContent = fmt(totalCost);
+      document.getElementById('cheapestProvider').textContent = cheapest || '—';
+
+      // Type breakdown
+      document.querySelectorAll('.type-row').forEach(row => {
+        const slug = row.dataset.slug;
+        const share = mix[slug.replace(/-/g, '_')] || 0;
+        row.querySelector('.type-share').textContent = Math.round(share * 100) + '%';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      ['tests', 'baseInput', 'baseOutput', 'cacheHit', 'severity', 'failRate', 'reviewHours', 'reviewRate'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', compute);
+      });
+      compute();
+    });
+  </script>
+</Layout>
