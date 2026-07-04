@@ -326,3 +326,10 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Inputs: target SLA (%), monthly revenue, requests/month, cost per minute of downtime, projection months
 - Outputs: allowed downtime per month/year, revenue at risk, availability class, provider SLA comparison table with credit tiers
 - Audience: AI agent builders setting reliability targets and choosing providers
+
+## AI Agent Hosting Cost Comparator
+- URL: https://hermesdispatch.dev/tools/agent-hosting-cost-comparator/
+- Description: Compare self-hosted, cloud GPU rental, and managed marketplace hosting costs for AI agents.
+- Inputs: monthly requests, input/output tokens per request, LLM provider, active hours per day, hardware amortization months, electricity rate, marketplace revenue per month
+- Outputs: monthly TCO per route, cost per 1k requests, cheapest hosting route, group-by-group comparison tables
+- Audience: AI agent builders choosing between self-hosting, cloud GPU rental, and managed marketplaces

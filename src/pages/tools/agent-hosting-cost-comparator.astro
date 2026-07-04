@@ -1,0 +1,270 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import apiPricing from '../../data/agent_api_pricing.json';
+import hosting from '../../data/agent_hosting_costs.json';
+
+const title = "AI Agent Hosting Cost Comparator | Hermes Dispatch";
+const description = "Compare self-hosted, cloud GPU rental, and managed marketplace hosting costs for AI agents. Estimate monthly TCO, cost per 1k requests, and the cheapest deployment route.";
+
+const providers = apiPricing.providers;
+const selfHosted = hosting.self_hosted_options;
+const cloudGpu = hosting.cloud_gpu_options;
+const marketplaces = hosting.marketplace_options;
+const assumptions = hosting.assumptions;
+
+const faqs = [
+  { q: "When is self-hosting an AI agent cheaper than a marketplace?", a: "Self-hosting usually wins when you have steady, high-volume traffic that keeps a local GPU busy. If utilization is low or you need instant scaling, managed marketplaces or cloud GPU rental can be cheaper because you avoid hardware capex and electricity." },
+  { q: "Does the calculator include LLM token costs?", a: "Yes. For self-hosted and cloud GPU routes, LLM inference is effectively the hardware/electricity cost. For marketplaces that pass LLM costs to the user, this calculator models the hosting markup only. Add token cost separately using the Agent API Pricing Comparator if you are the end user paying per token." },
+  { q: "What does cost per 1k requests mean?", a: "It is the total monthly cost divided by the number of requests per month, scaled to 1,000 requests. It lets you compare routes regardless of volume and see where fixed costs (hardware, base platform fees) dilute as volume grows." },
+  { q: "How are hardware costs handled?", a: "Local hardware is amortized over " + assumptions.hardware_amortization_months + " months and added to monthly electricity. You can override the amortization months and electricity rate in the inputs." },
+  { q: "How often are prices updated?", a: "Hosting and API prices are reviewed monthly. Last updated: " + hosting.last_updated + ". Always confirm current rates on provider sites before committing to a budget." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Hosting Cost Comparator" description={description} url="https://hermesdispatch.dev/tools/agent-hosting-cost-comparator/" applicationCategory="FinanceApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4">AI Agent Hosting Cost Comparator</h1>
+      <p class="text-slate-300 text-lg max-w-2xl mx-auto">Compare self-hosted hardware, cloud GPU rental, and managed marketplace hosting for your AI agent workload. See total monthly cost, cost per 1k requests, and the cheapest route.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-neutral-800">
+      <h2 class="text-xl font-semibold text-white mb-6">Workload & assumptions</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-slate-300 text-sm">Requests / month</span>
+          <input id="requests" type="number" min="0" value="100000" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" value="2000" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" value="500" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">LLM provider</span>
+          <select id="llmProvider" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={p.name}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Hours active / day</span>
+          <input id="hoursPerDay" type="number" min="0" max="24" value="24" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Hardware amortization (months)</span>
+          <input id="amortizeMonths" type="number" min="1" value="36" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Electricity $/kWh</span>
+          <input id="electricityRate" type="number" min="0" step="0.01" value="0.12" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Marketplace revenue / user / mo</span>
+          <input id="marketRevenue" type="number" min="0" value="1000" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-slate-400 text-sm mt-4">Prices per 1M tokens: {apiPricing.last_updated}. Hosting costs: {hosting.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <section id="summary" class="bg-brand-gold/10 border border-brand-gold/30 rounded-xl p-6 mb-12">
+      <h2 class="text-lg font-semibold text-brand-gold mb-2">Cheapest hosting route</h2>
+      <p id="cheapestLine" class="text-white text-xl font-medium">Enter a workload to see the cheapest route.</p>
+      <p id="cheapestDetail" class="text-slate-300 text-sm mt-2"></p>
+    </section>
+
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Self-hosted options</h2>
+      <table class="w-full text-left border-collapse mb-10">
+        <thead>
+          <tr class="border-b border-slate-600 text-slate-300 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Option</th>
+            <th class="py-3 pr-4">GPU / RAM</th>
+            <th class="py-3 pr-4 text-right">Monthly TCO</th>
+            <th class="py-3 pr-4 text-right">Cost / 1k req</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="selfHostedBody" class="text-slate-200">
+          {selfHosted.map(o => (
+            <tr class="border-b border-slate-700/50" data-option={o.name}>
+              <td class="py-3 pr-4 font-medium text-white">{o.name}</td>
+              <td class="py-3 pr-4 text-sm">{o.gpu} ({o.vram_gb} GB)</td>
+              <td class="py-3 pr-4 text-right font-mono cost-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono per1k-cell">—</td>
+              <td class="py-3 pr-4 text-sm">{o.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2 class="text-xl font-semibold text-white mb-4">Cloud GPU rental</h2>
+      <table class="w-full text-left border-collapse mb-10">
+        <thead>
+          <tr class="border-b border-slate-600 text-slate-300 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Option</th>
+            <th class="py-3 pr-4">GPU</th>
+            <th class="py-3 pr-4 text-right">Monthly cost</th>
+            <th class="py-3 pr-4 text-right">Cost / 1k req</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="cloudBody" class="text-slate-200">
+          {cloudGpu.map(o => (
+            <tr class="border-b border-slate-700/50" data-option={o.name}>
+              <td class="py-3 pr-4 font-medium text-white">{o.name}</td>
+              <td class="py-3 pr-4 text-sm">{o.gpu} ({o.vram_gb} GB)</td>
+              <td class="py-3 pr-4 text-right font-mono cost-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono per1k-cell">—</td>
+              <td class="py-3 pr-4 text-sm">{o.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h2 class="text-xl font-semibold text-white mb-4">Managed marketplaces</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-600 text-slate-300 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Platform</th>
+            <th class="py-3 pr-4">Model</th>
+            <th class="py-3 pr-4 text-right">Monthly hosting cost</th>
+            <th class="py-3 pr-4 text-right">Cost / 1k req</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="marketplaceBody" class="text-slate-200">
+          {marketplaces.map(o => (
+            <tr class="border-b border-slate-700/50" data-option={o.name}>
+              <td class="py-3 pr-4 font-medium text-white">{o.name}</td>
+              <td class="py-3 pr-4 text-sm">{o.hosting_model}</td>
+              <td class="py-3 pr-4 text-right font-mono cost-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono per1k-cell">—</td>
+              <td class="py-3 pr-4 text-sm">{o.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-neutral-800">
+      <h2 class="text-xl font-semibold text-white mb-4">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-slate-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <p id="note" class="text-slate-500 text-sm">{hosting.note} LLM token costs from the selected provider are added for self-hosted and cloud GPU routes using the provider's per-1M-token rates; marketplaces are modeled on hosting markup plus base fees.</p>
+  </main>
+
+  <script is:inline define:vars={{
+    providers: JSON.stringify(providers),
+    selfHosted: JSON.stringify(selfHosted),
+    cloudGpu: JSON.stringify(cloudGpu),
+    marketplaces: JSON.stringify(marketplaces),
+    assumptions: JSON.stringify(assumptions)
+  }}>
+    const providerData = JSON.parse(providers);
+    const selfHostedData = JSON.parse(selfHosted);
+    const cloudData = JSON.parse(cloudGpu);
+    const marketplaceData = JSON.parse(marketplaces);
+    const defaults = JSON.parse(assumptions);
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+
+    function getLlmCost(providerName, requests, inputTokens, outputTokens) {
+      const p = providerData.find(x => x.name === providerName) || providerData[0];
+      const inputCost = (requests * inputTokens / 1_000_000) * p.input_per_1m;
+      const outputCost = (requests * outputTokens / 1_000_000) * p.output_per_1m;
+      return inputCost + outputCost;
+    }
+
+    function compute() {
+      const requests = Math.max(0, parseFloat(document.getElementById('requests').value) || 0);
+      const inputTokens = Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0);
+      const outputTokens = Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0);
+      const llmProvider = document.getElementById('llmProvider').value;
+      const hoursPerDay = Math.min(24, Math.max(0, parseFloat(document.getElementById('hoursPerDay').value) || 0));
+      const amortizeMonths = Math.max(1, parseFloat(document.getElementById('amortizeMonths').value) || defaults.hardware_amortization_months);
+      const electricityRate = Math.max(0, parseFloat(document.getElementById('electricityRate').value) || defaults.electricity_rate_per_kwh);
+      const marketRevenue = Math.max(0, parseFloat(document.getElementById('marketRevenue').value) || 0);
+      const hoursPerMonth = hoursPerDay * defaults.default_days_per_month;
+
+      const llmCost = getLlmCost(llmProvider, requests, inputTokens, outputTokens);
+
+      const results = [];
+
+      // Self-hosted: hardware amortization + electricity only (compute cost is captured by hardware)
+      selfHostedData.forEach(o => {
+        const amortized = o.hardware_cost / amortizeMonths;
+        const electric = o.monthly_power_kwh * electricityRate;
+        const total = amortized + electric;
+        results.push({ name: o.name, group: 'Self-hosted', total, per1k: requests ? (total / requests * 1000) : 0, best_for: o.best_for });
+      });
+
+      // Cloud GPU rental: hourly rate * hours only (compute cost is captured by rental)
+      cloudData.forEach(o => {
+        const total = o.hourly_rate * hoursPerMonth;
+        results.push({ name: o.name, group: 'Cloud GPU rental', total, per1k: requests ? (total / requests * 1000) : 0, best_for: o.best_for });
+      });
+
+      // Marketplaces: base fee + revenue share + LLM cost if not passed to user
+      marketplaceData.forEach(o => {
+        const base = o.monthly_base || 0;
+        const revenueShare = marketRevenue * (o.platform_fee_pct || 0) / 100;
+        const llm = o.llm_cost_passed_to_user ? 0 : llmCost;
+        const total = base + revenueShare + llm;
+        results.push({ name: o.name, group: 'Managed marketplace', total, per1k: requests ? (total / requests * 1000) : 0, best_for: o.best_for });
+      });
+
+      results.sort((a, b) => a.total - b.total);
+
+      function updateTable(id, rows, perRequest = false) {
+        document.querySelectorAll(`#${id} tr`).forEach(tr => {
+          const name = tr.dataset.option;
+          const row = rows.find(r => r.name === name);
+          const costCell = tr.querySelector('.cost-cell');
+          const per1kCell = tr.querySelector('.per1k-cell');
+          if (costCell && row) costCell.textContent = fmt(row.total);
+          if (per1kCell && row) per1kCell.textContent = row.per1k < 0.01 ? `$${row.per1k.toFixed(4)}` : fmt(row.per1k);
+          tr.classList.remove('bg-cyan-400/10');
+          if (results.length && results[0].name === name) {
+            tr.classList.add('bg-cyan-400/10');
+          }
+        });
+      }
+
+      updateTable('selfHostedBody', results.filter(r => r.group === 'Self-hosted'));
+      updateTable('cloudBody', results.filter(r => r.group === 'Cloud GPU rental'));
+      updateTable('marketplaceBody', results.filter(r => r.group === 'Managed marketplace'));
+
+      const winner = results[0];
+      document.getElementById('cheapestLine').textContent = winner
+        ? `${winner.name} (${winner.group}) — ${fmt(winner.total)} / month`
+        : 'Enter a workload to see the cheapest route.';
+      document.getElementById('cheapestDetail').textContent = winner
+        ? `${fmt(winner.per1k)} per 1k requests. Best for: ${winner.best_for}.`
+        : '';
+    }
+
+    ['requests', 'inputTokens', 'outputTokens', 'llmProvider', 'hoursPerDay', 'amortizeMonths', 'electricityRate', 'marketRevenue'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+    compute();
+  </script>
+</Layout>

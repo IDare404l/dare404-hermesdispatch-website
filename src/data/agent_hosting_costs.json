@@ -1,0 +1,124 @@
+{
+  "last_updated": "2026-07-03",
+  "note": "Hosting costs are representative monthly estimates in USD for a single agent workload. Confirm current pricing on each provider's site before committing.",
+  "self_hosted_options": [
+    {
+      "name": "Local GPU (RTX 4090)",
+      "gpu": "NVIDIA RTX 4090",
+      "vram_gb": 24,
+      "hardware_cost": 1600,
+      "monthly_power_kwh": 150,
+      "platform_fee_pct": 0,
+      "hosting_model": "Self-hosted local",
+      "best_for": "High-volume agents with steady load"
+    },
+    {
+      "name": "Local GPU (RTX 3090)",
+      "gpu": "NVIDIA RTX 3090",
+      "vram_gb": 24,
+      "hardware_cost": 800,
+      "monthly_power_kwh": 180,
+      "platform_fee_pct": 0,
+      "hosting_model": "Self-hosted local",
+      "best_for": "Budget local inference"
+    },
+    {
+      "name": "Mac mini M4 Pro 64GB",
+      "gpu": "Apple M4 Pro 20-core",
+      "vram_gb": 64,
+      "hardware_cost": 2400,
+      "monthly_power_kwh": 40,
+      "platform_fee_pct": 0,
+      "hosting_model": "Self-hosted local",
+      "best_for": "Silent, high-RAM local inference"
+    }
+  ],
+  "cloud_gpu_options": [
+    {
+      "name": "Vast.ai RTX 4090",
+      "gpu": "NVIDIA RTX 4090",
+      "vram_gb": 24,
+      "hourly_rate": 0.45,
+      "platform_fee_pct": 0,
+      "hosting_model": "Cloud GPU rental",
+      "best_for": "Spot inference with low utilization"
+    },
+    {
+      "name": "RunPod RTX 4090",
+      "gpu": "NVIDIA RTX 4090",
+      "vram_gb": 24,
+      "hourly_rate": 0.52,
+      "platform_fee_pct": 0,
+      "hosting_model": "Cloud GPU rental",
+      "best_for": "Reliable on-demand inference"
+    },
+    {
+      "name": "Lambda GPU A100 40GB",
+      "gpu": "NVIDIA A100 40GB",
+      "vram_gb": 40,
+      "hourly_rate": 1.99,
+      "platform_fee_pct": 0,
+      "hosting_model": "Cloud GPU rental",
+      "best_for": "Large models and training workloads"
+    }
+  ],
+  "marketplace_options": [
+    {
+      "name": "OpenAI GPT Store",
+      "hosting_model": "Managed marketplace",
+      "platform_fee_pct": 0,
+      "extra_per_request": 0,
+      "llm_cost_passed_to_user": true,
+      "best_for": "ChatGPT-integrated agents"
+    },
+    {
+      "name": "Anthropic Claude Marketplace",
+      "hosting_model": "Managed marketplace",
+      "platform_fee_pct": 0,
+      "extra_per_request": 0,
+      "llm_cost_passed_to_user": true,
+      "best_for": "Claude-integrated agents"
+    },
+    {
+      "name": "Quora Poe",
+      "hosting_model": "Managed marketplace",
+      "platform_fee_pct": 0,
+      "extra_per_request": 0,
+      "llm_cost_passed_to_user": true,
+      "best_for": "Multi-bot discovery"
+    },
+    {
+      "name": "Relevance AI",
+      "hosting_model": "Agent platform",
+      "platform_fee_pct": 0,
+      "monthly_base": 19,
+      "extra_per_request": 0,
+      "llm_cost_passed_to_user": true,
+      "best_for": "No-code agent teams"
+    },
+    {
+      "name": "Pickaxe",
+      "hosting_model": "Agent platform",
+      "platform_fee_pct": 10,
+      "monthly_base": 0,
+      "extra_per_request": 0,
+      "llm_cost_passed_to_user": true,
+      "best_for": "Template-based agents"
+    },
+    {
+      "name": "AWS Marketplace for Gen AI",
+      "hosting_model": "Managed infrastructure",
+      "platform_fee_pct": 0,
+      "monthly_base": 0,
+      "extra_per_request": 0,
+      "llm_cost_passed_to_user": true,
+      "best_for": "Enterprise deployments"
+    }
+  ],
+  "assumptions": {
+    "hardware_amortization_months": 36,
+    "electricity_rate_per_kwh": 0.12,
+    "default_hours_per_day": 24,
+    "default_days_per_month": 30.44
+  }
+}
