@@ -1,0 +1,278 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/llm_fine_tuning_cost.json';
+
+const title = "LLM Fine-Tuning Cost Calculator — Training + Hosting Estimate";
+const description = "Estimate the cost to fine-tune an LLM across OpenAI, Together AI, Fireworks, Replicate, Google Gemini, and local GPU routes. Includes training, usage, and hardware rental.";
+
+const providers = data.providers;
+const scenarios = data.scenarios;
+const gpuLocalCosts = data.gpuLocalCosts;
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does it cost to fine-tune an LLM?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Managed API fine-tuning typically costs $0.001 to $0.010 per training token, plus ongoing usage fees per input/output token. A 7B-class model on 10k examples often ranges from a few dollars to a few hundred dollars to train, depending on provider and epochs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is fine-tuning locally cheaper than using an API?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Local fine-tuning avoids per-token training charges but requires GPU time, electricity, and setup. It can be cheaper for very large datasets or repeated experiments, while managed APIs win for one-off jobs and fast iteration."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What drives fine-tuning cost the most?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Total training tokens — model size × examples × tokens per example × epochs — dominates training cost. Monthly inference volume then drives ongoing hosting cost."
+      }
+    }
+  ]
+};
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema
+    name="LLM Fine-Tuning Cost Calculator"
+    description="Estimate LLM fine-tuning cost across OpenAI, Together AI, Fireworks, Replicate, Google Gemini, and local GPU routes. Compare training and hosting spend."
+    url="https://hermesdispatch.dev/tools/llm-fine-tuning-cost-calculator/"
+    applicationCategory="FinanceApplication"
+  />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧠</div>
+        <h1 class="display-heading mb-4">LLM Fine-Tuning Cost Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Compare training and hosting costs for fine-tuning an LLM across managed APIs and local GPU routes.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Examples</label>
+          <input id="examples" type="number" value="10000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Tokens / example</label>
+          <input id="tokensPerExample" type="number" value="300" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Epochs</label>
+          <input id="epochs" type="number" value="3" step="1" min="1" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Scenario preset</label>
+          <select id="scenario" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+            <option value="">Custom</option>
+            {scenarios.map(s => (
+              <option value={JSON.stringify(s)}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Usage requests / month</label>
+          <input id="monthlyRequests" type="number" value="500000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Input tokens / request</label>
+          <input id="inputTokens" type="number" value="250" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Output tokens / request</label>
+          <input id="outputTokens" type="number" value="150" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Local GPU</label>
+          <select id="localGpu" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+            {Object.entries(gpuLocalCosts).map(([id, gpu]) => (
+              <option value={id}>{gpu.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 mb-8 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-neutral-500 border-b border-neutral-800">
+              <th class="pb-3">Provider</th>
+              <th class="pb-3">Training $/1k tokens</th>
+              <th class="pb-3">Input $/1k</th>
+              <th class="pb-3">Output $/1k</th>
+              <th class="pb-3">One-time training</th>
+              <th class="pb-3">Monthly usage</th>
+              <th class="pb-3">First-year total</th>
+            </tr>
+          </thead>
+          <tbody id="costTable">
+            {providers.map(p => (
+              <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" data-id={p.id}>
+                <td class="py-3 font-medium">{p.name}</td>
+                <td class="py-3"><input type="number" data-rate="training" value={p.trainingPer1kTokens.toFixed(4)} step="0.0001" class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3"><input type="number" data-rate="input" value={p.inputUsagePer1kTokens.toFixed(4)} step="0.0001" class="w-20 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3"><input type="number" data-rate="output" value={p.outputUsagePer1kTokens.toFixed(4)} step="0.0001" class="w-20 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3 training-cell font-semibold text-brand-gold">—</td>
+                <td class="py-3 monthly-cell font-semibold text-brand-gold">—</td>
+                <td class="py-3 yearly-cell font-semibold text-brand-gold">—</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="text-xs text-neutral-500 mt-4">Rates are editable estimates in USD. Local GPU route adds hardware rental or amortized cost below.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-3">Cheapest managed route</h2>
+          <p class="text-neutral-300">For your training + usage profile, the cheapest managed option is <span id="cheapestName" class="text-brand-gold font-bold">—</span> at <span id="cheapestYearly" class="text-brand-gold font-bold">—</span> first-year total.</p>
+          <p class="text-sm text-neutral-500 mt-2">Excludes setup labor, data labeling, and evaluation runs. Local GPU may still win if you already own hardware.</p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-3">Local GPU estimate</h2>
+          <p class="text-neutral-300">Selected GPU: <span id="gpuName" class="text-brand-gold font-bold">—</span></p>
+          <p class="text-neutral-300 mt-1">Training time: <span id="trainHours" class="text-brand-gold font-bold">—</span> hours</p>
+          <p class="text-neutral-300 mt-1">Rental training cost: <span id="rentalTrainCost" class="text-brand-gold font-bold">—</span></p>
+          <p class="text-neutral-300 mt-1">Monthly hosting rental: <span id="rentalHostingCost" class="text-brand-gold font-bold">—</span></p>
+          <p class="text-neutral-300 mt-1">First-year rental total: <span id="rentalYearly" class="text-brand-gold font-bold">—</span></p>
+          <p class="text-sm text-neutral-500 mt-2">Assumes 80% utilization while hosting; training uses full GPU. Electricity and hardware amortization not included.</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-3">How to use this estimate</h2>
+        <ul class="list-disc list-inside text-neutral-300 space-y-2">
+          <li>Start with a scenario preset, then tune examples, tokens per example, and epochs to match your dataset.</li>
+          <li>Set realistic monthly inference requests and input/output tokens to see ongoing hosting cost.</li>
+          <li>Edit provider rates if you have custom pricing or a different model size.</li>
+          <li>Compare managed APIs against local GPU rental to decide whether to buy/rent hardware.</li>
+        </ul>
+        <p class="text-sm text-neutral-500 mt-4">
+          Cross-links: <a href="/tools/llm-cost-calculator" class="text-brand-gold hover:underline">LLM Cost Calculator</a>, <a href="/tools/local-llm-roi-calculator" class="text-brand-gold hover:underline">Local LLM ROI Calculator</a>, <a href="/tools/agent-api-pricing-comparator" class="text-brand-gold hover:underline">API Pricing Comparator</a>, <a href="/tools/gpu-cloud-vs-buy-calculator" class="text-brand-gold hover:underline">GPU Cloud vs Buy Calculator</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ providers, scenarios, gpuLocalCosts }}>
+    const examplesEl = document.getElementById('examples');
+    const tokensEl = document.getElementById('tokensPerExample');
+    const epochsEl = document.getElementById('epochs');
+    const scenarioEl = document.getElementById('scenario');
+    const monthlyRequestsEl = document.getElementById('monthlyRequests');
+    const inputTokensEl = document.getElementById('inputTokens');
+    const outputTokensEl = document.getElementById('outputTokens');
+    const localGpuEl = document.getElementById('localGpu');
+
+    const cheapestNameEl = document.getElementById('cheapestName');
+    const cheapestYearlyEl = document.getElementById('cheapestYearly');
+    const gpuNameEl = document.getElementById('gpuName');
+    const trainHoursEl = document.getElementById('trainHours');
+    const rentalTrainCostEl = document.getElementById('rentalTrainCost');
+    const rentalHostingCostEl = document.getElementById('rentalHostingCost');
+    const rentalYearlyEl = document.getElementById('rentalYearly');
+
+    function getNum(id) {
+      const el = document.getElementById(id);
+      return el ? parseFloat(el.value) || 0 : 0;
+    }
+
+    function fmtMoney(n) {
+      if (n >= 1000) return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+      if (n >= 1) return '$' + n.toFixed(2);
+      return '$' + n.toFixed(4);
+    }
+
+    function calc() {
+      const examples = Math.max(0, getNum('examples'));
+      const tokensPerExample = Math.max(0, getNum('tokensPerExample'));
+      const epochs = Math.max(1, getNum('epochs'));
+      const monthlyRequests = Math.max(0, getNum('monthlyRequests'));
+      const inputTokens = Math.max(0, getNum('inputTokens'));
+      const outputTokens = Math.max(0, getNum('outputTokens'));
+      const totalTrainingTokens = examples * tokensPerExample * epochs;
+      const monthlyInputTokens = monthlyRequests * inputTokens;
+      const monthlyOutputTokens = monthlyRequests * outputTokens;
+
+      let cheapest = null;
+      let cheapestCost = Infinity;
+
+      const rows = document.querySelectorAll('#costTable tr');
+      rows.forEach(row => {
+        const id = row.getAttribute('data-id');
+        const trainingRate = parseFloat(row.querySelector('[data-rate="training"]').value) || 0;
+        const inputRate = parseFloat(row.querySelector('[data-rate="input"]').value) || 0;
+        const outputRate = parseFloat(row.querySelector('[data-rate="output"]').value) || 0;
+        const p = providers.find(x => x.id === id) || {};
+
+        const trainingCost = totalTrainingTokens / 1000 * trainingRate + p.minCharge;
+        const monthlyUsage = (monthlyInputTokens / 1000 * inputRate) + (monthlyOutputTokens / 1000 * outputRate) + (p.storagePerDay || 0) * 30;
+        const yearly = trainingCost + monthlyUsage * 12;
+
+        row.querySelector('.training-cell').textContent = fmtMoney(trainingCost);
+        row.querySelector('.monthly-cell').textContent = fmtMoney(monthlyUsage);
+        row.querySelector('.yearly-cell').textContent = fmtMoney(yearly);
+
+        if (yearly < cheapestCost && id !== 'local') {
+          cheapestCost = yearly;
+          cheapest = row.querySelector('td').textContent;
+        }
+      });
+
+      cheapestNameEl.textContent = cheapest || '—';
+      cheapestYearlyEl.textContent = cheapestCost === Infinity ? '—' : fmtMoney(cheapestCost);
+
+      // Local GPU estimate
+      const gpuId = localGpuEl.value;
+      const gpu = gpuLocalCosts[gpuId];
+      gpuNameEl.textContent = gpu.name;
+      // rough training hours: tokens / (tokens/sec * 3600) with 50% efficiency
+      const trainHours = Math.max(0.1, totalTrainingTokens / (gpu.tokensPerSec * 3600 * 0.5));
+      const rentalTrainCost = trainHours * gpu.rentPerHour;
+      // hosting: assume GPU rented continuously while serving; approx by monthly usage time, but simpler: assume always-on for high volume
+      const hostingHoursPerMonth = 730; // 24/7
+      const rentalHostingCost = hostingHoursPerMonth * gpu.rentPerHour;
+      const rentalYearly = rentalTrainCost + rentalHostingCost * 12;
+      trainHoursEl.textContent = trainHours.toFixed(1);
+      rentalTrainCostEl.textContent = fmtMoney(rentalTrainCost);
+      rentalHostingCostEl.textContent = fmtMoney(rentalHostingCost) + '/mo';
+      rentalYearlyEl.textContent = fmtMoney(rentalYearly);
+    }
+
+    if (scenarioEl) {
+      scenarioEl.addEventListener('change', (e) => {
+        if (!e.target.value) return;
+        const s = JSON.parse(e.target.value);
+        examplesEl.value = s.examples;
+        tokensEl.value = s.tokensPerExample;
+        epochsEl.value = s.epochs;
+        monthlyRequestsEl.value = s.monthlyUsageRequests;
+        inputTokensEl.value = s.inputTokensPerRequest;
+        outputTokensEl.value = s.outputTokensPerRequest;
+        calc();
+      });
+    }
+
+    [examplesEl, tokensEl, epochsEl, monthlyRequestsEl, inputTokensEl, outputTokensEl, localGpuEl].forEach(el => el.addEventListener('input', calc));
+    document.querySelectorAll('#costTable input').forEach(el => el.addEventListener('input', calc));
+    calc();
+  </script>
+</Layout>

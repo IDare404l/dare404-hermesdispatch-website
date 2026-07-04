@@ -1,0 +1,82 @@
+{
+  "providers": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "trainingPer1kTokens": 0.0080,
+      "inputUsagePer1kTokens": 0.0030,
+      "outputUsagePer1kTokens": 0.0060,
+      "minCharge": 0,
+      "storagePerDay": 0,
+      "supportsEpochs": true,
+      "notes": "GPT-4o mini fine-tuning pricing. Training tokens billed once; hosted model charged per usage token."
+    },
+    {
+      "id": "together",
+      "name": "Together AI",
+      "trainingPer1kTokens": 0.0018,
+      "inputUsagePer1kTokens": 0.0008,
+      "outputUsagePer1kTokens": 0.0008,
+      "minCharge": 0,
+      "storagePerDay": 0,
+      "supportsEpochs": true,
+      "notes": "Competitive flat rate for Llama 3.1 8B-class models. Usage priced per token in/out."
+    },
+    {
+      "id": "fireworks",
+      "name": "Fireworks AI",
+      "trainingPer1kTokens": 0.0025,
+      "inputUsagePer1kTokens": 0.0005,
+      "outputUsagePer1kTokens": 0.0005,
+      "minCharge": 5.00,
+      "storagePerDay": 0,
+      "supportsEpochs": true,
+      "notes": "Minimum $5 tuning job charge. Strong for small, fast jobs."
+    },
+    {
+      "id": "replicate",
+      "name": "Replicate",
+      "trainingPer1kTokens": 0.0035,
+      "inputUsagePer1kTokens": 0.0010,
+      "outputUsagePer1kTokens": 0.0010,
+      "minCharge": 0,
+      "storagePerDay": 0.10,
+      "supportsEpochs": false,
+      "notes": "Pay-per-minute training plus storage. Flat usage rate shown per 1k tokens for comparison."
+    },
+    {
+      "id": "google",
+      "name": "Google Gemini",
+      "trainingPer1kTokens": 0.0040,
+      "inputUsagePer1kTokens": 0.0015,
+      "outputUsagePer1kTokens": 0.0060,
+      "minCharge": 0,
+      "storagePerDay": 0,
+      "supportsEpochs": true,
+      "notes": "Gemini 1.5 Flash tuning pricing. Tuning free promotions sometimes apply."
+    },
+    {
+      "id": "local",
+      "name": "Local GPU (Unsloth / llama-factory)",
+      "trainingPer1kTokens": 0,
+      "inputUsagePer1kTokens": 0,
+      "outputUsagePer1kTokens": 0,
+      "minCharge": 0,
+      "storagePerDay": 0,
+      "supportsEpochs": true,
+      "notes": "Variable electricity + hardware amortization only. Add GPU rental if you don't own hardware."
+    }
+  ],
+  "gpuLocalCosts": {
+    "rtx4090": { "name": "RTX 4090 (24 GB)", "hardware": 1600, "rentPerHour": 0.69, "watts": 450, "tokensPerSec": 1200, "notes": "Fastest consumer route for 7B-8B LoRA tuning." },
+    "rtx3090": { "name": "RTX 3090 (24 GB)", "hardware": 900, "rentPerHour": 0.39, "watts": 350, "tokensPerSec": 650, "notes": "Cheaper used alternative with ample VRAM." },
+    "a100": { "name": "NVIDIA A100 40GB", "hardware": 8000, "rentPerHour": 1.69, "watts": 400, "tokensPerSec": 1400, "notes": "Datacenter reliability; needed for larger models." },
+    "h100": { "name": "NVIDIA H100 80GB", "hardware": 25000, "rentPerHour": 2.99, "watts": 700, "tokensPerSec": 2400, "notes": "Fastest option for 70B-class full fine-tunes." }
+  },
+  "scenarios": [
+    { "name": "7B model, 10k examples", "modelSizeB": 7, "examples": 10000, "tokensPerExample": 300, "epochs": 3, "monthlyUsageRequests": 500000, "inputTokensPerRequest": 250, "outputTokensPerRequest": 150 },
+    { "name": "Small support classifier", "modelSizeB": 8, "examples": 2500, "tokensPerExample": 120, "epochs": 5, "monthlyUsageRequests": 100000, "inputTokensPerRequest": 200, "outputTokensPerRequest": 30 },
+    { "name": "70B domain expert", "modelSizeB": 70, "examples": 50000, "tokensPerExample": 800, "epochs": 2, "monthlyUsageRequests": 200000, "inputTokensPerRequest": 500, "outputTokensPerRequest": 400 },
+    { "name": "Code assistant LoRA", "modelSizeB": 13, "examples": 20000, "tokensPerExample": 500, "epochs": 3, "monthlyUsageRequests": 300000, "inputTokensPerRequest": 350, "outputTokensPerRequest": 250 }
+  ]
+}
