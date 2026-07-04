@@ -1,0 +1,76 @@
+{
+  "scenarios": [
+    { "name": "Support bot", "minutes": 5000, "inboundPct": 80, "avgDuration": 4 },
+    { "name": "Sales agent", "minutes": 20000, "inboundPct": 30, "avgDuration": 6 },
+    { "name": "Scheduling assistant", "minutes": 50000, "inboundPct": 90, "avgDuration": 2 },
+    { "name": "Enterprise call center", "minutes": 200000, "inboundPct": 60, "avgDuration": 5 }
+  ],
+  "providers": [
+    {
+      "id": "bland",
+      "name": "Bland AI",
+      "platformPerMin": 0.045,
+      "llmPerMin": 0,
+      "sttPerMin": 0,
+      "ttsPerMin": 0,
+      "inboundPerMin": 0,
+      "outboundPerMin": 0,
+      "notes": "All-in per-minute rate for phone calls. Enterprise volume discounts available."
+    },
+    {
+      "id": "retell",
+      "name": "Retell AI",
+      "platformPerMin": 0.035,
+      "llmPerMin": 0,
+      "sttPerMin": 0,
+      "ttsPerMin": 0,
+      "inboundPerMin": 0,
+      "outboundPerMin": 0,
+      "notes": "All-in rate for Retell voice agents. Custom enterprise pricing at scale."
+    },
+    {
+      "id": "vapi",
+      "name": "Vapi",
+      "platformPerMin": 0.05,
+      "llmPerMin": 0.015,
+      "sttPerMin": 0.008,
+      "ttsPerMin": 0.012,
+      "inboundPerMin": 0.015,
+      "outboundPerMin": 0.025,
+      "notes": "Platform fee + LLM, STT, TTS, and telephony broken out."
+    },
+    {
+      "id": "synthflow",
+      "name": "Synthflow",
+      "platformPerMin": 0.08,
+      "llmPerMin": 0,
+      "sttPerMin": 0,
+      "ttsPerMin": 0,
+      "inboundPerMin": 0.02,
+      "outboundPerMin": 0.03,
+      "notes": "All-in AI assistant rate; telephony and some premium voices extra."
+    },
+    {
+      "id": "openai-realtime",
+      "name": "OpenAI Realtime API + Twilio",
+      "platformPerMin": 0,
+      "llmPerMin": 0.06,
+      "sttPerMin": 0,
+      "ttsPerMin": 0,
+      "inboundPerMin": 0.013,
+      "outboundPerMin": 0.022,
+      "notes": "Native audio tokens via Realtime API plus Twilio telephony."
+    },
+    {
+      "id": "self-hosted",
+      "name": "Self-hosted stack",
+      "platformPerMin": 0,
+      "llmPerMin": 0.04,
+      "sttPerMin": 0.006,
+      "ttsPerMin": 0.015,
+      "inboundPerMin": 0.0085,
+      "outboundPerMin": 0.013,
+      "notes": "DIY stack with Whisper, TTS, LLM, and Twilio. Add server and labor costs separately."
+    }
+  ]
+}

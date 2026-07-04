@@ -1,0 +1,218 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import costData from '../../data/ai_voice_agent_cost.json';
+
+const title = "AI Voice Agent Cost Calculator — Per-Minute and Monthly Pricing";
+const description = "Estimate the cost of running AI voice agents. Compare Bland, Retell, Vapi, Synthflow, OpenAI Realtime, and self-hosted stacks by minutes, concurrency, and telephony.";
+
+const providers = costData.providers;
+const scenarios = costData.scenarios;
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does an AI voice agent cost per minute?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "All-in voice-agent costs typically range from $0.035 to $0.15 per minute, depending on the platform, LLM, speech models, and whether calls are inbound or outbound."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What drives AI voice agent cost the most?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Total minutes dominate cost. Next are telephony charges for outbound calls, LLM/audio token pricing for real-time models, and concurrency-related platform fees."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it cheaper to self-host a voice agent?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Self-hosting can lower per-minute variable costs but adds server, GPU, and engineering labor. It usually wins only at very high volume or when customization is critical."
+      }
+    }
+  ]
+};
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema
+    name="AI Voice Agent Cost Calculator"
+    description="Estimate AI voice agent cost per minute and per month across Bland, Retell, Vapi, Synthflow, OpenAI Realtime, and self-hosted stacks."
+    url="https://hermesdispatch.dev/tools/ai-voice-agent-cost-calculator/"
+    applicationCategory="FinanceApplication"
+  />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🎙️</div>
+        <h1 class="display-heading mb-4">AI Voice Agent Cost Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate per-minute and monthly spend for AI voice agents across platforms, then pick the cheapest stack for your call volume.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Minutes / month</label>
+          <input id="minutes" type="number" value="20000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Inbound %</label>
+          <input id="inboundPct" type="number" value="50" min="0" max="100" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Avg call duration (min)</label>
+          <input id="avgDuration" type="number" value="4" step="0.1" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Scenario preset</label>
+          <select id="scenario" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+            <option value="">Custom</option>
+            {scenarios.map(s => (
+              <option value={JSON.stringify(s)}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 mb-8 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-neutral-500 border-b border-neutral-800">
+              <th class="pb-3">Provider</th>
+              <th class="pb-3">Platform</th>
+              <th class="pb-3">LLM</th>
+              <th class="pb-3">STT</th>
+              <th class="pb-3">TTS</th>
+              <th class="pb-3">Inbound tel.</th>
+              <th class="pb-3">Outbound tel.</th>
+              <th class="pb-3">$/min</th>
+              <th class="pb-3">Monthly</th>
+            </tr>
+          </thead>
+          <tbody id="costTable">
+            {providers.map(p => (
+              <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" data-id={p.id}>
+                <td class="py-3 font-medium">{p.name}</td>
+                <td class="py-3"><input type="number" data-rate="platform" value={p.platformPerMin.toFixed(3)} step="0.001" class="w-20 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3"><input type="number" data-rate="llm" value={p.llmPerMin.toFixed(3)} step="0.001" class="w-20 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3"><input type="number" data-rate="stt" value={p.sttPerMin.toFixed(3)} step="0.001" class="w-20 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3"><input type="number" data-rate="tts" value={p.ttsPerMin.toFixed(3)} step="0.001" class="w-20 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3"><input type="number" data-rate="inbound" value={p.inboundPerMin.toFixed(4)} step="0.0001" class="w-20 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3"><input type="number" data-rate="outbound" value={p.outboundPerMin.toFixed(4)} step="0.0001" class="w-20 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3 per-min-cell font-semibold text-brand-gold">—</td>
+                <td class="py-3 monthly-cell font-semibold text-brand-gold">—</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="text-xs text-neutral-500 mt-4">All rates are editable estimates in USD per minute. Update them to match your actual vendor quotes.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-3">Cheapest option</h2>
+          <p class="text-neutral-300">At your selected volume, the cheapest stack is <span id="cheapestName" class="text-brand-gold font-bold">—</span> at roughly <span id="cheapestMonthly" class="text-brand-gold font-bold">—</span>/month.</p>
+          <p class="text-sm text-neutral-500 mt-2">This ignores seat fees, setup costs, and concurrency limits. Use it as a first-pass filter.</p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-3">Concurrency estimate</h2>
+          <p class="text-neutral-300">With an average call duration of <span id="avgDurOut" class="text-brand-gold font-bold">—</span> min, you need roughly <span id="concurrency" class="text-brand-gold font-bold">—</span> concurrent lines to handle peak load.</p>
+          <p class="text-sm text-neutral-500 mt-2">Assumes even distribution across a 12-hour business day and Erlang C ~1.3x headroom.</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-3">How to use this estimate</h2>
+        <ul class="list-disc list-inside text-neutral-300 space-y-2">
+          <li>Adjust minutes and inbound/outbound mix to match your expected call traffic.</li>
+          <li>Edit per-minute rates if you have vendor quotes or custom LLM/TTS choices.</li>
+          <li>Add fixed platform seats, phone-number rental, and developer labor on top of these variable costs.</li>
+          <li>Compare against your current human or outsourced call-center cost to find the breakeven point.</li>
+        </ul>
+        <p class="text-sm text-neutral-500 mt-4">
+          Cross-links: <a href="/tools/agent-stack-builder" class="text-brand-gold hover:underline">Agent Stack Builder</a>, <a href="/tools/agent-api-pricing-comparator" class="text-brand-gold hover:underline">API Pricing Comparator</a>, <a href="/tools/ai-startup-cost-calculator" class="text-brand-gold hover:underline">AI Startup Cost Calculator</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ providers, scenarios }}>
+    const minutesEl = document.getElementById('minutes');
+    const inboundEl = document.getElementById('inboundPct');
+    const durationEl = document.getElementById('avgDuration');
+    const scenarioEl = document.getElementById('scenario');
+    const cheapestNameEl = document.getElementById('cheapestName');
+    const cheapestMonthlyEl = document.getElementById('cheapestMonthly');
+    const avgDurOutEl = document.getElementById('avgDurOut');
+    const concurrencyEl = document.getElementById('concurrency');
+
+    function getNum(id) {
+      const el = document.getElementById(id);
+      return el ? parseFloat(el.value) || 0 : 0;
+    }
+
+    function calc() {
+      const minutes = getNum('minutes');
+      const inboundPct = Math.max(0, Math.min(100, getNum('inboundPct')));
+      const outboundPct = 100 - inboundPct;
+      const avgDuration = Math.max(0.1, getNum('avgDuration'));
+      const rows = document.querySelectorAll('#costTable tr');
+
+      let cheapest = null;
+      let cheapestCost = Infinity;
+
+      rows.forEach(row => {
+        const platform = parseFloat(row.querySelector('[data-rate="platform"]').value) || 0;
+        const llm = parseFloat(row.querySelector('[data-rate="llm"]').value) || 0;
+        const stt = parseFloat(row.querySelector('[data-rate="stt"]').value) || 0;
+        const tts = parseFloat(row.querySelector('[data-rate="tts"]').value) || 0;
+        const inbound = parseFloat(row.querySelector('[data-rate="inbound"]').value) || 0;
+        const outbound = parseFloat(row.querySelector('[data-rate="outbound"]').value) || 0;
+        const perMin = platform + llm + stt + tts + (inboundPct / 100 * inbound) + (outboundPct / 100 * outbound);
+        const monthly = perMin * minutes;
+        row.querySelector('.per-min-cell').textContent = '$' + perMin.toFixed(4);
+        row.querySelector('.monthly-cell').textContent = '$' + monthly.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        if (monthly < cheapestCost) {
+          cheapestCost = monthly;
+          cheapest = row.querySelector('td').textContent;
+        }
+      });
+
+      cheapestNameEl.textContent = cheapest || '—';
+      cheapestMonthlyEl.textContent = cheapestCost === Infinity ? '—' : '$' + cheapestCost.toLocaleString('en-US', { maximumFractionDigits: 0 });
+      avgDurOutEl.textContent = avgDuration.toFixed(1);
+      // Erlang-like rough concurrency: calls per hour over 12h * duration * 1.3 headroom
+      const callsPerMonth = minutes / avgDuration;
+      const callsPerHour = callsPerMonth / (30 * 12);
+      const concurrent = Math.max(1, Math.ceil(callsPerHour * avgDuration * 1.3));
+      concurrencyEl.textContent = concurrent;
+    }
+
+    if (scenarioEl) {
+      scenarioEl.addEventListener('change', (e) => {
+        if (!e.target.value) return;
+        const s = JSON.parse(e.target.value);
+        minutesEl.value = s.minutes;
+        inboundEl.value = s.inboundPct;
+        durationEl.value = s.avgDuration;
+        calc();
+      });
+    }
+
+    [minutesEl, inboundEl, durationEl].forEach(el => el.addEventListener('input', calc));
+    document.querySelectorAll('#costTable input').forEach(el => el.addEventListener('input', calc));
+    calc();
+  </script>
+</Layout>

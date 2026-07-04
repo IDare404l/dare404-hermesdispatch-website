@@ -332,4 +332,10 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Description: Compare self-hosted, cloud GPU rental, and managed marketplace hosting costs for AI agents.
 - Inputs: monthly requests, input/output tokens per request, LLM provider, active hours per day, hardware amortization months, electricity rate, marketplace revenue per month
 - Outputs: monthly TCO per route, cost per 1k requests, cheapest hosting route, group-by-group comparison tables
-- Audience: AI agent builders choosing between self-hosting, cloud GPU rental, and managed marketplaces
+
+## AI Voice Agent Cost Calculator
+- URL: https://hermesdispatch.dev/tools/ai-voice-agent-cost-calculator/
+- Description: Estimate per-minute and monthly cost for AI voice agents across Bland, Retell, Vapi, Synthflow, OpenAI Realtime, and self-hosted stacks.
+- Inputs: minutes per month, inbound percentage, average call duration, provider per-minute rates (editable)
+- Outputs: effective $/minute, monthly cost per provider, cheapest stack, rough concurrency estimate
+- Audience: AI agent builders comparing voice platforms
