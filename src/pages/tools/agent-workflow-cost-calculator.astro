@@ -1,0 +1,395 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_workflow_cost.json';
+
+const title = "AI Agent Multi-Step Workflow Cost Calculator | Hermes Dispatch";
+const description = "Estimate per-run and monthly cost for multi-step AI agent workflows across OpenAI, Anthropic, Google, Groq, Together AI, Cohere, and local GPU routes.";
+const models = data.models;
+const presets = data.presets;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What counts as a 'step' in an AI agent workflow?", a: "A step is any discrete LLM call inside a single end-to-end run. Classifying intent, rewriting a query, retrieving context, generating an answer, self-checking, and combining sub-agent outputs are all common steps. Each step has its own model, token budget, and number of calls per run." },
+  { q: "Why do multi-step agents cost so much more than a single chat completion?", a: "A production agent often chains 3–8 LLM calls per user request. Retrieval, planning, generation, and safety checks each consume input and output tokens. This calculator adds them up so you can see the real per-run and monthly cost." },
+  { q: "Should I route cheap tasks to a smaller model?", a: "Yes. Classification, routing, formatting, and safety checks usually work well on fast, cheap models such as GPT-4o mini, Claude 3 Haiku, or Gemini 1.5 Flash. Reserve larger models for reasoning, coding, and synthesis." },
+  { q: "How do I include RAG or tool-call costs?", a: "Use the Retrieval cost per run and Tool-call cost per run fields to capture embedding search, web search, API calls, or external service fees that are not priced as LLM tokens." },
+  { q: "When is self-hosting cheaper than API calls?", a: "Self-hosting wins at high volume if you can keep a GPU utilized and you are comfortable managing the stack. This calculator uses an effective per-token cost for a local RTX 4090 that includes power and hardware amortization; compare it to managed APIs at your expected scale." }
+];
+
+const maxSteps = 6;
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Multi-Step Workflow Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-workflow-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🪜</div>
+      <h1 class="display-heading mb-4">AI Agent Multi-Step Workflow Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate per-run and monthly cost for multi-step AI agent workflows across major LLM providers and local GPU routes.</p>
+    </div>
+
+    <!-- Presets -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {presets.map(p => (
+        <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset={p.slug}>
+          <div class="text-2xl mb-2">{p.emoji}</div>
+          <h3 class="font-semibold text-sm">{p.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1">{p.runs_per_month.toLocaleString()} runs/mo • {p.steps.length} steps</p>
+        </button>
+      ))}
+    </div>
+
+    <!-- Global inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Runs / month</span>
+          <input id="runsPerMonth" type="number" min="0" step="1000" value={defaults.runs_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retrieval cost / run ($)</span>
+          <input id="retrievalCost" type="number" min="0" step="0.001" value={defaults.retrieval_cost_per_run} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tool-call cost / run ($)</span>
+          <input id="toolCallCost" type="number" min="0" step="0.001" value={defaults.tool_call_cost_per_run} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review hours / 1k runs</span>
+          <input id="reviewHours" type="number" min="0" step="0.1" value={defaults.review_hours_per_1k_runs} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly rate ($)</span>
+          <input id="reviewerRate" type="number" min="0" step="1" value={defaults.reviewer_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Prices are directional estimates in USD. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Steps -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-brand-gold">Workflow steps</h2>
+        <span class="text-sm text-neutral-400">Edit model, tokens, and calls per run. Unused rows are ignored.</span>
+      </div>
+      <div class="space-y-3" id="stepsContainer">
+        {Array.from({ length: maxSteps }).map((_, i) => {
+          const step = defaults.steps[i] || { name: `Step ${i + 1}`, model_slug: models[1].slug, input_tokens: 1000, output_tokens: 200, calls_per_run: 1 };
+          return (
+            <div class="step-row grid grid-cols-12 gap-3 items-end" data-index={i}>
+              <label class="col-span-12 sm:col-span-3 block">
+                <span class="text-neutral-400 text-xs">Step name</span>
+                <input type="text" class="step-name w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" value={step.name} />
+              </label>
+              <label class="col-span-6 sm:col-span-2 block">
+                <span class="text-neutral-400 text-xs">Model</span>
+                <select class="step-model w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+                  {models.map(m => (
+                    <option value={m.slug} selected={m.slug === step.model_slug}>{m.name}</option>
+                  ))}
+                </select>
+              </label>
+              <label class="col-span-6 sm:col-span-2 block">
+                <span class="text-neutral-400 text-xs">Input tokens</span>
+                <input type="number" min="0" step="50" class="step-input w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" value={step.input_tokens} />
+              </label>
+              <label class="col-span-6 sm:col-span-2 block">
+                <span class="text-neutral-400 text-xs">Output tokens</span>
+                <input type="number" min="0" step="50" class="step-output w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" value={step.output_tokens} />
+              </label>
+              <label class="col-span-6 sm:col-span-2 block">
+                <span class="text-neutral-400 text-xs">Calls / run</span>
+                <input type="number" min="0" step="1" class="step-calls w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" value={step.calls_per_run} />
+              </label>
+              <label class="col-span-12 sm:col-span-1 flex items-center gap-2 pb-3">
+                <input type="checkbox" class="step-active w-4 h-4 accent-brand-gold" checked={i < defaults.steps.length} />
+                <span class="text-xs text-neutral-400">On</span>
+              </label>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/30 text-center">
+      <p class="text-xs text-neutral-500 uppercase mb-1">Estimated monthly workflow cost</p>
+      <p id="totalLine" class="text-2xl font-bold text-brand-gold">Enter a workload to see the cost.</p>
+      <p id="perRunLine" class="text-sm text-neutral-400 mt-1">—</p>
+      <p id="periodLine" class="text-sm text-neutral-400 mt-1">—</p>
+    </section>
+
+    <!-- Results table -->
+    <section class="overflow-x-auto mb-12">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Step</th>
+            <th class="py-3 pr-4">Model</th>
+            <th class="py-3 pr-4 text-right">Input / run</th>
+            <th class="py-3 pr-4 text-right">Output / run</th>
+            <th class="py-3 pr-4 text-right">Calls</th>
+            <th class="py-3 pr-4 text-right">Cost / run</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4">% of LLM cost</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {Array.from({ length: maxSteps }).map((_, i) => (
+            <tr class="border-b border-neutral-800/50" data-step={i}>
+              <td class="py-3 pr-4 step-name-cell">—</td>
+              <td class="py-3 pr-4 step-model-cell text-sm">—</td>
+              <td class="py-3 pr-4 text-right font-mono step-input-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono step-output-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono step-calls-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono step-cost-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono step-monthly-cell">—</td>
+              <td class="py-3 pr-4 text-sm step-pct-cell">—</td>
+            </tr>
+          ))}
+          <tr class="border-b border-neutral-700 font-medium text-white bg-neutral-900/50">
+            <td class="py-3 pr-4">Subtotal (LLM calls)</td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td id="llmPerRun" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="llmMonthly" class="py-3 pr-4 text-right font-mono">—</td>
+            <td class="py-3 pr-4 text-right">100%</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Retrieval / external</td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td id="retrievalPerRun" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="retrievalMonthly" class="py-3 pr-4 text-right font-mono">—</td>
+            <td class="py-3 pr-4"></td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Tool calls / APIs</td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td id="toolsPerRun" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="toolsMonthly" class="py-3 pr-4 text-right font-mono">—</td>
+            <td class="py-3 pr-4"></td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Human review</td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td id="reviewPerRun" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewMonthly" class="py-3 pr-4 text-right font-mono">—</td>
+            <td class="py-3 pr-4"></td>
+          </tr>
+          <tr class="border-t-2 border-brand-gold/30 font-bold text-brand-gold">
+            <td class="py-3 pr-4">Total</td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td class="py-3 pr-4"></td>
+            <td id="totalPerRun" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="totalMonthly" class="py-3 pr-4 text-right font-mono">—</td>
+            <td class="py-3 pr-4"></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/prompt-tokenizer-pricing-estimator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Prompt Tokenizer →</a>
+      <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost Calc →</a>
+      <a href="/tools/ai-startup-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ modelsJson: JSON.stringify(models), presetsJson: JSON.stringify(presets), maxSteps }}>
+    const models = JSON.parse(modelsJson);
+    const presets = JSON.parse(presetsJson);
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 });
+    const fmtN = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        runs: Math.max(0, parseFloat(document.getElementById('runsPerMonth').value) || 0),
+        retrieval: Math.max(0, parseFloat(document.getElementById('retrievalCost').value) || 0),
+        tool: Math.max(0, parseFloat(document.getElementById('toolCallCost').value) || 0),
+        reviewHours: Math.max(0, parseFloat(document.getElementById('reviewHours').value) || 0),
+        reviewRate: Math.max(0, parseFloat(document.getElementById('reviewerRate').value) || 0),
+        projection: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function getSteps() {
+      const rows = document.querySelectorAll('#stepsContainer .step-row');
+      return Array.from(rows).map(row => {
+        const active = row.querySelector('.step-active').checked;
+        const name = row.querySelector('.step-name').value.trim();
+        const modelSlug = row.querySelector('.step-model').value;
+        const inputTokens = Math.max(0, parseFloat(row.querySelector('.step-input').value) || 0);
+        const outputTokens = Math.max(0, parseFloat(row.querySelector('.step-output').value) || 0);
+        const calls = Math.max(0, parseFloat(row.querySelector('.step-calls').value) || 0);
+        return { active, name, modelSlug, inputTokens, outputTokens, calls };
+      });
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const steps = getSteps();
+      const runsK = inps.runs / 1000;
+
+      let llmPerRun = 0;
+      const stepResults = steps.map((s, i) => {
+        if (!s.active || !s.name || s.calls <= 0) {
+          return { index: i, active: false, costPerRun: 0, monthly: 0 };
+        }
+        const m = models.find(x => x.slug === s.modelSlug) || models[0];
+        const inputCost = (s.inputTokens / 1_000_000) * m.input_price_per_1m;
+        const outputCost = (s.outputTokens / 1_000_000) * m.output_price_per_1m;
+        const costPerCall = inputCost + outputCost;
+        const costPerRun = costPerCall * s.calls;
+        const monthly = costPerRun * inps.runs;
+        llmPerRun += costPerRun;
+        return { index: i, active: true, name: s.name, modelName: m.name, inputTokens: s.inputTokens, outputTokens: s.outputTokens, calls: s.calls, costPerRun, monthly };
+      });
+
+      const retrievalPerRun = inps.retrieval;
+      const toolsPerRun = inps.tool;
+      const reviewPerRun = (inps.reviewHours / 1000) * inps.reviewRate;
+      const totalPerRun = llmPerRun + retrievalPerRun + toolsPerRun + reviewPerRun;
+      const llmMonthly = llmPerRun * inps.runs;
+      const retrievalMonthly = retrievalPerRun * inps.runs;
+      const toolsMonthly = toolsPerRun * inps.runs;
+      const reviewMonthly = reviewPerRun * inps.runs;
+      const totalMonthly = totalPerRun * inps.runs;
+
+      // Update table rows
+      stepResults.forEach(r => {
+        const tr = document.querySelector(`#resultsBody tr[data-step="${r.index}"]`);
+        if (!tr) return;
+        const cells = {
+          name: tr.querySelector('.step-name-cell'),
+          model: tr.querySelector('.step-model-cell'),
+          input: tr.querySelector('.step-input-cell'),
+          output: tr.querySelector('.step-output-cell'),
+          calls: tr.querySelector('.step-calls-cell'),
+          cost: tr.querySelector('.step-cost-cell'),
+          monthly: tr.querySelector('.step-monthly-cell'),
+          pct: tr.querySelector('.step-pct-cell')
+        };
+        if (r.active) {
+          cells.name.textContent = r.name;
+          cells.model.textContent = r.modelName;
+          cells.input.textContent = fmtN(r.inputTokens);
+          cells.output.textContent = fmtN(r.outputTokens);
+          cells.calls.textContent = fmtN(r.calls);
+          cells.cost.textContent = fmt(r.costPerRun);
+          cells.monthly.textContent = fmt(r.monthly);
+          cells.pct.textContent = llmPerRun > 0 ? ((r.costPerRun / llmPerRun) * 100).toFixed(1) + '%' : '0%';
+          tr.style.display = '';
+        } else {
+          cells.name.textContent = '—';
+          cells.model.textContent = '—';
+          cells.input.textContent = '—';
+          cells.output.textContent = '—';
+          cells.calls.textContent = '—';
+          cells.cost.textContent = '—';
+          cells.monthly.textContent = '—';
+          cells.pct.textContent = '—';
+          tr.style.display = 'none';
+        }
+      });
+
+      document.getElementById('llmPerRun').textContent = fmt(llmPerRun);
+      document.getElementById('llmMonthly').textContent = fmt(llmMonthly);
+      document.getElementById('retrievalPerRun').textContent = fmt(retrievalPerRun);
+      document.getElementById('retrievalMonthly').textContent = fmt(retrievalMonthly);
+      document.getElementById('toolsPerRun').textContent = fmt(toolsPerRun);
+      document.getElementById('toolsMonthly').textContent = fmt(toolsMonthly);
+      document.getElementById('reviewPerRun').textContent = fmt(reviewPerRun);
+      document.getElementById('reviewMonthly').textContent = fmt(reviewMonthly);
+      document.getElementById('totalPerRun').textContent = fmt(totalPerRun);
+      document.getElementById('totalMonthly').textContent = fmt(totalMonthly);
+
+      document.getElementById('totalLine').textContent = fmt(totalMonthly) + ' / month';
+      document.getElementById('perRunLine').textContent = inps.runs > 0
+        ? `${fmt(totalPerRun)} per run • ${fmt(totalPerRun / (inps.runs / 1000))} per 1k runs`
+        : '—';
+      document.getElementById('periodLine').textContent = `Projected ${inps.projection}-month cost: ${fmt(totalMonthly * inps.projection)}`;
+    }
+
+    function applyPreset(slug) {
+      const p = presets.find(x => x.slug === slug);
+      if (!p) return;
+      document.getElementById('runsPerMonth').value = p.runs_per_month;
+      document.getElementById('retrievalCost').value = p.retrieval_cost_per_run;
+      document.getElementById('toolCallCost').value = p.tool_call_cost_per_run;
+      document.getElementById('reviewHours').value = p.review_hours_per_1k_runs;
+      document.getElementById('reviewerRate').value = p.reviewer_hourly_rate;
+
+      const rows = document.querySelectorAll('#stepsContainer .step-row');
+      rows.forEach((row, i) => {
+        const step = p.steps[i];
+        const cb = row.querySelector('.step-active');
+        if (!step) {
+          cb.checked = false;
+          return;
+        }
+        cb.checked = true;
+        row.querySelector('.step-name').value = step.name;
+        row.querySelector('.step-model').value = step.model_slug;
+        row.querySelector('.step-input').value = step.input_tokens;
+        row.querySelector('.step-output').value = step.output_tokens;
+        row.querySelector('.step-calls').value = step.calls_per_run;
+      });
+      compute();
+    }
+
+    document.querySelectorAll('#stepsContainer input, #stepsContainer select').forEach(el => {
+      el.addEventListener('input', compute);
+    });
+    ['runsPerMonth', 'retrievalCost', 'toolCallCost', 'reviewHours', 'reviewerRate', 'projectionMonths'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
+
+    compute();
+  </script>
+</Layout>

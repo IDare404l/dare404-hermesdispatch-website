@@ -1,0 +1,177 @@
+{
+  "last_updated": "2026-07-05",
+  "note": "Prices are directional estimates per 1M tokens in USD. Provider rates change frequently; confirm current pricing before budgeting. Local GPU cost is estimated based on RTX 4090 effective inference cost including power and amortization.",
+  "defaults": {
+    "runs_per_month": 100000,
+    "retrieval_cost_per_run": 0.005,
+    "tool_call_cost_per_run": 0.002,
+    "review_hours_per_1k_runs": 2,
+    "reviewer_hourly_rate": 75,
+    "projection_months": 12,
+    "steps": [
+      { "name": "Understand request", "model_slug": "gpt-4o-mini", "input_tokens": 800, "output_tokens": 150, "calls_per_run": 1 },
+      { "name": "Retrieve context", "model_slug": "gpt-4o-mini", "input_tokens": 1200, "output_tokens": 0, "calls_per_run": 1, "is_retrieval": true },
+      { "name": "Generate answer", "model_slug": "gpt-4o", "input_tokens": 2500, "output_tokens": 600, "calls_per_run": 1 },
+      { "name": "Self-check / critique", "model_slug": "gpt-4o-mini", "input_tokens": 2000, "output_tokens": 100, "calls_per_run": 1 }
+    ]
+  },
+  "models": [
+    {
+      "slug": "gpt-4o",
+      "name": "OpenAI GPT-4o",
+      "provider": "OpenAI",
+      "input_price_per_1m": 2.50,
+      "cached_input_price_per_1m": 1.25,
+      "output_price_per_1m": 10.00,
+      "note": "Strong general reasoning"
+    },
+    {
+      "slug": "gpt-4o-mini",
+      "name": "OpenAI GPT-4o mini",
+      "provider": "OpenAI",
+      "input_price_per_1m": 0.15,
+      "cached_input_price_per_1m": 0.075,
+      "output_price_per_1m": 0.60,
+      "note": "Cheap routing / extraction"
+    },
+    {
+      "slug": "claude-3-5-sonnet",
+      "name": "Anthropic Claude 3.5 Sonnet",
+      "provider": "Anthropic",
+      "input_price_per_1m": 3.00,
+      "cached_input_price_per_1m": 1.50,
+      "output_price_per_1m": 15.00,
+      "note": "Long-context reasoning"
+    },
+    {
+      "slug": "claude-3-haiku",
+      "name": "Anthropic Claude 3 Haiku",
+      "provider": "Anthropic",
+      "input_price_per_1m": 0.25,
+      "cached_input_price_per_1m": 0.125,
+      "output_price_per_1m": 1.25,
+      "note": "Fast, cheap classification"
+    },
+    {
+      "slug": "gemini-1-5-pro",
+      "name": "Google Gemini 1.5 Pro",
+      "provider": "Google",
+      "input_price_per_1m": 1.25,
+      "cached_input_price_per_1m": 0.625,
+      "output_price_per_1m": 5.00,
+      "note": "1M context window"
+    },
+    {
+      "slug": "gemini-1-5-flash",
+      "name": "Google Gemini 1.5 Flash",
+      "provider": "Google",
+      "input_price_per_1m": 0.075,
+      "cached_input_price_per_1m": 0.0375,
+      "output_price_per_1m": 0.30,
+      "note": "Fast, cheap retrieval"
+    },
+    {
+      "slug": "groq-llama-3-1-70b",
+      "name": "Groq Llama 3.1 70B",
+      "provider": "Groq",
+      "input_price_per_1m": 0.59,
+      "cached_input_price_per_1m": 0.59,
+      "output_price_per_1m": 0.79,
+      "note": "Low-latency inference"
+    },
+    {
+      "slug": "together-llama-3-1-70b",
+      "name": "Together AI Llama 3.1 70B",
+      "provider": "Together AI",
+      "input_price_per_1m": 0.88,
+      "cached_input_price_per_1m": 0.88,
+      "output_price_per_1m": 0.88,
+      "note": "Open weights at API cost"
+    },
+    {
+      "slug": "cohere-command-r-plus",
+      "name": "Cohere Command R+",
+      "provider": "Cohere",
+      "input_price_per_1m": 2.50,
+      "cached_input_price_per_1m": 1.25,
+      "output_price_per_1m": 10.00,
+      "note": "RAG-optimized model"
+    },
+    {
+      "slug": "local-rtx-4090",
+      "name": "Local RTX 4090",
+      "provider": "Self-hosted",
+      "input_price_per_1m": 0.10,
+      "cached_input_price_per_1m": 0.10,
+      "output_price_per_1m": 0.10,
+      "note": "Effective per-token cost incl. power & amortization"
+    }
+  ],
+  "presets": [
+    {
+      "slug": "rag-support",
+      "name": "RAG support agent",
+      "emoji": "🤖",
+      "runs_per_month": 100000,
+      "retrieval_cost_per_run": 0.005,
+      "tool_call_cost_per_run": 0.001,
+      "review_hours_per_1k_runs": 2,
+      "reviewer_hourly_rate": 75,
+      "steps": [
+        { "name": "Classify intent", "model_slug": "gpt-4o-mini", "input_tokens": 400, "output_tokens": 50, "calls_per_run": 1 },
+        { "name": "Rewrite query", "model_slug": "gpt-4o-mini", "input_tokens": 600, "output_tokens": 100, "calls_per_run": 1 },
+        { "name": "Retrieve docs", "model_slug": "gemini-1-5-flash", "input_tokens": 2000, "output_tokens": 0, "calls_per_run": 1, "is_retrieval": true },
+        { "name": "Generate answer", "model_slug": "gpt-4o", "input_tokens": 3500, "output_tokens": 500, "calls_per_run": 1 },
+        { "name": "Safety check", "model_slug": "gpt-4o-mini", "input_tokens": 1500, "output_tokens": 50, "calls_per_run": 1 }
+      ]
+    },
+    {
+      "slug": "coding-agent",
+      "name": "Coding agent",
+      "emoji": "💻",
+      "runs_per_month": 50000,
+      "retrieval_cost_per_run": 0.008,
+      "tool_call_cost_per_run": 0.005,
+      "review_hours_per_1k_runs": 5,
+      "reviewer_hourly_rate": 100,
+      "steps": [
+        { "name": "Plan changes", "model_slug": "claude-3-5-sonnet", "input_tokens": 3000, "output_tokens": 800, "calls_per_run": 1 },
+        { "name": "Generate code", "model_slug": "claude-3-5-sonnet", "input_tokens": 5000, "output_tokens": 1200, "calls_per_run": 2 },
+        { "name": "Run tests / tool calls", "model_slug": "gpt-4o-mini", "input_tokens": 2500, "output_tokens": 200, "calls_per_run": 3 },
+        { "name": "Summarize result", "model_slug": "gpt-4o-mini", "input_tokens": 2000, "output_tokens": 150, "calls_per_run": 1 }
+      ]
+    },
+    {
+      "slug": "research-agent",
+      "name": "Research agent",
+      "emoji": "🔬",
+      "runs_per_month": 20000,
+      "retrieval_cost_per_run": 0.020,
+      "tool_call_cost_per_run": 0.010,
+      "review_hours_per_1k_runs": 8,
+      "reviewer_hourly_rate": 80,
+      "steps": [
+        { "name": "Decompose question", "model_slug": "gpt-4o", "input_tokens": 1200, "output_tokens": 300, "calls_per_run": 1 },
+        { "name": "Search / retrieve", "model_slug": "gemini-1-5-pro", "input_tokens": 8000, "output_tokens": 500, "calls_per_run": 3, "is_retrieval": true },
+        { "name": "Synthesize report", "model_slug": "claude-3-5-sonnet", "input_tokens": 12000, "output_tokens": 2500, "calls_per_run": 1 },
+        { "name": "Cite / format", "model_slug": "gpt-4o-mini", "input_tokens": 3000, "output_tokens": 200, "calls_per_run": 1 }
+      ]
+    },
+    {
+      "slug": "multi-agent-orchestrator",
+      "name": "Multi-agent orchestrator",
+      "emoji": "🧩",
+      "runs_per_month": 50000,
+      "retrieval_cost_per_run": 0.003,
+      "tool_call_cost_per_run": 0.004,
+      "review_hours_per_1k_runs": 1,
+      "reviewer_hourly_rate": 75,
+      "steps": [
+        { "name": "Route to sub-agent", "model_slug": "gpt-4o-mini", "input_tokens": 800, "output_tokens": 100, "calls_per_run": 1 },
+        { "name": "Sub-agent task", "model_slug": "gpt-4o", "input_tokens": 2500, "output_tokens": 400, "calls_per_run": 2 },
+        { "name": "Sub-agent task", "model_slug": "claude-3-haiku", "input_tokens": 1500, "output_tokens": 250, "calls_per_run": 2 },
+        { "name": "Combine outputs", "model_slug": "gpt-4o-mini", "input_tokens": 3000, "output_tokens": 300, "calls_per_run": 1 }
+      ]
+    }
+  ]
+}

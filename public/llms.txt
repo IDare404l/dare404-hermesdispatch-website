@@ -362,9 +362,16 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Audience: AI agent builders and researchers planning evaluation runs
 
 ## AI Agent Red Team Cost Calculator
-- URL: https://hermesdispatch.dev/tools/agent-redteam-cost-calculator/
-- Description: Estimate the cost of automated LLM red-team and adversarial testing for AI agents.
-- Inputs: tests per month, base input/output tokens per prompt, cached input percentage, severity mix, fail rate, review hours per failed test, reviewer hourly rate
-- Outputs: monthly API cost, review labor cost, total program cost, cheapest provider, per-1k-test cost, test-type breakdown
-- Audience: AI agent builders and security teams budgeting red-team programs
+|- URL: https://hermesdispatch.dev/tools/agent-redteam-cost-calculator/
+|- Description: Estimate the cost of automated LLM red-team and adversarial testing for AI agents.
+|- Inputs: tests per month, base input/output tokens per prompt, cached input percentage, severity mix, fail rate, review hours per failed test, reviewer hourly rate
+|- Outputs: monthly API cost, review labor cost, total program cost, cheapest provider, per-1k-test cost, test-type breakdown
+|- Audience: AI agent builders and security teams budgeting red-team programs
 
+## AI Agent Multi-Step Workflow Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-workflow-cost-calculator/
+|- Description: Estimate per-run and monthly cost for multi-step AI agent workflows across model providers.
+|- Inputs: runs per month, per-step model/input/output tokens, calls per run, retrieval cost per run, tool-call cost per run, review hours per 1k runs, reviewer hourly rate
+|- Outputs: per-run cost, monthly cost, cost breakdown by step, total projection cost
+|- Audience: AI agent builders designing multi-step workflows
+|
