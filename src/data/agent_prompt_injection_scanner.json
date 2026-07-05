@@ -1,0 +1,189 @@
+{
+  "last_updated": "2026-07-05",
+  "note": "Risk weights and mitigation costs are directional estimates. For a full audit, combine this scan with manual red-teaming and a review by a security engineer.",
+  "risk_categories": [
+    {
+      "slug": "prompt_injection",
+      "name": "Direct Prompt Injection",
+      "emoji": "💉",
+      "description": "User input that overrides the system prompt or hidden instructions.",
+      "signals": [
+        "User text contains 'ignore previous instructions' or similar",
+        "User asks the model to reveal its system prompt",
+        "System prompt is concatenated raw with user input",
+        "No delimiter between instructions and user content"
+      ],
+      "mitigations": [
+        "Use a strict instruction hierarchy and system-level delimiter",
+        "Filter or flag known injection phrases",
+        "Run user input through a separate guard model",
+        "Limit what the system prompt discloses"
+      ],
+      "base_weight": 25,
+      "cost_low": 500,
+      "cost_high": 3000
+    },
+    {
+      "slug": "jailbreak",
+      "name": "Jailbreak / Roleplay Attacks",
+      "emoji": "🎭",
+      "description": "Manipulating the model into bypassing safety or policy constraints.",
+      "signals": [
+        "System prompt relies on the model's general safety training",
+        "No output policy or classifier after the LLM",
+        "Model is tuned to be very compliant or 'helpful'",
+        "User can frame harmful requests as fiction, translation, or code"
+      ],
+      "mitigations": [
+        "Add an output classifier / moderation layer",
+        "Define explicit allowed vs. denied topics",
+        "Use a smaller, specialized model for sensitive routes",
+        "Log and review high-temperature or roleplay-style requests"
+      ],
+      "base_weight": 20,
+      "cost_low": 300,
+      "cost_high": 2500
+    },
+    {
+      "slug": "tool_hijack",
+      "name": "Tool / Function Hijacking",
+      "emoji": "🔧",
+      "description": "Forcing the agent to call tools with malicious arguments or unintended sequencing.",
+      "signals": [
+        "Tools accept free-form arguments from the LLM",
+        "No argument schema validation before execution",
+        "Agent can chain multiple tool calls autonomously",
+        "Tool outputs are fed back to the LLM unsanitized"
+      ],
+      "mitigations": [
+        "Enforce JSON schema and type validation on every tool call",
+        "Require user confirmation for destructive or irreversible actions",
+        "Use allowlists for domains, commands, and file paths",
+        "Sandbox tool execution with minimal privileges"
+      ],
+      "base_weight": 25,
+      "cost_low": 800,
+      "cost_high": 5000
+    },
+    {
+      "slug": "data_exfil",
+      "name": "Data Exfiltration / Leakage",
+      "emoji": "📤",
+      "description": "Tricking the agent into revealing secrets, PII, or context from other sessions.",
+      "signals": [
+        "System prompt or retrieved context includes secrets",
+        "Retrieval can return documents the user should not see",
+        "Tool responses contain other users' data",
+        "No output filtering on PII or session context"
+      ],
+      "mitigations": [
+        "Strip secrets from prompts and retrieval context",
+        "Apply row-level / user-level access control in RAG",
+        "Run output PII detection and redaction",
+        "Audit what the model emits per session"
+      ],
+      "base_weight": 20,
+      "cost_low": 600,
+      "cost_high": 4000
+    },
+    {
+      "slug": "indirect_injection",
+      "name": "Indirect Prompt Injection",
+      "emoji": "🪝",
+      "description": "Malicious instructions hidden in retrieved documents, emails, web pages, or tool outputs.",
+      "signals": [
+        "Agent retrieves untrusted web pages or emails",
+        "Retrieved content is passed to the LLM without sanitization",
+        "Agent executes actions based on retrieved instructions",
+        "No provenance metadata on retrieved chunks"
+      ],
+      "mitigations": [
+        "Sanitize and mark retrieved content as untrusted",
+        "Do not let retrieved content trigger tool calls directly",
+        "Use content extraction instead of full raw HTML/text",
+        "Add citation/provenance metadata to every chunk"
+      ],
+      "base_weight": 20,
+      "cost_low": 700,
+      "cost_high": 3500
+    },
+    {
+      "slug": "denial_of_wallet",
+      "name": "Denial-of-Wallet / Resource Abuse",
+      "emoji": "💸",
+      "description": "Attackers generating expensive long-context or high-token requests.",
+      "signals": [
+        "No per-user rate or token limits",
+        "Very large context windows exposed to users",
+        "Unbounded agent loops allowed",
+        "No cost alerts or budgets"
+      ],
+      "mitigations": [
+        "Set per-request and per-user token caps",
+        "Rate limit by user/IP with escalating delays",
+        "Add maximum loop/recursion depth",
+        "Enable billing alerts and kill switches"
+      ],
+      "base_weight": 15,
+      "cost_low": 200,
+      "cost_high": 1500
+    },
+    {
+      "slug": "model_self_correction",
+      "name": "Model Self-Correction Bypass",
+      "emoji": "🔄",
+      "description": "Using reflection, repeated re-prompting, or debating agents to erode safeguards.",
+      "signals": [
+        "Agent can call itself in a reflection loop",
+        "No consistency check across multiple attempts",
+        "System rewards the model for 'finding a way'",
+        "Outputs are editable by the model before guard checks"
+      ],
+      "mitigations": [
+        "Limit reflection/self-call rounds",
+        "Apply the guard layer after final output, not before",
+        "Require deterministic checks for safety-critical outputs",
+        "Compare multiple sampled outputs for contradictions"
+      ],
+      "base_weight": 10,
+      "cost_low": 300,
+      "cost_high": 2000
+    }
+  ],
+  "checklist": [
+    { "id": "sys_delimiter", "category": "prompt_injection", "text": "System prompt uses explicit delimiters / instruction hierarchy", "weight": 3 },
+    { "id": "input_filter", "category": "prompt_injection", "text": "Known injection phrases are filtered or flagged", "weight": 2 },
+    { "id": "guard_model", "category": "prompt_injection", "text": "A separate guard model/classifier reviews inputs", "weight": 3 },
+    { "id": "sys_hidden", "category": "prompt_injection", "text": "System prompt does not reveal its own text or secrets", "weight": 2 },
+    { "id": "output_policy", "category": "jailbreak", "text": "Explicit output policy defines allowed/denied content", "weight": 3 },
+    { "id": "moderation_layer", "category": "jailbreak", "text": "Output moderation layer runs after the LLM", "weight": 3 },
+    { "id": "topic_deny", "category": "jailbreak", "text": "Denied topics are listed and tested", "weight": 2 },
+    { "id": "schema_validation", "category": "tool_hijack", "text": "Every tool call is validated against a strict schema", "weight": 4 },
+    { "id": "confirm_destructive", "category": "tool_hijack", "text": "Destructive actions require explicit user confirmation", "weight": 3 },
+    { "id": "tool_sandbox", "category": "tool_hijack", "text": "Tools run in a sandbox with least privilege", "weight": 3 },
+    { "id": "arg_allowlist", "category": "tool_hijack", "text": "Tool arguments use allowlists for URLs, commands, paths", "weight": 3 },
+    { "id": "secrets_out_of_prompt", "category": "data_exfil", "text": "No secrets, keys, or PII in system prompt or retrieval context", "weight": 4 },
+    { "id": "rag_acl", "category": "data_exfil", "text": "RAG / vector store enforces user-level access control", "weight": 3 },
+    { "id": "pii_output", "category": "data_exfil", "text": "PII redaction/detection runs on model outputs", "weight": 3 },
+    { "id": "sanitize_retrieval", "category": "indirect_injection", "text": "Retrieved untrusted content is sanitized and marked", "weight": 3 },
+    { "id": "no_tool_from_retrieval", "category": "indirect_injection", "text": "Retrieved content cannot directly trigger tool calls", "weight": 4 },
+    { "id": "rate_limits", "category": "denial_of_wallet", "text": "Per-user rate and token limits are enforced", "weight": 3 },
+    { "id": "budget_alerts", "category": "denial_of_wallet", "text": "Cost alerts and kill switches are configured", "weight": 2 },
+    { "id": "loop_limits", "category": "denial_of_wallet", "text": "Maximum recursion / loop depth is enforced", "weight": 2 },
+    { "id": "guard_after_output", "category": "model_self_correction", "text": "Guard checks run after final output, not only before", "weight": 3 },
+    { "id": "reflection_cap", "category": "model_self_correction", "text": "Self-reflection / agent loops have a hard cap", "weight": 2 }
+  ],
+  "exposure_profiles": [
+    { "slug": "internal", "name": "Internal-only prototype", "multiplier": 0.6, "description": "No external users, no sensitive data." },
+    { "slug": "trusted", "name": "Trusted users / team", "multiplier": 0.8, "description": "Authenticated internal or beta users only." },
+    { "slug": "public", "name": "Public web / app", "multiplier": 1.0, "description": "Any internet user can reach the agent." },
+    { "slug": "high_value", "name": "High-value / regulated data", "multiplier": 1.3, "description": "Handles PII, health, financial, or regulated data." },
+    { "slug": "autonomous", "name": "Autonomous with real-world actions", "multiplier": 1.5, "description": "Can spend money, send messages, or modify systems unsupervised." }
+  ],
+  "risk_levels": [
+    { "max": 25, "label": "Low Risk", "color": "emerald", "message": "Your agent shows basic defensive posture. Keep testing as you add tools and users." },
+    { "max": 50, "label": "Moderate Risk", "color": "amber", "message": "Several common attack paths are open. Address the high-impact items before scaling traffic." },
+    { "max": 75, "label": "High Risk", "color": "orange", "message": "The agent is likely exploitable by prompt injection or tool hijacking. Fix P0 items before public launch." },
+    { "max": 100, "label": "Critical Risk", "color": "red", "message": "Critical exposure. Do not deploy to untrusted users until major safeguards are in place." }
+  ]
+}
