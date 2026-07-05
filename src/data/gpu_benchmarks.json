@@ -12,10 +12,7 @@
         "llama-3.1-70b": 22.0,
         "qwen2.5-7b": 165.0
       },
-      "notes": "Flagship Blackwell gaming/AI card. Estimated data.",
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      "notes": "Flagship Blackwell gaming/AI card. Estimated data."
     },
     "NVIDIA GeForce RTX 4090": {
       "vram_gb": 24,
@@ -29,10 +26,7 @@
         "llama-3.1-70b": 18.0,
         "qwen2.5-7b": 135.0
       },
-      "notes": "Top pick for local LLMs today.",
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      "notes": "Top pick for local LLMs today."
     },
     "NVIDIA GeForce RTX 4080": {
       "vram_gb": 16,
@@ -45,10 +39,7 @@
         "llama-3.1-8b": 105.0,
         "llama-3.1-70b": 15.0,
         "qwen2.5-7b": 115.0
-      },
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      }
     },
     "NVIDIA GeForce RTX 4070 Ti": {
       "vram_gb": 12,
@@ -61,10 +52,7 @@
         "llama-3.1-8b": 85.0,
         "llama-3.1-70b": 11.0,
         "qwen2.5-7b": 92.0
-      },
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      }
     },
     "NVIDIA GeForce RTX 3090": {
       "vram_gb": 24,
@@ -78,10 +66,7 @@
         "llama-3.1-70b": 14.0,
         "qwen2.5-7b": 105.0
       },
-      "notes": "Best VRAM-per-dollar for large models on used market.",
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      "notes": "Best VRAM-per-dollar for large models on used market."
     },
     "NVIDIA GeForce RTX 3090 Ti": {
       "vram_gb": 24,
@@ -94,10 +79,7 @@
         "llama-3.1-8b": 98.0,
         "llama-3.1-70b": 15.0,
         "qwen2.5-7b": 108.0
-      },
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      }
     },
     "Apple Mac Studio M4 Max": {
       "vram_gb": 128,
@@ -111,10 +93,7 @@
         "llama-3.1-70b": 9.0,
         "qwen2.5-7b": 70.0
       },
-      "notes": "Massive unified memory for 70B+ models, lower raw TPS.",
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      "notes": "Massive unified memory for 70B+ models, lower raw TPS."
     },
     "Apple Mac Studio M3 Max": {
       "vram_gb": 128,
@@ -127,10 +106,7 @@
         "llama-3.1-8b": 55.0,
         "llama-3.1-70b": 7.0,
         "qwen2.5-7b": 60.0
-      },
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      }
     },
     "Apple Mac Studio M2 Ultra": {
       "vram_gb": 192,
@@ -142,10 +118,7 @@
       "ollama_tps": {
         "llama-3.1-8b": 50.0,
         "llama-3.1-70b": 8.0
-      },
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      }
     },
     "Geekom A8 (Ryzen 9 8945HS, Radeon 780M)": {
       "vram_gb": 8,
@@ -158,10 +131,7 @@
         "llama-3.1-8b": 12.0,
         "qwen2.5-7b": 13.0
       },
-      "notes": "Mini PC. Good for 3B-7B models, very low power.",
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      "notes": "Mini PC. Good for 3B-7B models, very low power."
     },
     "GMKtec NucBox K8+ (Ryzen 7 8845HS, Radeon 780M)": {
       "vram_gb": 8,
@@ -174,13 +144,10 @@
         "llama-3.1-8b": 11.0,
         "qwen2.5-7b": 12.0
       },
-      "notes": "Budget mini PC for local LLM experiments.",
-      "sponsored": false,
-      "sponsor_badge": "",
-      "affiliate_slug": ""
+      "notes": "Budget mini PC for local LLM experiments."
     }
   },
-  "last_updated": "2026-06-28T09:00:15.794392Z",
+  "last_updated": "2026-07-05T09:00:02.626539Z",
   "source": "curated public spec sheets + community Ollama/vLLM benchmarks",
   "methodology": "All token/sec numbers are 4-bit quantized inference at ~4096 context, averaged from community Ollama and vLLM runs."
 }
