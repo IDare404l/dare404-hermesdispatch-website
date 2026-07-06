@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/gpu_cloud_vs_buy.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "GPU Cloud Rental vs Buy Calculator";
 const description = "Compare renting a cloud GPU by the hour against buying a local GPU for AI inference and training. See total cost, break-even months, and which option wins for your workload.";
@@ -397,4 +398,16 @@ const utilHelp = data.utilization_help;
 
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Gpu Cloud Vs Buy Calculator"
+    toolPath="/tools/gpu-cloud-vs-buy-calculator/"
+    description="Copy-paste Hermes Agent script for gpu cloud vs buy calculator."
+    scriptPath="/hermes-tools/gpu_cloud_vs_buy_calculator.py"
+    locked={false}
+  />
 </Layout>

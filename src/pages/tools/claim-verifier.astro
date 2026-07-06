@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 import HermesToolDownload from '../../components/HermesToolDownload.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Claim Verifier | The Hermes Dispatch";
 const description = "Verify a claim against web search results. Get a confidence score, cross-source confirmation, and a citable verdict for AI agents and humans.";
@@ -270,103 +270,23 @@ const faqSchema = {
     })();
   </script>
 
-  <AgentCodeBlock
-    toolName="Claim Verifier"
-    toolPath="/tools/claim-verifier/"
-    description="Verify a claim against web search results with a confidence score, source list, and ClaimReview JSON."
-    locked={false}
-    snippets={[
-      {
-        lang: 'python',
-        label: 'Python',
-        code: `# Claim Verifier snippet
-# Docs: https://hermesdispatch.dev/tools/claim-verifier/
-import urllib.parse, requests
-
-def search_sources(claim: str, count: int = 10):
-    encoded = urllib.parse.quote(claim)
-    url = f"https://html.duckduckgo.com/html/?q={encoded}"
-    res = requests.get(url, headers={"X-Requested-With": "XMLHttpRequest"})
-    # extract result links from HTML
-    import re
-    matches = re.findall(r'result__a[^>]*href="([^"]+)"', res.text)
-    return [m for m in matches[:count] if not m.startswith('/')]
-
-def score_claim(claim: str, sources: list):
-    keywords = [w for w in claim.lower().split() if len(w) > 3]
-    supports = contradicts = neutral = 0
-    for src in sources:
-        text = src.get('text', '').lower()
-        hits = sum(1 for kw in keywords if kw in text)
-        if hits >= 2:
-            if any(w in text for w in ['false', 'fake', 'misleading', 'not true', 'debunked']):
-                contradicts += 1; src['sentiment'] = 'contradicts'
-            elif any(w in text for w in ['true', 'confirmed', 'reported', 'announced', 'released', 'official']):
-                supports += 1; src['sentiment'] = 'supports'
-            else:
-                neutral += 1; src['sentiment'] = 'neutral'
-        else:
-            src['sentiment'] = 'neutral'
-    score = round(supports / len(sources) * 100) if sources else 0
-    if contradicts: score -= round(contradicts / len(sources) * 60)
-    score = max(0, min(100, score))
-    level = 'High confidence' if score >= 75 and supports >= 2 else 'Medium confidence' if score >= 40 else 'Contradicted' if contradicts > 0 else 'Insufficient evidence'
-    return {"score": score, "level": level, "supports": supports, "contradicts": contradicts, "neutral": neutral, "sources": sources}
-
-print(search_sources("NVIDIA released the RTX 5090 in June 2026"))`
-      },
-      {
-        lang: 'javascript',
-        label: 'JavaScript',
-        code: `// Claim Verifier snippet
-// Docs: https://hermesdispatch.dev/tools/claim-verifier/
-function scoreClaim(claim, sources) {
-  const keywords = claim.toLowerCase().split(/\s+/).filter(w => w.length > 3);
-  let supports = 0, contradicts = 0, neutral = 0;
-  sources.forEach(src => {
-    const text = (src.text || '').toLowerCase();
-    const hits = keywords.filter(kw => text.includes(kw)).length;
-    if (hits >= 2) {
-      if (/false|fake|misleading|not true|debunked/.test(text)) { contradicts++; src.sentiment = 'contradicts'; }
-      else if (/true|confirmed|reported|announced|released|official/.test(text)) { supports++; src.sentiment = 'supports'; }
-      else { neutral++; src.sentiment = 'neutral'; }
-    } else { src.sentiment = 'neutral'; }
-  });
-  let score = sources.length ? Math.round((supports / sources.length) * 100) : 0;
-  if (contradicts) score -= Math.round((contradicts / sources.length) * 60);
-  score = Math.max(0, Math.min(100, score));
-  let level = score >= 75 && supports >= 2 ? 'High confidence' : score >= 40 ? 'Medium confidence' : contradicts > 0 ? 'Contradicted' : 'Insufficient evidence';
-  return { score, level, supports, contradicts, neutral, sources };
-}
-
-console.log(scoreClaim("NVIDIA released the RTX 5090 in June 2026", [
-  { text: "NVIDIA officially released the RTX 5090 in June 2026" }
-]));`
-      },
-      {
-        lang: 'bash',
-        label: 'cURL',
-        code: `# Search for claim sources via DuckDuckGo HTML
-# Docs: https://hermesdispatch.dev/tools/claim-verifier/
-CLAIM="NVIDIA released the RTX 5090 in June 2026"
-ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$CLAIM'))")
-curl -s "https://html.duckduckgo.com/html/?q=$ENCODED" \\
-  -H "X-Requested-With: XMLHttpRequest" | grep -oP 'result__a[^>]*href="\K[^"]+' | head -10`
-      },
-      {
-        lang: 'markdown',
-        label: 'Hermes /slash',
-        code: `# Use in a Hermes Agent session:
-Verify the claim "NVIDIA released the RTX 5090 in June 2026" by searching DuckDuckGo, reading the top 10 result pages, and scoring support/contradiction/neutral counts. Return a ClaimReview JSON verdict with score, level, and sources.`
-      }
-    ]}
-  />
+  
 
   <HermesToolDownload
     toolName="Claim Verifier"
     toolPath="/tools/claim-verifier/"
     scriptUrl="/hermes-tools/claim_verifier.py"
     description="Verify a claim against web search results with a confidence score, source list, and citable verdict."
+    locked={false}
+  />
+
+  
+
+  <AgentCodeBlock
+    toolName="Claim Verifier"
+    toolPath="/tools/claim-verifier/"
+    description="Copy-paste Hermes Agent script for claim verifier."
+    scriptPath="/hermes-tools/claim_verifier.py"
     locked={false}
   />
 </Layout>

@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_workflow_cost.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Multi-Step Workflow Cost Calculator | Hermes Dispatch";
 const description = "Estimate per-run and monthly cost for multi-step AI agent workflows across OpenAI, Anthropic, Google, Groq, Together AI, Cohere, and local GPU routes.";
@@ -392,4 +393,16 @@ const maxSteps = 6;
 
     compute();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Workflow Cost Calculator"
+    toolPath="/tools/agent-workflow-cost-calculator/"
+    description="Copy-paste Hermes Agent script for agent workflow cost calculator."
+    scriptPath="/hermes-tools/agent_workflow_cost_calculator.py"
+    locked={false}
+  />
 </Layout>

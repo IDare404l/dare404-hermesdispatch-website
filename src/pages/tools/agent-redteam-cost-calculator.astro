@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_redteam_cost.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Red Team Cost Calculator | Hermes Dispatch";
 const description = "Estimate the monthly cost of automated LLM red-team and adversarial testing for AI agents. Compare prompt injection, jailbreak, fuzzing, and multimodal tests across providers.";
@@ -273,4 +274,16 @@ function money(n) {
       compute();
     });
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Redteam Cost Calculator"
+    toolPath="/tools/agent-redteam-cost-calculator/"
+    description="Copy-paste Hermes Agent script for agent redteam cost calculator."
+    scriptPath="/hermes-tools/agent_redteam_cost_calculator.py"
+    locked={false}
+  />
 </Layout>

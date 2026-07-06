@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import data from '../../data/agent_marketplace_fees.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Marketplace Fee Comparator — Platform Take Rates & Revenue";
 const description = "Compare fees, revenue share, and take rates across AI agent marketplaces: OpenAI GPT Store, Anthropic Claude Marketplace, Poe, Salesforce Agentforce, Pickaxe, Relevance AI, GitHub, AWS, and Stripe.";
@@ -265,4 +266,16 @@ const defaults = data.defaults;
 
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Marketplace Fee Comparator"
+    toolPath="/tools/agent-marketplace-fee-comparator/"
+    description="Copy-paste Hermes Agent script for agent marketplace fee comparator."
+    scriptPath="/hermes-tools/agent_marketplace_fee_comparator.py"
+    locked={false}
+  />
 </Layout>

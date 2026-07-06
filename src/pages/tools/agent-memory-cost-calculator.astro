@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import data from '../../data/agent_memory_cost.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Memory / RAG Cost Calculator";
 const description = "Estimate vector DB and embedding costs for AI agent memory and RAG. Compare managed vs self-hosted vector databases, embedding models, and rerankers.";
@@ -400,4 +401,16 @@ const rerankerMap = Object.fromEntries(rerankers.map(r => [r.slug, r]));
 
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Memory Cost Calculator"
+    toolPath="/tools/agent-memory-cost-calculator/"
+    description="Copy-paste Hermes Agent script for agent memory cost calculator."
+    scriptPath="/hermes-tools/agent_memory_cost_calculator.py"
+    locked={false}
+  />
 </Layout>

@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import apiPricing from '../../data/agent_api_pricing.json';
 import hosting from '../../data/agent_hosting_costs.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Hosting Cost Comparator | Hermes Dispatch";
 const description = "Compare self-hosted, cloud GPU rental, and managed marketplace hosting costs for AI agents. Estimate monthly TCO, cost per 1k requests, and the cheapest deployment route.";
@@ -267,4 +268,16 @@ const faqs = [
     });
     compute();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Hosting Cost Comparator"
+    toolPath="/tools/agent-hosting-cost-comparator/"
+    description="Copy-paste Hermes Agent script for agent hosting cost comparator."
+    scriptPath="/hermes-tools/agent_hosting_cost_comparator.py"
+    locked={false}
+  />
 </Layout>

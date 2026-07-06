@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_deployment_scorecard.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Deployment Readiness Scorecard | Hermes Dispatch";
 const description = "Score your AI agent's production readiness across architecture, model, privacy, security, reliability, observability, cost, and go-live plan.";
@@ -303,4 +304,16 @@ const totalQuestions = dimensions.reduce((sum, d) => sum + d.questions.length, 0
       update();
     });
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Deployment Scorecard"
+    toolPath="/tools/agent-deployment-scorecard/"
+    description="Copy-paste Hermes Agent script for agent deployment scorecard."
+    scriptPath="/hermes-tools/agent_deployment_scorecard.py"
+    locked={false}
+  />
 </Layout>

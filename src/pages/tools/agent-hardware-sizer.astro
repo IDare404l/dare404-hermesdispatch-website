@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Agent Hardware Sizer | The Hermes Dispatch";
 const description = "Find the exact mini PC, GPU, and RAM config you need to run local LLMs and AI agents. Pick a model and get a tested hardware recommendation with affiliate links.";
@@ -210,4 +211,16 @@ const productLinks: Record<string, { slug: string; label: string }> = {
       });
     })();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Hardware Sizer"
+    toolPath="/tools/agent-hardware-sizer/"
+    description="Copy-paste Hermes Agent script for agent hardware sizer."
+    scriptPath="/hermes-tools/agent_hardware_sizer.py"
+    locked={false}
+  />
 </Layout>

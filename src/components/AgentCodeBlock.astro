@@ -1,4 +1,7 @@
 ---
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
 export interface Snippet {
   lang: string;
   label: string;
@@ -9,7 +12,8 @@ export interface Props {
   toolName: string;
   toolPath: string;
   description: string;
-  snippets: Snippet[];
+  snippets?: Snippet[];
+  scriptPath?: string; // e.g. /hermes-tools/llm_vram_calculator.py — auto-inlines Python snippet
   locked?: boolean;
   unlockDate?: string; // ISO date string, e.g. "2026-07-17"
   lockReason?: string;
@@ -19,7 +23,8 @@ const {
   toolName,
   toolPath,
   description,
-  snippets,
+  snippets = [],
+  scriptPath,
   locked = false,
   unlockDate,
   lockReason = "Agent code snippets for this tool are exclusive to Hermes Dispatch subscribers for early access. Subscribe to unlock the copy-paste code."
@@ -29,11 +34,27 @@ const nowIso = new Date().toISOString().slice(0, 10);
 const isLocked = locked && (!unlockDate || unlockDate > nowIso);
 const unlockDisplay = unlockDate ? new Date(unlockDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : undefined;
 
+function loadScript(path: string): string | null {
+  try {
+    const localPath = join(process.cwd(), 'public', path);
+    return readFileSync(localPath, 'utf-8');
+  } catch (e) {
+    try {
+      const altPath = join(process.cwd(), path);
+      return readFileSync(altPath, 'utf-8');
+    } catch (e2) {
+      return null;
+    }
+  }
+}
+
+const inlinePython = scriptPath ? loadScript(scriptPath) : null;
+
 const defaultSnippets: Snippet[] = [
   {
     lang: 'python',
     label: 'Python',
-    code: `# Use ${toolName} from hermesdispatch.dev
+    code: inlinePython || `# Use ${toolName} from hermesdispatch.dev
 # Docs: https://hermesdispatch.dev${toolPath}
 print("${toolName} agent snippet coming soon")`
   },

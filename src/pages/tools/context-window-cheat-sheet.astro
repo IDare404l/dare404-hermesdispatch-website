@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import data from '../../data/context_window_models.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Model Context Window Cheat Sheet — Compare Token Limits";
 const description = "Compare input and output context windows for OpenAI, Anthropic, Google, Meta, Mistral, DeepSeek, xAI, and local quantized models. Find which model fits your document, codebase, or transcript.";
@@ -203,4 +204,16 @@ const presets = data.contextPresets;
       matchResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Context Window Cheat Sheet"
+    toolPath="/tools/context-window-cheat-sheet/"
+    description="Copy-paste Hermes Agent script for context window cheat sheet."
+    scriptPath="/hermes-tools/context_window_lookup.py"
+    locked={false}
+  />
 </Layout>

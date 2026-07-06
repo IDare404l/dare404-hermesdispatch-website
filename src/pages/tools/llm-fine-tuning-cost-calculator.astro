@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/llm_fine_tuning_cost.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "LLM Fine-Tuning Cost Calculator — Training + Hosting Estimate";
 const description = "Estimate the cost to fine-tune an LLM across OpenAI, Together AI, Fireworks, Replicate, Google Gemini, and local GPU routes. Includes training, usage, and hardware rental.";
@@ -275,4 +276,16 @@ const faqSchema = {
     document.querySelectorAll('#costTable input').forEach(el => el.addEventListener('input', calc));
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Llm Fine Tuning Cost Calculator"
+    toolPath="/tools/llm-fine-tuning-cost-calculator/"
+    description="Copy-paste Hermes Agent script for llm fine tuning cost calculator."
+    scriptPath="/hermes-tools/llm_fine_tuning_cost_calculator.py"
+    locked={false}
+  />
 </Layout>

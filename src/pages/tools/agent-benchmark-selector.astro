@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import categories from '../../data/agent_benchmarks.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Performance Benchmark Selector — Pick the Right Evaluation";
 const description = "Choose the best benchmark for your AI agent: coding (SWE-bench, HumanEval), reasoning (GAIA, MMLU), web (WebArena), desktop (OSWorld), multi-agent (AgentBench), and domain-specific tests.";
@@ -149,4 +150,16 @@ const description = "Choose the best benchmark for your AI agent: coding (SWE-be
 
     if (cards.length) select(cards[0].dataset.slug);
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Benchmark Selector"
+    toolPath="/tools/agent-benchmark-selector/"
+    description="Copy-paste Hermes Agent script for agent benchmark selector."
+    scriptPath="/hermes-tools/agent_benchmark_selector.py"
+    locked={false}
+  />
 </Layout>

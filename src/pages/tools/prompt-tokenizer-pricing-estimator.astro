@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import pricing from '../../data/agent_api_pricing.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Prompt Tokenizer & Pricing Estimator — Count Tokens Before You Send";
 const description = "Estimate token count and API cost for OpenAI, Anthropic, Google, Groq, Together AI, and Cohere before sending a prompt. Paste text or chat messages and compare prices instantly.";
@@ -216,4 +217,16 @@ const faqs = [
 
     compute();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Prompt Tokenizer Pricing Estimator"
+    toolPath="/tools/prompt-tokenizer-pricing-estimator/"
+    description="Copy-paste Hermes Agent script for prompt tokenizer pricing estimator."
+    scriptPath="/hermes-tools/prompt_tokenizer_pricing_estimator.py"
+    locked={false}
+  />
 </Layout>

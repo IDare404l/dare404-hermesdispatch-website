@@ -4,6 +4,7 @@ import LeadCapture from '../../components/LeadCapture.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import dealsRaw from '../../data/deal_tracker.json';
 import dealSponsors from '../../data/deal_sponsor_overlay.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 const deals = Object.fromEntries(Object.entries(dealsRaw).map(([k, v]) => [k, { ...v, ...(dealSponsors[k] || {}) }]));
 
 const title = "AI Hardware Deal Tracker — GPUs, Mini PCs, RAM, Storage";
@@ -128,4 +129,16 @@ const description = "Track AI hardware prices for local LLM builds. Know MSRP, t
   </script>
 <LeadCapture toolName="this deal" toolPath="/tools/ai-hardware-deal-tracker/" />
 
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Ai Hardware Deal Tracker"
+    toolPath="/tools/ai-hardware-deal-tracker/"
+    description="Copy-paste Hermes Agent script for ai hardware deal tracker."
+    scriptPath="/hermes-tools/ai_hardware_deal_tracker.py"
+    locked={false}
+  />
 </Layout>

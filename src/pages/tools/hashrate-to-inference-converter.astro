@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import data from '../../data/hashrate_to_inference.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "GPU Hashrate to LLM Inference Capacity Converter";
 const description = "Convert your GPU's crypto-mining hashrate into an estimated LLM inference capacity: tok/s, VRAM fit, and rough revenue potential.";
@@ -300,4 +301,16 @@ const eff = data.efficiency_help;
 
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Hashrate To Inference Converter"
+    toolPath="/tools/hashrate-to-inference-converter/"
+    description="Copy-paste Hermes Agent script for hashrate to inference converter."
+    scriptPath="/hermes-tools/hashrate_to_inference_converter.py"
+    locked={false}
+  />
 </Layout>

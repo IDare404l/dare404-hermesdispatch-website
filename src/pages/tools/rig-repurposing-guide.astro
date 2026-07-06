@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import rigs from '../../data/rig_repurpose.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Crypto Mining Rig Repurposing Guide — From Crypto to AI";
 const description = "Five proven ways to repurpose crypto mining hardware: ASIC heaters, GPU inference clusters, render farms, home labs, and resale strategies.";
@@ -148,4 +149,16 @@ const description = "Five proven ways to repurpose crypto mining hardware: ASIC 
 
     if (cards.length) select(cards[0].dataset.slug);
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Rig Repurposing Guide"
+    toolPath="/tools/rig-repurposing-guide/"
+    description="Copy-paste Hermes Agent script for rig repurposing guide."
+    scriptPath="/hermes-tools/rig_repurposing_guide.py"
+    locked={false}
+  />
 </Layout>

@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import data from '../../data/ai_agent_compliance.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Privacy & Compliance Checker";
 const description = "Check which privacy and compliance requirements apply to your AI agent. Covers GDPR, SOC 2, CCPA/CPRA, EU AI Act, HIPAA, DORA, PIPEDA, and more.";
@@ -272,4 +273,16 @@ const readiness = data.readiness;
 
     updateFrameworks();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Ai Agent Compliance Checker"
+    toolPath="/tools/ai-agent-compliance-checker/"
+    description="Copy-paste Hermes Agent script for ai agent compliance checker."
+    scriptPath="/hermes-tools/ai_agent_compliance_checker.py"
+    locked={false}
+  />
 </Layout>

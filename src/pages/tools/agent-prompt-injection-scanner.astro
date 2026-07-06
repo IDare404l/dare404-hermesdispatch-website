@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_prompt_injection_scanner.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Prompt Injection & Security Risk Scanner | Hermes Dispatch";
 const description = "Score your AI agent's system prompt and tool setup for prompt injection, jailbreak, data exfiltration, tool hijacking, and indirect injection risks. Get prioritized fixes and estimated mitigation cost.";
@@ -251,4 +252,16 @@ const faqs = [
 
     compute();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Prompt Injection Scanner"
+    toolPath="/tools/agent-prompt-injection-scanner/"
+    description="Copy-paste Hermes Agent script for agent prompt injection scanner."
+    scriptPath="/hermes-tools/agent_prompt_injection_scanner.py"
+    locked={false}
+  />
 </Layout>

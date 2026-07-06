@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import data from '../../data/startup_runway.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Startup Runway Calculator — Months of Cash, Zero-Cash Date, Fundraising Signal";
 const description = "Calculate how many months your startup can operate before cash runs out. Model burn, revenue growth, fundraising target, and zero-cash date.";
@@ -325,4 +326,16 @@ const faq = data.faq;
 
     calculate();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Startup Runway Calculator"
+    toolPath="/tools/startup-runway-calculator/"
+    description="Copy-paste Hermes Agent script for startup runway calculator."
+    scriptPath="/hermes-tools/startup_runway_calculator.py"
+    locked={false}
+  />
 </Layout>

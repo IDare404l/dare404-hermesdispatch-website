@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import topics from '../../data/newsletter_topics.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Newsletter Topic Finder — High-Intent AI, Crypto, Investing Queries";
 const description = "Find your next newsletter angle fast. Browse proven high-intent topics for AI hardware, AI agents, crypto-to-AI pivots, investing, and AEO/citations.";
@@ -117,4 +118,16 @@ const description = "Find your next newsletter angle fast. Browse proven high-in
     randomBtn.addEventListener('click', randomize);
     randomize();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Newsletter Topic Finder"
+    toolPath="/tools/newsletter-topic-finder/"
+    description="Copy-paste Hermes Agent script for newsletter topic finder."
+    scriptPath="/hermes-tools/newsletter_topic_finder.py"
+    locked={false}
+  />
 </Layout>

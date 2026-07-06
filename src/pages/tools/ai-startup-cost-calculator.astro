@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Startup Cost Calculator — Build an AI-Native Business";
 const description = "Estimate monthly and first-year costs to launch an AI agent startup: LLM APIs, hosting, hardware, tools, and labor.";
@@ -169,4 +170,16 @@ const description = "Estimate monthly and first-year costs to launch an AI agent
     inputs.forEach(el => el.addEventListener('input', calc));
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Ai Startup Cost Calculator"
+    toolPath="/tools/ai-startup-cost-calculator/"
+    description="Copy-paste Hermes Agent script for ai startup cost calculator."
+    scriptPath="/hermes-tools/ai_startup_cost_calculator.py"
+    locked={false}
+  />
 </Layout>

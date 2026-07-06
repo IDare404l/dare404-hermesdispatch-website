@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import LeadCapture from '../../components/LeadCapture.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import miniPcs from '../../data/mini_pcs.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Mini PC Recommender for Local AI";
 const description = "Answer three questions and get a mini PC recommendation for running local LLMs, from budget entry to 70B models.";
@@ -106,4 +107,16 @@ const description = "Answer three questions and get a mini PC recommendation for
   </script>
 <LeadCapture toolName="your mini PC setup" toolPath="/tools/mini-pc-recommender/" />
 
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Mini Pc Recommender"
+    toolPath="/tools/mini-pc-recommender/"
+    description="Copy-paste Hermes Agent script for mini pc recommender."
+    scriptPath="/hermes-tools/mini_pc_recommender.py"
+    locked={false}
+  />
 </Layout>

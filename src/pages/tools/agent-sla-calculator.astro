@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_sla.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent SLA / Uptime Calculator | Hermes Dispatch";
 const description = "Convert uptime targets into allowed downtime, compare provider SLAs, and estimate the revenue at risk when an AI agent goes down.";
@@ -225,4 +226,16 @@ const faqs = [
 
     compute();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Sla Calculator"
+    toolPath="/tools/agent-sla-calculator/"
+    description="Copy-paste Hermes Agent script for agent sla calculator."
+    scriptPath="/hermes-tools/agent_sla_calculator.py"
+    locked={false}
+  />
 </Layout>

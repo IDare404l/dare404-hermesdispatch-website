@@ -1,8 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 import HermesToolDownload from '../../components/HermesToolDownload.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Answer Engine Citation Tracker — Monitor Who Cites Your Content";
 const description = "Track whether ChatGPT, Perplexity, Gemini, and other answer engines cite your pages. Build your AEO monitoring workflow in minutes.";
@@ -173,64 +173,7 @@ const description = "Track whether ChatGPT, Perplexity, Gemini, and other answer
     generate();
   </script>
 
-  <AgentCodeBlock
-    toolName="Answer Engine Citation Tracker"
-    toolPath="/tools/answer-engine-citation-tracker/"
-    description="Generate test links for Perplexity, ChatGPT, Gemini, and Copilot to check if your pages are cited."
-    locked={false}
-    snippets={[
-      {
-        lang: 'python',
-        label: 'Python',
-        code: `# Answer Engine Citation Tracker snippet
-# Docs: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
-import urllib.parse
-
-def citation_test_links(url: str, query: str):
-    encoded = urllib.parse.quote(query)
-    return {
-        "perplexity": f"https://www.perplexity.ai/search?q={encoded}",
-        "chatgpt": f"https://chat.openai.com/?q={encoded}",
-        "gemini": f"https://gemini.google.com/app?q={encoded}",
-        "copilot": f"https://copilot.microsoft.com/?q={encoded}"
-    }
-
-print(citation_test_links("https://hermesdispatch.dev/", "best GPU for local LLM"))`
-      },
-      {
-        lang: 'javascript',
-        label: 'JavaScript',
-        code: `// Answer Engine Citation Tracker snippet
-// Docs: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
-function citationTestLinks(url, query) {
-  const encoded = encodeURIComponent(query);
-  return {
-    perplexity: 'https://www.perplexity.ai/search?q=' + encoded,
-    chatgpt: 'https://chat.openai.com/?q=' + encoded,
-    gemini: 'https://gemini.google.com/app?q=' + encoded,
-    copilot: 'https://copilot.microsoft.com/?q=' + encoded
-  };
-}
-
-console.log(citationTestLinks("https://hermesdispatch.dev/", "best GPU for local LLM"));`
-      },
-      {
-        lang: 'bash',
-        label: 'cURL',
-        code: `# Test citation links via curl
-# Docs: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
-QUERY="best GPU for local LLM"
-ENCODED=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$QUERY'))")
-curl -sI "https://www.perplexity.ai/search?q=$ENCODED" | head -1`
-      },
-      {
-        lang: 'markdown',
-        label: 'Hermes /slash',
-        code: `# Use in a Hermes Agent session:
-Open https://hermesdispatch.dev/tools/answer-engine-citation-tracker/, enter the URL to monitor and the query to test, then generate the Perplexity, ChatGPT, Gemini, and Copilot test links. Log the citation status for each engine.`
-      }
-    ]}
-  />
+  
 
   <HermesToolDownload
     toolName="Answer Engine Citation Tracker"
@@ -239,5 +182,15 @@ Open https://hermesdispatch.dev/tools/answer-engine-citation-tracker/, enter the
     description="Generate test links for Perplexity, ChatGPT, Gemini, and Copilot to check if your pages are cited."
     locked={true}
     unlockDate="2026-07-17"
+  />
+
+  
+
+  <AgentCodeBlock
+    toolName="Answer Engine Citation Tracker"
+    toolPath="/tools/answer-engine-citation-tracker/"
+    description="Copy-paste Hermes Agent script for answer engine citation tracker."
+    scriptPath="/hermes-tools/answer_engine_citation_tracker.py"
+    locked={false}
   />
 </Layout>

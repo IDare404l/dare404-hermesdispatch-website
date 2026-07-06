@@ -1,8 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 import HermesToolDownload from '../../components/HermesToolDownload.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 const title = "LLM VRAM Calculator — How Much GPU Memory Do You Need?";
 const description = "Calculate how much VRAM you need to run Llama, Qwen, DeepSeek, and Mistral models locally. Pick model size and quantization.";
 
@@ -195,6 +195,16 @@ const quantizations = [
     toolPath="/tools/vram-calculator/"
     scriptUrl="/hermes-tools/llm_vram_calculator.py"
     description="Estimate GPU memory for any model size and quantization."
+    locked={false}
+  />
+
+  
+
+  <AgentCodeBlock
+    toolName="Vram Calculator"
+    toolPath="/tools/vram-calculator/"
+    description="Copy-paste Hermes Agent script for vram calculator."
+    scriptPath="/hermes-tools/llm_vram_calculator.py"
     locked={false}
   />
 </Layout>

@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "LLM Cost Calculator — API vs Local Inference per 1M Tokens";
 const description = "Compare token costs across OpenAI, Anthropic, Google, Groq, and local GPU inference. Find the cheapest way to run your AI workload.";
@@ -137,4 +138,16 @@ const providers = [
     [inputEl, outputEl, callsEl].forEach(el => el.addEventListener('input', calc));
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Llm Cost Calculator"
+    toolPath="/tools/llm-cost-calculator/"
+    description="Copy-paste Hermes Agent script for llm cost calculator."
+    scriptPath="/hermes-tools/llm_cost_calculator.py"
+    locked={false}
+  />
 </Layout>

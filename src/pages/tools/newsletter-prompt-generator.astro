@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import data from '../../data/newsletter_prompt_generator.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Daily Newsletter Prompt Generator — DOC-id Prompt Drafts";
 const description = "Generate a DOC-id prompt draft for today's Hermes Dispatch issue. Pick a category, angle, tone, and word count, then copy the prompt to your AI writer.";
@@ -317,4 +318,16 @@ VOICE RULES
 
     populateAngles();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Newsletter Prompt Generator"
+    toolPath="/tools/newsletter-prompt-generator/"
+    description="Copy-paste Hermes Agent script for newsletter prompt generator."
+    scriptPath="/hermes-tools/newsletter_prompt_generator.py"
+    locked={false}
+  />
 </Layout>

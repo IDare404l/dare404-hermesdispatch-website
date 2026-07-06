@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 import HermesToolDownload from '../../components/HermesToolDownload.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Prompt Reliability Checker | The Hermes Dispatch";
 const description = "Test how brittle your system prompt is. Run it multiple times against a local LLM and get a variance, failure, and consistency score.";
@@ -234,104 +234,23 @@ const faqSchema = {
     })();
   </script>
 
-  <AgentCodeBlock
-    toolName="Prompt Reliability Checker"
-    toolPath="/tools/prompt-reliability-checker/"
-    description="Run a system prompt N times against a local LLM and score consistency, failure rate, and output variance."
-    locked={false}
-    snippets={[
-      {
-        lang: 'python',
-        label: 'Python',
-        code: `# Prompt Reliability Checker snippet
-# Docs: https://hermesdispatch.dev/tools/prompt-reliability-checker/
-import requests
-
-def score_reliability(endpoint: str, model: str, system: str, prompt: str, runs: int = 5, expected: str = None):
-    url = endpoint.rstrip('/') + '/api/generate'
-    responses = []
-    for i in range(runs):
-        r = requests.post(url, json={
-            "model": model,
-            "system": system,
-            "prompt": prompt,
-            "stream": False,
-            "options": {"temperature": 0.7}
-        })
-        r.raise_for_status()
-        responses.append(r.json().get("response", ""))
-    # simple consistency: exact-match rate
-    consistency = sum(1 for x in responses if x == responses[0]) / len(responses) * 100 if responses else 0
-    failures = 0
-    if expected:
-        failures = sum(1 for x in responses if expected.lower() not in x.lower())
-    return {
-        "responses": responses,
-        "consistency": round(consistency, 1),
-        "failures": f"{failures}/{runs}"
-    }
-
-print(score_reliability(
-    "http://localhost:11434",
-    "llama3.2",
-    "Reply with exactly one word: YES or NO. Then explain.",
-    "Is red wine heart-healthy?",
-    runs=5,
-    expected="yes"
-))`
-      },
-      {
-        lang: 'javascript',
-        label: 'JavaScript',
-        code: `// Prompt Reliability Checker snippet
-// Docs: https://hermesdispatch.dev/tools/prompt-reliability-checker/
-async function scoreReliability(endpoint, model, system, prompt, runs = 5, expected) {
-  const url = endpoint.replace(/\/$/, '') + '/api/generate';
-  const responses = [];
-  for (let i = 0; i < runs; i++) {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, system, prompt, stream: false, options: { temperature: 0.7 } })
-    });
-    const data = await res.json();
-    responses.push(data.response || '');
-  }
-  const consistency = responses.length
-    ? responses.filter(r => r === responses[0]).length / responses.length * 100
-    : 0;
-  const failures = expected
-    ? responses.filter(r => !r.toLowerCase().includes(expected.toLowerCase())).length
-    : 0;
-  return { responses, consistency: Math.round(consistency), failures: failures + '/' + runs };
-}
-
-scoreReliability("http://localhost:11434", "llama3.2", "Reply YES or NO", "Is red wine heart-healthy?", 5, "yes")
-  .then(console.log);`
-      },
-      {
-        lang: 'bash',
-        label: 'cURL',
-        code: `# Test one Ollama prompt run via curl
-# Docs: https://hermesdispatch.dev/tools/prompt-reliability-checker/
-curl -s http://localhost:11434/api/generate \\
-  -H "Content-Type: application/json" \\
-  -d '{"model":"llama3.2","system":"Reply YES or NO only.","prompt":"Is red wine heart-healthy?","stream":false,"options":{"temperature":0.7}}' | jq -r '.response'`
-      },
-      {
-        lang: 'markdown',
-        label: 'Hermes /slash',
-        code: `# Use in a Hermes Agent session:
-Run a prompt reliability test against the local Ollama endpoint http://localhost:11434 using model llama3.2. Run the system prompt 5 times against the same user message, score consistency and failures, and report the results.`
-      }
-    ]}
-  />
+  
 
   <HermesToolDownload
     toolName="Prompt Reliability Checker"
     toolPath="/tools/prompt-reliability-checker/"
     scriptUrl="/hermes-tools/prompt_reliability_checker.py"
     description="Run a system prompt N times against a local LLM and score consistency, failure rate, and output variance."
+    locked={false}
+  />
+
+  
+
+  <AgentCodeBlock
+    toolName="Prompt Reliability Checker"
+    toolPath="/tools/prompt-reliability-checker/"
+    description="Copy-paste Hermes Agent script for prompt reliability checker."
+    scriptPath="/hermes-tools/prompt_reliability_checker.py"
     locked={false}
   />
 </Layout>

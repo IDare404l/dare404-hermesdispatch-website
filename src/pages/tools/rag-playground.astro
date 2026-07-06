@@ -209,106 +209,15 @@ const isLocked = unlockDate > nowIso;
     })();
   </script>
 
+  
+
+  
+
   <AgentCodeBlock
-    toolName="Agent RAG / Chunking Playground"
+    toolName="Rag Playground"
     toolPath="/tools/rag-playground/"
-    description="Chunk text with configurable size and overlap, score chunks against a query, and return the top-K matches for a RAG pipeline."
-    locked={isLocked}
-    unlockDate={unlockDate}
-    snippets={[
-      {
-        lang: 'python',
-        label: 'Python',
-        code: `# Agent RAG / Chunking Playground snippet
-# Docs: https://hermesdispatch.dev/tools/rag-playground/
-
-def tokenize(text: str):
-    return text.split()  # simple whitespace tokenizer for demo
-
-def chunk_text(text: str, size: int, overlap: int):
-    tokens = tokenize(text)
-    step = max(1, size - overlap)
-    chunks = []
-    for i in range(0, len(tokens), step):
-        chunk = tokens[i:i+size]
-        if not chunk:
-            break
-        chunks.append({"text": " ".join(chunk), "start": i, "end": i + len(chunk)})
-        if len(chunk) < size:
-            break
-    return chunks
-
-def score_overlap(chunk: dict, query: str):
-    query_tokens = set(query.lower().split())
-    chunk_tokens = set(chunk["text"].lower().split())
-    if not query_tokens:
-        return 0.0
-    return len(query_tokens & chunk_tokens) / len(query_tokens)
-
-def retrieve(text: str, query: str, size: int = 128, overlap: int = 16, top_k: int = 3):
-    chunks = chunk_text(text, size, overlap)
-    scored = [{"chunk": c, "score": score_overlap(c, query)} for c in chunks]
-    scored.sort(key=lambda x: x["score"], reverse=True)
-    return scored[:top_k]
-
-source = """Retrieval-Augmented Generation, or RAG, is a technique that gives large language models access to external knowledge. Instead of relying only on parametric memory, a RAG system retrieves relevant documents from a vector store and includes them in the prompt. The chunking strategy matters: too small and context is lost; too large and retrieval becomes noisy."""
-
-for item in retrieve(source, "How does chunk size affect RAG retrieval?"):
-    print(f"score={item['score']:.2f} tokens={item['chunk']['start']}-{item['chunk']['end']}")
-    print(item['chunk']['text'])
-    print("---")`
-      },
-      {
-        lang: 'javascript',
-        label: 'JavaScript',
-        code: `// Agent RAG / Chunking Playground snippet
-// Docs: https://hermesdispatch.dev/tools/rag-playground/
-function tokenize(text) { return text.split(/\s+/).filter(w => w.length > 0); }
-
-function chunkText(text, size, overlap) {
-  const tokens = tokenize(text);
-  const step = Math.max(1, size - overlap);
-  const chunks = [];
-  for (let i = 0; i < tokens.length; i += step) {
-    const slice = tokens.slice(i, i + size);
-    if (!slice.length) break;
-    chunks.push({ text: slice.join(' '), start: i, end: i + slice.length });
-    if (slice.length < size) break;
-  }
-  return chunks;
-}
-
-function scoreOverlap(chunk, query) {
-  const queryTokens = new Set(query.toLowerCase().split(/\s+/));
-  const chunkTokens = new Set(chunk.text.toLowerCase().split(/\s+/));
-  let matched = 0;
-  queryTokens.forEach(qt => { if (chunkTokens.has(qt)) matched++; });
-  return queryTokens.size ? matched / queryTokens.size : 0;
-}
-
-function retrieve(text, query, size = 128, overlap = 16, topK = 3) {
-  return chunkText(text, size, overlap)
-    .map(c => ({ chunk: c, score: scoreOverlap(c, query) }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, topK);
-}
-
-const source = "Retrieval-Augmented Generation, or RAG, is a technique that gives large language models access to external knowledge. The chunking strategy matters: too small and context is lost; too large and retrieval becomes noisy.";
-console.log(retrieve(source, "How does chunk size affect RAG retrieval?"));`
-      },
-      {
-        lang: 'bash',
-        label: 'cURL',
-        code: `# The RAG playground is a client-side tool; fetch its contract:
-# Docs: https://hermesdispatch.dev/tools/rag-playground/
-curl -s https://hermesdispatch.dev/tools/rag-playground/ | grep -oE '<title>[^<]+' | head -1`
-      },
-      {
-        lang: 'markdown',
-        label: 'Hermes /slash',
-        code: `# Use in a Hermes Agent session:
-Open https://hermesdispatch.dev/tools/rag-playground/, paste the source text, set chunk size to 128 and overlap to 16, then run the query "How does chunk size affect RAG retrieval?" Return the top 3 retrieved chunks with scores and token ranges.`
-      }
-    ]}
+    description="Copy-paste Hermes Agent script for rag playground."
+    scriptPath="/hermes-tools/rag_playground.py"
+    locked={false}
   />
 </Layout>

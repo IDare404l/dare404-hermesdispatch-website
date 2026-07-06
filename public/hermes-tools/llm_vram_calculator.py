@@ -13,7 +13,8 @@
 #   register()
 
 import json
-import math
+
+DATA = {}
 
 def _ok(result):
     return json.dumps({"success": True, "data": result}, indent=2)
@@ -26,29 +27,49 @@ TOOL_NAME = "llm_vram_calculator"
 TOOLSET = "hardware"
 
 SCHEMA = {
-    "type": "function",
-    "function": {
-        "name": TOOL_NAME,
-        "description": "Estimate GPU VRAM for a local LLM given parameters, quantization bits, context length, and optional KV-cache overhead.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "parameters_b": {"type": "number", "description": "Model parameter count in billions (e.g. 8, 70, 405)."},
-                "quantization_bits": {"type": "number", "description": "Bits per parameter (16, 8, 6, 5, 4, 3, 2)."},
-                "context_length": {"type": "integer", "default": 4096, "description": "Typical context length in tokens."},
-                "include_kv_cache": {"type": "boolean", "default": True, "description": "Whether to include a 20% KV-cache/overhead buffer."},
-            },
-            "required": ["parameters_b", "quantization_bits"]
+  "type": "function",
+  "function": {
+    "name": "llm_vram_calculator",
+    "description": "Estimate GPU VRAM for a local LLM given parameters, quantization bits, context length, and optional KV-cache overhead.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "parameters_b": {
+          "type": "number",
+          "description": "Model parameter count in billions."
+        },
+        "quantization_bits": {
+          "type": "number",
+          "description": "Bits per parameter."
+        },
+        "context_length": {
+          "type": "integer",
+          "default": 4096,
+          "description": "Typical context length in tokens."
+        },
+        "include_kv_cache": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include 20% KV-cache/overhead buffer."
         }
+      },
+      "required": [
+        "parameters_b",
+        "quantization_bits"
+      ]
     }
+  }
 }
 
-def estimate_vram(parameters_b, quantization_bits, context_length=4096, include_kv_cache=True):
+def _run(args):
+    parameters_b = float(args.get("parameters_b", 8))
+    quantization_bits = float(args.get("quantization_bits", 4))
+    context_length = int(args.get("context_length", 4096))
+    include_kv_cache = bool(args.get("include_kv_cache", True))
     overhead = 1.2 if include_kv_cache else 1.05
     base_gb = (parameters_b * quantization_bits / 8) * overhead
     context_cost = (context_length * parameters_b / 1_000_000) * 0.5 if include_kv_cache else 0
     total = base_gb + context_cost
-
     if total <= 12:
         recommendation = "RTX 4060 Ti 16GB, RX 7600 XT 16GB, or Apple M4 16GB."
     elif total <= 24:
@@ -61,7 +82,6 @@ def estimate_vram(parameters_b, quantization_bits, context_length=4096, include_
         recommendation = "Mac Studio M3 Max 128GB, two 48GB datacenter GPUs, or RTX 4090 x6."
     else:
         recommendation = "Multi-GPU workstation or cloud inference."
-
     return _ok({
         "estimated_vram_gb": round(total, 2),
         "base_vram_gb": round(base_gb, 2),
@@ -72,12 +92,7 @@ def estimate_vram(parameters_b, quantization_bits, context_length=4096, include_
 
 def HANDLER(args):
     try:
-        return estimate_vram(
-            parameters_b=float(args.get("parameters_b")),
-            quantization_bits=float(args.get("quantization_bits")),
-            context_length=int(args.get("context_length", 4096)),
-            include_kv_cache=bool(args.get("include_kv_cache", True)),
-        )
+        return _run(args)
     except Exception as e:
         return _err(str(e))
 
@@ -97,4 +112,4 @@ def register():
 
 if __name__ == "__main__":
     # CLI smoke test
-    print(HANDLER({{}}))
+    print(HANDLER({}))

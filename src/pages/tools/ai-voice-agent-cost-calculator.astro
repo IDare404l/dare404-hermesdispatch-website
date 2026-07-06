@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import costData from '../../data/ai_voice_agent_cost.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Voice Agent Cost Calculator — Per-Minute and Monthly Pricing";
 const description = "Estimate the cost of running AI voice agents. Compare Bland, Retell, Vapi, Synthflow, OpenAI Realtime, and self-hosted stacks by minutes, concurrency, and telephony.";
@@ -215,4 +216,16 @@ const faqSchema = {
     document.querySelectorAll('#costTable input').forEach(el => el.addEventListener('input', calc));
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Ai Voice Agent Cost Calculator"
+    toolPath="/tools/ai-voice-agent-cost-calculator/"
+    description="Copy-paste Hermes Agent script for ai voice agent cost calculator."
+    scriptPath="/hermes-tools/ai_voice_agent_cost_calculator.py"
+    locked={false}
+  />
 </Layout>

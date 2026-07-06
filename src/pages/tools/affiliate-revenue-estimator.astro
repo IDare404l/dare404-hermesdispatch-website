@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import data from '../../data/affiliate_revenue.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Affiliate Link Revenue Estimator — Estimate Clicks to Commission";
 const description = "Estimate affiliate earnings from monthly clicks, conversion rate, average order value, commission rate, refunds, network fees, and CPA. Built for AI hardware, SaaS, course, and finance affiliates.";
@@ -283,4 +284,16 @@ const tiers = data.tiers;
 
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Affiliate Revenue Estimator"
+    toolPath="/tools/affiliate-revenue-estimator/"
+    description="Copy-paste Hermes Agent script for affiliate revenue estimator."
+    scriptPath="/hermes-tools/affiliate_revenue_estimator.py"
+    locked={false}
+  />
 </Layout>

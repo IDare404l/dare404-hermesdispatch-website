@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/local_llm_hosting_revenue.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Local LLM Hosting Revenue Estimator — Rent Your GPU";
 const description = "Estimate monthly profit from renting out your GPU for local LLM inference on Vast.ai, RunPod, Lambda, and other GPU marketplaces. Includes power, platform fees, and break-even.";
@@ -410,4 +411,16 @@ const url = "https://hermesdispatch.dev/tools/local-llm-hosting-revenue-estimato
 
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Local Llm Hosting Revenue Estimator"
+    toolPath="/tools/local-llm-hosting-revenue-estimator/"
+    description="Copy-paste Hermes Agent script for local llm hosting revenue estimator."
+    scriptPath="/hermes-tools/local_llm_hosting_revenue_estimator.py"
+    locked={false}
+  />
 </Layout>

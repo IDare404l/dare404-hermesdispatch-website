@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import taxData from '../../data/crypto_tax_loss.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Crypto Tax Loss Harvesting Calculator — Estimate Harvested Losses & Tax Savings";
 const description = "Estimate how much you can save by harvesting crypto losses. Enter cost basis, current price, and tax rate to see realized losses, tax savings, and net portfolio impact.";
@@ -335,4 +336,16 @@ const description = "Estimate how much you can save by harvesting crypto losses.
     updateRatesFromIncome();
     calc();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Crypto Tax Loss Harvester"
+    toolPath="/tools/crypto-tax-loss-harvester/"
+    description="Copy-paste Hermes Agent script for crypto tax loss harvester."
+    scriptPath="/hermes-tools/crypto_tax_loss_harvester.py"
+    locked={false}
+  />
 </Layout>

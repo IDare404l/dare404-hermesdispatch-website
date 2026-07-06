@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_observability_cost.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Observability Cost Calculator | Hermes Dispatch";
 const description = "Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring. Compare Langfuse, LangSmith, Helicone, Datadog, Sentry, Grafana Cloud, and more.";
@@ -276,4 +277,16 @@ const faqs = [
 
     compute();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Observability Cost Calculator"
+    toolPath="/tools/agent-observability-cost-calculator/"
+    description="Copy-paste Hermes Agent script for agent observability cost calculator."
+    scriptPath="/hermes-tools/agent_observability_cost_calculator.py"
+    locked={false}
+  />
 </Layout>

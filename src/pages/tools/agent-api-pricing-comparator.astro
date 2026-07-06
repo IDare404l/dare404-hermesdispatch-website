@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import pricing from '../../data/agent_api_pricing.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent API Pricing Comparator | Hermes Dispatch";
 const description = "Compare per-token and per-request pricing across OpenAI, Anthropic, Google, Groq, Together AI, and Cohere. Estimate monthly cost for your agent workload.";
@@ -144,4 +145,16 @@ const faqs = [
     });
     compute();
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Api Pricing Comparator"
+    toolPath="/tools/agent-api-pricing-comparator/"
+    description="Copy-paste Hermes Agent script for agent api pricing comparator."
+    scriptPath="/hermes-tools/agent_api_pricing_comparator.py"
+    locked={false}
+  />
 </Layout>

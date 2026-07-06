@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_eval_plan.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Evaluation Planner | Hermes Dispatch";
 const description = "Choose the right benchmark, budget, and timeline for evaluating an AI agent. Filter by agent type, readiness level, and per-run budget.";
@@ -233,4 +234,16 @@ function effortClass(effort) {
       update();
     });
   </script>
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Evaluation Planner"
+    toolPath="/tools/agent-evaluation-planner/"
+    description="Copy-paste Hermes Agent script for agent evaluation planner."
+    scriptPath="/hermes-tools/agent_evaluation_planner.py"
+    locked={false}
+  />
 </Layout>

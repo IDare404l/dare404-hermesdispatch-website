@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import LeadCapture from '../../components/LeadCapture.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import stacks from '../../data/agent_stacks.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Stack Builder — Pick Your Use Case, Get Your Stack";
 const description = "Build the right AI agent system for content, trading, support, coding, research, or multi-agent orchestration. Stack includes LLM, framework, hosting, and cost estimate.";
@@ -177,4 +178,16 @@ const description = "Build the right AI agent system for content, trading, suppo
   </script>
 <LeadCapture toolName="your agent stack" toolPath="/tools/agent-stack-builder/" />
 
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Agent Stack Builder"
+    toolPath="/tools/agent-stack-builder/"
+    description="Copy-paste Hermes Agent script for agent stack builder."
+    scriptPath="/hermes-tools/agent_stack_builder.py"
+    locked={false}
+  />
 </Layout>

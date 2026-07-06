@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import LeadCapture from '../../components/LeadCapture.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import builds from '../../data/ai_pc_builds.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI PC Build Configurator — Pick the Right Hardware Stack";
 const description = "Choose an AI PC build by budget and use case: entry-level, enthusiast, pro workstation, silent home server, or Mac Studio route.";
@@ -175,4 +176,16 @@ const description = "Choose an AI PC build by budget and use case: entry-level, 
   </script>
 <LeadCapture toolName="your AI PC build" toolPath="/tools/ai-pc-build-configurator/" />
 
+
+  
+
+  
+
+  <AgentCodeBlock
+    toolName="Ai Pc Build Configurator"
+    toolPath="/tools/ai-pc-build-configurator/"
+    description="Copy-paste Hermes Agent script for ai pc build configurator."
+    scriptPath="/hermes-tools/ai_pc_build_configurator.py"
+    locked={false}
+  />
 </Layout>
