@@ -1,0 +1,80 @@
+{
+  "last_updated": "2026-07-06",
+  "note": "Escalation cost estimates are directional. Actual human handle times, wages, and API costs vary by industry, region, and model/provider. Use your own operational data where available.",
+  "defaults": {
+    "monthly_requests": 100000,
+    "escalation_rate_pct": 8.5,
+    "human_handle_minutes": 12,
+    "hourly_labor_cost": 22.0,
+    "api_cost_per_escalation": 0.18,
+    "sla_target_hours": 4,
+    "avg_resolution_hours": 3.2,
+    "projection_months": 12,
+    "first_contact_resolution_pct": 65
+  },
+  "scenarios": [
+    {
+      "slug": "support-bot",
+      "name": "Customer support bot",
+      "monthly_requests": 200000,
+      "escalation_rate_pct": 10,
+      "human_handle_minutes": 10,
+      "hourly_labor_cost": 22,
+      "api_cost_per_escalation": 0.15,
+      "sla_target_hours": 4,
+      "avg_resolution_hours": 3,
+      "first_contact_resolution_pct": 70
+    },
+    {
+      "slug": "sales-agent",
+      "name": "AI sales / SDR agent",
+      "monthly_requests": 50000,
+      "escalation_rate_pct": 15,
+      "human_handle_minutes": 20,
+      "hourly_labor_cost": 35,
+      "api_cost_per_escalation": 0.25,
+      "sla_target_hours": 2,
+      "avg_resolution_hours": 4,
+      "first_contact_resolution_pct": 55
+    },
+    {
+      "slug": "it-helpdesk",
+      "name": "Internal IT helpdesk agent",
+      "monthly_requests": 30000,
+      "escalation_rate_pct": 12,
+      "human_handle_minutes": 18,
+      "hourly_labor_cost": 45,
+      "api_cost_per_escalation": 0.20,
+      "sla_target_hours": 8,
+      "avg_resolution_hours": 5,
+      "first_contact_resolution_pct": 60
+    },
+    {
+      "slug": "premium-concierge",
+      "name": "Premium concierge / white-glove",
+      "monthly_requests": 10000,
+      "escalation_rate_pct": 25,
+      "human_handle_minutes": 35,
+      "hourly_labor_cost": 65,
+      "api_cost_per_escalation": 0.40,
+      "sla_target_hours": 1,
+      "avg_resolution_hours": 2,
+      "first_contact_resolution_pct": 80
+    }
+  ],
+  "labor_tiers": [
+    { "label": "Offshore / L1", "hourly_cost": 12 },
+    { "label": "Nearshore / mid-market", "hourly_cost": 22 },
+    { "label": "US onshore / L2", "hourly_cost": 35 },
+    { "label": "Senior / specialist", "hourly_cost": 55 },
+    { "label": "Premium / executive", "hourly_cost": 80 }
+  ],
+  "provider_fallback_costs": [
+    { "provider": "OpenAI GPT-4o", "cost_per_escalation": 0.25 },
+    { "provider": "Anthropic Claude 3.5 Sonnet", "cost_per_escalation": 0.28 },
+    { "provider": "Google Gemini 1.5 Pro", "cost_per_escalation": 0.20 },
+    { "provider": "OpenAI GPT-4o-mini", "cost_per_escalation": 0.06 },
+    { "provider": "Together AI Llama 3.1 70B", "cost_per_escalation": 0.12 },
+    { "provider": "Groq Llama 3.1 70B", "cost_per_escalation": 0.08 }
+  ]
+}

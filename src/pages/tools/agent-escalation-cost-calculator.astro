@@ -1,0 +1,301 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_escalation_cost.json';
+
+const title = "AI Agent Human Escalation Cost Calculator | Hermes Dispatch";
+const description = "Estimate the monthly cost of handing off AI-agent conversations or tasks to human agents, including labor, API fallback, SLA impact, and resolution-time scenarios.";
+const scenarios = data.scenarios;
+const laborTiers = data.labor_tiers;
+const providerCosts = data.provider_fallback_costs;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What counts as an escalation?", a: "Any interaction your AI agent cannot resolve on its own and routes to a human — unresolved support tickets, complex sales objections, sensitive account issues, or approval workflows. The escalation rate is the percentage of total monthly requests that require human takeover." },
+  { q: "How is human labor cost calculated?", a: "We multiply the number of escalations by the average human handle time in minutes, convert to hours, then multiply by the fully-loaded hourly labor cost. This gives a directional monthly labor cost for your human-in-the-loop layer." },
+  { q: "What is API fallback cost?", a: "Even after escalation, the agent often keeps generating summaries, suggested replies, or context for the human. API fallback cost captures the extra LLM spend per escalated request." },
+  { q: "How does SLA target affect the estimate?", a: "We compare your average resolution time to your SLA target. If average resolution is slower than the target, we flag the SLA breach rate and estimate the share of escalations at risk of missing the commitment." },
+  { q: "Why does first-contact resolution matter?", a: "Higher first-contact resolution means fewer back-and-forth touches, lowering total human hours. We use it to adjust effective handle time and reduce re-escalation labor." },
+  { q: "Should I include overhead in the hourly cost?", a: "Yes — fully-loaded wages, benefits, software seats, and supervisor time should be reflected in the hourly labor cost. The preset tiers are rough defaults; replace them with your actual numbers." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Human Escalation Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-escalation-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🤝</div>
+      <h1 class="display-heading mb-4">AI Agent Human Escalation Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the monthly cost of handing off AI-agent conversations or tasks to human agents, including labor, API fallback, SLA impact, and resolution-time scenarios.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload & escalation assumptions</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly AI-handled requests</span>
+          <input id="monthlyRequests" type="number" min="0" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Escalation rate (%)</span>
+          <input id="escalationRate" type="number" min="0" max="100" step="0.1" value={defaults.escalation_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human handle time (minutes)</span>
+          <input id="humanHandleMinutes" type="number" min="0" step="1" value={defaults.human_handle_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fully-loaded hourly labor cost ($)</span>
+          <input id="hourlyLaborCost" type="number" min="0" step="1" value={defaults.hourly_labor_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">API fallback cost per escalation ($)</span>
+          <input id="apiCostPerEscalation" type="number" min="0" step="0.01" value={defaults.api_cost_per_escalation} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">SLA target resolution time (hours)</span>
+          <input id="slaTargetHours" type="number" min="0.1" step="0.1" value={defaults.sla_target_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Average resolution time (hours)</span>
+          <input id="avgResolutionHours" type="number" min="0.1" step="0.1" value={defaults.avg_resolution_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">First-contact resolution (%)</span>
+          <input id="firstContactResolution" type="number" min="0" max="100" step="1" value={defaults.first_contact_resolution_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+
+      <div class="mt-6">
+        <span class="text-neutral-400 text-sm block mb-2">Quick labor tier</span>
+        <div class="flex flex-wrap gap-2">
+          {laborTiers.map(t => (
+            <button type="button" class="tier-btn px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-xs transition-colors" data-cost={t.hourly_cost}>
+              {t.label} — ${t.hourly_cost}/hr
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Escalations / month</p>
+        <p id="escalationsMonth" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly human labor cost</p>
+        <p id="laborCostMonth" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly API fallback cost</p>
+        <p id="apiCostMonth" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total escalation cost / mo</p>
+        <p id="totalCostMonth" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per escalation</p>
+        <p id="costPerEscalation" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human hours / month</p>
+        <p id="humanHoursMonth" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">SLA breach rate</p>
+        <p id="slaBreachRate" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Provider fallback cost comparison -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Estimated API fallback cost by provider</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4 text-right">Cost / escalation</th>
+            <th class="py-3 pr-4 text-right">Monthly (at current volume)</th>
+            <th class="py-3 pr-4 text-right">Annual projection</th>
+          </tr>
+        </thead>
+        <tbody id="providerBody" class="text-neutral-200">
+          {providerCosts.map(p => (
+            <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" data-provider-cost={p.cost_per_escalation}>
+              <td class="py-3 pr-4 font-medium text-white">{p.provider}</td>
+              <td class="py-3 pr-4 text-right font-mono cost-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono monthly-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono annual-cell">—</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/ai-voice-agent-cost-calculator/" class="btn-primary text-sm">Voice Agent Cost Calc →</a>
+      <a href="/tools/agent-sla-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">SLA / Uptime Calc →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/ai-startup-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios), providerCosts: JSON.stringify(providerCosts) }}>
+    const providerData = JSON.parse(providerCosts);
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const fmtPct = n => n.toFixed(1) + '%';
+
+    function getInputs() {
+      return {
+        monthlyRequests: Math.max(0, parseFloat(document.getElementById('monthlyRequests').value) || 0),
+        escalationRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('escalationRate').value) || 0)),
+        humanHandleMinutes: Math.max(0, parseFloat(document.getElementById('humanHandleMinutes').value) || 0),
+        hourlyLaborCost: Math.max(0, parseFloat(document.getElementById('hourlyLaborCost').value) || 0),
+        apiCostPerEscalation: Math.max(0, parseFloat(document.getElementById('apiCostPerEscalation').value) || 0),
+        slaTargetHours: Math.max(0.1, parseFloat(document.getElementById('slaTargetHours').value) || 0.1),
+        avgResolutionHours: Math.max(0.1, parseFloat(document.getElementById('avgResolutionHours').value) || 0.1),
+        firstContactResolution: Math.min(100, Math.max(0, parseFloat(document.getElementById('firstContactResolution').value) || 0)),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_requests !== undefined) document.getElementById('monthlyRequests').value = obj.monthly_requests;
+      if (obj.escalation_rate_pct !== undefined) document.getElementById('escalationRate').value = obj.escalation_rate_pct;
+      if (obj.human_handle_minutes !== undefined) document.getElementById('humanHandleMinutes').value = obj.human_handle_minutes;
+      if (obj.hourly_labor_cost !== undefined) document.getElementById('hourlyLaborCost').value = obj.hourly_labor_cost;
+      if (obj.api_cost_per_escalation !== undefined) document.getElementById('apiCostPerEscalation').value = obj.api_cost_per_escalation;
+      if (obj.sla_target_hours !== undefined) document.getElementById('slaTargetHours').value = obj.sla_target_hours;
+      if (obj.avg_resolution_hours !== undefined) document.getElementById('avgResolutionHours').value = obj.avg_resolution_hours;
+      if (obj.first_contact_resolution_pct !== undefined) document.getElementById('firstContactResolution').value = obj.first_contact_resolution_pct;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const escalations = Math.round(inps.monthlyRequests * (inps.escalationRate / 100));
+      const fcrMultiplier = 1 / Math.max(0.5, (inps.firstContactResolution / 100));
+      const effectiveHandleMinutes = inps.humanHandleMinutes * fcrMultiplier;
+      const humanHours = (escalations * effectiveHandleMinutes) / 60;
+      const laborCost = humanHours * inps.hourlyLaborCost;
+      const apiCost = escalations * inps.apiCostPerEscalation;
+      const totalCost = laborCost + apiCost;
+      const costPerEsc = escalations > 0 ? totalCost / escalations : 0;
+      const breachRate = inps.avgResolutionHours > inps.slaTargetHours ? 100 * (inps.avgResolutionHours - inps.slaTargetHours) / inps.slaTargetHours : 0;
+
+      document.getElementById('escalationsMonth').textContent = fmtNum(escalations);
+      document.getElementById('laborCostMonth').textContent = fmtMoney(laborCost);
+      document.getElementById('apiCostMonth').textContent = fmtMoney(apiCost);
+      document.getElementById('totalCostMonth').textContent = fmtMoney(totalCost);
+      document.getElementById('costPerEscalation').textContent = fmtMoney2(costPerEsc);
+      document.getElementById('humanHoursMonth').textContent = humanHours.toFixed(1) + ' hrs';
+      const breachEl = document.getElementById('slaBreachRate');
+      breachEl.textContent = fmtPct(Math.min(breachRate, 100));
+      breachEl.className = 'text-xl font-semibold ' + (breachRate > 20 ? 'text-red-400' : breachRate > 5 ? 'text-brand-gold' : 'text-green-400');
+
+      // Provider table
+      const rows = document.querySelectorAll('#providerBody tr');
+      rows.forEach((row, i) => {
+        const cost = providerData[i]?.cost_per_escalation || 0;
+        const monthly = cost * escalations;
+        const annual = monthly * inps.projectionMonths;
+        row.querySelector('.cost-cell').textContent = fmtMoney2(cost);
+        row.querySelector('.monthly-cell').textContent = fmtMoney(monthly);
+        row.querySelector('.annual-cell').textContent = fmtMoney(annual);
+      });
+
+      // Verdict
+      const totalAnnual = totalCost * inps.projectionMonths;
+      const laborShare = totalCost > 0 ? (laborCost / totalCost) * 100 : 0;
+      let verdict = '';
+      if (breachRate > 25) {
+        verdict = `Escalations are missing SLA targets by ${fmtPct(breachRate)}. Human cost dominates (${fmtPct(laborShare)} of the escalation budget). Consider faster routing, better self-service, or adding an L1 triage bot to cut handle time. Projected ${inps.projectionMonths}-month cost: ${fmtMoney(totalAnnual)}.`;
+      } else if (laborShare > 80) {
+        verdict = `Human labor is the biggest line item (${fmtPct(laborShare)}). Even though SLA performance is acceptable, reducing escalation rate or handle time would have the highest ROI. Projected ${inps.projectionMonths}-month cost: ${fmtMoney(totalAnnual)}.`;
+      } else if (escalations === 0) {
+        verdict = `No escalations at this volume and rate. Great — but confirm you are measuring real handoffs, not just dropped conversations. Projected ${inps.projectionMonths}-month cost: ${fmtMoney(totalAnnual)}.`;
+      } else {
+        verdict = `Escalation economics look balanced. API fallback is ${fmtPct(100 - laborShare)} of the monthly escalation cost and SLA targets are within reach. Projected ${inps.projectionMonths}-month cost: ${fmtMoney(totalAnnual)}.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setInputs(JSON.parse(btn.dataset.scenario));
+          compute();
+        });
+      });
+
+      document.querySelectorAll('.tier-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('hourlyLaborCost').value = btn.dataset.cost;
+          compute();
+        });
+      });
+
+      ['monthlyRequests','escalationRate','humanHandleMinutes','hourlyLaborCost','apiCostPerEscalation','slaTargetHours','avgResolutionHours','firstContactResolution','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

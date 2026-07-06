@@ -382,3 +382,10 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Outputs: overall risk score, risk level label, per-category risk breakdown, estimated mitigation cost, prioritized fix list
 |- Audience: AI agent builders and security teams hardening agents before deployment
 |
+## AI Agent Human Escalation Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-escalation-cost-calculator/
+|- Description: Estimate the monthly cost of handing off AI-agent conversations or tasks to human agents.
+|- Inputs: monthly AI-handled requests, escalation rate (%), human handle time (minutes), fully-loaded hourly labor cost ($), API fallback cost per escalation ($), SLA target resolution time (hours), average resolution time (hours), first-contact resolution (%), projection months
+|- Outputs: escalations per month, monthly human labor cost, monthly API fallback cost, total monthly escalation cost, cost per escalation, human hours per month, SLA breach rate, provider fallback cost comparison, verdict
+|- Audience: AI agent builders and support operators budgeting human-in-the-loop costs
+|
