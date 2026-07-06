@@ -1,0 +1,261 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/inference_engines.json';
+
+const { categories, platforms, engines, speedHints } = data;
+const title = "Local LLM Inference Engine Selector — Pick the Best Backend";
+const description = "Choose the right local LLM inference engine for your model, hardware, and use case: Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, and more.";
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Which inference engine is best for Apple Silicon?",
+        "acceptedAnswer": { "@type": "Answer", "text": "MLX or llama.cpp are the fastest on Apple Silicon. Ollama is the easiest to install." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the best local LLM inference server for high throughput?",
+        "acceptedAnswer": { "@type": "Answer", "text": "vLLM, TensorRT-LLM, and SGLang offer the highest throughput on NVIDIA GPUs thanks to PagedAttention, KV-cache optimizations, and continuous batching." }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I use Ollama or llama.cpp?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Use Ollama for quick local experimentation and a built-in model library. Use llama.cpp when you need lower-level control, speculative decoding, or custom backends." }
+      }
+    ]
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚙️</div>
+        <h1 class="display-heading mb-4">Local LLM Inference Engine Selector</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Pick the best backend for your model, hardware, and use case. Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, TGI, TabbyAPI, Aphrodite, and more.
+        </p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="useCase">Use case</label>
+            <select id="useCase" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
+              {Object.entries(categories).map(([slug, cat]) => (
+                <option value={slug}>{cat.icon} {cat.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="platform">Hardware platform</label>
+            <select id="platform" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
+              {Object.entries(platforms).map(([slug, plat]) => (
+                <option value={slug}>{plat.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="os">Operating system</label>
+            <select id="os" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
+              <option value="macOS">macOS</option>
+              <option value="Linux" selected>Linux</option>
+              <option value="Windows">Windows</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="quant">Preferred quantization</label>
+            <select id="quant" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
+              <option value="any">Any / unsure</option>
+              <option value="GGUF">GGUF (llama.cpp / Ollama)</option>
+              <option value="AWQ">AWQ</option>
+              <option value="GPTQ">GPTQ</option>
+              <option value="FP8">FP8</option>
+              <option value="FP16">FP16 / BF16</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2" for="priority">Top priority</label>
+            <select id="priority" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
+              <option value="balanced">Balanced</option>
+              <option value="throughput">Highest throughput</option>
+              <option value="latency">Lowest latency</option>
+              <option value="ease">Easiest setup</option>
+            </select>
+          </div>
+          <div class="flex items-end">
+            <button id="resetBtn" type="button" class="w-full px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Reset</button>
+          </div>
+        </div>
+
+        <p id="summary" class="text-sm text-neutral-400"></p>
+      </div>
+
+      <div id="results" class="space-y-4"></div>
+    </div>
+  </section>
+
+  <script define:vars={{ categories, platforms, engines, speedHints }}>
+    const useCaseEl = document.getElementById('useCase');
+    const platformEl = document.getElementById('platform');
+    const osEl = document.getElementById('os');
+    const quantEl = document.getElementById('quant');
+    const priorityEl = document.getElementById('priority');
+    const resultsEl = document.getElementById('results');
+    const summaryEl = document.getElementById('summary');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const quantMap = {
+      any: [],
+      GGUF: ['Q4_0', 'Q4_K_M', 'Q5_K_M', 'Q6_K', 'Q8_0', 'FP16'],
+      AWQ: ['AWQ'],
+      GPTQ: ['GPTQ'],
+      FP8: ['FP8'],
+      FP16: ['FP16', 'BF16', 'FP32']
+    };
+
+    function complexityBadge(level) {
+      const colors = {
+        'Low': 'bg-green-500/10 text-green-400 border-green-500/20',
+        'Medium': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+        'High': 'bg-red-500/10 text-red-400 border-red-500/20'
+      };
+      return colors[level] || colors['Medium'];
+    }
+
+    function supportsOs(engineKey, os) {
+      const plat = platforms[platformEl.value];
+      return plat && plat.os.includes(os);
+    }
+
+    function supportsQuant(engineKey, quant) {
+      if (quant === 'any') return true;
+      const supported = engines[engineKey].quantization;
+      return quantMap[quant].some(q => supported.includes(q));
+    }
+
+    function scoreEngine(key) {
+      const e = engines[key];
+      const platform = platformEl.value;
+      const useCase = useCaseEl.value;
+      const priority = priorityEl.value;
+      let score = 0;
+
+      if (!e.platforms.includes(platform)) return -1;
+      if (!supportsOs(key, osEl.value)) return -1;
+      if (!supportsQuant(key, quantEl.value)) return -1;
+      if (!e.best_for.includes(useCase)) score -= 10;
+
+      const speed = speedHints[platform][key] || 0.5;
+      score += speed * 40;
+
+      if (priority === 'throughput') score += e.throughput === 'Very High' ? 30 : e.throughput === 'High' ? 20 : 0;
+      if (priority === 'latency') score += e.latency === 'Low' ? 25 : 0;
+      if (priority === 'ease') score += e.complexity === 'Low' ? 30 : e.complexity === 'Medium' ? 10 : 0;
+      if (e.best_for.includes(useCase)) score += 20;
+
+      return score;
+    }
+
+    function render() {
+      const entries = Object.entries(engines)
+        .map(([key, e]) => ({ key, e, score: scoreEngine(key) }))
+        .filter(x => x.score >= 0)
+        .sort((a, b) => b.score - a.score);
+
+      if (entries.length === 0) {
+        resultsEl.innerHTML = `
+          <div class="glass-card rounded-2xl p-6 text-center border border-red-500/20">
+            <p class="text-red-400">No engine matches the selected platform, OS, and quantization. Try a different combination.</p>
+          </div>`;
+        summaryEl.textContent = '';
+        return;
+      }
+
+      const selectedCat = categories[useCaseEl.value];
+      summaryEl.textContent = `For ${selectedCat.name.toLowerCase()} on ${platforms[platformEl.value].name} (${osEl.value}), ${entries.length} engine${entries.length !== 1 ? 's' : ''} match your filters.`;
+
+      resultsEl.innerHTML = entries.map((x, i) => {
+        const e = x.e;
+        const tags = [e.throughput + ' throughput', e.latency + ' latency', e.serving];
+        const matchNote = e.best_for.includes(useCaseEl.value)
+          ? '<span class="text-brand-gold">★ Strong use-case fit</span>'
+          : '<span class="text-neutral-500">Use-case possible but not primary</span>';
+        return `
+          <div class="glass-card rounded-2xl p-5 border ${i === 0 ? 'border-brand-gold/40' : 'border-neutral-700/50'} hover:border-brand-gold/30 transition-colors">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+              <div class="flex items-center gap-3">
+                <div class="text-3xl">${e.icon}</div>
+                <div>
+                  <h3 class="text-xl font-bold">${i === 0 ? '🏆 ' : ''}${e.name}</h3>
+                  <p class="text-sm text-neutral-400">${e.serving} • Complexity: <span class="text-neutral-300">${e.complexity}</span></p>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                ${tags.map(t => `<span class="text-xs px-2 py-1 rounded border border-neutral-700 text-neutral-300">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-3 text-sm mb-4">
+              <p><span class="text-brand-gold">✓</span> ${e.pros}</p>
+              <p><span class="text-neutral-500">✗</span> ${e.cons}</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-4 text-sm">
+              <span class="text-xs px-2 py-1 rounded border ${complexityBadge(e.complexity)}">${e.complexity} setup</span>
+              <span class="text-neutral-300">${matchNote}</span>
+              <a href="${e.setup_url}" target="_blank" rel="noopener" class="ml-auto px-4 py-2 rounded-lg bg-brand-gold text-black font-medium text-xs hover:opacity-90 transition-opacity">Install docs →</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    [useCaseEl, platformEl, osEl, quantEl, priorityEl].forEach(el => el.addEventListener('change', render));
+
+    resetBtn.addEventListener('click', () => {
+      useCaseEl.value = 'coding';
+      platformEl.value = 'nvidia-cuda';
+      osEl.value = 'Linux';
+      quantEl.value = 'any';
+      priorityEl.value = 'balanced';
+      render();
+    });
+
+    render();
+  </script>
+
+  <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+    <h2 class="text-2xl font-bold mb-6">Why the backend matters</h2>
+    <div class="grid md:grid-cols-2 gap-6 text-sm text-neutral-400">
+      <div class="glass-card rounded-xl p-5 border border-neutral-700/50">
+        <h3 class="text-lg font-semibold text-white mb-2">Throughput vs latency</h3>
+        <p>Chat bots need low time-to-first-token. Batch pipelines care about total throughput. Servers like vLLM and TensorRT-LLM optimize throughput; Ollama and llama.cpp optimize quick local use.</p>
+      </div>
+      <div class="glass-card rounded-xl p-5 border border-neutral-700/50">
+        <h3 class="text-lg font-semibold text-white mb-2">Hardware lock-in</h3>
+        <p>MLX is Apple-only. TensorRT-LLM is NVIDIA-only. llama.cpp is the most portable. Choose the engine that matches the hardware you already own.</p>
+      </div>
+      <div class="glass-card rounded-xl p-5 border border-neutral-700/50">
+        <h3 class="text-lg font-semibold text-white mb-2">Quantization formats</h3>
+        <p>GGUF works nearly everywhere. GPTQ/AWQ/EXL2 are fastest on CUDA. FP16/BF16 need the most VRAM. Match your model file to your engine.</p>
+      </div>
+      <div class="glass-card rounded-xl p-5 border border-neutral-700/50">
+        <h3 class="text-lg font-semibold text-white mb-2">Serving interface</h3>
+        <p>OpenAI-compatible endpoints let you swap local and cloud with one line of code. Pick an engine with an HTTP server if you are building an app.</p>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="/tools/vram-calculator/" class="btn-primary text-sm">Check VRAM needs →</a>
+      <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compare API vs local cost →</a>
+      <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Build your agent stack →</a>
+    </div>
+  </section>
+</Layout>

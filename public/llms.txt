@@ -196,6 +196,13 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: one-time training cost, monthly usage cost, first-year total, cheapest managed route, local GPU rental estimate
 - Audience: AI builders choosing between managed fine-tuning APIs and local GPU training
 
+### Local LLM Inference Engine Selector
+- URL: https://hermesdispatch.dev/tools/inference-engine-selector/
+- Description: Pick the best local LLM backend for your model, hardware, OS, and use case.
+- Inputs: use case, hardware platform, operating system, preferred quantization, top priority (throughput/latency/ease/balanced)
+- Outputs: ranked list of inference engines, setup links, complexity badges, throughput/latency notes
+- Audience: AI builders choosing between Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, and other local inference engines
+
 ### Answer Engine Citation Tracker
 - URL: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
 - Description: Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.

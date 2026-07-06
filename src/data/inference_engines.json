@@ -1,0 +1,190 @@
+{
+  "categories": {
+    "coding": {
+      "name": "Coding agents",
+      "description": "Agents that write, edit, debug, or review code.",
+      "icon": "💻"
+    },
+    "chat": {
+      "name": "Chat / assistant",
+      "description": "General Q&A, role-play, brainstorming, and helper bots.",
+      "icon": "💬"
+    },
+    "rag": {
+      "name": "RAG / knowledge base",
+      "description": "Agents that retrieve from documents and answer contextually.",
+      "icon": "📚"
+    },
+    "multimodal": {
+      "name": "Multimodal / vision",
+      "description": "Agents that process images, audio, or video alongside text.",
+      "icon": "🖼️"
+    },
+    "voice": {
+      "name": "Voice / real-time",
+      "description": "Low-latency conversational voice agents.",
+      "icon": "🎙️"
+    },
+    "batch": {
+      "name": "Batch / data pipelines",
+      "description": "High-throughput offline jobs over large datasets.",
+      "icon": "⚙️"
+    }
+  },
+  "platforms": {
+    "apple-silicon": { "name": "Apple Silicon (M1/M2/M3/M4)", "os": ["macOS"] },
+    "nvidia-cuda": { "name": "NVIDIA GPU (CUDA, Linux/Windows)", "os": ["Linux", "Windows"] },
+    "amd-rocm": { "name": "AMD GPU (ROCm, Linux)", "os": ["Linux"] },
+    "intel-arc": { "name": "Intel Arc / Xe (Linux/Windows)", "os": ["Linux", "Windows"] },
+    "cpu-only": { "name": "CPU only (any OS)", "os": ["macOS", "Linux", "Windows"] }
+  },
+  "engines": {
+    "ollama": {
+      "name": "Ollama",
+      "icon": "🦙",
+      "best_for": ["chat", "rag", "coding"],
+      "platforms": ["apple-silicon", "nvidia-cuda", "amd-rocm", "cpu-only"],
+      "quantization": ["Q4_0", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0", "FP16"],
+      "pros": "Dead-simple install, huge model library, REST API, cross-platform.",
+      "cons": "Less tunable than bare llama.cpp; not ideal for batched serving.",
+      "setup_url": "https://ollama.com/download",
+      "complexity": "Low",
+      "serving": "Local server + CLI",
+      "throughput": "Moderate",
+      "latency": "Low"
+    },
+    "llama-cpp": {
+      "name": "llama.cpp",
+      "icon": "🐑",
+      "best_for": ["chat", "rag", "batch", "voice"],
+      "platforms": ["apple-silicon", "nvidia-cuda", "amd-rocm", "intel-arc", "cpu-only"],
+      "quantization": ["Q4_0", "Q4_K_M", "Q5_K_M", "Q6_K", "Q8_0", "FP16"],
+      "pros": "Fastest CPU inference, Metal/CUDA/Vulkan/ROCm backends, server mode, speculative decoding.",
+      "cons": "Manual build/flags; model must be GGUF converted.",
+      "setup_url": "https://github.com/ggerganov/llama.cpp",
+      "complexity": "Medium",
+      "serving": "CLI / server / bindings",
+      "throughput": "High",
+      "latency": "Low"
+    },
+    "vllm": {
+      "name": "vLLM",
+      "icon": "⚡",
+      "best_for": ["batch", "rag", "chat", "voice"],
+      "platforms": ["nvidia-cuda", "amd-rocm"],
+      "quantization": ["FP16", "AWQ", "GPTQ", "FP8", "INT8"],
+      "pros": "PagedAttention for high throughput, OpenAI-compatible server, continuous batching.",
+      "cons": "Linux-focused; needs modern GPU; heavier setup.",
+      "setup_url": "https://docs.vllm.ai/",
+      "complexity": "Medium",
+      "serving": "OpenAI-compatible server",
+      "throughput": "Very High",
+      "latency": "Medium"
+    },
+    "tensorrt-llm": {
+      "name": "TensorRT-LLM",
+      "icon": "🧩",
+      "best_for": ["batch", "rag", "chat"],
+      "platforms": ["nvidia-cuda"],
+      "quantization": ["FP16", "FP8", "INT8", "INT4"],
+      "pros": "Highest NVIDIA throughput, KV-cache optimizations, multi-GPU, spec decoding.",
+      "cons": "NVIDIA-only; complicated build/engine conversion; less flexible.",
+      "setup_url": "https://github.com/NVIDIA/TensorRT-LLM",
+      "complexity": "High",
+      "serving": "Triton / TLLM backend",
+      "throughput": "Very High",
+      "latency": "Medium"
+    },
+    "sglang": {
+      "name": "SGLang",
+      "icon": "🧬",
+      "best_for": ["batch", "chat", "coding", "multimodal"],
+      "platforms": ["nvidia-cuda", "amd-rocm"],
+      "quantization": ["FP16", "FP8", "AWQ", "GPTQ"],
+      "pros": "Structured generation, fast radix cache, OpenAI-compatible, good for agents with tool loops.",
+      "cons": "Smaller ecosystem than vLLM; still maturing.",
+      "setup_url": "https://github.com/sgl-project/sglang",
+      "complexity": "Medium",
+      "serving": "OpenAI-compatible server",
+      "throughput": "Very High",
+      "latency": "Medium"
+    },
+    "text-generation-inference": {
+      "name": "Hugging Face TGI",
+      "icon": "🤗",
+      "best_for": ["batch", "rag", "chat"],
+      "platforms": ["nvidia-cuda", "amd-rocm"],
+      "quantization": ["FP16", "GPTQ", "AWQ", "bitsandbytes"],
+      "pros": "Production-tested, easy Docker deploy, built-in metrics, FlashAttention.",
+      "cons": "Docker-centric; not optimized for Apple Silicon; setup can be heavy.",
+      "setup_url": "https://huggingface.co/docs/text-generation-inference/index",
+      "complexity": "Medium",
+      "serving": "Docker / Kubernetes",
+      "throughput": "High",
+      "latency": "Medium"
+    },
+    "mlx": {
+      "name": "Apple MLX",
+      "icon": "🍎",
+      "best_for": ["chat", "rag", "batch", "multimodal"],
+      "platforms": ["apple-silicon"],
+      "quantization": ["FP16", "Q4_0", "Q4_1", "Q8_0"],
+      "pros": "Best performance on Apple Silicon, unified memory, simple Python API.",
+      "cons": "Apple Silicon only; smaller model zoo than llama.cpp.",
+      "setup_url": "https://github.com/ml-explore/mlx-examples",
+      "complexity": "Low",
+      "serving": "Python / CLI / local server",
+      "throughput": "High",
+      "latency": "Low"
+    },
+    "transformers": {
+      "name": "Hugging Face Transformers",
+      "icon": "🤗",
+      "best_for": ["chat", "rag", "coding", "multimodal", "batch"],
+      "platforms": ["apple-silicon", "nvidia-cuda", "amd-rocm", "intel-arc", "cpu-only"],
+      "quantization": ["FP32", "FP16", "BF16", "INT8", "GPTQ", "AWQ", "bitsandbytes"],
+      "pros": "Universal compatibility, largest model hub, easy quantization loaders.",
+      "cons": "Slower than specialized engines; memory hungry at full precision.",
+      "setup_url": "https://huggingface.co/docs/transformers/index",
+      "complexity": "Low",
+      "serving": "Python scripts / pipelines",
+      "throughput": "Moderate",
+      "latency": "Medium"
+    },
+    "tabbyapi": {
+      "name": "TabbyAPI",
+      "icon": "📝",
+      "best_for": ["chat", "rag"],
+      "platforms": ["nvidia-cuda", "amd-rocm"],
+      "quantization": ["GPTQ", "AWQ", "EXL2", "FP16"],
+      "pros": "OpenAI-compatible API around ExLlamaV2; excellent for quantized local serving.",
+      "cons": "GPU-only; no Apple Silicon; mainly for chat completions.",
+      "setup_url": "https://github.com/theroyallab/tabbyapi",
+      "complexity": "Medium",
+      "serving": "OpenAI-compatible server",
+      "throughput": "High",
+      "latency": "Low"
+    },
+    "aphrodite": {
+      "name": "Aphrodite Engine",
+      "icon": "🌙",
+      "best_for": ["chat", "batch", "rag"],
+      "platforms": ["nvidia-cuda"],
+      "quantization": ["FP16", "GPTQ", "AWQ", "FP8", "Marlin"],
+      "pros": "OpenAI-compatible, focused on creative/long-context workloads, high batch throughput.",
+      "cons": "Smaller community; mostly CUDA; less enterprise tooling.",
+      "setup_url": "https://github.com/PygmalionAI/Aphrodite-engine",
+      "complexity": "Medium",
+      "serving": "OpenAI-compatible server",
+      "throughput": "High",
+      "latency": "Medium"
+    }
+  },
+  "speedHints": {
+    "apple-silicon": { "ollama": 1.0, "llama-cpp": 1.1, "mlx": 1.35, "transformers": 0.6, "vllm": 0, "tensorrt-llm": 0, "sglang": 0, "text-generation-inference": 0, "tabbyapi": 0, "aphrodite": 0 },
+    "nvidia-cuda": { "vllm": 1.25, "tensorrt-llm": 1.35, "sglang": 1.2, "llama-cpp": 0.9, "ollama": 0.85, "text-generation-inference": 1.0, "transformers": 0.55, "tabbyapi": 1.0, "aphrodite": 1.05, "mlx": 0 },
+    "amd-rocm": { "vllm": 0.9, "llama-cpp": 0.85, "ollama": 0.8, "text-generation-inference": 0.75, "transformers": 0.5, "tensorrt-llm": 0, "sglang": 0.85, "mlx": 0, "tabbyapi": 0, "aphrodite": 0 },
+    "intel-arc": { "llama-cpp": 0.7, "transformers": 0.45, "ollama": 0.55, "vllm": 0, "tensorrt-llm": 0, "sglang": 0, "text-generation-inference": 0, "mlx": 0, "tabbyapi": 0, "aphrodite": 0 },
+    "cpu-only": { "llama-cpp": 1.0, "ollama": 0.9, "transformers": 0.4, "mlx": 0, "vllm": 0, "tensorrt-llm": 0, "sglang": 0, "text-generation-inference": 0, "tabbyapi": 0, "aphrodite": 0 }
+  }
+}
