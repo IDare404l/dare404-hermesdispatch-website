@@ -1,0 +1,304 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_output_value.json';
+
+const title = "AI Agent Output Value Calculator | Hermes Dispatch";
+const description = "Estimate the monthly business value, API cost, and ROI of an AI agent based on how many outputs it produces and what each output is worth.";
+const tasks = data.tasks;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What counts as an agent output?", a: "One completed unit of work the agent produces: a qualified lead, a resolved ticket, a reviewed PR, a drafted article, an extracted data field, or a scheduled meeting. Pick the output type that maps closest to your agent's deliverable." },
+  { q: "How is value per output determined?", a: "Value per output is a conservative estimate of what that completed unit is worth to your business. For support it might be cost avoided; for sales it could be pipeline value per qualified lead. You can override it with your own data." },
+  { q: "What is included in total monthly cost?", a: "API inference spend, human review labor, and ongoing maintenance hours. One-time setup is shown separately so you can see how many months it takes to recover the build investment." },
+  { q: "Why does the calculator show value per $1 of agent cost?", a: "This ratio tells you how much business value you generate for every dollar spent running the agent. A ratio above 5x is usually strong; below 2x suggests you should cut review cost, raise output quality, or reduce API spend." },
+  { q: "How accurate are these estimates?", a: "They are directional. The presets are based on public case studies and benchmarks. Replace them with your actual conversion rates, ticket costs, or pipeline values for a precise forecast." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Output Value Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-output-value-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📈</div>
+      <h1 class="display-heading mb-4">AI Agent Output Value Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the monthly business value, API cost, and ROI of an AI agent based on how many outputs it produces and what each output is worth.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Agent economics</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output type</span>
+          <select id="taskSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {tasks.map(t => <option value={JSON.stringify(t)} selected={t.slug === 'lead-qualification'}>{t.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly outputs</span>
+          <input id="monthlyOutputs" type="number" min="0" step="100" value={defaults.monthly_outputs} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Value per output ($)</span>
+          <input id="valuePerOutput" type="number" min="0" step="0.5" value={defaults.value_per_output} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">API cost per output ($)</span>
+          <input id="apiCostPerOutput" type="number" min="0" step="0.01" value={defaults.api_cost_per_output} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="humanReviewPct" type="number" min="0" max="100" step="1" value={defaults.human_review_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review hourly cost ($)</span>
+          <input id="reviewHourlyCost" type="number" min="0" step="5" value={defaults.review_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Minutes to review one output</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.5" value={5} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupHourlyRate" type="number" min="0" step="5" value={defaults.hourly_setup_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly gross value</p>
+        <p id="grossValue" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly total cost</p>
+        <p id="totalCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly net value</p>
+        <p id="netValue" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Value per $1 of cost</p>
+        <p id="valuePerCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Setup cost (one-time)</p>
+        <p id="setupCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Payback period (months)</p>
+        <p id="paybackMonths" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected {defaults.projection_months}-month ROI</p>
+        <p id="periodRoi" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">API / inference</td>
+            <td id="apiCostMonth" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="apiCostShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Human review labor</td>
+            <td id="reviewCostMonth" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewCostShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Maintenance</td>
+            <td id="maintenanceCostMonth" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="maintenanceCostShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/agent-workflow-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Workflow Cost Calc →</a>
+      <a href="/tools/ai-startup-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Cost Calc →</a>
+      <a href="/tools/local-llm-roi-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Local LLM ROI Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    function getInputs() {
+      return {
+        monthlyOutputs: Math.max(0, parseFloat(document.getElementById('monthlyOutputs').value) || 0),
+        valuePerOutput: Math.max(0, parseFloat(document.getElementById('valuePerOutput').value) || 0),
+        apiCostPerOutput: Math.max(0, parseFloat(document.getElementById('apiCostPerOutput').value) || 0),
+        humanReviewPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('humanReviewPct').value) || 0)),
+        reviewHourlyCost: Math.max(0, parseFloat(document.getElementById('reviewHourlyCost').value) || 0),
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupHourlyRate: Math.max(0, parseFloat(document.getElementById('setupHourlyRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_outputs !== undefined) document.getElementById('monthlyOutputs').value = obj.monthly_outputs;
+      if (obj.value_per_output !== undefined) document.getElementById('valuePerOutput').value = obj.value_per_output;
+      if (obj.api_cost_per_output !== undefined) document.getElementById('apiCostPerOutput').value = obj.api_cost_per_output;
+      if (obj.human_review_pct !== undefined) document.getElementById('humanReviewPct').value = obj.human_review_pct;
+      if (obj.review_hourly_cost !== undefined) document.getElementById('reviewHourlyCost').value = obj.review_hourly_cost;
+      if (obj.review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.review_minutes;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.hourly_setup_rate !== undefined) document.getElementById('setupHourlyRate').value = obj.hourly_setup_rate;
+      if (obj.maintenance_hours_per_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_per_month;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const grossValue = inps.monthlyOutputs * inps.valuePerOutput;
+      const apiCost = inps.monthlyOutputs * inps.apiCostPerOutput;
+      const reviewedOutputs = inps.monthlyOutputs * (inps.humanReviewPct / 100);
+      const reviewHours = (reviewedOutputs * inps.reviewMinutes) / 60;
+      const reviewCost = reviewHours * inps.reviewHourlyCost;
+      const maintenanceCost = inps.maintenanceHours * inps.setupHourlyRate;
+      const totalCost = apiCost + reviewCost + maintenanceCost;
+      const netValue = grossValue - totalCost;
+      const valuePerCost = totalCost > 0 ? grossValue / totalCost : 0;
+      const setupCost = inps.setupHours * inps.setupHourlyRate;
+      const paybackMonths = netValue > 0 ? setupCost / netValue : Infinity;
+      const periodRoi = setupCost > 0 ? ((netValue * inps.projectionMonths - setupCost) / setupCost) * 100 : 0;
+
+      document.getElementById('grossValue').textContent = fmtMoney(grossValue);
+      document.getElementById('totalCost').textContent = fmtMoney(totalCost);
+      const netEl = document.getElementById('netValue');
+      netEl.textContent = fmtMoney(netValue);
+      netEl.className = 'text-2xl font-bold ' + (netValue >= 0 ? 'text-brand-gold' : 'text-red-400');
+      document.getElementById('valuePerCost').textContent = fmtNum(valuePerCost) + 'x';
+      document.getElementById('setupCost').textContent = fmtMoney(setupCost);
+      const paybackEl = document.getElementById('paybackMonths');
+      paybackEl.textContent = isFinite(paybackMonths) ? fmtNum(paybackMonths) + ' mo' : '∞';
+      paybackEl.className = 'text-xl font-semibold ' + (isFinite(paybackMonths) && paybackMonths <= 6 ? 'text-green-400' : isFinite(paybackMonths) && paybackMonths <= 12 ? 'text-brand-gold' : 'text-red-400');
+      document.getElementById('periodRoi').textContent = fmtNum(periodRoi) + '%';
+
+      // Cost breakdown
+      document.getElementById('apiCostMonth').textContent = fmtMoney(apiCost);
+      document.getElementById('apiCostShare').textContent = totalCost > 0 ? (apiCost / totalCost * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('reviewCostMonth').textContent = fmtMoney(reviewCost);
+      document.getElementById('reviewCostShare').textContent = totalCost > 0 ? (reviewCost / totalCost * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('maintenanceCostMonth').textContent = fmtMoney(maintenanceCost);
+      document.getElementById('maintenanceCostShare').textContent = totalCost > 0 ? (maintenanceCost / totalCost * 100).toFixed(1) + '%' : '0%';
+
+      // Verdict
+      let verdict = '';
+      if (valuePerCost < 2) {
+        verdict = `This agent is currently returning only ${fmtNum(valuePerCost)}x value per dollar spent. The economics may not justify deployment unless output quality or value per output can be raised, or review/API costs can be cut.`;
+      } else if (valuePerCost < 5) {
+        verdict = `Solid economics: ${fmtNum(valuePerCost)}x value per dollar spent. Net monthly value is ${fmtMoney(netValue)} with a ${isFinite(paybackMonths) ? fmtNum(paybackMonths) + '-month' : 'never'} setup payback. Track output quality so review cost does not grow with scale.`;
+      } else {
+        verdict = `Strong ROI: ${fmtNum(valuePerCost)}x value per dollar spent. The agent pays back setup in ${isFinite(paybackMonths) ? fmtNum(paybackMonths) : '∞'} months and delivers ${fmtMoney(netValue * inps.projectionMonths - setupCost)} projected value over ${inps.projectionMonths} months after setup.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs({ ...s, review_minutes: s.review_minutes || 5 });
+          compute();
+        });
+      });
+
+      document.getElementById('taskSelect').addEventListener('change', e => {
+        const t = JSON.parse(e.target.value);
+        document.getElementById('valuePerOutput').value = t.value_per_output;
+        document.getElementById('apiCostPerOutput').value = t.api_cost_per_output;
+        document.getElementById('setupHours').value = t.setup_hours;
+        document.getElementById('setupHourlyRate').value = t.hourly_setup_rate;
+        compute();
+      });
+
+      ['monthlyOutputs','valuePerOutput','apiCostPerOutput','humanReviewPct','reviewHourlyCost','reviewMinutes','setupHours','setupHourlyRate','maintenanceHours','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

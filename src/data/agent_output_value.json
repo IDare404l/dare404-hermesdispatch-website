@@ -1,0 +1,70 @@
+{
+  "last_updated": "2026-07-06",
+  "note": "Values are directional estimates based on public case studies and benchmarks. Replace with your own conversion and revenue data for precision forecasts.",
+  "tasks": [
+    { "slug": "lead-qualification", "name": "AI SDR / lead qualification", "value_per_output": 45, "label": "qualified lead", "api_cost_per_output": 0.18, "setup_hours": 16, "hourly_setup_rate": 150 },
+    { "slug": "support-resolution", "name": "Customer support ticket resolution", "value_per_output": 22, "label": "resolved ticket", "api_cost_per_output": 0.08, "setup_hours": 24, "hourly_setup_rate": 150 },
+    { "slug": "code-review", "name": "Code review / bug catch", "value_per_output": 120, "label": "reviewed PR", "api_cost_per_output": 0.25, "setup_hours": 32, "hourly_setup_rate": 175 },
+    { "slug": "content-draft", "name": "Marketing content draft", "value_per_output": 65, "label": "draft article", "api_cost_per_output": 0.12, "setup_hours": 10, "hourly_setup_rate": 125 },
+    { "slug": "data-extraction", "name": "Document data extraction", "value_per_output": 1.5, "label": "extracted field", "api_cost_per_output": 0.005, "setup_hours": 20, "hourly_setup_rate": 150 },
+    { "slug": "schedule-meeting", "name": "Meeting scheduling / coordination", "value_per_output": 18, "label": "scheduled meeting", "api_cost_per_output": 0.04, "setup_hours": 8, "hourly_setup_rate": 125 },
+    { "slug": "custom", "name": "Custom agent output", "value_per_output": 50, "label": "agent output", "api_cost_per_output": 0.1, "setup_hours": 20, "hourly_setup_rate": 150 }
+  ],
+  "defaults": {
+    "monthly_outputs": 5000,
+    "value_per_output": 45,
+    "api_cost_per_output": 0.18,
+    "human_review_pct": 15,
+    "review_hourly_cost": 65,
+    "setup_hours": 16,
+    "hourly_setup_rate": 150,
+    "maintenance_hours_per_month": 6,
+    "projection_months": 12
+  },
+  "scenarios": [
+    {
+      "name": "AI sales SDR",
+      "monthly_outputs": 1200,
+      "value_per_output": 45,
+      "api_cost_per_output": 0.22,
+      "human_review_pct": 20,
+      "review_hourly_cost": 75,
+      "setup_hours": 24,
+      "hourly_setup_rate": 150,
+      "maintenance_hours_per_month": 8
+    },
+    {
+      "name": "Support deflection bot",
+      "monthly_outputs": 8000,
+      "value_per_output": 22,
+      "api_cost_per_output": 0.06,
+      "human_review_pct": 10,
+      "review_hourly_cost": 45,
+      "setup_hours": 20,
+      "hourly_setup_rate": 150,
+      "maintenance_hours_per_month": 4
+    },
+    {
+      "name": "Code review agent",
+      "monthly_outputs": 300,
+      "value_per_output": 120,
+      "api_cost_per_output": 0.30,
+      "human_review_pct": 30,
+      "review_hourly_cost": 120,
+      "setup_hours": 40,
+      "hourly_setup_rate": 175,
+      "maintenance_hours_per_month": 12
+    },
+    {
+      "name": "Content automation",
+      "monthly_outputs": 400,
+      "value_per_output": 65,
+      "api_cost_per_output": 0.15,
+      "human_review_pct": 40,
+      "review_hourly_cost": 55,
+      "setup_hours": 12,
+      "hourly_setup_rate": 125,
+      "maintenance_hours_per_month": 5
+    }
+  ]
+}
