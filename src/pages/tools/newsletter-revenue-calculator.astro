@@ -1,0 +1,383 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/newsletter_revenue.json';
+
+const title = "Newsletter Revenue & Growth Calculator | Hermes Dispatch";
+const description = "Estimate monthly newsletter revenue from sponsorships, affiliate links, and paid subscriptions. Forecast subscriber growth, opens, clicks, and ARPU.";
+const defaults = data.defaults;
+const scenarios = data.scenarios;
+const cpmBenchmarks = data.cpm_benchmarks;
+
+const faqs = [
+  { q: "How is sponsorship revenue calculated?", a: "Sponsorship revenue uses a CPM rate per 1,000 subscribers multiplied by the number of sponsor slots per issue and issues per month. A 5,000-subscriber newsletter at $150 CPM with one slot per issue and 22 issues earns $16,500/month." },
+  { q: "What counts as affiliate revenue for a newsletter?", a: "Affiliate revenue is the share of readers who click an affiliate link, buy something, and generate commission. It depends on opens, click-through rate, affiliate click share, conversion rate, average order value, and commission percentage." },
+  { q: "Why does paid subscription revenue matter?", a: "Paid subscriptions can become the most predictable revenue line. The calculator converts a percentage of total subscribers into paying members at your monthly or annual price, then adds that recurring revenue to the total." },
+  { q: "What is ARPU and why track it?", a: "ARPU is average revenue per subscriber per month. It tells you whether growth alone is the right goal, or whether improving engagement and monetization is more valuable than chasing raw subscriber count." },
+  { q: "Are these numbers guaranteed?", a: "No. CPMs, conversion rates, and paid-subscription conversion vary by niche, audience quality, and sales effort. Use the benchmarks as starting points and replace them with your actual rates." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Newsletter Revenue & Growth Calculator" description={description} url="https://hermesdispatch.dev/tools/newsletter-revenue-calculator/" applicationCategory="BusinessApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📰</div>
+      <h1 class="display-heading mb-4">Newsletter Revenue & Growth Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly revenue from sponsorships, affiliate links, and paid subscriptions. Forecast subscriber growth and ARPU.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Newsletter economics</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Current subscribers</span>
+          <input id="subscribers" type="number" min="0" step="100" value={defaults.subscribers} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly subscriber growth (%)</span>
+          <input id="growthRate" type="number" min="-20" max="100" step="0.5" value={defaults.growth_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Open rate (%)</span>
+          <input id="openRate" type="number" min="0" max="100" step="0.5" value={defaults.open_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Click rate (% of opens)</span>
+          <input id="clickRate" type="number" min="0" max="100" step="0.1" value={defaults.click_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Issues per month</span>
+          <input id="issuesPerMonth" type="number" min="0" max="31" value={defaults.issues_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sponsorship slots per issue</span>
+          <input id="sponsorSlots" type="number" min="0" max="10" value={defaults.sponsorship_slots_per_issue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sponsorship CPM ($)</span>
+          <input id="cpmRate" type="number" min="0" step="5" value={defaults.cpm_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Affiliate clicks (% of opens)</span>
+          <input id="affiliateClickPct" type="number" min="0" max="100" step="0.5" value={defaults.affiliate_click_pct_of_opens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Affiliate conversion (%)</span>
+          <input id="affiliateConversion" type="number" min="0" max="100" step="0.1" value={defaults.affiliate_conversion_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Affiliate AOV ($)</span>
+          <input id="affiliateAov" type="number" min="0" step="5" value={defaults.affiliate_aov} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Affiliate commission (%)</span>
+          <input id="affiliateCommission" type="number" min="0" max="100" step="0.5" value={defaults.affiliate_commission_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Paid sub conversion (%)</span>
+          <input id="paidSubConversion" type="number" min="0" max="100" step="0.1" value={defaults.paid_sub_conversion_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Paid sub price ($/mo)</span>
+          <input id="paidSubPrice" type="number" min="0" step="1" value={defaults.paid_sub_price} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly revenue</p>
+        <p id="monthlyRevenue" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected subscribers</p>
+        <p id="projectedSubscribers" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Revenue per subscriber (ARPU)</p>
+        <p id="arpu" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Annual revenue</p>
+        <p id="annualRevenue" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Revenue breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly revenue breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Revenue line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Sponsorships</td>
+            <td id="sponsorRevenue" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="sponsorShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Affiliate</td>
+            <td id="affiliateRevenue" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="affiliateShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Paid subscriptions</td>
+            <td id="paidSubRevenue" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="paidSubShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Projection table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Month-by-month projection</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Month</th>
+              <th class="py-3 pr-4 text-right">Subscribers</th>
+              <th class="py-3 pr-4 text-right">Opens</th>
+              <th class="py-3 pr-4 text-right">Sponsorships</th>
+              <th class="py-3 pr-4 text-right">Affiliate</th>
+              <th class="py-3 pr-4 text-right">Paid subs</th>
+              <th class="py-3 pr-4 text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody id="projectionBody" class="text-neutral-200 text-sm">
+            <tr><td colspan="7" class="py-4 text-neutral-500">Enter inputs to see projection.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CPM benchmark hint -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Typical sponsorship CPM by list size</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">List size</th>
+              <th class="py-3 pr-4 text-right">Typical CPM</th>
+              <th class="py-3 pr-4 text-right">Range</th>
+            </tr>
+          </thead>
+          <tbody class="text-neutral-200 text-sm">
+            {cpmBenchmarks.map(b => (
+              <tr class="border-b border-neutral-800/50">
+                <td class="py-3 pr-4">{b.min_subscribers.toLocaleString()} – {b.max_subscribers.toLocaleString()}</td>
+                <td class="py-3 pr-4 text-right font-mono">${b.typical_cpm}</td>
+                <td class="py-3 pr-4 text-right font-mono">{b.range}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/affiliate-revenue-estimator/" class="btn-primary text-sm">Affiliate Revenue Estimator →</a>
+      <a href="/tools/newsletter-topic-finder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Newsletter Topic Finder →</a>
+      <a href="/tools/newsletter-prompt-generator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Prompt Generator →</a>
+      <a href="/subscribe/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Subscribe →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios) }}>
+    const inputs = {
+      subscribers: document.getElementById('subscribers'),
+      growthRate: document.getElementById('growthRate'),
+      openRate: document.getElementById('openRate'),
+      clickRate: document.getElementById('clickRate'),
+      issuesPerMonth: document.getElementById('issuesPerMonth'),
+      sponsorSlots: document.getElementById('sponsorSlots'),
+      cpmRate: document.getElementById('cpmRate'),
+      affiliateClickPct: document.getElementById('affiliateClickPct'),
+      affiliateConversion: document.getElementById('affiliateConversion'),
+      affiliateAov: document.getElementById('affiliateAov'),
+      affiliateCommission: document.getElementById('affiliateCommission'),
+      paidSubConversion: document.getElementById('paidSubConversion'),
+      paidSubPrice: document.getElementById('paidSubPrice'),
+      projectionMonths: document.getElementById('projectionMonths'),
+    };
+
+    const outputs = {
+      monthlyRevenue: document.getElementById('monthlyRevenue'),
+      projectedSubscribers: document.getElementById('projectedSubscribers'),
+      arpu: document.getElementById('arpu'),
+      annualRevenue: document.getElementById('annualRevenue'),
+      sponsorRevenue: document.getElementById('sponsorRevenue'),
+      sponsorShare: document.getElementById('sponsorShare'),
+      affiliateRevenue: document.getElementById('affiliateRevenue'),
+      affiliateShare: document.getElementById('affiliateShare'),
+      paidSubRevenue: document.getElementById('paidSubRevenue'),
+      paidSubShare: document.getElementById('paidSubShare'),
+      projectionBody: document.getElementById('projectionBody'),
+      verdictText: document.getElementById('verdictText'),
+    };
+
+    function fmtMoney(n) { return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 0 }); }
+    function fmtPct(n) { return (n * 100).toFixed(1) + '%'; }
+    function fmtNum(n) { return n.toLocaleString(undefined, { maximumFractionDigits: 0 }); }
+
+    function getVal(id) {
+      const el = inputs[id];
+      return el ? parseFloat(el.value) || 0 : 0;
+    }
+
+    function setScenario(s) {
+      inputs.subscribers.value = s.subscribers;
+      inputs.growthRate.value = s.growth_rate_pct;
+      inputs.openRate.value = s.open_rate_pct;
+      inputs.clickRate.value = s.click_rate_pct;
+      inputs.issuesPerMonth.value = s.issues_per_month;
+      inputs.sponsorSlots.value = s.sponsorship_slots_per_issue;
+      inputs.cpmRate.value = s.cpm_rate;
+      inputs.affiliateClickPct.value = s.affiliate_click_pct_of_opens;
+      inputs.affiliateConversion.value = s.affiliate_conversion_pct;
+      inputs.affiliateAov.value = s.affiliate_aov;
+      inputs.affiliateCommission.value = s.affiliate_commission_pct;
+      inputs.paidSubConversion.value = s.paid_sub_conversion_pct;
+      inputs.paidSubPrice.value = s.paid_sub_price;
+      inputs.projectionMonths.value = s.projection_months;
+      calculate();
+    }
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => setScenario(JSON.parse(btn.dataset.scenario)));
+    });
+
+    function calculate() {
+      const subsStart = getVal('subscribers');
+      const growth = getVal('growthRate') / 100;
+      const openRate = getVal('openRate') / 100;
+      const clickRate = getVal('clickRate') / 100;
+      const issues = getVal('issuesPerMonth');
+      const slots = getVal('sponsorSlots');
+      const cpm = getVal('cpmRate');
+      const affClickOfOpens = getVal('affiliateClickPct') / 100;
+      const affConv = getVal('affiliateConversion') / 100;
+      const affAov = getVal('affiliateAov');
+      const affComm = getVal('affiliateCommission') / 100;
+      const paidConv = getVal('paidSubConversion') / 100;
+      const paidPrice = getVal('paidSubPrice');
+      const months = Math.max(1, Math.min(60, getVal('projectionMonths')));
+
+      const rows = [];
+      let subs = subsStart;
+      let totalPeriodRevenue = 0;
+      for (let m = 1; m <= months; m++) {
+        if (m > 1) subs = subs * (1 + growth);
+        const opens = subs * openRate;
+        const clicks = opens * clickRate;
+        const sponsor = subs * (cpm / 1000) * slots * issues;
+        const affiliateClicks = opens * affClickOfOpens;
+        const affiliate = affiliateClicks * affConv * affAov * affComm;
+        const paidSubs = subs * paidConv;
+        const paid = paidSubs * paidPrice;
+        const total = sponsor + affiliate + paid;
+        totalPeriodRevenue += total;
+        rows.push({ month: m, subs, opens, sponsor, affiliate, paid, total });
+      }
+
+      const firstMonth = rows[0] || { subs: subsStart, opens: 0, sponsor: 0, affiliate: 0, paid: 0, total: 0 };
+      const lastMonth = rows[rows.length - 1] || firstMonth;
+      const avgMonthly = totalPeriodRevenue / months;
+
+      outputs.monthlyRevenue.textContent = fmtMoney(avgMonthly);
+      outputs.projectedSubscribers.textContent = fmtNum(lastMonth.subs);
+      outputs.arpu.textContent = fmtMoney(avgMonthly / Math.max(1, firstMonth.subs));
+      outputs.annualRevenue.textContent = fmtMoney(avgMonthly * 12);
+
+      outputs.sponsorRevenue.textContent = fmtMoney(firstMonth.sponsor);
+      outputs.affiliateRevenue.textContent = fmtMoney(firstMonth.affiliate);
+      outputs.paidSubRevenue.textContent = fmtMoney(firstMonth.paid);
+
+      const totalFirst = firstMonth.total || 1;
+      outputs.sponsorShare.textContent = fmtPct(firstMonth.sponsor / totalFirst);
+      outputs.affiliateShare.textContent = fmtPct(firstMonth.affiliate / totalFirst);
+      outputs.paidSubShare.textContent = fmtPct(firstMonth.paid / totalFirst);
+
+      outputs.projectionBody.innerHTML = rows.map(r => `
+        <tr class="border-b border-neutral-800/50">
+          <td class="py-3 pr-4">${r.month}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtNum(r.subs)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtNum(r.opens)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(r.sponsor)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(r.affiliate)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(r.paid)}</td>
+          <td class="py-3 pr-4 text-right font-mono text-brand-gold">${fmtMoney(r.total)}</td>
+        </tr>
+      `).join('');
+
+      let verdict = '';
+      if (avgMonthly === 0) verdict = 'No revenue lines are active. Add sponsorships, affiliate links, or paid subscriptions to see a forecast.';
+      else if (firstMonth.sponsor === 0 && firstMonth.affiliate === 0 && firstMonth.paid > 0) verdict = 'Paid subscriptions are your primary revenue model. Focus on retention and premium value to keep churn low.';
+      else if (firstMonth.sponsor > firstMonth.affiliate && firstMonth.sponsor > firstMonth.paid) verdict = 'Sponsorships are your biggest lever. Improve open rate and pitch cadence to raise CPMs and fill rates.';
+      else if (firstMonth.affiliate > firstMonth.sponsor && firstMonth.affiliate > firstMonth.paid) verdict = 'Affiliate revenue is dominant. Test higher-intent products and placement to improve conversion without hurting opens.';
+      else if (firstMonth.paid >= firstMonth.sponsor && firstMonth.paid >= firstMonth.affiliate) verdict = 'Paid subs are your largest line. This is the most defensible model; prioritize content quality and churn reduction.';
+      else verdict = 'Revenue is mixed across multiple lines. Pick the one with the best ARPU and double down before diversifying.';
+
+      outputs.verdictText.textContent = verdict;
+    }
+
+    Object.values(inputs).forEach(el => { if (el) el.addEventListener('input', calculate); });
+    calculate();
+  </script>
+</Layout>

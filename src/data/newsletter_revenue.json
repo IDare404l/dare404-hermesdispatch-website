@@ -1,0 +1,79 @@
+{
+  "last_updated": "2026-07-06",
+  "note": "Estimates are directional. Sponsorship CPMs, affiliate conversion, and paid-subscription conversion vary widely by audience quality and niche. Replace presets with your actual rates.",
+  "defaults": {
+    "subscribers": 5000,
+    "growth_rate_pct": 8,
+    "open_rate_pct": 42,
+    "click_rate_pct": 6,
+    "issues_per_month": 22,
+    "sponsorship_slots_per_issue": 1,
+    "cpm_rate": 150,
+    "affiliate_click_pct_of_opens": 12,
+    "affiliate_conversion_pct": 2.5,
+    "affiliate_aov": 120,
+    "affiliate_commission_pct": 4,
+    "paid_sub_conversion_pct": 0,
+    "paid_sub_price": 12,
+    "projection_months": 12
+  },
+  "scenarios": [
+    {
+      "name": "Niche AI newsletter",
+      "subscribers": 5000,
+      "growth_rate_pct": 8,
+      "open_rate_pct": 45,
+      "click_rate_pct": 7,
+      "issues_per_month": 22,
+      "sponsorship_slots_per_issue": 1,
+      "cpm_rate": 180,
+      "affiliate_click_pct_of_opens": 14,
+      "affiliate_conversion_pct": 3,
+      "affiliate_aov": 150,
+      "affiliate_commission_pct": 4,
+      "paid_sub_conversion_pct": 1.5,
+      "paid_sub_price": 15,
+      "projection_months": 12
+    },
+    {
+      "name": "Broad tech/media newsletter",
+      "subscribers": 25000,
+      "growth_rate_pct": 5,
+      "open_rate_pct": 35,
+      "click_rate_pct": 4,
+      "issues_per_month": 20,
+      "sponsorship_slots_per_issue": 2,
+      "cpm_rate": 80,
+      "affiliate_click_pct_of_opens": 8,
+      "affiliate_conversion_pct": 1.5,
+      "affiliate_aov": 80,
+      "affiliate_commission_pct": 5,
+      "paid_sub_conversion_pct": 0.5,
+      "paid_sub_price": 10,
+      "projection_months": 12
+    },
+    {
+      "name": "Paid-subscriber first",
+      "subscribers": 2000,
+      "growth_rate_pct": 4,
+      "open_rate_pct": 55,
+      "click_rate_pct": 10,
+      "issues_per_month": 12,
+      "sponsorship_slots_per_issue": 0,
+      "cpm_rate": 0,
+      "affiliate_click_pct_of_opens": 5,
+      "affiliate_conversion_pct": 2,
+      "affiliate_aov": 100,
+      "affiliate_commission_pct": 5,
+      "paid_sub_conversion_pct": 8,
+      "paid_sub_price": 20,
+      "projection_months": 12
+    }
+  ],
+  "cpm_benchmarks": [
+    { "min_subscribers": 0, "max_subscribers": 5000, "typical_cpm": 80, "range": "$40–$120" },
+    { "min_subscribers": 5000, "max_subscribers": 20000, "typical_cpm": 120, "range": "$80–$180" },
+    { "min_subscribers": 20000, "max_subscribers": 50000, "typical_cpm": 150, "range": "$100–$220" },
+    { "min_subscribers": 50000, "max_subscribers": 200000, "typical_cpm": 200, "range": "$140–$300" }
+  ]
+}

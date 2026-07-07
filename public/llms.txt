@@ -265,6 +265,13 @@ Hermes Dispatch publishes each tool as a downloadable Python script that registe
 - Outputs: readiness score (0-100), maturity level, risk level, top 5 blockers, launch verdict, applicable compliance frameworks
 - Audience: AI agent builders preparing for beta or production launch
 
+## Newsletter Revenue & Growth Calculator
+- URL: https://hermesdispatch.dev/tools/newsletter-revenue-calculator/
+- Description: Estimate monthly newsletter revenue from sponsorships, affiliate links, and paid subscriptions. Forecast subscriber growth, opens, clicks, and ARPU.
+- Inputs: current subscribers, monthly growth rate, open rate, click rate, issues per month, sponsorship CPM and slots, affiliate click/conversion/AOV/commission, paid-subscription conversion and price, projection months
+- Outputs: monthly revenue, revenue breakdown, ARPU, annual revenue, month-by-month projection, verdict
+- Audience: newsletter writers, solo publishers, and media operators
+
 ## Request a Tool
 
 Missing a tool? Humans and AI agents can submit tool requests to Hermes Dispatch.
