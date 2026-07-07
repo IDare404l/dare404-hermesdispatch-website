@@ -1,0 +1,356 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_model_router_cost.json';
+
+const title = "AI Agent Model Router / Fallback Cost Calculator | Hermes Dispatch";
+const description = "Compare the cost and reliability of routing AI agent requests across multiple LLM providers with fallback logic, cache hits, and retry penalties.";
+
+const providers = data.providers;
+const strategies = data.routing_strategies;
+const scenarios = data.routing_scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is an AI agent model router?", a: "A model router sends each agent request to the best LLM provider based on cost, quality, latency, or reliability rules. If the primary provider fails or is rate-limited, the router falls back to a secondary provider so the agent stays available." },
+  { q: "How does fallback rate affect monthly cost?", a: "Fallback requests usually land on a more expensive or higher-quality model. The calculator adds that premium to your effective per-request cost and shows how much extra you pay for resilience." },
+  { q: "What is cached-input ratio?", a: "It is the share of input tokens that your provider can serve from a prompt cache at a discounted rate. Higher ratios reduce cost significantly for agents with long repeated system prompts." },
+  { q: "Which routing strategy should I start with?", a: "Most agents should start with Balanced Cost + Quality. It keeps cost reasonable while reserving premium models for complex tasks. Switch to Cheapest First only if failure impact is low and volume is very high." },
+  { q: "Do retries really add cost?", a: "Yes. Each retry consumes tokens again. The calculator applies a retry penalty equal to the expected extra calls multiplied by the average cost of the fallback provider." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Model Router / Fallback Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-model-router-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🚦</div>
+      <h1 class="display-heading mb-4">AI Agent Model Router / Fallback Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Compare the cost and reliability of routing AI agent requests across multiple LLM providers with fallback logic, cache hits, and retry penalties.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Routing scenario preset</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-3 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20 lg:col-span-1">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Traffic & routing</h2>
+        <div class="space-y-4">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Routing strategy</span>
+            <select id="strategy" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {strategies.map(s => <option value={s.id} selected={s.id === defaults.strategy_id}>{s.name}</option>)}
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Monthly requests</span>
+            <input id="requests" type="number" min="1" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Input tokens / request</span>
+            <input id="inputTokens" type="number" min="1" step="100" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Output tokens / request</span>
+            <input id="outputTokens" type="number" min="1" step="100" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Cached input ratio (%)</span>
+            <input id="cachedRatio" type="number" min="0" max="100" step="1" value={Math.round(defaults.cached_input_ratio * 100)} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Fallback rate (%)</span>
+            <input id="fallbackRate" type="number" min="0" max="100" step="1" value={Math.round(defaults.fallback_rate * 100)} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Retry rate (%)</span>
+            <input id="retryRate" type="number" min="0" max="100" step="1" value={Math.round(defaults.retry_rate * 100)} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Complex-task split to premium model (%)</span>
+            <input id="complexPct" type="number" min="0" max="100" step="1" value={defaults.quality_split_complex_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20 lg:col-span-2">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Provider mix under this strategy</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+                <th class="py-3 pr-4">Provider</th>
+                <th class="py-3 pr-4 text-right">Primary %</th>
+                <th class="py-3 pr-4 text-right">Fallback %</th>
+                <th class="py-3 pr-4 text-right">Effective $/1M tokens</th>
+                <th class="py-3 pr-4 text-right">Est. monthly cost</th>
+              </tr>
+            </thead>
+            <tbody id="providerMixBody" class="text-neutral-200"></tbody>
+          </table>
+        </div>
+
+        <div id="strategyNote" class="mt-6 text-sm text-neutral-400 p-4 rounded-xl bg-neutral-900/50 border border-neutral-800"></div>
+      </div>
+    </section>
+
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Base monthly cost</p>
+        <p id="baseCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Fallback premium</p>
+        <p id="fallbackCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Retry penalty</p>
+        <p id="retryCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total routed cost</p>
+        <p id="totalCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost vs single-provider alternatives</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">Single-provider cost</th>
+              <th class="py-3 pr-4 text-right">vs routed cost</th>
+              <th class="py-3 pr-4 text-right">Reliability</th>
+            </tr>
+          </thead>
+          <tbody id="compareBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/agent-latency-budget-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Latency Budget Calc →</a>
+      <a href="/tools/agent-sla-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">SLA / Uptime Calc →</a>
+      <a href="/tools/prompt-cache-savings-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Prompt Cache Savings Calc →</a>
+    </div>
+
+    <p class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providersJson: JSON.stringify(providers), strategiesJson: JSON.stringify(strategies), qualityWeightsJson: JSON.stringify(data.quality_weights) }}>
+    const providers = JSON.parse(providersJson);
+    const strategies = JSON.parse(strategiesJson);
+    const qualityWeights = JSON.parse(qualityWeightsJson);
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtMoney4 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 4 });
+
+    function getInputs() {
+      return {
+        strategyId: document.getElementById('strategy').value,
+        requests: Math.max(1, parseFloat(document.getElementById('requests').value) || 1),
+        inputTokens: Math.max(1, parseFloat(document.getElementById('inputTokens').value) || 1),
+        outputTokens: Math.max(1, parseFloat(document.getElementById('outputTokens').value) || 1),
+        cachedRatio: Math.min(1, Math.max(0, (parseFloat(document.getElementById('cachedRatio').value) || 0) / 100)),
+        fallbackRate: Math.min(1, Math.max(0, (parseFloat(document.getElementById('fallbackRate').value) || 0) / 100)),
+        retryRate: Math.min(1, Math.max(0, (parseFloat(document.getElementById('retryRate').value) || 0) / 100)),
+        complexPct: Math.min(1, Math.max(0, (parseFloat(document.getElementById('complexPct').value) || 0) / 100)),
+      };
+    }
+
+    function costPerRequest(provider, cachedRatio) {
+      const inputCost = (provider.input_per_1m / 1e6) * (1 - cachedRatio) + (provider.cached_input_per_1m / 1e6) * cachedRatio;
+      const outputCost = provider.output_per_1m / 1e6;
+      const inTok = document.getElementById('inputTokens') ? parseFloat(document.getElementById('inputTokens').value) || 1 : 1;
+      const outTok = document.getElementById('outputTokens') ? parseFloat(document.getElementById('outputTokens').value) || 1 : 1;
+      return inputCost * inTok + outputCost * outTok;
+    }
+
+    function pickProviderMix(strategy, complexPct) {
+      const premium = providers.filter(p => qualityWeights.premium.includes(p.name)).sort((a,b) => a.input_per_1m + a.output_per_1m - (b.input_per_1m + b.output_per_1m));
+      const standard = providers.filter(p => qualityWeights.standard.includes(p.name)).sort((a,b) => a.input_per_1m + a.output_per_1m - (b.input_per_1m + b.output_per_1m));
+      const cheap = providers.filter(p => qualityWeights.fast_cheap.includes(p.name)).sort((a,b) => a.input_per_1m + a.output_per_1m - (b.input_per_1m + b.output_per_1m));
+      let primary, fallback;
+      if (strategy.id === 'cheapest-first') {
+        primary = cheap[0] || providers.sort((a,b) => a.input_per_1m + a.output_per_1m - (b.input_per_1m + b.output_per_1m))[0];
+        fallback = standard[0] || premium[0];
+      } else if (strategy.id === 'quality-first') {
+        primary = premium[0] || standard[0];
+        fallback = premium[1] || standard[0];
+      } else if (strategy.id === 'reliability-first') {
+        primary = providers.slice().sort((a,b) => b.reliability - a.reliability)[0];
+        fallback = providers.slice().sort((a,b) => b.reliability - a.reliability)[1];
+      } else if (strategy.id === 'cache-optimized') {
+        primary = providers.filter(p => p.cached_input_per_1m > 0).sort((a,b) => a.cached_input_per_1m - b.cached_input_per_1m)[0] || standard[0];
+        fallback = providers.filter(p => p.cached_input_per_1m > 0).sort((a,b) => a.cached_input_per_1m - b.cached_input_per_1m)[1] || premium[0];
+      } else {
+        primary = standard[0] || premium[0];
+        fallback = premium[0] || standard[1];
+      }
+      const premiumPrimary = premium[0] || primary;
+      const effectivePrimary = strategy.id === 'balanced' && complexPct > 0
+        ? { blend: true, standard: primary, premium: premiumPrimary, standardShare: 1 - complexPct, premiumShare: complexPct }
+        : { blend: false, provider: primary, share: 1 };
+      return { primary: effectivePrimary, fallback };
+    }
+
+    function compute() {
+      const i = getInputs();
+      const strategy = strategies.find(s => s.id === i.strategyId);
+      const mix = pickProviderMix(strategy, i.complexPct);
+
+      let baseCostPerReq = 0;
+      const primaryRows = [];
+      if (mix.primary.blend) {
+        const stdCost = costPerRequest(mix.primary.standard, i.cachedRatio);
+        const premCost = costPerRequest(mix.primary.premium, i.cachedRatio);
+        baseCostPerReq = stdCost * mix.primary.standardShare + premCost * mix.primary.premiumShare;
+        primaryRows.push({ name: `${mix.primary.standard.name} (standard)`, share: mix.primary.standardShare, cost: stdCost });
+        primaryRows.push({ name: `${mix.primary.premium.name} (premium)`, share: mix.primary.premiumShare, cost: premCost });
+      } else {
+        baseCostPerReq = costPerRequest(mix.primary.provider, i.cachedRatio);
+        primaryRows.push({ name: mix.primary.provider.name, share: 1, cost: baseCostPerReq });
+      }
+
+      const fallbackCostPerReq = costPerRequest(mix.fallback, i.cachedRatio);
+      const effectiveCostPerReq = baseCostPerReq * (1 - i.fallbackRate) + fallbackCostPerReq * i.fallbackRate;
+      const retryCostPerReq = effectiveCostPerReq * i.retryRate;
+      const finalCostPerReq = effectiveCostPerReq + retryCostPerReq;
+
+      const baseMonthly = baseCostPerReq * i.requests;
+      const fallbackMonthly = (fallbackCostPerReq - baseCostPerReq) * i.fallbackRate * i.requests;
+      const retryMonthly = retryCostPerReq * i.requests;
+      const totalMonthly = finalCostPerReq * i.requests;
+
+      document.getElementById('baseCost').textContent = fmtMoney(baseMonthly);
+      const fallbackEl = document.getElementById('fallbackCost');
+      fallbackEl.textContent = (fallbackMonthly >= 0 ? '+' : '') + fmtMoney(fallbackMonthly);
+      fallbackEl.className = 'text-2xl font-bold ' + (fallbackMonthly >= 0 ? 'text-red-400' : 'text-green-400');
+      const retryEl = document.getElementById('retryCost');
+      retryEl.textContent = '+' + fmtMoney(retryMonthly);
+      retryEl.className = 'text-2xl font-bold text-red-400';
+      document.getElementById('totalCost').textContent = fmtMoney(totalMonthly);
+
+      // Provider mix table
+      const tbody = document.getElementById('providerMixBody');
+      let rows = primaryRows.map(r => `
+        <tr class="border-b border-neutral-800/50">
+          <td class="py-3 pr-4 font-medium">${r.name}</td>
+          <td class="py-3 pr-4 text-right">${(r.share * 100).toFixed(0)}%</td>
+          <td class="py-3 pr-4 text-right">—</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney4(r.cost * 1e6)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(r.cost * i.requests * r.share)}</td>
+        </tr>
+      `).join('');
+      rows += `
+        <tr class="border-b border-neutral-800/50">
+          <td class="py-3 pr-4 font-medium">${mix.fallback.name} (fallback)</td>
+          <td class="py-3 pr-4 text-right">—</td>
+          <td class="py-3 pr-4 text-right">${(i.fallbackRate * 100).toFixed(0)}%</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney4(fallbackCostPerReq * 1e6)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(fallbackCostPerReq * i.requests * i.fallbackRate)}</td>
+        </tr>
+      `;
+      if (i.retryRate > 0) {
+        rows += `
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4 font-medium">Retry penalty (avg)</td>
+            <td class="py-3 pr-4 text-right">—</td>
+            <td class="py-3 pr-4 text-right">${(i.retryRate * 100).toFixed(0)}%</td>
+            <td class="py-3 pr-4 text-right font-mono">${fmtMoney4(retryCostPerReq * 1e6)}</td>
+            <td class="py-3 pr-4 text-right font-mono">${fmtMoney(retryMonthly)}</td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = rows;
+
+      document.getElementById('strategyNote').textContent = strategy.description + ' ' + strategy.fallback_logic;
+
+      // Single-provider comparison
+      const compareBody = document.getElementById('compareBody');
+      const rowsCompare = providers.map(p => {
+        const singleCost = costPerRequest(p, i.cachedRatio) * i.requests;
+        const diff = singleCost - totalMonthly;
+        const diffPct = totalMonthly > 0 ? (diff / totalMonthly) * 100 : 0;
+        return `
+          <tr class="border-b border-neutral-800/50 ${p.name === (mix.primary.blend ? mix.primary.standard.name : mix.primary.provider.name) || p.name === mix.fallback.name ? 'bg-brand-gold/5' : ''}">
+            <td class="py-3 pr-4">${p.name}</td>
+            <td class="py-3 pr-4 text-right font-mono">${fmtMoney(singleCost)}</td>
+            <td class="py-3 pr-4 text-right font-mono ${diff > 0 ? 'text-green-400' : 'text-red-400'}">${diff > 0 ? '−' + fmtMoney(diff) : '+' + fmtMoney(Math.abs(diff))} (${diff > 0 ? '-' : '+'}${Math.abs(diffPct).toFixed(0)}%)</td>
+            <td class="py-3 pr-4 text-right">${(p.reliability * 100).toFixed(1)}%</td>
+          </tr>
+        `;
+      }).join('');
+      compareBody.innerHTML = rowsCompare;
+
+      // Verdict
+      const cheapest = providers.slice().sort((a,b) => costPerRequest(a, i.cachedRatio) - costPerRequest(b, i.cachedRatio))[0];
+      const singleCheapestCost = costPerRequest(cheapest, i.cachedRatio) * i.requests;
+      let verdict = '';
+      if (totalMonthly <= singleCheapestCost * 1.05) {
+        verdict = `Excellent: the routed stack costs about the same as the cheapest single provider (${cheapest.name}) while adding fallback resilience. This is usually the right choice for production agents.`;
+      } else if (totalMonthly <= singleCheapestCost * 1.25) {
+        verdict = `Good trade-off: you pay ${((totalMonthly / singleCheapestCost - 1) * 100).toFixed(0)}% more than the cheapest single provider for redundancy and better model fit. Consider tightening fallback/retry rates if budget is tight.`;
+      } else {
+        verdict = `Expensive routing profile: you pay ${((totalMonthly / singleCheapestCost - 1) * 100).toFixed(0)}% more than the cheapest single provider. Lower the complex-task split, fallback rate, or retry rate unless reliability is worth the premium.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          document.getElementById('strategy').value = s.strategy_id;
+          document.getElementById('requests').value = s.monthly_requests;
+          document.getElementById('inputTokens').value = s.input_tokens;
+          document.getElementById('outputTokens').value = s.output_tokens;
+          document.getElementById('cachedRatio').value = Math.round(s.cached_input_ratio * 100);
+          document.getElementById('fallbackRate').value = Math.round(s.fallback_rate * 100);
+          document.getElementById('retryRate').value = Math.round(s.retry_rate * 100);
+          compute();
+        });
+      });
+
+      ['strategy','requests','inputTokens','outputTokens','cachedRatio','fallbackRate','retryRate','complexPct'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

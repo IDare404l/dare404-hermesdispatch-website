@@ -438,10 +438,17 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||||- Outputs: ranked builder list, top pick, pricing model, integration count, pros/cons
 |||||- Audience: AI agent builders choosing a no-code or low-code platform
 |||||
-|||||## AI Agent vs Human Hire Calculator
-|||||- URL: https://hermesdispatch.dev/tools/agent-vs-hire-calculator/
-|||||- Description: Compare the cost of deploying an AI agent versus hiring a human employee for the same task.
-|||||- Inputs: role preset, annual salary, benefits percentage, monthly outputs, agent stack, API cost per output, review rate, setup/maintenance hours, hourly rates, projection months
-|||||- Outputs: monthly human cost, monthly agent cost, 1-year savings, break-even month, month-by-month projection, verdict
-|||||- Audience: AI agent builders and operators deciding between hiring and automation
-|||||
+||||||## AI Agent vs Human Hire Calculator
+||||||- URL: https://hermesdispatch.dev/tools/agent-vs-hire-calculator/
+||||||- Description: Compare the cost of deploying an AI agent versus hiring a human employee for the same task.
+||||||- Inputs: role preset, annual salary, benefits percentage, monthly outputs, agent stack, API cost per output, review rate, setup/maintenance hours, hourly rates, projection months
+||||||- Outputs: monthly human cost, monthly agent cost, 1-year savings, break-even month, month-by-month projection, verdict
+||||||- Audience: AI agent builders and operators deciding between hiring and automation
+||||||
+||||||## AI Agent Model Router / Fallback Cost Calculator
+||||||- URL: https://hermesdispatch.dev/tools/agent-model-router-cost-calculator/
+||||||- Description: Compare the cost and reliability of routing AI agent requests across multiple LLM providers with fallback logic, cache hits, and retry penalties.
+||||||- Inputs: routing strategy, monthly requests, input/output tokens per request, cached input ratio, fallback rate, retry rate, complex-task split percentage
+||||||- Outputs: base monthly cost, fallback premium, retry penalty, total routed cost, provider mix table, single-provider comparison, verdict
+||||||- Audience: AI agent builders designing multi-provider routing and resilience
+||||||
