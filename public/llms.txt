@@ -409,7 +409,15 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Inputs: exposure profile, checklist of security controls
 |- Outputs: overall risk score, risk level label, per-category risk breakdown, estimated mitigation cost, prioritized fix list
 |- Audience: AI agent builders and security teams hardening agents before deployment
-|
+
+## AI Agent Security Audit Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-security-audit-cost-calculator/
+|- Description: Estimate the cost to audit an AI agent for prompt injection, data exfiltration, tool hijacking, PII handling, access control, supply-chain risk, observability, and output integrity.
+|- Inputs: audit depth, external auditor tier, automation tooling, external/internal split, hourly rates, number of endpoints/tools, remediation hours, selected audit areas, projection months
+|- Outputs: total audit cost, labor cost, external cost, tooling cost, remediation cost, cost per control, expected findings, estimated audit timeline, verdict
+|- Audience: AI agent builders and security teams budgeting audits before deployment
+|- Cross-links: Prompt Injection & Security Risk Scanner, AI Agent Red Team Cost Calculator, AI Agent Compliance Checker, Agent Deployment Readiness Scorecard
+
 ## AI Agent Human Escalation Cost Calculator
 ||- URL: https://hermesdispatch.dev/tools/agent-escalation-cost-calculator/
 ||- Description: Estimate the monthly cost of handing off AI-agent conversations or tasks to human agents.

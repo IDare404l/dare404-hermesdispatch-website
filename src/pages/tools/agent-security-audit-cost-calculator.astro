@@ -1,0 +1,364 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_security_audit_cost.json';
+
+const title = "AI Agent Security Audit Cost Calculator | Hermes Dispatch";
+const description = "Estimate the cost to audit an AI agent for prompt injection, data exfiltration, tool hijacking, PII handling, and access control. Compare internal, external, and automated audit routes.";
+const depths = data.audit_depths;
+const tiers = data.auditor_tiers;
+const autoTools = data.automation_tools;
+const areas = data.areas;
+const presets = data.presets;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does an AI agent security audit cost?", a: "A focused internal checklist may cost only a few thousand dollars in labor. A boutique consultancy audit typically runs $10k–$50k. A full red-team simulation with remediation for a regulated financial or healthcare agent can exceed $100k." },
+  { q: "Which areas drive the most audit hours?", a: "Tool/function-call hijacking, prompt injection, and sensitive-data handling usually consume the most hours because they require custom adversarial tests and manual review of outputs." },
+  { q: "Should I use internal staff or an external firm?", a: "Internal staff know the system but may miss novel attack patterns. External firms bring fresh eyes and can produce reports for regulators, customers, or SOC 2 auditors. A hybrid mix is common." },
+  { q: "How do automation tools change the cost?", a: "Automated prompt scanners and SAST tools reduce manual test hours, but they still require triage, validation, and remediation. They are most cost-effective for repeated regression testing." },
+  { q: "How often should we re-audit an AI agent?", a: "Re-audit after any major model change, tool addition, or data-source change. Many teams run a light audit quarterly, a standard audit twice a year, and a red-team exercise annually or before a major launch." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Security Audit Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-security-audit-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔐</div>
+      <h1 class="display-heading mb-4">AI Agent Security Audit Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the cost to audit an AI agent for prompt injection, data exfiltration, tool hijacking, PII handling, and access control.</p>
+    </div>
+
+    <!-- Presets -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {presets.map(p => (
+        <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset={p.slug}>
+          <div class="text-2xl mb-2">{p.emoji}</div>
+          <h3 class="font-semibold text-sm">{p.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1">{depths[p.audit_depth].label} • {p.areas.length} areas</p>
+        </button>
+      ))}
+    </div>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Scope</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Audit depth</span>
+          <select id="auditDepth" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {Object.entries(depths).map(([k, v]) => (
+              <option value={k} selected={k === defaults.audit_depth}>{v.label}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">External auditor tier</span>
+          <select id="auditorTier" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {Object.entries(tiers).map(([k, v]) => (
+              <option value={k} selected={k === defaults.auditor_tier}>{v.label} — ${v.hourly_rate}/hr</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Automation tooling</span>
+          <select id="autoTool" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {Object.entries(autoTools).map(([k, v]) => (
+              <option value={k} selected={k === defaults.automation_tool}>{v.label} — ${v.monthly_cost}/mo</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">External hours %</span>
+          <input id="externalPct" type="number" min="0" max="100" step="5" value={defaults.external_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">External hourly rate override ($)</span>
+          <input id="externalRate" type="number" min="0" step="5" value={tiers[defaults.auditor_tier].hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Internal hourly rate ($)</span>
+          <input id="internalRate" type="number" min="0" step="5" value={tiers.internal.hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Connected tools / endpoints</span>
+          <input id="numEndpoints" type="number" min="0" step="1" value={defaults.num_endpoints} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Remediation hours</span>
+          <input id="remediationHours" type="number" min="0" step="1" value={defaults.remediation_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+
+      <h3 class="text-lg font-bold mb-4 text-brand-gold">Audit areas</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="areasGrid">
+        {areas.map(a => (
+          <label class="flex items-start gap-3 p-3 rounded-lg border border-neutral-800 bg-neutral-900/50 cursor-pointer hover:border-neutral-600 transition">
+            <input type="checkbox" class="area-check mt-1" data-slug={a.slug} data-base-hours={a.base_hours} data-tests={a.tests_default} checked={a.default_enabled ? true : undefined} />
+            <div>
+              <p class="font-medium text-sm">{a.label}</p>
+              <p class="text-xs text-neutral-500">{a.base_hours}h base • {a.tests_default} tests</p>
+            </div>
+          </label>
+        ))}
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Prices are directional USD estimates. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/30 text-center">
+      <p class="text-xs text-neutral-500 uppercase mb-1">Estimated total audit cost</p>
+      <p id="totalLine" class="text-3xl font-bold text-brand-gold">Enter scope to see cost.</p>
+      <p id="perControlLine" class="text-sm text-neutral-400 mt-1">—</p>
+      <p id="timelineLine" class="text-sm text-neutral-400 mt-1">—</p>
+    </section>
+
+    <!-- Breakdown -->
+    <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Labor cost</p>
+        <p id="laborCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">External cost</p>
+        <p id="externalCost" class="text-2xl font-bold text-cyan-400">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Tooling cost</p>
+        <p id="toolCost" class="text-2xl font-bold text-cyan-400">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Remediation cost</p>
+        <p id="remediationCost" class="text-2xl font-bold text-cyan-400">—</p>
+      </div>
+    </section>
+
+    <!-- Area table -->
+    <section class="overflow-x-auto mb-12">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Area</th>
+            <th class="py-3 pr-4 text-right">Est. hours</th>
+            <th class="py-3 pr-4 text-right">Tests</th>
+            <th class="py-3 pr-4 text-right">Est. findings</th>
+            <th class="py-3 pr-4 text-right">Area labor cost</th>
+          </tr>
+        </thead>
+        <tbody id="areasBody" class="text-neutral-200">
+          {areas.map(a => (
+            <tr class="border-b border-neutral-800/50" data-area={a.slug}>
+              <td class="py-3 pr-4">
+                <span class="font-medium">{a.label}</span>
+              </td>
+              <td id={`hours-${a.slug}`} class="py-3 pr-4 text-right font-mono">—</td>
+              <td id={`tests-${a.slug}`} class="py-3 pr-4 text-right font-mono">—</td>
+              <td id={`findings-${a.slug}`} class="py-3 pr-4 text-right font-mono">—</td>
+              <td id={`cost-${a.slug}`} class="py-3 pr-4 text-right font-mono">—</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Insight -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Audit strategy</h2>
+      <p id="verdict" class="text-neutral-300">Enter a scope to see a strategy verdict.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-prompt-injection-scanner/" class="btn-primary text-sm">Prompt Injection Scanner →</a>
+      <a href="/tools/agent-redteam-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Red Team Cost Calc →</a>
+      <a href="/tools/ai-agent-compliance-checker/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compliance Checker →</a>
+      <a href="/tools/agent-deployment-scorecard/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Deployment Scorecard →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ dataJson: JSON.stringify(data) }}>
+    const data = JSON.parse(dataJson);
+    const depths = data.audit_depths;
+    const tiers = data.auditor_tiers;
+    const autoTools = data.automation_tools;
+    const areas = data.areas;
+    const presets = data.presets;
+
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmt1 = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    function getInputs() {
+      return {
+        auditDepth: document.getElementById('auditDepth').value,
+        auditorTier: document.getElementById('auditorTier').value,
+        autoTool: document.getElementById('autoTool').value,
+        externalPct: Math.max(0, Math.min(100, parseFloat(document.getElementById('externalPct').value) || 0)),
+        externalRate: Math.max(0, parseFloat(document.getElementById('externalRate').value) || 0),
+        internalRate: Math.max(0, parseFloat(document.getElementById('internalRate').value) || 0),
+        numEndpoints: Math.max(0, parseFloat(document.getElementById('numEndpoints').value) || 0),
+        remediationHours: Math.max(0, parseFloat(document.getElementById('remediationHours').value) || 0),
+        projection: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1),
+        selectedAreas: Array.from(document.querySelectorAll('.area-check:checked')).map(cb => cb.dataset.slug)
+      };
+    }
+
+    function areaRow(slug) {
+      return areas.find(a => a.slug === slug);
+    }
+
+    function compute() {
+      const inp = getInputs();
+      const depth = depths[inp.auditDepth] || depths.standard;
+      const selected = inp.selectedAreas.map(areaRow).filter(Boolean);
+
+      // Endpoint complexity factor: 2.5% extra per endpoint beyond 1
+      const endpointFactor = 1 + Math.max(0, inp.numEndpoints - 1) * 0.025;
+
+      let totalHours = 0;
+      let totalTests = 0;
+      let totalFindings = 0;
+      let areaLaborTotal = 0;
+
+      areas.forEach(a => {
+        const enabled = selected.some(s => s.slug === a.slug);
+        const hours = enabled ? a.base_hours * depth.hour_multiplier * endpointFactor : 0;
+        const tests = enabled ? a.tests_default * depth.test_multiplier : 0;
+        const findings = enabled ? Math.round(tests * a.findings_rate) : 0;
+        const blendedRate = (inp.externalRate * inp.externalPct / 100) + (inp.internalRate * (1 - inp.externalPct / 100));
+        const cost = hours * blendedRate;
+
+        totalHours += hours;
+        totalTests += tests;
+        totalFindings += findings;
+        areaLaborTotal += cost;
+
+        const row = document.querySelector(`#areasBody tr[data-area="${a.slug}"]`);
+        if (row) {
+          row.style.opacity = enabled ? '1' : '0.4';
+          document.getElementById(`hours-${a.slug}`).textContent = enabled ? fmt1(hours) : '—';
+          document.getElementById(`tests-${a.slug}`).textContent = enabled ? Math.round(tests).toLocaleString() : '—';
+          document.getElementById(`findings-${a.slug}`).textContent = enabled ? findings.toLocaleString() : '—';
+          document.getElementById(`cost-${a.slug}`).textContent = enabled ? fmt(cost) : '—';
+        }
+      });
+
+      // Overhead from auditor tier
+      const tier = tiers[inp.auditorTier] || tiers.boutique;
+      const overheadPct = tier.overhead_pct / 100;
+      const toolingCost = autoTools[inp.autoTool]?.monthly_cost || 0;
+
+      // Tooling is charged during audit period: assume one audit cycle ~= report weeks converted to months, but we allow projection months override by charging per month the tool is kept
+      const reportMonths = Math.max(1, depth.report_weeks / 4);
+      const toolingPeriod = Math.min(inp.projection, Math.max(reportMonths, 1));
+      const toolingCostTotal = toolingCost * toolingPeriod;
+
+      // Remediation cost: hours * blended rate * depth multiplier
+      const blendedRate = (inp.externalRate * inp.externalPct / 100) + (inp.internalRate * (1 - inp.externalPct / 100));
+      const remediationCost = inp.remediationHours * blendedRate * depth.remediation_multiplier;
+
+      // External vs internal split
+      const externalHours = totalHours * (inp.externalPct / 100);
+      const internalHours = totalHours - externalHours;
+      const externalLaborCost = externalHours * inp.externalRate * (1 + overheadPct);
+      const internalLaborCost = internalHours * inp.internalRate;
+      const totalLaborCost = externalLaborCost + internalLaborCost;
+
+      const totalCost = totalLaborCost + toolingCostTotal + remediationCost;
+      const periodCost = totalCost; // audit is one-time-ish but tooling repeats; we'll show total period projection if projection > toolingPeriod
+      const repeatedTooling = toolingCost * Math.max(0, inp.projection - toolingPeriod);
+      const totalPeriodCost = totalCost + repeatedTooling;
+
+      // Update summary
+      if (selected.length === 0) {
+        document.getElementById('totalLine').textContent = 'Select at least one audit area.';
+        document.getElementById('perControlLine').textContent = '—';
+        document.getElementById('timelineLine').textContent = '—';
+      } else {
+        document.getElementById('totalLine').textContent = fmt(totalCost);
+        document.getElementById('perControlLine').textContent = `${fmt(totalCost / selected.length)} per control area • ${fmt(totalCost / Math.max(1, totalTests))} per test`;
+        document.getElementById('timelineLine').textContent = `Estimated audit timeline: ${depth.report_weeks} week${depth.report_weeks === 1 ? '' : 's'} • ${totalFindings.toLocaleString()} expected findings`;
+      }
+
+      document.getElementById('laborCost').textContent = fmt(totalLaborCost);
+      document.getElementById('externalCost').textContent = fmt(externalLaborCost);
+      document.getElementById('toolCost').textContent = fmt(toolingCostTotal) + (inp.projection > toolingPeriod ? ` (${fmt(repeatedTooling)} recurring)` : '');
+      document.getElementById('remediationCost').textContent = fmt(remediationCost);
+
+      const verdictEl = document.getElementById('verdict');
+      if (selected.length === 0) {
+        verdictEl.textContent = 'Select at least one audit area to see a strategy verdict.';
+      } else {
+        const externalShare = totalCost > 0 ? externalLaborCost / totalCost : 0;
+        let strategy = '';
+        if (inp.auditDepth === 'redteam') {
+          strategy = `A red-team engagement is appropriate for high-risk agents. Keep ${Math.round(externalShare * 100)}% external if you need a report for customers, regulators, or SOC 2 auditors.`;
+        } else if (inp.auditDepth === 'deep') {
+          strategy = `A deep audit with code review gives you defensible findings. Consider retesting critical findings with an automated suite to catch regressions.`;
+        } else if (inp.auditDepth === 'light') {
+          strategy = `A light audit is a good quarterly checkpoint. Pair it with automated scanners so you catch regressions without burning senior hours.`;
+        } else {
+          strategy = `Standard audits balance coverage and cost. Split work so external testers handle novel attacks while internal staff validate fixes.`;
+        }
+        verdictEl.innerHTML = `<strong>${depth.label}</strong> for ${selected.length} area${selected.length === 1 ? '' : 's'} across ${inp.numEndpoints} endpoint${inp.numEndpoints === 1 ? '' : 's'}. ${strategy} Projected ${inp.projection}-month cost including any recurring tooling: <strong>${fmt(totalPeriodCost)}</strong>.`;
+      }
+    }
+
+    function applyPreset(slug) {
+      const p = presets.find(x => x.slug === slug);
+      if (!p) return;
+      document.getElementById('auditDepth').value = p.audit_depth;
+      document.getElementById('numEndpoints').value = p.num_endpoints;
+      document.getElementById('externalPct').value = p.external_pct;
+      document.getElementById('remediationHours').value = p.remediation_hours;
+      document.querySelectorAll('.area-check').forEach(cb => {
+        cb.checked = p.areas.includes(cb.dataset.slug);
+      });
+      // Update external rate to match current tier default if user hasn't manually overridden; here we just recompute
+      compute();
+    }
+
+    // Listeners
+    ['auditDepth', 'auditorTier', 'autoTool', 'externalPct', 'externalRate', 'internalRate', 'numEndpoints', 'remediationHours', 'projectionMonths'].forEach(id => {
+      document.getElementById(id).addEventListener('input', (e) => {
+        if (id === 'auditorTier') {
+          const t = tiers[e.target.value];
+          document.getElementById('externalRate').value = t.hourly_rate;
+        }
+        compute();
+      });
+    });
+    document.querySelectorAll('.area-check').forEach(cb => cb.addEventListener('change', compute));
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
+
+    compute();
+  </script>
+</Layout>
