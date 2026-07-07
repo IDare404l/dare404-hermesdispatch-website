@@ -1,0 +1,344 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_knowledge_graph_cost.json';
+
+const title = "AI Agent Knowledge Graph / Ontology Cost Calculator | Hermes Dispatch";
+const description = "Estimate the cost to build, store, embed, and query a knowledge graph or ontology for AI agent memory. Compare managed graph DBs vs self-hosted RDF stores.";
+const extractionModels = data.extraction_models;
+const storageBackends = data.storage_backends;
+const embeddingModels = data.embedding_models;
+const presets = data.presets;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is a knowledge graph for an AI agent?", a: "A knowledge graph stores entities (people, products, concepts) and their relationships as structured nodes and edges. Agents use it for grounded retrieval, reasoning, and long-term memory beyond vector-only RAG." },
+  { q: "When should I use a graph DB instead of plain vector RAG?", a: "Use a graph when answers depend on multi-hop relationships, precise lineage, or schema constraints. Vector RAG is cheaper and simpler for semantic similarity search over unstructured text." },
+  { q: "What drives the biggest knowledge-graph costs?", a: "Entity extraction via an LLM usually dominates the one-time build cost. At scale, monthly storage base fees and high query volumes can exceed extraction costs within a year." },
+  { q: "Are self-hosted graph stores always cheaper?", a: "Not always. Self-hosted Oxigraph or PostgreSQL avoid per-entity/per-query metered pricing, but you pay VM, backup, and operational labor. Managed options win at small scale and for teams without a DBA." },
+  { q: "How often should I refresh the graph?", a: "Refresh when source documents or schemas change. Many production agents do a full rebuild quarterly and incremental updates weekly or daily, depending on how fast new entities appear." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Knowledge Graph / Ontology Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-knowledge-graph-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🕸️</div>
+      <h1 class="display-heading mb-4">AI Agent Knowledge Graph / Ontology Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the cost to build, store, embed, and query a knowledge graph or ontology for AI agent memory.</p>
+    </div>
+
+    <!-- Presets -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {Object.entries(presets).map(([slug, p]) => (
+        <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset={slug}>
+          <div class="text-2xl mb-2">{p.emoji}</div>
+          <h3 class="font-semibold text-sm">{p.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1">{p.entity_count.toLocaleString()} entities • {p.projection_months} months</p>
+        </button>
+      ))}
+    </div>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Graph scope</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Initial entities</span>
+          <input id="entityCount" type="number" min="0" step="100" value={defaults.entity_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Relations per entity</span>
+          <input id="relationsPerEntity" type="number" min="0" step="0.5" value={defaults.relations_per_entity} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">New entities per month</span>
+          <input id="newEntitiesPerMonth" type="number" min="0" step="50" value={defaults.new_entities_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Extraction model</span>
+          <select id="extractionModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {Object.entries(extractionModels).map(([k, v]) => (
+              <option value={k} selected={k === defaults.extraction_model}>{v.label}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage backend</span>
+          <select id="storageBackend" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {Object.entries(storageBackends).map(([k, v]) => (
+              <option value={k} selected={k === defaults.storage_backend}>{v.label}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Entity embedding model</span>
+          <select id="embeddingModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {Object.entries(embeddingModels).map(([k, v]) => (
+              <option value={k} selected={k === defaults.embedding_model}>{v.label}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Queries per month</span>
+          <input id="queriesPerMonth" type="number" min="0" step="1000" value={defaults.queries_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="humanReviewRate" type="number" min="0" max="100" step="5" value={defaults.human_review_rate * 100} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review hourly rate ($)</span>
+          <input id="reviewHourlyRate" type="number" min="0" step="5" value={defaults.review_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Source docs per entity</span>
+          <input id="docsPerEntity" type="number" min="0.1" step="0.1" value={defaults.docs_per_entity} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tokens per source doc</span>
+          <input id="tokensPerDoc" type="number" min="50" step="50" value={defaults.tokens_per_doc} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm">Prices are directional USD estimates. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/30 text-center">
+      <p class="text-xs text-neutral-500 uppercase mb-1">Estimated total {defaults.projection_months}-month cost</p>
+      <p id="totalLine" class="text-3xl font-bold text-brand-gold">Enter scope to see cost.</p>
+      <p id="monthlyLine" class="text-sm text-neutral-400 mt-1">—</p>
+      <p id="buildLine" class="text-sm text-neutral-400 mt-1">—</p>
+    </section>
+
+    <!-- Breakdown -->
+    <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Initial build</p>
+        <p id="buildCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly steady-state</p>
+        <p id="monthlyCost" class="text-2xl font-bold text-cyan-400">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Storage / queries</p>
+        <p id="storageCost" class="text-2xl font-bold text-cyan-400">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review</p>
+        <p id="reviewCost" class="text-2xl font-bold text-cyan-400">—</p>
+      </div>
+    </section>
+
+    <!-- Backend comparison -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Backend comparison (monthly steady-state)</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Backend</th>
+            <th class="py-3 pr-4 text-right">Base</th>
+            <th class="py-3 pr-4 text-right">Entities</th>
+            <th class="py-3 pr-4 text-right">Queries</th>
+            <th class="py-3 pr-4 text-right">Writes</th>
+            <th class="py-3 pr-4 text-right">Total / mo</th>
+          </tr>
+        </thead>
+        <tbody id="backendBody" class="text-neutral-200">
+          {Object.entries(storageBackends).map(([k, v]) => (
+            <tr class="border-b border-neutral-800/50" data-backend={k}>
+              <td class="py-3 pr-4 font-medium">{v.label}</td>
+              <td id={`base-${k}`} class="py-3 pr-4 text-right font-mono">—</td>
+              <td id={`ent-${k}`} class="py-3 pr-4 text-right font-mono">—</td>
+              <td id={`q-${k}`} class="py-3 pr-4 text-right font-mono">—</td>
+              <td id={`w-${k}`} class="py-3 pr-4 text-right font-mono">—</td>
+              <td id={`tot-${k}`} class="py-3 pr-4 text-right font-mono">—</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Insight -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Graph strategy</h2>
+      <p id="verdict" class="text-neutral-300">Enter a scope to see a strategy verdict.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-memory-cost-calculator/" class="btn-primary text-sm">Agent Memory / RAG Cost Calc →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+      <a href="/tools/agent-task-fit-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Task Fit Selector →</a>
+    </div>
+
+    <!-- Note -->
+    <section id="note" class="glass-card rounded-2xl p-6 border border-brand-gold/10">
+      <h2 class="text-lg font-bold mb-2 text-brand-gold">Notes</h2>
+      <ul class="text-sm text-neutral-400 list-disc pl-5 space-y-1">
+        <li>Entity extraction assumes each entity requires reading one or more source documents and generating structured output.</li>
+        <li>Storage costs include a monthly base fee plus metered per-entity and per-query/write pricing where applicable.</li>
+        <li>Embedding costs cover one embedding per entity; relation embeddings are not included unless you treat relations as separate entities.</li>
+        <li>Human review cost assumes a fixed number of minutes per entity reviewed at the specified hourly rate.</li>
+        <li>Self-hosted backends use a flat VM/hosting estimate; adjust base fee if your cluster size differs.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ extractionModels, storageBackends, embeddingModels, presets }}>
+    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+    function $(id) { return document.getElementById(id); }
+    function num(id) { return parseFloat($(id).value) || 0; }
+    function model(id) { return extractionModels[$(id).value] || extractionModels.openai_gpt4o_mini; }
+    function backend(id) { return storageBackends[$(id).value] || storageBackends.neo4j_aura; }
+    function emb(id) { return embeddingModels[$(id).value] || embeddingModels.openai_ada_002; }
+
+    function compute() {
+      const entityCount = num('entityCount');
+      const relationsPerEntity = num('relationsPerEntity');
+      const newEntitiesPerMonth = num('newEntitiesPerMonth');
+      const queriesPerMonth = num('queriesPerMonth');
+      const projectionMonths = num('projectionMonths');
+      const humanReviewRate = num('humanReviewRate') / 100;
+      const reviewHourlyRate = num('reviewHourlyRate');
+      const docsPerEntity = num('docsPerEntity');
+      const tokensPerDoc = num('tokensPerDoc');
+
+      const em = model('extractionModel');
+      const sb = backend('storageBackend');
+      const embModel = emb('embeddingModel');
+
+      const relationCount = entityCount * relationsPerEntity;
+      const totalObjects = entityCount + relationCount;
+      const docsForBuild = entityCount * docsPerEntity;
+      const tokensForBuild = docsForBuild * tokensPerDoc;
+      const extractionInputTokens = totalObjects * em.input_per_entity;
+      const extractionOutputTokens = totalObjects * em.output_per_entity;
+      const extractionBuildCost = (extractionInputTokens * em.input_rate + extractionOutputTokens * em.output_rate) / 1e6;
+
+      const embeddingTokens = totalObjects * (tokensPerDoc * 0.6);
+      const embeddingBuildCost = (embeddingTokens * embModel.rate_per_1m) / 1e6;
+
+      const reviewHours = totalObjects * humanReviewRate * 0.08;
+      const reviewBuildCost = reviewHours * reviewHourlyRate;
+
+      const initialBuild = extractionBuildCost + embeddingBuildCost + reviewBuildCost;
+
+      // Monthly recurring
+      const monthlyNewObjects = newEntitiesPerMonth * (1 + relationsPerEntity);
+      const monthlyExtractionInput = monthlyNewObjects * em.input_per_entity;
+      const monthlyExtractionOutput = monthlyNewObjects * em.output_per_entity;
+      const monthlyExtractionCost = (monthlyExtractionInput * em.input_rate + monthlyExtractionOutput * em.output_rate) / 1e6;
+
+      const monthlyEmbeddingTokens = monthlyNewObjects * (tokensPerDoc * 0.6);
+      const monthlyEmbeddingCost = (monthlyEmbeddingTokens * embModel.rate_per_1m) / 1e6;
+
+      const totalEntitiesAfterProjection = entityCount + newEntitiesPerMonth * projectionMonths;
+      const monthlyStorageEntityCost = (totalEntitiesAfterProjection / 1000) * sb.per_1k_entities;
+      const monthlyQueryCost = queriesPerMonth * sb.query_rate;
+      const monthlyWriteCost = monthlyNewObjects * sb.write_rate;
+      const monthlyStorageCost = sb.monthly_base + monthlyStorageEntityCost + monthlyQueryCost + monthlyWriteCost;
+
+      const monthlyReviewHours = monthlyNewObjects * humanReviewRate * 0.08;
+      const monthlyReviewCost = monthlyReviewHours * reviewHourlyRate;
+
+      const monthlyTotal = monthlyExtractionCost + monthlyEmbeddingCost + monthlyStorageCost + monthlyReviewCost;
+      const totalCost = initialBuild + monthlyTotal * projectionMonths;
+
+      $('totalLine').textContent = fmt.format(totalCost);
+      $('monthlyLine').textContent = `${fmt.format(monthlyTotal)} / month steady-state • ${fmt.format(initialBuild)} initial build`;
+      $('buildLine').textContent = `${totalObjects.toLocaleString()} nodes + edges • ${fmt.format(totalCost / (queriesPerMonth * projectionMonths || 1))} per query over ${projectionMonths} months`;
+      $('buildCost').textContent = fmt.format(initialBuild);
+      $('monthlyCost').textContent = fmt.format(monthlyTotal);
+      $('storageCost').textContent = fmt.format(monthlyStorageCost);
+      $('reviewCost').textContent = fmt.format(monthlyReviewCost);
+
+      // Backend comparison (steady-state)
+      Object.entries(storageBackends).forEach(([k, v]) => {
+        const base = v.monthly_base;
+        const ent = (totalEntitiesAfterProjection / 1000) * v.per_1k_entities;
+        const q = queriesPerMonth * v.query_rate;
+        const w = monthlyNewObjects * v.write_rate;
+        const tot = base + ent + q + w;
+        $(`base-${k}`).textContent = fmt.format(base);
+        $(`ent-${k}`).textContent = fmt.format(ent);
+        $(`q-${k}`).textContent = fmt.format(q);
+        $(`w-${k}`).textContent = fmt.format(w);
+        $(`tot-${k}`).textContent = fmt.format(tot);
+      });
+
+      // Verdict
+      const cheapestBackend = Object.entries(storageBackends).reduce((a, b) => {
+        const costA = a[1].monthly_base + (totalEntitiesAfterProjection / 1000) * a[1].per_1k_entities + queriesPerMonth * a[1].query_rate + monthlyNewObjects * a[1].write_rate;
+        const costB = b[1].monthly_base + (totalEntitiesAfterProjection / 1000) * b[1].per_1k_entities + queriesPerMonth * b[1].query_rate + monthlyNewObjects * b[1].write_rate;
+        return costA < costB ? a : b;
+      });
+
+      let verdict = '';
+      if (monthlyTotal > initialBuild && projectionMonths > 3) {
+        verdict = `At this scale, recurring query + storage costs overtake the initial build cost after a few months. The cheapest storage backend for your projected graph is ${cheapestBackend[1].label}. `;
+      } else {
+        verdict = `The one-time extraction and review cost dominates. The cheapest storage backend for your projected graph is ${cheapestBackend[1].label}. `;
+      }
+      if (em.input_rate === 0) {
+        verdict += 'Using a local LLM for extraction removes API cost but adds hardware and review overhead.';
+      } else if (em.quality >= 0.95) {
+        verdict += 'A high-quality extraction model reduces downstream review labor.';
+      } else {
+        verdict += 'Consider a stronger extraction model if review costs are high.';
+      }
+      $('verdict').textContent = verdict;
+    }
+
+    function applyPreset(slug) {
+      const p = presets[slug];
+      if (!p) return;
+      $('entityCount').value = p.entity_count;
+      $('relationsPerEntity').value = p.relations_per_entity;
+      $('newEntitiesPerMonth').value = p.new_entities_per_month;
+      $('extractionModel').value = p.extraction_model;
+      $('storageBackend').value = p.storage_backend;
+      $('embeddingModel').value = p.embedding_model;
+      $('queriesPerMonth').value = p.queries_per_month;
+      $('projectionMonths').value = p.projection_months;
+      $('humanReviewRate').value = p.human_review_rate * 100;
+      $('reviewHourlyRate').value = p.review_hourly_rate;
+      compute();
+    }
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
+
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
+    compute();
+  </script>
+</Layout>

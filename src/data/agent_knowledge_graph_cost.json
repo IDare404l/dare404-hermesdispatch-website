@@ -1,0 +1,99 @@
+{
+  "last_updated": "2026-07-07",
+  "extraction_models": {
+    "openai_gpt4o_mini": { "label": "OpenAI GPT-4o-mini", "input_rate": 0.15, "output_rate": 0.60, "input_per_entity": 120, "output_per_entity": 45, "quality": 0.85 },
+    "openai_gpt4o": { "label": "OpenAI GPT-4o", "input_rate": 2.50, "output_rate": 10.00, "input_per_entity": 100, "output_per_entity": 40, "quality": 0.95 },
+    "anthropic_haiku": { "label": "Anthropic Claude 3.5 Haiku", "input_rate": 0.25, "output_rate": 1.25, "input_per_entity": 130, "output_per_entity": 50, "quality": 0.80 },
+    "anthropic_sonnet": { "label": "Anthropic Claude 3.5 Sonnet", "input_rate": 3.00, "output_rate": 15.00, "input_per_entity": 110, "output_per_entity": 42, "quality": 0.95 },
+    "local_llm": { "label": "Local quantized LLM (free runtime)", "input_rate": 0.00, "output_rate": 0.00, "input_per_entity": 140, "output_per_entity": 55, "quality": 0.70 }
+  },
+  "storage_backends": {
+    "neo4j_aura": { "label": "Neo4j AuraDB", "monthly_base": 65, "per_1k_entities": 0.18, "query_rate": 0.002, "write_rate": 0.005, "notes": "Managed graph DB; base includes 8 GB RAM instance" },
+    "amazon_neptune": { "label": "Amazon Neptune Serverless", "monthly_base": 0, "per_1k_entities": 0.05, "query_rate": 0.0008, "write_rate": 0.002, "notes": "Pay-per-use; assumes db.r6g.large minimum capacity" },
+    "azure_digital_twins": { "label": "Azure Digital Twins", "monthly_base": 0, "per_1k_entities": 0.08, "query_rate": 0.001, "write_rate": 0.002, "notes": "Per-query billing with digital twin lifecycle events" },
+    "oxigraph_self_hosted": { "label": "Oxigraph / RDFlib self-hosted", "monthly_base": 35, "per_1k_entities": 0.00, "query_rate": 0.0000, "write_rate": 0.0000, "notes": "RDF triplestore on VPS; base is VM cost only" },
+    "memgraph_cloud": { "label": "Memgraph Cloud", "monthly_base": 49, "per_1k_entities": 0.12, "query_rate": 0.0015, "write_rate": 0.004, "notes": "Includes 2 vCPU / 8 GB starter instance" },
+    "typedb_cloud": { "label": "TypeDB Cloud", "monthly_base": 99, "per_1k_entities": 0.10, "query_rate": 0.002, "write_rate": 0.005, "notes": "Strong-schema managed knowledge graph" },
+    "arangodb_oasis": { "label": "ArangoDB Oasis", "monthly_base": 59, "per_1k_entities": 0.15, "query_rate": 0.001, "write_rate": 0.003, "notes": "Multi-model DB with graph analytics" },
+    "postgres_pgvector": { "label": "PostgreSQL + pgvector (self-hosted)", "monthly_base": 45, "per_1k_entities": 0.00, "query_rate": 0.0000, "write_rate": 0.0000, "notes": "Store entities in relational rows + vector index; base is VM cost" }
+  },
+  "embedding_models": {
+    "openai_ada_002": { "label": "OpenAI text-embedding-3-small", "rate_per_1m": 2.00, "dims": 1536 },
+    "openai_3_large": { "label": "OpenAI text-embedding-3-large", "rate_per_1m": 13.00, "dims": 3072 },
+    "cohere_embed": { "label": "Cohere embed-english-v3", "rate_per_1m": 10.00, "dims": 1024 },
+    "local_bge": { "label": "Local BGE / GTE (free runtime)", "rate_per_1m": 0.00, "dims": 768 },
+    "none": { "label": "No entity embeddings", "rate_per_1m": 0.00, "dims": 0 }
+  },
+  "presets": {
+    "support_kb": {
+      "name": "Support knowledge graph",
+      "emoji": "🎧",
+      "entity_count": 5000,
+      "relations_per_entity": 3,
+      "extraction_model": "openai_gpt4o_mini",
+      "storage_backend": "neo4j_aura",
+      "embedding_model": "openai_ada_002",
+      "queries_per_month": 50000,
+      "new_entities_per_month": 800,
+      "projection_months": 12,
+      "human_review_rate": 0.10,
+      "review_hourly_rate": 75
+    },
+    "research_graph": {
+      "name": "Research intelligence graph",
+      "emoji": "🔬",
+      "entity_count": 25000,
+      "relations_per_entity": 5,
+      "extraction_model": "openai_gpt4o",
+      "storage_backend": "amazon_neptune",
+      "embedding_model": "openai_3_large",
+      "queries_per_month": 200000,
+      "new_entities_per_month": 3000,
+      "projection_months": 12,
+      "human_review_rate": 0.20,
+      "review_hourly_rate": 90
+    },
+    "product_catalog": {
+      "name": "Product / catalog ontology",
+      "emoji": "🛒",
+      "entity_count": 10000,
+      "relations_per_entity": 4,
+      "extraction_model": "anthropic_haiku",
+      "storage_backend": "memgraph_cloud",
+      "embedding_model": "cohere_embed",
+      "queries_per_month": 120000,
+      "new_entities_per_month": 1500,
+      "projection_months": 12,
+      "human_review_rate": 0.05,
+      "review_hourly_rate": 60
+    },
+    "compliance_graph": {
+      "name": "Compliance / risk ontology",
+      "emoji": "📋",
+      "entity_count": 15000,
+      "relations_per_entity": 6,
+      "extraction_model": "anthropic_sonnet",
+      "storage_backend": "typedb_cloud",
+      "embedding_model": "openai_3_large",
+      "queries_per_month": 80000,
+      "new_entities_per_month": 500,
+      "projection_months": 12,
+      "human_review_rate": 0.30,
+      "review_hourly_rate": 120
+    }
+  },
+  "defaults": {
+    "entity_count": 10000,
+    "relations_per_entity": 4,
+    "extraction_model": "openai_gpt4o_mini",
+    "storage_backend": "neo4j_aura",
+    "embedding_model": "openai_ada_002",
+    "queries_per_month": 100000,
+    "new_entities_per_month": 1200,
+    "projection_months": 12,
+    "human_review_rate": 0.10,
+    "review_hourly_rate": 75,
+    "docs_per_entity": 1.5,
+    "tokens_per_doc": 600
+  }
+}

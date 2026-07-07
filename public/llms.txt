@@ -488,13 +488,21 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||||||||||||- Outputs: monthly cost for selected model, cost per 1k requests, full provider comparison table, projected period cost
 |||||||||||||- Audience: AI agent builders budgeting API spend before launch
 |||||||||||||
-||||||||||||||## AI Agent Outreach Campaign Cost Calculator
-|||||||||||||||- URL: https://hermesdispatch.dev/tools/agent-outreach-cost-calculator/
-|||||||||||||||- Description: Estimate per-contact and monthly cost for AI-powered email, SMS, LinkedIn, and voice outreach campaigns.
-|||||||||||||||- Inputs: monthly contacts, channel mix (email/SMS/LinkedIn/voice %), list/enrichment cost per contact, platform subscription, email send cost, SMS cost, LinkedIn platform cost, voice cost per minute, average voice minutes, LLM API cost per contact, human review rate, review minutes, SDR hourly rate, positive reply rate, value per positive reply, setup/maintenance hours and rates, projection months
-|||||||||||||||- Outputs: cost per contact, cost per positive reply, monthly campaign cost, monthly positive replies, monthly gross value, net monthly ROI, cost breakdown table, 12-month projection, verdict
-|||||||||||||||- Audience: AI SDR teams, growth marketers, and agent builders budgeting outbound campaigns
-|||||||||||||||- Cross-links: Agent Output Value Calculator, AI Voice Agent Cost Calculator, Agent vs Human Hire Calculator, API Pricing Comparator
+|||||||||||||||## AI Agent Outreach Campaign Cost Calculator
+||||||||||||||||- URL: https://hermesdispatch.dev/tools/agent-outreach-cost-calculator/
+||||||||||||||||- Description: Estimate per-contact and monthly cost for AI-powered email, SMS, LinkedIn, and voice outreach campaigns.
+||||||||||||||||- Inputs: monthly contacts, channel mix (email/SMS/LinkedIn/voice %), list/enrichment cost per contact, platform subscription, email send cost, SMS cost, LinkedIn platform cost, voice cost per minute, average voice minutes, LLM API cost per contact, human review rate, review minutes, SDR hourly rate, positive reply rate, value per positive reply, setup/maintenance hours and rates, projection months
+||||||||||||||||- Outputs: cost per contact, cost per positive reply, monthly campaign cost, monthly positive replies, monthly gross value, net monthly ROI, cost breakdown table, 12-month projection, verdict
+||||||||||||||||- Audience: AI SDR teams, growth marketers, and agent builders budgeting outbound campaigns
+||||||||||||||||- Cross-links: Agent Output Value Calculator, AI Voice Agent Cost Calculator, Agent vs Human Hire Calculator, API Pricing Comparator
+
+|||||||||||||||||## AI Agent Knowledge Graph / Ontology Cost Calculator
+|||||||||||||||||- URL: https://hermesdispatch.dev/tools/agent-knowledge-graph-cost-calculator/
+|||||||||||||||||- Description: Estimate the cost to build, store, embed, and query a knowledge graph or ontology for AI agent memory.
+|||||||||||||||||- Inputs: initial entities, relations per entity, new entities per month, extraction model, storage backend, entity embedding model, queries per month, projection months, human review rate, review hourly rate, source docs per entity, tokens per source doc
+|||||||||||||||||- Outputs: total projected cost, initial build cost, monthly steady-state cost, monthly storage/query/write cost, monthly human review cost, backend comparison table, per-query cost over period, verdict
+|||||||||||||||||- Audience: AI agent builders choosing between graph DBs, RDF stores, and relational+vector backends for agent memory
+|||||||||||||||||- Cross-links: Agent Memory / RAG Cost Calculator, Agent API Pricing Comparator, Agent Stack Builder, Agent Task Fit Selector
 
 ## GPU Power Supply & Cooling Sizer
 |- URL: https://hermesdispatch.dev/tools/gpu-power-cooling-sizer/
