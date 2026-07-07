@@ -520,10 +520,17 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Cross-links: AI PC Build Configurator, VRAM Calculator, GPU Comparison, Rig Repurposing Guide
 ||
 |## AI Agent Tool Call Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-tool-call-cost-calculator/
-|- Description: Estimate monthly cost for AI agents that call tools: web search, databases, code interpreters, browser actions, and external APIs.
-|- Inputs: monthly agent tasks, tool calls per task, cost per tool call, failure rate, retry rate, retry cost multiplier, human review rate, review hourly cost, review minutes per task, setup hours, setup hourly rate, maintenance hours per month, projection months
-|- Outputs: monthly tool calls, failed calls, retry calls, monthly tool cost, failure cost, retry cost, human review cost, maintenance cost, total monthly cost, cost per task, cost per 1k tasks, setup cost, projected period cost, verdict
-|- Audience: AI agent builders budgeting tool-use spend for retrieval, browser, code, and SaaS actions
-|- Cross-links: Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Output Value Calculator, Agent Model Router Cost Calculator
-|
+||- URL: https://hermesdispatch.dev/tools/agent-tool-call-cost-calculator/
+||- Description: Estimate monthly cost for AI agents that call tools: web search, databases, code interpreters, browser actions, and external APIs.
+||- Inputs: monthly agent tasks, tool calls per task, cost per tool call, failure rate, retry rate, retry cost multiplier, human review rate, review hourly cost, review minutes per task, setup hours, setup hourly rate, maintenance hours per month, projection months
+||- Outputs: monthly tool calls, failed calls, retry calls, monthly tool cost, failure cost, retry cost, human review cost, maintenance cost, total monthly cost, cost per task, cost per 1k tasks, setup cost, projected period cost, verdict
+||- Audience: AI agent builders budgeting tool-use spend for retrieval, browser, code, and SaaS actions
+||- Cross-links: Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Output Value Calculator, Agent Model Router Cost Calculator
+||
+||## AI Agent LLM Router Benchmarker
+||- URL: https://hermesdispatch.dev/tools/agent-llm-router-benchmarker/
+||- Description: Benchmark and score multi-provider LLM routing strategies for an AI agent by cost, latency, quality, and fallback reliability.
+||- Inputs: routing strategy, scoring profile, monthly requests, input/output tokens per request, cached input ratio, fallback rate, retry rate, quality target, latency target, fallback depth
+||- Outputs: weighted benchmark score, cost/latency/quality/reliability sub-scores, estimated monthly routing cost, fallback success probability, Pareto frontier status, recommended strategy, verdict
+||- Audience: AI agent builders choosing or tuning multi-provider LLM routing
+||- Cross-links: Agent Model Router / Fallback Cost Calculator, Agent Benchmark Selector, API Pricing Comparator, Agent Latency Budget Calculator

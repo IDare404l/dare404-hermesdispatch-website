@@ -1,0 +1,400 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_llm_router_benchmarker.json';
+
+const title = "AI Agent LLM Router Benchmarker | Hermes Dispatch";
+const description = "Benchmark and score multi-provider LLM routing strategies for an AI agent by cost, latency, quality, and fallback reliability.";
+
+const providers = data.providers;
+const strategies = data.routing_strategies;
+const profiles = data.scoring_profiles;
+const workloads = data.workload_patterns;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is an AI agent LLM router benchmarker?", a: "It scores different multi-provider routing strategies against your actual workload priorities: cost, latency, quality, and reliability. You can see which strategy wins before you write the routing code." },
+  { q: "How is the weighted score calculated?", a: "Each provider/strategy combo gets normalized sub-scores for cost (cheaper is better), latency (faster is better), quality, and reliability. Your chosen scoring profile assigns weights to those sub-scores and the tool sums them into a 0-100 benchmark score." },
+  { q: "What do the Pareto frontier notes mean?", a: "A strategy is on the Pareto frontier if no other strategy beats it on all four dimensions simultaneously. Off-frontier strategies are dominated and usually only make sense for narrow edge cases." },
+  { q: "Which routing strategy is best for most agents?", a: "Balanced Cost + Quality is the safest default. It keeps the cost reasonable while reserving premium models for complex tasks detected by a heuristic or classifier." },
+  { q: "How does fallback depth change the score?", a: "Higher fallback depth improves reliability by giving the router more backup providers, but it adds average latency and cost because some traffic is retried. The benchmark reflects this trade-off." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent LLM Router Benchmarker" description={description} url="https://hermesdispatch.dev/tools/agent-llm-router-benchmarker/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧭</div>
+      <h1 class="display-heading mb-4">AI Agent LLM Router Benchmarker</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Benchmark and score multi-provider LLM routing strategies for your AI agent by cost, latency, quality, and fallback reliability.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Workload preset</h2>
+      <div class="flex flex-wrap gap-3">
+        {workloads.map(w => (
+          <button type="button" class="workload-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-workload={JSON.stringify(w)}>
+            {w.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-3 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20 lg:col-span-1">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload & priorities</h2>
+        <div class="space-y-4">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Routing strategy</span>
+            <select id="strategy" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {strategies.map(s => <option value={s.id} selected={s.id === defaults.strategy_id}>{s.name}</option>)}
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Scoring profile</span>
+            <select id="profile" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {profiles.map(p => <option value={p.id} selected={p.id === defaults.profile_id}>{p.name}</option>)}
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Monthly requests</span>
+            <input id="requests" type="number" min="1" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Input tokens / request</span>
+            <input id="inputTokens" type="number" min="1" step="100" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Output tokens / request</span>
+            <input id="outputTokens" type="number" min="1" step="100" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Cached input ratio (%)</span>
+            <input id="cachedRatio" type="number" min="0" max="100" step="1" value={Math.round(defaults.cached_input_ratio * 100)} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Fallback rate (%)</span>
+            <input id="fallbackRate" type="number" min="0" max="100" step="1" value={Math.round(defaults.fallback_rate * 100)} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Retry rate (%)</span>
+            <input id="retryRate" type="number" min="0" max="100" step="1" value={Math.round(defaults.retry_rate * 100)} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Quality target (0-1)</span>
+            <input id="qualityTarget" type="number" min="0" max="1" step="0.01" value={defaults.quality_target} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Latency target (ms)</span>
+            <input id="latencyTarget" type="number" min="1" step="50" value={defaults.latency_target_ms} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Fallback depth</span>
+            <input id="fallbackDepth" type="number" min="1" max="5" step="1" value={defaults.fallback_depth} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20 lg:col-span-2">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Strategy benchmark scores</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+                <th class="py-3 pr-4">Strategy</th>
+                <th class="py-3 pr-4 text-right">Weighted</th>
+                <th class="py-3 pr-4 text-right">Cost</th>
+                <th class="py-3 pr-4 text-right">Latency</th>
+                <th class="py-3 pr-4 text-right">Quality</th>
+                <th class="py-3 pr-4 text-right">Reliability</th>
+                <th class="py-3 pr-4 text-right">Est. monthly cost</th>
+              </tr>
+            </thead>
+            <tbody id="scoreBody" class="text-neutral-200"></tbody>
+          </table>
+        </div>
+
+        <div id="strategyNote" class="mt-6 text-sm text-neutral-400 p-4 rounded-xl bg-neutral-900/50 border border-neutral-800"></div>
+      </div>
+    </section>
+
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Selected score</p>
+        <p id="selectedScore" class="text-3xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Estimated monthly cost</p>
+        <p id="selectedCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Fallback success probability</p>
+        <p id="fallbackProb" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Pareto frontier</p>
+        <p id="paretoNote" class="text-sm font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Recommendation</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-model-router-cost-calculator/" class="btn-primary text-sm">Model Router Cost Calc →</a>
+      <a href="/tools/agent-benchmark-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Benchmark Selector →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-latency-budget-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Latency Budget Calc →</a>
+    </div>
+
+    <p class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providersJson: JSON.stringify(providers), strategiesJson: JSON.stringify(strategies), profilesJson: JSON.stringify(profiles), workloadsJson: JSON.stringify(workloads), qualityTiersJson: JSON.stringify(data.quality_tiers) }}>
+    const providers = JSON.parse(providersJson);
+    const strategies = JSON.parse(strategiesJson);
+    const profiles = JSON.parse(profilesJson);
+    const workloads = JSON.parse(workloadsJson);
+    const qualityTiers = JSON.parse(qualityTiersJson);
+
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function getInputs() {
+      return {
+        strategyId: document.getElementById('strategy').value,
+        profileId: document.getElementById('profile').value,
+        requests: Math.max(1, parseFloat(document.getElementById('requests').value) || 1),
+        inputTokens: Math.max(1, parseFloat(document.getElementById('inputTokens').value) || 1),
+        outputTokens: Math.max(1, parseFloat(document.getElementById('outputTokens').value) || 1),
+        cachedRatio: Math.min(1, Math.max(0, (parseFloat(document.getElementById('cachedRatio').value) || 0) / 100)),
+        fallbackRate: Math.min(1, Math.max(0, (parseFloat(document.getElementById('fallbackRate').value) || 0) / 100)),
+        retryRate: Math.min(1, Math.max(0, (parseFloat(document.getElementById('retryRate').value) || 0) / 100)),
+        qualityTarget: Math.min(1, Math.max(0, parseFloat(document.getElementById('qualityTarget').value) || 0)),
+        latencyTarget: Math.max(1, parseFloat(document.getElementById('latencyTarget').value) || 1),
+        fallbackDepth: Math.min(5, Math.max(1, parseInt(document.getElementById('fallbackDepth').value) || 1)),
+      };
+    }
+
+    function costPerRequest(provider, cachedRatio, inputTokens, outputTokens) {
+      const inputCost = (provider.input_per_1m / 1e6) * (1 - cachedRatio) + (provider.cached_input_per_1m / 1e6) * cachedRatio;
+      const outputCost = provider.output_per_1m / 1e6;
+      return inputCost * inputTokens + outputCost * outputTokens;
+    }
+
+    function pickProviders(strategy, profile, inputs) {
+      const premium = providers.filter(p => qualityTiers.premium.includes(p.name));
+      const standard = providers.filter(p => qualityTiers.standard.includes(p.name));
+      const fastCheap = providers.filter(p => qualityTiers.fast_cheap.includes(p.name));
+      let primary, fallbackList;
+
+      function sortCost(arr) { return arr.slice().sort((a,b) => (a.input_per_1m + a.output_per_1m) - (b.input_per_1m + b.output_per_1m)); }
+      function sortRel(arr) { return arr.slice().sort((a,b) => b.reliability - a.reliability); }
+      function sortLat(arr) { return arr.slice().sort((a,b) => a.latency_ms - b.latency_ms); }
+      function sortQual(arr) { return arr.slice().sort((a,b) => b.quality_score - a.quality_score); }
+      function sortCache(arr) { return arr.filter(p => p.cached_input_per_1m > 0).sort((a,b) => a.cached_input_per_1m - b.cached_input_per_1m); }
+
+      if (strategy.id === 'cheapest-first') {
+        primary = sortCost(providers)[0];
+        fallbackList = sortCost(providers).slice(1, 1 + inputs.fallbackDepth);
+      } else if (strategy.id === 'quality-first') {
+        primary = sortQual(providers)[0];
+        fallbackList = sortQual(providers).slice(1, 1 + inputs.fallbackDepth);
+      } else if (strategy.id === 'reliability-first') {
+        primary = sortRel(providers)[0];
+        fallbackList = sortRel(providers).slice(1, 1 + inputs.fallbackDepth);
+      } else if (strategy.id === 'cache-optimized') {
+        const cacheProviders = sortCache(providers);
+        primary = cacheProviders[0] || sortCost(providers)[0];
+        fallbackList = (cacheProviders.slice(1, 1 + inputs.fallbackDepth).length ? cacheProviders.slice(1, 1 + inputs.fallbackDepth) : sortLat(providers).slice(0, inputs.fallbackDepth));
+      } else {
+        // balanced: mid-tier primary, premium for complex
+        primary = sortCost(standard)[0] || sortCost(providers)[0];
+        fallbackList = sortQual(providers).slice(0, inputs.fallbackDepth);
+      }
+      if (!fallbackList.length) fallbackList = [providers[1] || providers[0]];
+      return { primary, fallbackList };
+    }
+
+    function effectiveCost(primary, fallbackList, fallbackRate, retryRate, cachedRatio, inputTokens, outputTokens) {
+      const primaryCost = costPerRequest(primary, cachedRatio, inputTokens, outputTokens);
+      const fallbackCost = fallbackList.reduce((sum, p, idx) => {
+        const weight = (fallbackRate / fallbackList.length); // distribute fallback among depth
+        return sum + costPerRequest(p, cachedRatio, inputTokens, outputTokens) * weight;
+      }, 0);
+      const retryCost = (primaryCost + fallbackCost) * retryRate;
+      return primaryCost * (1 - fallbackRate) + fallbackCost + retryCost;
+    }
+
+    function effectiveReliability(primary, fallbackList, fallbackRate, retryRate, fallbackDepth) {
+      const usedDepth = Math.min(fallbackList.length, fallbackDepth);
+      const fallbackRel = usedDepth > 0 ? fallbackList.slice(0, usedDepth).reduce((sum, p) => sum + p.reliability, 0) / usedDepth : primary.reliability;
+      const baseRel = primary.reliability + (1 - primary.reliability) * fallbackRel;
+      const retryBoost = 1 - Math.pow(1 - baseRel, 1 + retryRate);
+      return Math.min(0.999, baseRel + retryBoost * 0.005);
+    }
+
+    function effectiveLatency(primary, fallbackList, fallbackRate, retryRate, extraLatencyMs) {
+      const baseLat = primary.latency_ms;
+      const fallbackLat = fallbackList.length ? fallbackList.reduce((sum, p) => sum + p.latency_ms, 0) / fallbackList.length : baseLat;
+      return baseLat * (1 - fallbackRate) + fallbackLat * fallbackRate + (extraLatencyMs || 0) + retryRate * 300;
+    }
+
+    function effectiveQuality(primary, fallbackList, fallbackRate, strategy, qualityTarget) {
+      const fallbackQual = fallbackList.length ? fallbackList.reduce((sum, p) => sum + p.quality_score, 0) / fallbackList.length : primary.quality_score;
+      let q = primary.quality_score * (1 - fallbackRate) + fallbackQual * fallbackRate;
+      if (strategy.complex_routing) q = Math.max(q, qualityTarget * 0.95);
+      return Math.min(0.98, q);
+    }
+
+    function normalize(values, bestIsHigh) {
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      if (max === min) return values.map(() => 0.5);
+      return values.map(v => bestIsHigh ? (v - min) / (max - min) : (max - v) / (max - min));
+    }
+
+    function scoreStrategy(strategy, profile, inputs) {
+      const { primary, fallbackList } = pickProviders(strategy, profile, inputs);
+      const cost = effectiveCost(primary, fallbackList, inputs.fallbackRate, inputs.retryRate, inputs.cachedRatio, inputs.inputTokens, inputs.outputTokens);
+      const latency = effectiveLatency(primary, fallbackList, inputs.fallbackRate, inputs.retryRate, strategy.typical_extra_latency_ms);
+      const quality = effectiveQuality(primary, fallbackList, inputs.fallbackRate, strategy, inputs.qualityTarget);
+      const reliability = effectiveReliability(primary, fallbackList, inputs.fallbackRate, inputs.retryRate, inputs.fallbackDepth);
+      const monthlyCost = cost * inputs.requests;
+
+      return { strategy, primary, fallbackList, cost, latency, quality, reliability, monthlyCost };
+    }
+
+    function compute() {
+      const inputs = getInputs();
+      const profile = profiles.find(p => p.id === inputs.profileId) || profiles[0];
+
+      const scored = strategies.map(s => scoreStrategy(s, profile, inputs));
+
+      // Normalize across all strategies
+      const costScores = normalize(scored.map(s => s.cost), false);
+      const latScores = normalize(scored.map(s => s.latency), false);
+      const qualScores = normalize(scored.map(s => s.quality), true);
+      const relScores = normalize(scored.map(s => s.reliability), true);
+
+      scored.forEach((s, i) => {
+        s.weighted = 100 * (
+          costScores[i] * profile.cost_weight +
+          latScores[i] * profile.latency_weight +
+          qualScores[i] * profile.quality_weight +
+          relScores[i] * profile.reliability_weight
+        );
+        s.costScore = 100 * costScores[i];
+        s.latScore = 100 * latScores[i];
+        s.qualScore = 100 * qualScores[i];
+        s.relScore = 100 * relScores[i];
+      });
+
+      scored.sort((a,b) => b.weighted - a.weighted);
+
+      // Pareto frontier: non-dominated strategies
+      const frontier = scored.filter(a => !scored.some(b =>
+        b !== a &&
+        b.costScore >= a.costScore &&
+        b.latScore >= a.latScore &&
+        b.qualScore >= a.qualScore &&
+        b.relScore >= a.relScore &&
+        (b.costScore > a.costScore || b.latScore > a.latScore || b.qualScore > a.qualScore || b.relScore > a.relScore)
+      ));
+      const frontierIds = new Set(frontier.map(s => s.strategy.id));
+
+      // Render table
+      const tbody = document.getElementById('scoreBody');
+      const selectedStrategy = document.getElementById('strategy').value;
+      tbody.innerHTML = scored.map(s => {
+        const isSelected = s.strategy.id === selectedStrategy;
+        const onFrontier = frontierIds.has(s.strategy.id);
+        return `
+          <tr class="border-b border-neutral-800/50 ${isSelected ? 'bg-brand-gold/10' : ''} ${onFrontier ? '' : 'opacity-70'}">
+            <td class="py-3 pr-4 font-medium">${s.strategy.name}${onFrontier ? ' <span class="text-xs text-brand-gold ml-1">★</span>' : ''}${isSelected ? ' <span class="text-xs text-cyan-400 ml-1">(selected)</span>' : ''}</td>
+            <td class="py-3 pr-4 text-right font-bold text-brand-gold">${s.weighted.toFixed(1)}</td>
+            <td class="py-3 pr-4 text-right font-mono">${s.costScore.toFixed(0)}</td>
+            <td class="py-3 pr-4 text-right font-mono">${s.latScore.toFixed(0)}</td>
+            <td class="py-3 pr-4 text-right font-mono">${s.qualScore.toFixed(0)}</td>
+            <td class="py-3 pr-4 text-right font-mono">${s.relScore.toFixed(0)}</td>
+            <td class="py-3 pr-4 text-right font-mono">${fmtMoney(s.monthlyCost)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const selected = scored.find(s => s.strategy.id === selectedStrategy);
+      const fallbackProb = Math.round(selected.reliability * 100);
+      const onFrontier = frontierIds.has(selected.strategy.id);
+
+      document.getElementById('selectedScore').textContent = selected.weighted.toFixed(1);
+      document.getElementById('selectedCost').textContent = fmtMoney(selected.monthlyCost);
+      document.getElementById('fallbackProb').textContent = fallbackProb + '%';
+      document.getElementById('paretoNote').textContent = onFrontier ? 'On frontier' : 'Dominated by another strategy';
+      document.getElementById('paretoNote').className = 'text-sm font-bold ' + (onFrontier ? 'text-green-400' : 'text-red-400');
+
+      const strategy = selected.strategy;
+      document.getElementById('strategyNote').textContent = strategy.description + ' ' + strategy.fallback_logic;
+
+      const best = scored[0];
+      let verdict;
+      if (best.strategy.id === selected.strategy.id) {
+        verdict = `${selected.strategy.name} is the top-scoring strategy for your ${profile.name.toLowerCase()} profile. It balances cost at ${fmtMoney2(selected.monthlyCost / inputs.requests)} per request with ${fallbackProb}% effective uptime.`;
+      } else if (selected.weighted >= best.weighted * 0.95) {
+        verdict = `${selected.strategy.name} is within 5% of the best strategy (${best.strategy.name}). Keep it if the routing logic is simpler or already implemented.`;
+      } else if (selected.strategy.id === 'balanced') {
+        verdict = `Balanced Cost + Quality is a safe default, but ${best.strategy.name} scores higher for this profile. Try raising the quality target or switching strategy if the workload is homogeneous.`;
+      } else {
+        verdict = `Consider switching to ${best.strategy.name}, which scores ${(best.weighted - selected.weighted).toFixed(1)} points higher for your priorities. The current strategy is leaving value on the table.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.workload-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const w = JSON.parse(btn.dataset.workload);
+          document.getElementById('strategy').value = w.strategy_id;
+          document.getElementById('profile').value = w.profile_id;
+          document.getElementById('requests').value = w.monthly_requests;
+          document.getElementById('inputTokens').value = w.input_tokens;
+          document.getElementById('outputTokens').value = w.output_tokens;
+          document.getElementById('cachedRatio').value = Math.round(w.cached_input_ratio * 100);
+          document.getElementById('fallbackRate').value = Math.round(w.fallback_rate * 100);
+          document.getElementById('retryRate').value = Math.round(w.retry_rate * 100);
+          document.getElementById('qualityTarget').value = w.quality_target;
+          document.getElementById('latencyTarget').value = w.latency_target_ms;
+          document.getElementById('fallbackDepth').value = w.fallback_depth;
+          compute();
+        });
+      });
+
+      ['strategy','profile','requests','inputTokens','outputTokens','cachedRatio','fallbackRate','retryRate','qualityTarget','latencyTarget','fallbackDepth'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
