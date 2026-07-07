@@ -1,0 +1,152 @@
+{
+  "last_updated": "2026-07-07",
+  "note": "Outage cost estimates are directional. They assume linear revenue exposure during downtime and do not include brand damage, legal exposure, or long-tail churn beyond the selected churn risk percentage.",
+  "defaults": {
+    "revenue_model": "transaction",
+    "monthly_revenue": 50000,
+    "monthly_outputs": 100000,
+    "value_per_output": 0.5,
+    "outage_hours": 2,
+    "incident_type": "api-downtime",
+    "sla_penalty_rate_pct": 10,
+    "churn_risk_pct": 2,
+    "human_hourly_cost": 35,
+    "human_handle_minutes": 5,
+    "recovery_hours": 4,
+    "engineer_hourly_cost": 150
+  },
+  "revenue_models": [
+    {
+      "slug": "transaction",
+      "name": "Transaction / conversion agent",
+      "description": "Each agent output directly drives a conversion or fee event."
+    },
+    {
+      "slug": "subscription",
+      "name": "Subscription / SaaS agent",
+      "description": "Agent is part of a subscription product; outage cost is proportional to MRR."
+    },
+    {
+      "slug": "support-cost",
+      "name": "Support deflection agent",
+      "description": "Agent deflects tickets that would otherwise cost human support time."
+    },
+    {
+      "slug": "usage-credits",
+      "name": "Usage-credit agent",
+      "description": "Customers pre-pay credits consumed per agent output."
+    }
+  ],
+  "incident_types": [
+    {
+      "slug": "api-downtime",
+      "name": "API provider downtime",
+      "typical_cause": "Frontier LLM API outage or rate-limiting",
+      "revenue_multiplier": 1.0,
+      "churn_multiplier": 1.0,
+      "sla_multiplier": 1.0
+    },
+    {
+      "slug": "model-degradation",
+      "name": "Model degradation / errors",
+      "typical_cause": "High error rate, bad outputs, or refusal loops",
+      "revenue_multiplier": 0.6,
+      "churn_multiplier": 1.3,
+      "sla_multiplier": 0.5
+    },
+    {
+      "slug": "deployment-failure",
+      "name": "Deployment / rollback failure",
+      "typical_cause": "Bad release breaks agent workflows",
+      "revenue_multiplier": 1.2,
+      "churn_multiplier": 1.4,
+      "sla_multiplier": 1.0
+    },
+    {
+      "slug": "infrastructure-crash",
+      "name": "Infrastructure crash",
+      "typical_cause": "Server, container, or database failure",
+      "revenue_multiplier": 1.0,
+      "churn_multiplier": 1.2,
+      "sla_multiplier": 1.0
+    },
+    {
+      "slug": "third-party-tool",
+      "name": "Critical tool integration outage",
+      "typical_cause": "Search, payments, CRM, or data source down",
+      "revenue_multiplier": 0.8,
+      "churn_multiplier": 1.1,
+      "sla_multiplier": 0.5
+    },
+    {
+      "slug": "planned-maintenance",
+      "name": "Planned maintenance",
+      "typical_cause": "Scheduled updates with notice",
+      "revenue_multiplier": 0.4,
+      "churn_multiplier": 0.3,
+      "sla_multiplier": 0.0
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "AI sales SDR",
+      "revenue_model": "transaction",
+      "monthly_revenue": 80000,
+      "monthly_outputs": 120000,
+      "value_per_output": 0.67,
+      "outage_hours": 2,
+      "incident_type": "api-downtime",
+      "sla_penalty_rate_pct": 0,
+      "churn_risk_pct": 1,
+      "human_hourly_cost": 45,
+      "human_handle_minutes": 4,
+      "recovery_hours": 3,
+      "engineer_hourly_cost": 150
+    },
+    {
+      "name": "Customer support bot",
+      "revenue_model": "support-cost",
+      "monthly_revenue": 40000,
+      "monthly_outputs": 200000,
+      "value_per_output": 0.2,
+      "outage_hours": 1,
+      "incident_type": "model-degradation",
+      "sla_penalty_rate_pct": 5,
+      "churn_risk_pct": 3,
+      "human_hourly_cost": 30,
+      "human_handle_minutes": 6,
+      "recovery_hours": 2,
+      "engineer_hourly_cost": 150
+    },
+    {
+      "name": "SaaS product agent",
+      "revenue_model": "subscription",
+      "monthly_revenue": 200000,
+      "monthly_outputs": 500000,
+      "value_per_output": 0.1,
+      "outage_hours": 3,
+      "incident_type": "infrastructure-crash",
+      "sla_penalty_rate_pct": 10,
+      "churn_risk_pct": 1.5,
+      "human_hourly_cost": 40,
+      "human_handle_minutes": 5,
+      "recovery_hours": 5,
+      "engineer_hourly_cost": 175
+    },
+    {
+      "name": "Usage-credit coding agent",
+      "revenue_model": "usage-credits",
+      "monthly_revenue": 60000,
+      "monthly_outputs": 80000,
+      "value_per_output": 0.75,
+      "outage_hours": 1.5,
+      "incident_type": "deployment-failure",
+      "sla_penalty_rate_pct": 0,
+      "churn_risk_pct": 2,
+      "human_hourly_cost": 60,
+      "human_handle_minutes": 8,
+      "recovery_hours": 4,
+      "engineer_hourly_cost": 175
+    }
+  ]
+}

@@ -1,0 +1,337 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_outage_cost.json';
+
+const title = "AI Agent Outage Cost Calculator | Hermes Dispatch";
+const description = "Estimate revenue loss, SLA penalties, support surge cost, and churn impact when an AI agent goes offline.";
+const scenarios = data.scenarios;
+const revenueModels = data.revenue_models;
+const incidentTypes = data.incident_types;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What counts as an AI agent outage?", a: "Any period when the agent cannot accept or complete requests: API downtime, model errors, rate-limiting, deployment failures, infrastructure crashes, or degradations that prevent normal operation." },
+  { q: "How is revenue loss estimated?", a: "We convert your revenue model into a per-minute value. For transaction agents, we use conversions per minute × value per conversion. For subscription agents, we use MRR per minute × churn risk. Support agents use cost per disrupted request." },
+  { q: "What are SLA penalties?", a: "SLA penalties are contractual commitments to customers when availability falls below a promised threshold. They are often a percentage of fees but rarely cover lost business." },
+  { q: "How is support surge cost calculated?", a: "When the agent is down, requests that would have been automated must be handled by humans or queued. We estimate that surge using your fallback handle time and labor cost." },
+  { q: "Does this include customer churn?", a: "Yes — you can set a churn risk percentage. We apply it only to revenue exposed during the outage window, not your whole customer base." },
+  { q: "What is the difference between planned and unplanned downtime?", a: "Planned downtime is scheduled maintenance and usually has lower churn/penalty impact. Unplanned downtime hurts trust more and often triggers SLA penalties and emergency engineering time." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Outage Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-outage-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚠️</div>
+      <h1 class="display-heading mb-4">AI Agent Outage Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate revenue loss, SLA penalties, support surge cost, and churn impact when an AI agent goes offline.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Outage assumptions</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Revenue model</span>
+          <select id="revenueModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {revenueModels.map(m => (
+              <option value={m.slug}>{m.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly revenue / MRR ($)</span>
+          <input id="monthlyRevenue" type="number" min="0" step="100" value={defaults.monthly_revenue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly successful agent outputs</span>
+          <input id="monthlyOutputs" type="number" min="0" step="1000" value={defaults.monthly_outputs} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Average value per output ($)</span>
+          <input id="valuePerOutput" type="number" min="0" step="0.01" value={defaults.value_per_output} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Outage duration (hours)</span>
+          <input id="outageHours" type="number" min="0" step="0.1" value={defaults.outage_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Incident type</span>
+          <select id="incidentType" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {incidentTypes.map(t => (
+              <option value={t.slug}>{t.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">SLA penalty rate (% of monthly fee)</span>
+          <input id="slaPenaltyRate" type="number" min="0" max="100" step="0.1" value={defaults.sla_penalty_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Churn risk from outage (%)</span>
+          <input id="churnRiskPct" type="number" min="0" max="100" step="0.1" value={defaults.churn_risk_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fallback human hourly cost ($)</span>
+          <input id="humanHourlyCost" type="number" min="0" step="1" value={defaults.human_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human handle time per disrupted request (min)</span>
+          <input id="humanHandleMinutes" type="number" min="0" step="0.5" value={defaults.human_handle_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Engineering recovery hours</span>
+          <input id="recoveryHours" type="number" min="0" step="0.5" value={defaults.recovery_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Engineering hourly cost ($)</span>
+          <input id="engineerHourlyCost" type="number" min="0" step="1" value={defaults.engineer_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Revenue loss</p>
+        <p id="revenueLoss" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">SLA penalties</p>
+        <p id="slaPenalties" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Support surge cost</p>
+        <p id="supportSurgeCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total outage cost</p>
+        <p id="totalOutageCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Churn impact</p>
+        <p id="churnImpact" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Recovery engineering cost</p>
+        <p id="recoveryCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per minute of outage</p>
+        <p id="costPerMinute" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Incident-type impact table -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Incident-type multipliers</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Incident type</th>
+            <th class="py-3 pr-4 text-right">Revenue multiplier</th>
+            <th class="py-3 pr-4 text-right">Churn multiplier</th>
+            <th class="py-3 pr-4 text-right">SLA multiplier</th>
+            <th class="py-3 pr-4">Typical cause</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          {incidentTypes.map(t => (
+            <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" id={`row-${t.slug}`}>
+              <td class="py-3 pr-4 font-medium text-white">{t.name}</td>
+              <td class="py-3 pr-4 text-right font-mono rev-mult">{t.revenue_multiplier}x</td>
+              <td class="py-3 pr-4 text-right font-mono churn-mult">{t.churn_multiplier}x</td>
+              <td class="py-3 pr-4 text-right font-mono sla-mult">{t.sla_multiplier}x</td>
+              <td class="py-3 pr-4 text-sm text-neutral-500">{t.typical_cause}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-sla-calculator/" class="btn-primary text-sm">SLA / Uptime Calc →</a>
+      <a href="/tools/agent-escalation-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Human Escalation Cost Calc →</a>
+      <a href="/tools/startup-runway-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Runway Calc →</a>
+      <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios), revenueModels: JSON.stringify(revenueModels), incidentTypes: JSON.stringify(incidentTypes) }}>
+    const scenarioData = JSON.parse(scenarios);
+    const modelData = JSON.parse(revenueModels);
+    const incidentData = JSON.parse(incidentTypes);
+
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtPct = n => n.toFixed(1) + '%';
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    function getInputs() {
+      return {
+        revenueModel: document.getElementById('revenueModel').value,
+        monthlyRevenue: Math.max(0, parseFloat(document.getElementById('monthlyRevenue').value) || 0),
+        monthlyOutputs: Math.max(0, parseFloat(document.getElementById('monthlyOutputs').value) || 0),
+        valuePerOutput: Math.max(0, parseFloat(document.getElementById('valuePerOutput').value) || 0),
+        outageHours: Math.max(0, parseFloat(document.getElementById('outageHours').value) || 0),
+        incidentType: document.getElementById('incidentType').value,
+        slaPenaltyRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('slaPenaltyRate').value) || 0)),
+        churnRiskPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('churnRiskPct').value) || 0)),
+        humanHourlyCost: Math.max(0, parseFloat(document.getElementById('humanHourlyCost').value) || 0),
+        humanHandleMinutes: Math.max(0, parseFloat(document.getElementById('humanHandleMinutes').value) || 0),
+        recoveryHours: Math.max(0, parseFloat(document.getElementById('recoveryHours').value) || 0),
+        engineerHourlyCost: Math.max(0, parseFloat(document.getElementById('engineerHourlyCost').value) || 0)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.revenue_model !== undefined) document.getElementById('revenueModel').value = obj.revenue_model;
+      if (obj.monthly_revenue !== undefined) document.getElementById('monthlyRevenue').value = obj.monthly_revenue;
+      if (obj.monthly_outputs !== undefined) document.getElementById('monthlyOutputs').value = obj.monthly_outputs;
+      if (obj.value_per_output !== undefined) document.getElementById('valuePerOutput').value = obj.value_per_output;
+      if (obj.outage_hours !== undefined) document.getElementById('outageHours').value = obj.outage_hours;
+      if (obj.incident_type !== undefined) document.getElementById('incidentType').value = obj.incident_type;
+      if (obj.sla_penalty_rate_pct !== undefined) document.getElementById('slaPenaltyRate').value = obj.sla_penalty_rate_pct;
+      if (obj.churn_risk_pct !== undefined) document.getElementById('churnRiskPct').value = obj.churn_risk_pct;
+      if (obj.human_hourly_cost !== undefined) document.getElementById('humanHourlyCost').value = obj.human_hourly_cost;
+      if (obj.human_handle_minutes !== undefined) document.getElementById('humanHandleMinutes').value = obj.human_handle_minutes;
+      if (obj.recovery_hours !== undefined) document.getElementById('recoveryHours').value = obj.recovery_hours;
+      if (obj.engineer_hourly_cost !== undefined) document.getElementById('engineerHourlyCost').value = obj.engineer_hourly_cost;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const model = modelData.find(m => m.slug === inps.revenueModel) || modelData[0];
+      const incident = incidentData.find(t => t.slug === inps.incidentType) || incidentData[0];
+      const outageMinutes = inps.outageHours * 60;
+      const minutesPerMonth = 30.44 * 24 * 60;
+
+      // Revenue loss based on model
+      let revenueLoss = 0;
+      if (model.slug === 'transaction') {
+        const outputsPerMinute = inps.monthlyOutputs / minutesPerMonth;
+        revenueLoss = outputsPerMinute * outageMinutes * inps.valuePerOutput;
+      } else if (model.slug === 'subscription') {
+        revenueLoss = (inps.monthlyRevenue / minutesPerMonth) * outageMinutes;
+      } else if (model.slug === 'support-cost') {
+        const outputsPerMinute = inps.monthlyOutputs / minutesPerMonth;
+        revenueLoss = outputsPerMinute * outageMinutes * inps.valuePerOutput;
+      } else if (model.slug === 'usage-credits') {
+        const outputsPerMinute = inps.monthlyOutputs / minutesPerMonth;
+        revenueLoss = outputsPerMinute * outageMinutes * inps.valuePerOutput;
+      }
+      revenueLoss *= incident.revenue_multiplier;
+
+      // SLA penalties
+      const slaPenalty = inps.monthlyRevenue * (inps.slaPenaltyRate / 100) * incident.sla_multiplier;
+
+      // Churn impact
+      const exposedRevenue = (inps.monthlyRevenue / minutesPerMonth) * outageMinutes;
+      const churnImpact = exposedRevenue * (inps.churnRiskPct / 100) * incident.churn_multiplier;
+
+      // Support surge: disrupted requests handled by humans
+      const disruptedRequests = outageMinutes > 0 ? (inps.monthlyOutputs / minutesPerMonth) * outageMinutes : 0;
+      const surgeHours = disruptedRequests * (inps.humanHandleMinutes / 60);
+      const surgeCost = surgeHours * inps.humanHourlyCost;
+
+      // Recovery engineering cost
+      const recoveryCost = inps.recoveryHours * inps.engineerHourlyCost;
+
+      const totalCost = revenueLoss + slaPenalty + churnImpact + surgeCost + recoveryCost;
+      const costPerMinute = outageMinutes > 0 ? totalCost / outageMinutes : 0;
+
+      document.getElementById('revenueLoss').textContent = fmtMoney(revenueLoss);
+      document.getElementById('slaPenalties').textContent = fmtMoney(slaPenalty);
+      document.getElementById('supportSurgeCost').textContent = fmtMoney(surgeCost);
+      document.getElementById('totalOutageCost').textContent = fmtMoney(totalCost);
+      document.getElementById('churnImpact').textContent = fmtMoney(churnImpact);
+      document.getElementById('recoveryCost').textContent = fmtMoney(recoveryCost);
+      document.getElementById('costPerMinute').textContent = fmtMoney2(costPerMinute);
+
+      // Highlight selected incident row
+      document.querySelectorAll('tbody tr').forEach(tr => tr.classList.remove('bg-brand-gold/10'));
+      const row = document.getElementById('row-' + inps.incidentType);
+      if (row) row.classList.add('bg-brand-gold/10');
+
+      // Verdict
+      let verdict = '';
+      const totalAnnualized = totalCost * 12;
+      if (totalCost === 0) {
+        verdict = `No outage cost with these inputs. Try a non-zero outage duration to see impact.`;
+      } else if (costPerMinute > 1000) {
+        verdict = `This is a high-cost outage: ${fmtMoney2(costPerMinute)} per minute. Revenue loss dominates at this scale. Consider multi-region failover, circuit breakers, and a runbook. Annualized exposure: ~${fmtMoney(totalAnnualized)}.`;
+      } else if (surgeCost > revenueLoss) {
+        verdict = `Support surge cost exceeds direct revenue loss. The biggest win is a graceful degradation path so users can self-serve while the agent recovers. Annualized exposure: ~${fmtMoney(totalAnnualized)}.`;
+      } else if (churnImpact > revenueLoss) {
+        verdict = `Churn impact is larger than the immediate revenue loss. Prioritize communication, proactive refunds, and fast recovery over pure uptime engineering. Annualized exposure: ~${fmtMoney(totalAnnualized)}.`;
+      } else {
+        verdict = `Outage economics are moderate. Revenue loss is the primary driver. Track MTTR and invest in monitoring to keep incidents short. Annualized exposure: ~${fmtMoney(totalAnnualized)}.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setInputs(JSON.parse(btn.dataset.scenario));
+          compute();
+        });
+      });
+
+      ['revenueModel','monthlyRevenue','monthlyOutputs','valuePerOutput','outageHours','incidentType','slaPenaltyRate','churnRiskPct','humanHourlyCost','humanHandleMinutes','recoveryHours','engineerHourlyCost'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+        document.getElementById(id).addEventListener('change', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

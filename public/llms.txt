@@ -445,10 +445,17 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||||||- Outputs: monthly human cost, monthly agent cost, 1-year savings, break-even month, month-by-month projection, verdict
 ||||||- Audience: AI agent builders and operators deciding between hiring and automation
 ||||||
-||||||## AI Agent Model Router / Fallback Cost Calculator
-||||||- URL: https://hermesdispatch.dev/tools/agent-model-router-cost-calculator/
-||||||- Description: Compare the cost and reliability of routing AI agent requests across multiple LLM providers with fallback logic, cache hits, and retry penalties.
-||||||- Inputs: routing strategy, monthly requests, input/output tokens per request, cached input ratio, fallback rate, retry rate, complex-task split percentage
-||||||- Outputs: base monthly cost, fallback premium, retry penalty, total routed cost, provider mix table, single-provider comparison, verdict
-||||||- Audience: AI agent builders designing multi-provider routing and resilience
-||||||
+|||||||## AI Agent Model Router / Fallback Cost Calculator
+|||||||- URL: https://hermesdispatch.dev/tools/agent-model-router-cost-calculator/
+|||||||- Description: Compare the cost and reliability of routing AI agent requests across multiple LLM providers with fallback logic, cache hits, and retry penalties.
+|||||||- Inputs: routing strategy, monthly requests, input/output tokens per request, cached input ratio, fallback rate, retry rate, complex-task split percentage
+|||||||- Outputs: base monthly cost, fallback premium, retry penalty, total routed cost, provider mix table, single-provider comparison, verdict
+|||||||- Audience: AI agent builders designing multi-provider routing and resilience
+|||||||
+|||||||## AI Agent Outage Cost Calculator
+|||||||- URL: https://hermesdispatch.dev/tools/agent-outage-cost-calculator/
+|||||||- Description: Estimate revenue loss, SLA penalties, support surge cost, churn impact, and engineering recovery cost when an AI agent goes offline.
+|||||||- Inputs: revenue model, monthly revenue / MRR, monthly agent outputs, value per output, outage duration, incident type, SLA penalty rate, churn risk, fallback labor cost, recovery hours
+|||||||- Outputs: revenue loss, SLA penalties, support surge cost, churn impact, recovery cost, total outage cost, cost per minute, verdict
+|||||||- Audience: AI agent operators planning reliability investments and incident response
+|||||||
