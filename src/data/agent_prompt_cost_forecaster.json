@@ -1,0 +1,151 @@
+{
+  "last_updated": "2026-07-07",
+  "note": "Prices are directional estimates per 1M tokens in USD. Provider rates change frequently; confirm current pricing before budgeting. Local GPU cost is an effective per-token estimate including power and hardware amortization.",
+  "defaults": {
+    "requests_per_month": 100000,
+    "system_prompt_tokens": 500,
+    "user_prompt_tokens": 800,
+    "output_tokens": 400,
+    "cached_input_percent": 50,
+    "projection_months": 12,
+    "model_slug": "gpt-4o-mini"
+  },
+  "models": [
+    {
+      "slug": "gpt-4o",
+      "name": "OpenAI GPT-4o",
+      "provider": "OpenAI",
+      "input_price_per_1m": 2.50,
+      "cached_input_price_per_1m": 1.25,
+      "output_price_per_1m": 10.00,
+      "note": "Strong general reasoning"
+    },
+    {
+      "slug": "gpt-4o-mini",
+      "name": "OpenAI GPT-4o mini",
+      "provider": "OpenAI",
+      "input_price_per_1m": 0.15,
+      "cached_input_price_per_1m": 0.075,
+      "output_price_per_1m": 0.60,
+      "note": "Cheap routing / extraction"
+    },
+    {
+      "slug": "claude-3-5-sonnet",
+      "name": "Anthropic Claude 3.5 Sonnet",
+      "provider": "Anthropic",
+      "input_price_per_1m": 3.00,
+      "cached_input_price_per_1m": 1.50,
+      "output_price_per_1m": 15.00,
+      "note": "Long-context reasoning"
+    },
+    {
+      "slug": "claude-3-haiku",
+      "name": "Anthropic Claude 3 Haiku",
+      "provider": "Anthropic",
+      "input_price_per_1m": 0.25,
+      "cached_input_price_per_1m": 0.125,
+      "output_price_per_1m": 1.25,
+      "note": "Fast, cheap classification"
+    },
+    {
+      "slug": "gemini-1-5-pro",
+      "name": "Google Gemini 1.5 Pro",
+      "provider": "Google",
+      "input_price_per_1m": 1.25,
+      "cached_input_price_per_1m": 0.625,
+      "output_price_per_1m": 5.00,
+      "note": "1M context window"
+    },
+    {
+      "slug": "gemini-1-5-flash",
+      "name": "Google Gemini 1.5 Flash",
+      "provider": "Google",
+      "input_price_per_1m": 0.075,
+      "cached_input_price_per_1m": 0.0375,
+      "output_price_per_1m": 0.30,
+      "note": "Fast, cheap retrieval"
+    },
+    {
+      "slug": "groq-llama-3-1-70b",
+      "name": "Groq Llama 3.1 70B",
+      "provider": "Groq",
+      "input_price_per_1m": 0.59,
+      "cached_input_price_per_1m": 0.59,
+      "output_price_per_1m": 0.79,
+      "note": "Low-latency inference"
+    },
+    {
+      "slug": "together-llama-3-1-70b",
+      "name": "Together AI Llama 3.1 70B",
+      "provider": "Together AI",
+      "input_price_per_1m": 0.88,
+      "cached_input_price_per_1m": 0.88,
+      "output_price_per_1m": 0.88,
+      "note": "Open weights at API cost"
+    },
+    {
+      "slug": "cohere-command-r-plus",
+      "name": "Cohere Command R+",
+      "provider": "Cohere",
+      "input_price_per_1m": 2.50,
+      "cached_input_price_per_1m": 1.25,
+      "output_price_per_1m": 10.00,
+      "note": "RAG-optimized model"
+    },
+    {
+      "slug": "local-rtx-4090",
+      "name": "Local RTX 4090",
+      "provider": "Self-hosted",
+      "input_price_per_1m": 0.10,
+      "cached_input_price_per_1m": 0.10,
+      "output_price_per_1m": 0.10,
+      "note": "Effective per-token cost incl. power & amortization"
+    }
+  ],
+  "presets": [
+    {
+      "slug": "support-bot",
+      "name": "Support deflection bot",
+      "emoji": "🤖",
+      "requests_per_month": 200000,
+      "system_prompt_tokens": 600,
+      "user_prompt_tokens": 900,
+      "output_tokens": 350,
+      "cached_input_percent": 60,
+      "model_slug": "gpt-4o-mini"
+    },
+    {
+      "slug": "content-drafter",
+      "name": "Content drafter",
+      "emoji": "✍️",
+      "requests_per_month": 50000,
+      "system_prompt_tokens": 400,
+      "user_prompt_tokens": 1200,
+      "output_tokens": 1200,
+      "cached_input_percent": 30,
+      "model_slug": "gpt-4o"
+    },
+    {
+      "slug": "code-assistant",
+      "name": "Coding assistant",
+      "emoji": "💻",
+      "requests_per_month": 80000,
+      "system_prompt_tokens": 800,
+      "user_prompt_tokens": 2500,
+      "output_tokens": 900,
+      "cached_input_percent": 40,
+      "model_slug": "claude-3-5-sonnet"
+    },
+    {
+      "slug": "research-agent",
+      "name": "Research agent",
+      "emoji": "🔬",
+      "requests_per_month": 20000,
+      "system_prompt_tokens": 500,
+      "user_prompt_tokens": 6000,
+      "output_tokens": 2000,
+      "cached_input_percent": 25,
+      "model_slug": "gemini-1-5-pro"
+    }
+  ]
+}

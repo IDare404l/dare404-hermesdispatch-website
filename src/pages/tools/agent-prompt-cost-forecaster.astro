@@ -1,0 +1,265 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_prompt_cost_forecaster.json';
+
+const title = "AI Agent Prompt Cost Forecaster | Hermes Dispatch";
+const description = "Forecast monthly LLM API spend from prompt length, output tokens, request volume, and cached-input percentage across OpenAI, Anthropic, Google, Groq, Together AI, Cohere, and local GPU routes.";
+const models = data.models;
+const presets = data.presets;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is a prompt cost forecaster?", a: "A prompt cost forecaster estimates how much you'll spend on LLM API calls before you launch an agent. It combines your expected requests per month, the size of your system and user prompts, the average output length, and the percentage of input tokens that hit a provider cache." },
+  { q: "How is cached input different from uncached input?", a: "Some providers charge less for input tokens they have seen recently and keep in a prompt cache (Anthropic, OpenAI, Google). If your system prompt or retrieved context repeats across requests, a higher cache-hit rate lowers your bill." },
+  { q: "Why does output tokens matter so much?", a: "Output tokens are usually more expensive per token than input tokens, and long outputs multiply quickly. A coding agent or report writer that emits 1,500 tokens per request can cost 3–10x more than a short classification call." },
+  { q: "Which providers offer prompt caching discounts?", a: "OpenAI GPT-4o/4o-mini, Anthropic Claude 3.5 Sonnet/Haiku, and Google Gemini 1.5 Pro/Flash publish discounted cached-input rates in this calculator. Other providers treat cached and uncached input at the same price." },
+  { q: "When is self-hosting cheaper than API calls?", a: "Self-hosting on a local RTX 4090 or rental GPU becomes cheaper at high, steady volume when you can keep the card utilized. This calculator shows an effective per-token cost for local inference so you can compare directly against managed APIs." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Prompt Cost Forecaster" description={description} url="https://hermesdispatch.dev/tools/agent-prompt-cost-forecaster/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📡</div>
+      <h1 class="display-heading mb-4">AI Agent Prompt Cost Forecaster</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly LLM API spend from prompt length, output tokens, request volume, and cached-input percentage.</p>
+    </div>
+
+    <!-- Presets -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {presets.map(p => (
+        <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset={p.slug}>
+          <div class="text-2xl mb-2">{p.emoji}</div>
+          <h3 class="font-semibold text-sm">{p.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1">{p.requests_per_month.toLocaleString()} req/mo • {p.model_slug}</p>
+        </button>
+      ))}
+    </div>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests / month</span>
+          <input id="requestsPerMonth" type="number" min="0" step="1000" value={defaults.requests_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">System prompt tokens</span>
+          <input id="systemTokens" type="number" min="0" step="50" value={defaults.system_prompt_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">User prompt tokens</span>
+          <input id="userTokens" type="number" min="0" step="50" value={defaults.user_prompt_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" step="50" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input %</span>
+          <input id="cachedPercent" type="number" min="0" max="100" step="5" value={defaults.cached_input_percent} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Base model</span>
+          <select id="baseModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {models.map(m => (
+              <option value={m.slug} selected={m.slug === defaults.model_slug}>{m.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Prices are directional estimates in USD. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/30 text-center">
+      <p class="text-xs text-neutral-500 uppercase mb-1">Estimated monthly cost with {models.find(m => m.slug === defaults.model_slug)?.name || defaults.model_slug}</p>
+      <p id="totalLine" class="text-3xl font-bold text-brand-gold">Enter a workload to see the cost.</p>
+      <p id="perRequestLine" class="text-sm text-neutral-400 mt-1">—</p>
+      <p id="periodLine" class="text-sm text-neutral-400 mt-1">—</p>
+    </section>
+
+    <!-- Results table -->
+    <section class="overflow-x-auto mb-12">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider / model</th>
+            <th class="py-3 pr-4 text-right">Input $/1M</th>
+            <th class="py-3 pr-4 text-right">Cached $/1M</th>
+            <th class="py-3 pr-4 text-right">Output $/1M</th>
+            <th class="py-3 pr-4 text-right">Monthly cost</th>
+            <th class="py-3 pr-4 text-right">Cost / 1k requests</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {models.map((m, i) => (
+            <tr class="border-b border-neutral-800/50" data-model={m.slug}>
+              <td class="py-3 pr-4">
+                <span class="font-medium">{m.name}</span>
+                <span class="block text-xs text-neutral-500">{m.note}</span>
+              </td>
+              <td class="py-3 pr-4 text-right font-mono">${m.input_price_per_1m.toFixed(3)}</td>
+              <td class="py-3 pr-4 text-right font-mono">${m.cached_input_price_per_1m.toFixed(3)}</td>
+              <td class="py-3 pr-4 text-right font-mono">${m.output_price_per_1m.toFixed(3)}</td>
+              <td id={`monthly-${m.slug}`} class="py-3 pr-4 text-right font-mono font-medium">—</td>
+              <td id={`per1k-${m.slug}`} class="py-3 pr-4 text-right font-mono">—</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Insight box -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost levers</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+        <div>
+          <p class="text-neutral-400">Prompt tokens / request</p>
+          <p id="inputTokensPerRequest" class="text-lg font-mono text-cyan-400">—</p>
+        </div>
+        <div>
+          <p class="text-neutral-400">Cached input tokens / request</p>
+          <p id="cachedTokensPerRequest" class="text-lg font-mono text-cyan-400">—</p>
+        </div>
+        <div>
+          <p class="text-neutral-400">Output tokens / request</p>
+          <p id="outputTokensPerRequest" class="text-lg font-mono text-cyan-400">—</p>
+        </div>
+      </div>
+      <p id="verdict" class="text-neutral-300 mt-4">Enter a workload to see cost levers.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/prompt-tokenizer-pricing-estimator/" class="btn-primary text-sm">Prompt Tokenizer →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/prompt-cache-savings-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Prompt Cache Savings Calc →</a>
+      <a href="/tools/agent-workflow-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Workflow Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ modelsJson: JSON.stringify(models), presetsJson: JSON.stringify(presets), defaultsJson: JSON.stringify(defaults) }}>
+    const models = JSON.parse(modelsJson);
+    const presets = JSON.parse(presetsJson);
+    const defaults = JSON.parse(defaultsJson);
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmt4 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 });
+    const fmtN = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        requests: Math.max(0, parseFloat(document.getElementById('requestsPerMonth').value) || 0),
+        systemTokens: Math.max(0, parseFloat(document.getElementById('systemTokens').value) || 0),
+        userTokens: Math.max(0, parseFloat(document.getElementById('userTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        cachedPercent: Math.max(0, Math.min(100, parseFloat(document.getElementById('cachedPercent').value) || 0)),
+        baseModel: document.getElementById('baseModel').value,
+        projection: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function costForModel(m, inp) {
+      const inputTokens = inp.systemTokens + inp.userTokens;
+      const cachedTokens = inputTokens * (inp.cachedPercent / 100);
+      const uncachedTokens = inputTokens - cachedTokens;
+      const inputCost = (uncachedTokens / 1_000_000) * m.input_price_per_1m + (cachedTokens / 1_000_000) * m.cached_input_price_per_1m;
+      const outputCost = (inp.outputTokens / 1_000_000) * m.output_price_per_1m;
+      const perRequest = inputCost + outputCost;
+      const monthly = perRequest * inp.requests;
+      return { inputTokens, cachedTokens, uncachedTokens, perRequest, monthly };
+    }
+
+    function compute() {
+      const inp = getInputs();
+      const base = models.find(m => m.slug === inp.baseModel) || models[0];
+      const baseCost = costForModel(base, inp);
+
+      // Update summary
+      document.getElementById('totalLine').textContent = fmt(baseCost.monthly) + ' / month';
+      document.getElementById('perRequestLine').textContent = inp.requests > 0
+        ? `${fmt4(baseCost.perRequest)} per request • ${fmt(baseCost.perRequest * 1000)} per 1k requests`
+        : '—';
+      document.getElementById('periodLine').textContent = `Projected ${inp.projection}-month cost: ${fmt(baseCost.monthly * inp.projection)}`;
+
+      // Update table
+      let cheapest = null;
+      models.forEach(m => {
+        const c = costForModel(m, inp);
+        if (!cheapest || c.monthly < cheapest.monthly) cheapest = { ...c, name: m.name };
+        document.getElementById(`monthly-${m.slug}`).textContent = fmt(c.monthly);
+        document.getElementById(`per1k-${m.slug}`).textContent = fmt(c.perRequest * 1000);
+      });
+
+      // Highlight base model row
+      document.querySelectorAll('#resultsBody tr').forEach(tr => tr.classList.remove('bg-brand-gold/10'));
+      const baseRow = document.querySelector(`#resultsBody tr[data-model="${inp.baseModel}"]`);
+      if (baseRow) baseRow.classList.add('bg-brand-gold/10');
+
+      // Cost levers
+      document.getElementById('inputTokensPerRequest').textContent = fmtN(baseCost.inputTokens);
+      document.getElementById('cachedTokensPerRequest').textContent = fmtN(baseCost.cachedTokens);
+      document.getElementById('outputTokensPerRequest').textContent = fmtN(inp.outputTokens);
+
+      const verdictEl = document.getElementById('verdict');
+      const savings = baseCost.monthly - cheapest.monthly;
+      if (inp.requests === 0) {
+        verdictEl.textContent = 'Enter a workload to see cost levers.';
+      } else if (cheapest && cheapest.name !== base.name && savings > 0) {
+        verdictEl.innerHTML = `You selected <strong>${base.name}</strong>. The cheapest matching provider in this list is <strong>${cheapest.name}</strong>, which would save about <strong>${fmt(savings)} / month</strong> at this volume. Switching the base model dropdown updates the headline and comparison highlight.`;
+      } else {
+        verdictEl.innerHTML = `You selected <strong>${base.name}</strong>, which is the cheapest match in this list at this volume and token profile.`;
+      }
+    }
+
+    function applyPreset(slug) {
+      const p = presets.find(x => x.slug === slug);
+      if (!p) return;
+      document.getElementById('requestsPerMonth').value = p.requests_per_month;
+      document.getElementById('systemTokens').value = p.system_prompt_tokens;
+      document.getElementById('userTokens').value = p.user_prompt_tokens;
+      document.getElementById('outputTokens').value = p.output_tokens;
+      document.getElementById('cachedPercent').value = p.cached_input_percent;
+      document.getElementById('baseModel').value = p.model_slug;
+      compute();
+    }
+
+    ['requestsPerMonth', 'systemTokens', 'userTokens', 'outputTokens', 'cachedPercent', 'baseModel', 'projectionMonths'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
+
+    compute();
+  </script>
+</Layout>

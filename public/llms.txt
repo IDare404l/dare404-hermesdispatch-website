@@ -466,10 +466,17 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||||||||- Outputs: deflected tickets per month, human cost saved, agent operating cost, net monthly savings, break-even month, annual savings, savings per ticket, projection table
 |||||||||- Audience: AI agent builders and support operators building a business case for ticket deflection
 |||||||||
-||||||||||## AI Agent Document Processing Cost Calculator
-||||||||||- URL: https://hermesdispatch.dev/tools/agent-document-processing-cost-calculator/
-||||||||||- Description: Estimate per-page and monthly cost for AI document extraction, OCR, classification, and summarization across cloud LLM APIs and local GPU stacks.
-||||||||||- Inputs: pages per month, words per page, extraction complexity, OCR percentage, classification toggle, human review rate, review minutes, review hourly cost, local GPU stack, electricity rate, projection months
-||||||||||- Outputs: cheapest cloud provider, monthly cloud cost, monthly local cost, cost per page, provider comparison table, local GPU throughput/electricity/amortized hardware, verdict
-||||||||||- Audience: AI agent builders designing document-processing, RAG, and data-extraction pipelines
-|||||||||
+|||||||||||## AI Agent Document Processing Cost Calculator
+|||||||||||- URL: https://hermesdispatch.dev/tools/agent-document-processing-cost-calculator/
+|||||||||||- Description: Estimate per-page and monthly cost for AI document extraction, OCR, classification, and summarization across cloud LLM APIs and local GPU stacks.
+|||||||||||- Inputs: pages per month, words per page, extraction complexity, OCR percentage, classification toggle, human review rate, review minutes, review hourly cost, local GPU stack, electricity rate, projection months
+|||||||||||- Outputs: cheapest cloud provider, monthly cloud cost, monthly local cost, cost per page, provider comparison table, local GPU throughput/electricity/amortized hardware, verdict
+|||||||||||- Audience: AI agent builders designing document-processing, RAG, and data-extraction pipelines
+||||||||||
+||||||||||||## AI Agent Prompt Cost Forecaster
+||||||||||||- URL: https://hermesdispatch.dev/tools/agent-prompt-cost-forecaster/
+||||||||||||- Description: Forecast monthly LLM API spend from prompt length, output tokens, request volume, and cached-input percentage.
+||||||||||||- Inputs: requests per month, system prompt tokens, user prompt tokens, output tokens per request, cached input percentage, base model, projection months
+||||||||||||- Outputs: monthly cost for selected model, cost per 1k requests, full provider comparison table, projected period cost
+||||||||||||- Audience: AI agent builders budgeting API spend before launch
+||||||||||||
