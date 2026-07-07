@@ -1,0 +1,42 @@
+{
+  "last_updated": "2026-07-07",
+  "note": "Prices are per 1M tokens in USD. Only providers that publish cached-input pricing are shown as cache-eligible. Always confirm current rates on the provider's pricing page before committing to a budget.",
+  "scenarios": [
+    {
+      "name": "Customer support bot with long system prompt",
+      "requests": 100000,
+      "input_tokens": 4000,
+      "cached_tokens": 3000,
+      "output_tokens": 250,
+      "cache_hit_pct": 80,
+      "description": "A detailed system prompt, brand voice rules, and FAQ context that repeats across tickets."
+    },
+    {
+      "name": "Coding assistant with few-shot examples",
+      "requests": 50000,
+      "input_tokens": 6000,
+      "cached_tokens": 4000,
+      "output_tokens": 800,
+      "cache_hit_pct": 75,
+      "description": "Repeated examples, style guide, and repository context that can sit in the cache."
+    },
+    {
+      "name": "RAG agent with reused document context",
+      "requests": 200000,
+      "input_tokens": 8000,
+      "cached_tokens": 6000,
+      "output_tokens": 400,
+      "cache_hit_pct": 70,
+      "description": "The same knowledge-base chunks are prepended to many user queries."
+    },
+    {
+      "name": "Content automation with repeated brand brief",
+      "requests": 30000,
+      "input_tokens": 3500,
+      "cached_tokens": 2500,
+      "output_tokens": 1200,
+      "cache_hit_pct": 90,
+      "description": "A fixed brand brief, templates, and SEO rules cached across generations."
+    }
+  ]
+}

@@ -1,0 +1,237 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import pricing from '../../data/agent_api_pricing.json';
+import cacheData from '../../data/prompt_cache_savings.json';
+
+const title = "Prompt Cache Savings Calculator — Cut LLM API Spend";
+const description = "Estimate how much context caching saves on monthly LLM API spend. Compare cached vs uncached costs across providers that support prompt caching.";
+
+// Only providers that publish a cached-input rate
+const providers = pricing.providers.filter(p => p.cached_input_per_1m && p.cached_input_per_1m > 0);
+const scenarios = cacheData.scenarios;
+
+const faqs = [
+  { q: "What is prompt caching and how does it save money?", a: "Prompt caching stores repeated context — system prompts, few-shot examples, knowledge-base chunks — so you only pay the standard input rate for new tokens. Tokens read from the cache are billed at a discounted cached-input rate, which lowers per-request cost for long-context agents." },
+  { q: "Which providers support cached input pricing?", a: "OpenAI GPT-4o and GPT-4o-mini, plus Anthropic Claude 3.5 Sonnet and Claude 3 Haiku, publish cached-input rates. Other providers may not offer context-cache discounts. Prices are reviewed monthly; confirm current rates on each provider's pricing page." },
+  { q: "What tokens should I mark as cached?", a: "Enter the portion of each request that is identical across calls — typically system instructions, examples, document context, or RAG chunks. The higher the share and cache-hit rate, the bigger the savings." },
+  { q: "Does this include output-token cost?", a: "Yes. Output tokens are billed at the standard output rate whether or not the input is cached, so the calculator includes them in both the cached and uncatched totals." },
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema
+    name="Prompt Cache Savings Calculator"
+    description={description}
+    url="https://hermesdispatch.dev/tools/prompt-cache-savings-calculator/"
+    applicationCategory="FinanceApplication"
+  />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">💾</div>
+        <h1 class="display-heading mb-4">Prompt Cache Savings Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          See how much repeated system prompts, examples, and RAG context can save on your LLM API bill each month.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Requests / month</label>
+          <input id="requests" type="number" min="0" value="100000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Input tokens / request</label>
+          <input id="inputTokens" type="number" min="0" value="4000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Repeated/cached tokens / request</label>
+          <input id="cachedTokens" type="number" min="0" value="3000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Cache hit %</label>
+          <input id="cacheHit" type="number" min="0" max="100" value="80" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Output tokens / request</label>
+          <input id="outputTokens" type="number" min="0" value="250" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Scenario preset</label>
+          <select id="scenario" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+            <option value="">Custom</option>
+            {scenarios.map(s => (
+              <option value={JSON.stringify(s)}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div id="summary" class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <div class="grid md:grid-cols-4 gap-6 text-center">
+          <div>
+            <p class="text-sm text-neutral-400">Uncached monthly</p>
+            <p id="uncachedTotal" class="text-2xl font-mono text-white">—</p>
+          </div>
+          <div>
+            <p class="text-sm text-neutral-400">Cached monthly</p>
+            <p id="cachedTotal" class="text-2xl font-mono text-brand-gold">—</p>
+          </div>
+          <div>
+            <p class="text-sm text-neutral-400">Savings / month</p>
+            <p id="savingsTotal" class="text-2xl font-mono text-emerald-400">—</p>
+          </div>
+          <div>
+            <p class="text-sm text-neutral-400">Best provider</p>
+            <p id="bestProvider" class="text-lg font-medium text-white">—</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 mb-8 overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <thead>
+            <tr class="text-neutral-500 border-b border-neutral-800">
+              <th class="pb-3">Provider</th>
+              <th class="pb-3 text-right">Input $/1M</th>
+              <th class="pb-3 text-right">Cached $/1M</th>
+              <th class="pb-3 text-right">Output $/1M</th>
+              <th class="pb-3 text-right">Uncached / mo</th>
+              <th class="pb-3 text-right">Cached / mo</th>
+              <th class="pb-3 text-right">Savings / mo</th>
+              <th class="pb-3 text-right">Effective input $/1M</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody">
+            {providers.map(p => (
+              <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" data-provider={p.name}>
+                <td class="py-3">
+                  <div class="font-medium text-white">{p.name}</div>
+                  <div class="text-xs text-neutral-500">{p.model}</div>
+                </td>
+                <td class="py-3 text-right font-mono">${p.input_per_1m.toFixed(2)}</td>
+                <td class="py-3 text-right font-mono">${p.cached_input_per_1m.toFixed(3)}</td>
+                <td class="py-3 text-right font-mono">${p.output_per_1m.toFixed(2)}</td>
+                <td class="py-3 text-right font-mono uncached-cell">—</td>
+                <td class="py-3 text-right font-mono cached-cell">—</td>
+                <td class="py-3 text-right font-mono savings-cell">—</td>
+                <td class="py-3 text-right font-mono effective-cell">—</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-12">
+        <h2 class="text-xl font-bold text-brand-gold mb-4">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faqs.map(f => (
+            <div>
+              <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+              <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-4 justify-center">
+        <a href="/tools/prompt-tokenizer-pricing-estimator/" class="btn-primary text-sm">Prompt tokenizer & pricing →</a>
+        <a href="/tools/agent-api-pricing-comparator/" class="px-5 py-3 rounded-xl border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API pricing comparator →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-5 py-3 rounded-xl border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM cost calculator →</a>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ providersJson: JSON.stringify(providers), scenariosJson: JSON.stringify(scenarios) }}>
+    const data = JSON.parse(providersJson);
+    const scenarios = JSON.parse(scenariosJson);
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmt4 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 });
+
+    function compute() {
+      const requests = Math.max(0, parseFloat(document.getElementById('requests').value) || 0);
+      const inputTokens = Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0);
+      const cachedTokens = Math.max(0, Math.min(inputTokens, parseFloat(document.getElementById('cachedTokens').value) || 0));
+      const cacheHit = Math.min(100, Math.max(0, parseFloat(document.getElementById('cacheHit').value) || 0)) / 100;
+      const outputTokens = Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0);
+
+      const outputCostBase = (requests * outputTokens / 1_000_000);
+
+      const rows = data.map(p => {
+        const uncachedInputCost = (requests * inputTokens / 1_000_000) * p.input_per_1m;
+        const cachedPortionTokens = cachedTokens * cacheHit;
+        const uncachedPortionTokens = inputTokens - cachedPortionTokens;
+        const cachedInputCost = (requests * cachedPortionTokens / 1_000_000) * p.cached_input_per_1m
+                              + (requests * Math.max(0, uncachedPortionTokens) / 1_000_000) * p.input_per_1m;
+        const outputCost = outputCostBase * p.output_per_1m;
+        const uncached = uncachedInputCost + outputCost;
+        const cached = cachedInputCost + outputCost;
+        const savings = uncached - cached;
+        const effectiveInputRate = cachedPortionTokens > 0
+          ? ((cachedPortionTokens * p.cached_input_per_1m + Math.max(0, uncachedPortionTokens) * p.input_per_1m) / inputTokens)
+          : p.input_per_1m;
+        return { name: p.name, model: p.model, uncached, cached, savings, effectiveInputRate };
+      });
+
+      rows.sort((a, b) => a.cached - b.cached);
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const name = tr.dataset.provider;
+        const row = rows.find(r => r.name === name);
+        if (!row) return;
+        tr.querySelector('.uncached-cell').textContent = fmt(row.uncached);
+        tr.querySelector('.cached-cell').textContent = fmt(row.cached);
+        tr.querySelector('.savings-cell').textContent = fmt(row.savings);
+        tr.querySelector('.effective-cell').textContent = fmt4(row.effectiveInputRate);
+        if (rows[0].name === name) {
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      const best = rows[0];
+      let totalUncached = 0;
+      let totalCached = 0;
+      rows.forEach(r => {
+        totalUncached += r.uncached;
+        totalCached += r.cached;
+      });
+      const avgSavings = totalUncached - totalCached;
+      // Summary uses the cheapest provider, not the sum across providers, because a user picks one provider
+      document.getElementById('uncachedTotal').textContent = fmt(best.uncached);
+      document.getElementById('cachedTotal').textContent = fmt(best.cached);
+      document.getElementById('savingsTotal').textContent = fmt(best.savings) + ' (' + ((best.savings / best.uncached) * 100).toFixed(0) + '%)';
+      document.getElementById('bestProvider').textContent = `${best.name} (${best.model})`;
+    }
+
+    function loadScenario() {
+      const raw = document.getElementById('scenario').value;
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      document.getElementById('requests').value = s.requests;
+      document.getElementById('inputTokens').value = s.input_tokens;
+      document.getElementById('cachedTokens').value = s.cached_tokens;
+      document.getElementById('cacheHit').value = s.cache_hit_pct;
+      document.getElementById('outputTokens').value = s.output_tokens;
+      compute();
+    }
+
+    ['requests', 'inputTokens', 'cachedTokens', 'cacheHit', 'outputTokens'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+    document.getElementById('scenario').addEventListener('change', loadScenario);
+
+    compute();
+  </script>
+</Layout>

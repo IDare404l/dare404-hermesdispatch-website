@@ -369,11 +369,18 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Audience: AI agent builders comparing voice platforms
 
 ## Voice-to-Text Cost Comparator
-- URL: https://hermesdispatch.dev/tools/voice-transcription-cost-comparator/
-- Description: Compare transcription costs across OpenAI Whisper, Deepgram, AssemblyAI, Google Cloud Speech-to-Text, Azure, AWS Transcribe, Rev AI, and Gladia for voice agents and meeting bots.
-- Inputs: audio minutes per month, batch percentage, diarization percentage, provider per-minute rates (editable)
-- Outputs: effective $/minute per provider, monthly cost, cheapest option, audio-hour estimate
-- Audience: AI agent builders comparing ASR APIs
+|- URL: https://hermesdispatch.dev/tools/voice-transcription-cost-comparator/
+|- Description: Compare transcription costs across OpenAI Whisper, Deepgram, AssemblyAI, Google Cloud Speech-to-Text, Azure, AWS Transcribe, Rev AI, and Gladia for voice agents and meeting bots.
+|- Inputs: audio minutes per month, batch percentage, diarization percentage, provider per-minute rates (editable)
+|- Outputs: effective $/minute per provider, monthly cost, cheapest option, audio-hour estimate
+|- Audience: AI agent builders comparing ASR APIs
+
+## Prompt Cache Savings Calculator
+|- URL: https://hermesdispatch.dev/tools/prompt-cache-savings-calculator/
+|- Description: Estimate how much repeated system prompts and context caching saves on monthly LLM API spend.
+|- Inputs: requests per month, input tokens per request, repeated/cached tokens per request, cache hit percentage, output tokens per request
+|- Outputs: uncached monthly cost, cached monthly cost, savings per month, best provider, effective cached input rate per provider
+|- Audience: AI agent builders optimizing LLM API spend
 
 ## LLM Fine-Tuning Cost Calculator
 - URL: https://hermesdispatch.dev/tools/agent-evaluation-planner/
