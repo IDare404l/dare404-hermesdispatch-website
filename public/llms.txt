@@ -511,11 +511,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||||||||||||||||- Audience: AI agent builders choosing between graph DBs, RDF stores, and relational+vector backends for agent memory
 |||||||||||||||||- Cross-links: Agent Memory / RAG Cost Calculator, Agent API Pricing Comparator, Agent Stack Builder, Agent Task Fit Selector
 
-## GPU Power Supply & Cooling Sizer
-|- URL: https://hermesdispatch.dev/tools/gpu-power-cooling-sizer/
-|- Description: Calculate the minimum PSU wattage, required PCIe/EPS cables, heat output, and case airflow for multi-GPU AI inference or mining rigs.
-|- Inputs: GPU model and count, CPU model, RAM sticks, NVMe/SATA/HDD count, motherboard estimate, 120/140 mm fans, AIO/custom pumps, case airflow class, ambient temperature, PSU headroom %, PSU efficiency target
-|- Outputs: estimated DC load, wall draw, recommended PSU wattage, recommended +12V rail current, 12VHPWR/8-pin/6-pin/EPS cable counts, heat output in BTU/hr, target case airflow in CFM, verdict
-|- Audience: AI hardware builders, crypto miners pivoting to inference, and DIY workstation assemblers
-|- Cross-links: AI PC Build Configurator, VRAM Calculator, GPU Comparison, Rig Repurposing Guide
+|## GPU Power Supply & Cooling Sizer
+||- URL: https://hermesdispatch.dev/tools/gpu-power-cooling-sizer/
+||- Description: Calculate the minimum PSU wattage, required PCIe/EPS cables, heat output, and case airflow for multi-GPU AI inference or mining rigs.
+||- Inputs: GPU model and count, CPU model, RAM sticks, NVMe/SATA/HDD count, motherboard estimate, 120/140 mm fans, AIO/custom pumps, case airflow class, ambient temperature, PSU headroom %, PSU efficiency target
+||- Outputs: estimated DC load, wall draw, recommended PSU wattage, recommended +12V rail current, 12VHPWR/8-pin/6-pin/EPS cable counts, heat output in BTU/hr, target case airflow in CFM, verdict
+||- Audience: AI hardware builders, crypto miners pivoting to inference, and DIY workstation assemblers
+||- Cross-links: AI PC Build Configurator, VRAM Calculator, GPU Comparison, Rig Repurposing Guide
+||
+|## AI Agent Tool Call Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-tool-call-cost-calculator/
+|- Description: Estimate monthly cost for AI agents that call tools: web search, databases, code interpreters, browser actions, and external APIs.
+|- Inputs: monthly agent tasks, tool calls per task, cost per tool call, failure rate, retry rate, retry cost multiplier, human review rate, review hourly cost, review minutes per task, setup hours, setup hourly rate, maintenance hours per month, projection months
+|- Outputs: monthly tool calls, failed calls, retry calls, monthly tool cost, failure cost, retry cost, human review cost, maintenance cost, total monthly cost, cost per task, cost per 1k tasks, setup cost, projected period cost, verdict
+|- Audience: AI agent builders budgeting tool-use spend for retrieval, browser, code, and SaaS actions
+|- Cross-links: Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Output Value Calculator, Agent Model Router Cost Calculator
 |

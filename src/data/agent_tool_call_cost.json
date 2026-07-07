@@ -1,0 +1,90 @@
+{
+  "last_updated": "2026-07-07",
+  "note": "Tool-call costs are directional estimates based on published API pricing and typical usage patterns. Replace them with your actual provider rates and observed failure/retry rates for a precise forecast.",
+  "tools": [
+    { "slug": "web_search", "name": "Web search / retrieval", "cost_per_call": 0.025, "avg_latency_ms": 800, "failure_rate_default": 3, "retry_rate_default": 30 },
+    { "slug": "db_query", "name": "Database / vector query", "cost_per_call": 0.005, "avg_latency_ms": 120, "failure_rate_default": 1, "retry_rate_default": 15 },
+    { "slug": "code_interpreter", "name": "Code interpreter / sandbox", "cost_per_call": 0.06, "avg_latency_ms": 2500, "failure_rate_default": 5, "retry_rate_default": 25 },
+    { "slug": "browser_click", "name": "Browser / DOM action", "cost_per_call": 0.04, "avg_latency_ms": 1500, "failure_rate_default": 8, "retry_rate_default": 35 },
+    { "slug": "external_api", "name": "External SaaS API", "cost_per_call": 0.015, "avg_latency_ms": 400, "failure_rate_default": 4, "retry_rate_default": 20 },
+    { "slug": "saas_action", "name": "CRM / email / calendar action", "cost_per_call": 0.02, "avg_latency_ms": 600, "failure_rate_default": 3, "retry_rate_default": 25 },
+    { "slug": "custom", "name": "Custom internal tool", "cost_per_call": 0.01, "avg_latency_ms": 200, "failure_rate_default": 2, "retry_rate_default": 20 }
+  ],
+  "defaults": {
+    "monthly_tasks": 5000,
+    "tools_per_task": 4,
+    "cost_per_tool_call": 0.025,
+    "failure_rate": 3,
+    "retry_rate": 30,
+    "retry_multiplier": 1.5,
+    "human_review_pct": 12,
+    "review_hourly_cost": 65,
+    "review_minutes": 3,
+    "setup_hours": 18,
+    "setup_hourly_rate": 150,
+    "maintenance_hours_per_month": 5,
+    "projection_months": 12
+  },
+  "scenarios": [
+    {
+      "name": "Customer support research agent",
+      "monthly_tasks": 8000,
+      "tools_per_task": 3,
+      "cost_per_tool_call": 0.02,
+      "failure_rate": 4,
+      "retry_rate": 35,
+      "retry_multiplier": 1.5,
+      "human_review_pct": 10,
+      "review_hourly_cost": 45,
+      "review_minutes": 2,
+      "setup_hours": 20,
+      "setup_hourly_rate": 150,
+      "maintenance_hours_per_month": 4
+    },
+    {
+      "name": "Coding agent with search",
+      "monthly_tasks": 600,
+      "tools_per_task": 6,
+      "cost_per_tool_call": 0.045,
+      "failure_rate": 6,
+      "retry_rate": 25,
+      "retry_multiplier": 1.5,
+      "human_review_pct": 25,
+      "review_hourly_cost": 120,
+      "review_minutes": 5,
+      "setup_hours": 36,
+      "setup_hourly_rate": 175,
+      "maintenance_hours_per_month": 10
+    },
+    {
+      "name": "Sales enrichment agent",
+      "monthly_tasks": 3000,
+      "tools_per_task": 5,
+      "cost_per_tool_call": 0.03,
+      "failure_rate": 3,
+      "retry_rate": 20,
+      "retry_multiplier": 1.5,
+      "human_review_pct": 15,
+      "review_hourly_cost": 75,
+      "review_minutes": 3,
+      "setup_hours": 16,
+      "setup_hourly_rate": 150,
+      "maintenance_hours_per_month": 4
+    },
+    {
+      "name": "Financial data agent",
+      "monthly_tasks": 1200,
+      "tools_per_task": 8,
+      "cost_per_tool_call": 0.05,
+      "failure_rate": 2,
+      "retry_rate": 15,
+      "retry_multiplier": 1.5,
+      "human_review_pct": 20,
+      "review_hourly_cost": 95,
+      "review_minutes": 4,
+      "setup_hours": 28,
+      "setup_hourly_rate": 175,
+      "maintenance_hours_per_month": 6
+    }
+  ]
+}
