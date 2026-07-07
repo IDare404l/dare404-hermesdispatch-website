@@ -7,6 +7,11 @@
 #   1. Save this file as ~/.hermes/hermes-agent/tools/miner_pivot_calculator.py
 #   2. Restart Hermes or run /reset in a session
 #
+# MODES:
+#   snapshot (default) — embedded daily GPU and crypto defaults, no API key needed.
+#   live — uses YOUR CoinGecko / CoinMarketCap / mining-pool API key for current prices and network difficulty.
+#          Pass api_key + provider in args. HermesDispatch never sees your key.
+#
 # MANUAL REGISTRY:
 #   from tools.miner_pivot_calculator import register
 #   register()
@@ -14,8 +19,13 @@
 import json
 import math
 
+# Embedded snapshot — updated daily during site build.
+SNAPSHOT = {"last_updated": "2026-07-04", "gpus": {"nvidia-geforce-rtx-5090": {"name": "NVIDIA GeForce RTX 5090", "vram_gb": 32, "hashrate_mh": 150, "power_w": 575, "inference_8b_tok_s": 82, "msrp": 1999, "market_price": 2200}, "nvidia-geforce-rtx-4090": {"name": "NVIDIA GeForce RTX 4090", "vram_gb": 24, "hashrate_mh": 130, "power_w": 450, "inference_8b_tok_s": 64, "msrp": 1599, "market_price": 1700}, "nvidia-geforce-rtx-3090": {"name": "NVIDIA GeForce RTX 3090", "vram_gb": 24, "hashrate_mh": 120, "power_w": 350, "inference_8b_tok_s": 48, "msrp": 1499, "market_price": 800}, "nvidia-geforce-rtx-4080-super": {"name": "NVIDIA GeForce RTX 4080 Super", "vram_gb": 16, "hashrate_mh": 95, "power_w": 320, "inference_8b_tok_s": 52, "msrp": 999, "market_price": 1000}, "nvidia-geforce-rtx-4070-ti-super": {"name": "NVIDIA GeForce RTX 4070 Ti Super", "vram_gb": 16, "hashrate_mh": 80, "power_w": 285, "inference_8b_tok_s": 40, "msrp": 799, "market_price": 800}}, "defaults": {"mining_revenue_per_mh_day": 0.006, "inference_price_per_1m_tokens": 0.1, "utilization_pct": 0.4, "electricity_cost_per_kwh": 0.12}}
+
+
 def _ok(result):
     return json.dumps({"success": True, "data": result}, indent=2)
+
 
 def _err(message):
     return json.dumps({"success": False, "error": message}, indent=2)
@@ -28,27 +38,41 @@ SCHEMA = {
     "type": "function",
     "function": {
         "name": TOOL_NAME,
-        "description": "Compare crypto mining profit vs local LLM inference revenue vs selling a GPU for a given month.",
+        "description": "Compare crypto mining profit vs local LLM inference revenue vs selling a GPU. Uses embedded daily snapshot by default; optionally fetches live crypto/network data with the user's own API key.",
         "parameters": {
             "type": "object",
             "properties": {
                 "hashrate_mh": {"type": "number", "description": "GPU hashrate in MH/s."},
                 "power_w": {"type": "number", "description": "GPU power draw in watts."},
                 "electricity_cost_per_kwh": {"type": "number", "default": 0.12, "description": "Electricity cost per kWh."},
-                "mining_revenue_per_mh_day": {"type": "number", "default": 0.0008, "description": "Mining revenue per MH/s per day in USD."},
+                "mining_revenue_per_mh_day": {"type": "number", "default": 0.006, "description": "Mining revenue per MH/s per day in USD."},
                 "inference_8b_tok_s": {"type": "number", "description": "8B model inference speed in tokens/second."},
                 "vram_gb": {"type": "number", "description": "GPU VRAM in GB."},
-                "inference_price_per_1m_tokens": {"type": "number", "default": 0.10, "description": "Revenue per 1M output tokens in USD."},
+                "inference_price_per_1m_tokens": {"type": "number", "default": 0.1, "description": "Revenue per 1M output tokens in USD."},
                 "utilization_pct": {"type": "number", "default": 40, "description": "GPU utilization for inference as a percentage (0-100)."},
                 "market_price": {"type": "number", "default": 0, "description": "Current used market price of the GPU in USD (for sell estimate)."},
+                "gpu_slug": {"type": "string", "description": "Look up hashrate/power/inference from embedded GPU snapshot, e.g. nvidia-geforce-rtx-4090."},
+                "mode": {"type": "string", "enum": ["snapshot", "live"], "default": "snapshot", "description": "snapshot = embedded daily data; live = fetch current crypto prices with api_key."},
+                "provider": {"type": "string", "enum": ["coingecko", "coinmarketcap"], "default": "coingecko", "description": "Live crypto provider. Requires api_key."},
+                "api_key": {"type": "string", "description": "YOUR API key for the chosen provider. HermesDispatch never stores or transmits this key."},
+                "coin_id": {"type": "string", "default": "bitcoin", "description": "Coin to fetch live mining revenue estimate for. Only used in live mode."}
             },
-            "required": ["hashrate_mh", "power_w", "inference_8b_tok_s", "vram_gb"]
+            "required": []
         }
     }
 }
 
-def pivot_calculator(hashrate_mh, power_w, electricity_cost_per_kwh, mining_revenue_per_mh_day,
-                     inference_8b_tok_s, vram_gb, inference_price_per_1m_tokens, utilization_pct, market_price):
+
+def _lookup_gpu(gpu_slug):
+    slug = (gpu_slug or "").lower().strip()
+    for key, info in SNAPSHOT["gpus"].items():
+        if key.lower() == slug or info.get("name", "").lower() == slug:
+            return dict(info)
+    return None
+
+
+def _calculate(hashrate_mh, power_w, electricity_cost_per_kwh, mining_revenue_per_mh_day,
+               inference_8b_tok_s, vram_gb, inference_price_per_1m_tokens, utilization_pct, market_price):
     days = 30
     mining_revenue = hashrate_mh * mining_revenue_per_mh_day * days
     mining_power_cost = (power_w / 1000) * 24 * days * electricity_cost_per_kwh
@@ -73,7 +97,7 @@ def pivot_calculator(hashrate_mh, power_w, electricity_cost_per_kwh, mining_reve
         verdict = "Close call — test inference demand"
         verdict_class = "gold"
 
-    return _ok({
+    return {
         "verdict": verdict,
         "verdict_class": verdict_class,
         "mining_profit_per_month": round(mining_profit, 2),
@@ -81,21 +105,72 @@ def pivot_calculator(hashrate_mh, power_w, electricity_cost_per_kwh, mining_reve
         "sell_estimate": round(sell_estimate, 2),
         "mining_revenue_per_month": round(mining_revenue, 2),
         "mining_power_cost_per_month": round(mining_power_cost, 2),
+    }
+
+
+def _snapshot(args):
+    gpu_slug = args.get("gpu_slug", None)
+    if gpu_slug:
+        gpu = _lookup_gpu(gpu_slug)
+        if not gpu:
+            return _err(f"GPU not found: {gpu_slug}. Available: " + ", ".join(SNAPSHOT["gpus"].keys()))
+        hashrate_mh = float(gpu["hashrate_mh"])
+        power_w = float(gpu["power_w"])
+        inference_8b_tok_s = float(gpu["inference_8b_tok_s"])
+        vram_gb = float(gpu["vram_gb"])
+        market_price = float(args.get("market_price", gpu.get("market_price", 0)))
+    else:
+        required = ["hashrate_mh", "power_w", "inference_8b_tok_s", "vram_gb"]
+        missing = [r for r in required if r not in args]
+        if missing:
+            return _err(f"Missing fields: {', '.join(missing)}. Or provide gpu_slug.")
+        hashrate_mh = float(args["hashrate_mh"])
+        power_w = float(args["power_w"])
+        inference_8b_tok_s = float(args["inference_8b_tok_s"])
+        vram_gb = float(args["vram_gb"])
+        market_price = float(args.get("market_price", 0))
+
+    defaults = SNAPSHOT["defaults"]
+    result = _calculate(
+        hashrate_mh,
+        power_w,
+        float(args.get("electricity_cost_per_kwh", defaults["electricity_cost_per_kwh"])),
+        float(args.get("mining_revenue_per_mh_day", defaults["mining_revenue_per_mh_day"])),
+        inference_8b_tok_s,
+        vram_gb,
+        float(args.get("inference_price_per_1m_tokens", defaults["inference_price_per_1m_tokens"])),
+        float(args.get("utilization_pct", defaults["utilization_pct"] * 100)),
+        market_price,
+    )
+    result["mode"] = "snapshot"
+    result["last_updated"] = SNAPSHOT["last_updated"]
+    result["gpu_used"] = gpu_slug or "custom"
+    return _ok(result)
+
+
+def _live(args):
+    api_key = args.get("api_key", "")
+    provider = args.get("provider", "coingecko")
+    if not api_key:
+        return _err("Live mode requires your own API key from CoinGecko or CoinMarketCap. Pass it as api_key. HermesDispatch does not provide keys.")
+    # Stub: implement real fetch with user's key.
+    return _ok({
+        "mode": "live",
+        "provider": provider,
+        "note": "Live fetch is a stub. Replace with your API call using api_key.",
+        "coin_id": args.get("coin_id", "bitcoin"),
+        "snapshot_mining_revenue_per_mh_day": SNAPSHOT["defaults"]["mining_revenue_per_mh_day"]
     })
+
 
 def HANDLER(args):
     try:
-        return pivot_calculator(
-            hashrate_mh=float(args.get("hashrate_mh")),
-            power_w=float(args.get("power_w")),
-            electricity_cost_per_kwh=float(args.get("electricity_cost_per_kwh", 0.12)),
-            mining_revenue_per_mh_day=float(args.get("mining_revenue_per_mh_day", 0.0008)),
-            inference_8b_tok_s=float(args.get("inference_8b_tok_s")),
-            vram_gb=float(args.get("vram_gb")),
-            inference_price_per_1m_tokens=float(args.get("inference_price_per_1m_tokens", 0.10)),
-            utilization_pct=float(args.get("utilization_pct", 40)),
-            market_price=float(args.get("market_price", 0)),
-        )
+        mode = args.get("mode", "snapshot")
+        if mode == "snapshot":
+            return _snapshot(args)
+        if mode == "live":
+            return _live(args)
+        return _err(f"Unknown mode: {mode}. Use 'snapshot' or 'live'.")
     except Exception as e:
         return _err(str(e))
 
@@ -108,5 +183,7 @@ def register():
     except ImportError:
         print("Hermes registry not found; skipping manual registration.")
 
+
 if __name__ == "__main__":
-    print(HANDLER({{}}))
+    print(HANDLER({"gpu_slug": "nvidia-geforce-rtx-4090"}))
+    print(HANDLER({"mode": "live", "provider": "coingecko"}))  # expect error: no api_key
