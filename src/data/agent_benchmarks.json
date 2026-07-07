@@ -1,224 +1,236 @@
 {
-  "coding": {
-    "name": "Coding & Software Engineering",
-    "icon": "💻",
-    "description": "Evaluate whether an agent can read, write, debug, and ship code in real repositories.",
-    "benchmarks": [
-      {
-        "name": "SWE-bench",
-        "tag": "Real GitHub issues",
-        "what": "Fixes real issues from popular Python repos end-to-end.",
-        "pros": "Industry standard; tests repo navigation, editing, testing.",
-        "cons": "Expensive to run; can overfit to public issues.",
-        "best_for": "Coding agents targeting production engineering workflows.",
-        "effort": "High",
-        "cost": "$5-50 per issue"
-      },
-      {
-        "name": "SWE-bench Verified",
-        "tag": "Human-filtered subset",
-        "what": "500 curated SWE-bench instances with confirmed problem/solution pairs.",
-        "pros": "More reliable scores; less noise than full SWE-bench.",
-        "cons": "Still costly; subset may not match your codebase.",
-        "best_for": "Trustworthy leaderboards and vendor comparison.",
-        "effort": "High",
-        "cost": "$5-50 per issue"
-      },
-      {
-        "name": "SWE-bench Lite",
-        "tag": "Faster / cheaper",
-        "what": "Smaller, simpler subset designed for faster iteration.",
-        "pros": "Cheaper; good CI signal for agent improvements.",
-        "cons": "Easier than full SWE-bench; may not generalize.",
-        "best_for": "Rapid iteration and regression testing.",
-        "effort": "Medium",
-        "cost": "$1-10 per issue"
-      },
-      {
-        "name": "HumanEval",
-        "tag": "Function-level coding",
-        "what": "164 hand-written programming problems with unit tests.",
-        "pros": "Fast, cheap, reproducible; great for model comparison.",
-        "cons": "Toy problems; does not test repo-level reasoning.",
-        "best_for": "Quick model capability checks and academic comparisons.",
-        "effort": "Low",
-        "cost": "$0.10-1 per problem"
-      },
-      {
-        "name": "MBPP",
-        "tag": "Python coding problems",
-        "what": "Mostly Basic Programming Problems — crowd-sourced Python tasks.",
-        "pros": "Larger and more varied than HumanEval; beginner friendly.",
-        "cons": "Simpler than real-world coding; limited scope.",
-        "best_for": "Entry-level coding agent evaluation.",
-        "effort": "Low",
-        "cost": "$0.05-0.50 per problem"
-      }
-    ]
+  "last_updated": "2026-07-07",
+  "note": "Benchmark costs and effort levels are directional estimates based on public leaderboards and API pricing. Replace with your own vendor quotes for exact budgeting.",
+  "categories": {
+    "coding": {
+      "slug": "coding",
+      "name": "Coding agents",
+      "icon": "💻",
+      "description": "Agents that write, edit, debug, review, or test code against real or synthetic repositories."
+    },
+    "reasoning": {
+      "slug": "reasoning",
+      "name": "Reasoning & knowledge",
+      "icon": "🧠",
+      "description": "Multi-step reasoning, tool use, world knowledge, and instruction following under time pressure."
+    },
+    "web": {
+      "slug": "web",
+      "name": "Web agents",
+      "icon": "🌐",
+      "description": "Agents that navigate websites, fill forms, search, and complete tasks in live or simulated browsers."
+    },
+    "desktop": {
+      "slug": "desktop",
+      "name": "Desktop / OS agents",
+      "icon": "🖥️",
+      "description": "Agents that operate an operating system GUI: files, apps, settings, and multi-step productivity tasks."
+    },
+    "multi-agent": {
+      "slug": "multi-agent",
+      "name": "Multi-agent systems",
+      "icon": "🤝",
+      "description": "Teams of agents that communicate, delegate, negotiate, or compete to solve a shared problem."
+    },
+    "domain": {
+      "slug": "domain",
+      "name": "Domain-specific agents",
+      "icon": "🎯",
+      "description": "Specialized tasks such as math, cybersecurity, science, law, finance, or biomedicine."
+    }
   },
-  "reasoning": {
-    "name": "General Reasoning & QA",
-    "icon": "🧠",
-    "description": "Tests multi-step reasoning, tool use, and question answering over text.",
-    "benchmarks": [
-      {
-        "name": "GAIA",
-        "tag": "Real-world assistant tasks",
-        "what": "466 tasks across three levels requiring reasoning, browsing, multimodality, and tool use.",
-        "pros": "Strong signal for general assistant ability; human-aligned difficulty.",
-        "cons": "Some tasks need live tools; leaderboard costs add up.",
-        "best_for": "General AI assistants and agentic copilots.",
-        "effort": "High",
-        "cost": "$0.25-5 per task"
-      },
-      {
-        "name": "MMLU / MMLU-Pro",
-        "tag": "Knowledge & reasoning",
-        "what": "Multiple-choice questions spanning STEM, humanities, and social sciences.",
-        "pros": "Standardized; easy to run; good for model ranking.",
-        "cons": "Static knowledge, not agent behavior.",
-        "best_for": "Base model intelligence checks.",
-        "effort": "Low",
-        "cost": "$0.01-0.10 per question"
-      },
-      {
-        "name": "LiveBench",
-        "tag": "Contamination-resistant",
-        "what": "Questions with answers that change over time to reduce memorization.",
-        "pros": "Harder to game; tests current knowledge.",
-        "cons": "Limited coverage; not a full agent test.",
-        "best_for": "Trustworthy LLM leaderboard evaluation.",
-        "effort": "Low",
-        "cost": "$0.01-0.10 per question"
-      }
-    ]
-  },
-  "web-browser": {
-    "name": "Web & Browser Agents",
-    "icon": "🌐",
-    "description": "Agents that navigate websites, fill forms, and complete tasks in a browser.",
-    "benchmarks": [
-      {
-        "name": "WebArena",
-        "tag": "Self-hosted web tasks",
-        "what": "812 reproducible tasks across self-hosted web apps.",
-        "pros": "Controlled environment; tests realistic web interaction.",
-        "cons": "Setup heavy; simulated sites differ from live web.",
-        "best_for": "Browser automation agents and RPA copilots.",
-        "effort": "High",
-        "cost": "$0.50-3 per task"
-      },
-      {
-        "name": "WebVoyager",
-        "tag": "Live web navigation",
-        "what": "Tasks on live websites using screenshots and actions.",
-        "pros": "Tests real-world resilience (layout changes, captchas).",
-        "cons": "Noisy; slow; live sites can break evals.",
-        "best_for": "Agents that must operate on real websites.",
-        "effort": "High",
-        "cost": "$1-10 per task"
-      },
-      {
-        "name": "Mind2Web",
-        "tag": "Web generalization",
-        "what": "Diverse web tasks across 137 sites in 31 domains.",
-        "pros": "Broad domain coverage; good cross-site generalization test.",
-        "cons": "Annotation-based; less end-to-end than WebArena.",
-        "best_for": "Generalist web agents and UI understanding.",
-        "effort": "Medium",
-        "cost": "$0.50-2 per task"
-      }
-    ]
-  },
-  "desktop-os": {
-    "name": "Desktop & OS Agents",
-    "icon": "🖥️",
-    "description": "Agents that control operating systems, applications, and files.",
-    "benchmarks": [
-      {
-        "name": "OSWorld",
-        "tag": "Open-ended OS tasks",
-        "what": "369 tasks across Windows, Ubuntu, and macOS requiring GUI + API reasoning.",
-        "pros": "Tests real desktop automation; multi-modal.",
-        "cons": "Requires VM infrastructure; slow to evaluate.",
-        "best_for": "Personal computer automation agents.",
-        "effort": "High",
-        "cost": "$2-10 per task"
-      },
-      {
-        "name": "Windows Agent Arena",
-        "tag": "Windows apps",
-        "what": "154 tasks across Windows applications and system settings.",
-        "pros": "Focused on Windows; enterprise automation scenarios.",
-        "cons": "Windows-specific; smaller coverage than OSWorld.",
-        "best_for": "Enterprise Windows automation copilots.",
-        "effort": "High",
-        "cost": "$2-10 per task"
-      }
-    ]
-  },
-  "multi-agent": {
-    "name": "Multi-Agent & Orchestration",
-    "icon": "🤖",
-    "description": "Evaluate coordination, delegation, and communication across multiple agents.",
-    "benchmarks": [
-      {
-        "name": "AgentBench",
-        "tag": "Multi-environment agents",
-        "what": "Eight environments spanning reasoning, decision making, coding, and embodied tasks.",
-        "pros": "Holistic view of agent ability across settings.",
-        "cons": "Complex setup; not a single narrow score.",
-        "best_for": "Teams building multi-domain agent platforms.",
-        "effort": "Very High",
-        "cost": "$5-20 per task"
-      },
-      {
-        "name": "BenchMAX",
-        "tag": "Multi-agent collaboration",
-        "what": "Tasks designed for agent teams with role specialization.",
-        "pros": "Directly measures delegation and coordination.",
-        "cons": "Newer benchmark; fewer public results.",
-        "best_for": "CrewAI / AutoGen / LangGraph multi-agent teams.",
-        "effort": "Medium",
-        "cost": "$1-5 per task"
-      }
-    ]
-  },
-  "domain-specific": {
-    "name": "Domain-Specific Agents",
-    "icon": "🎯",
-    "description": "Benchmarks tuned for math, science, security, and other specialized domains.",
-    "benchmarks": [
-      {
-        "name": "GSM8K / MATH",
-        "tag": "Mathematical reasoning",
-        "what": "Grade-school and competition-level math word problems.",
-        "pros": "Clear right/wrong scoring; cheap to run.",
-        "cons": "Text-only; not agentic.",
-        "best_for": "Agents with a calculator or code-interpreter step.",
-        "effort": "Low",
-        "cost": "$0.05-0.20 per problem"
-      },
-      {
-        "name": "CYBER",
-        "tag": "Cybersecurity agents",
-        "what": "Capture-the-flag style tasks for offensive security agents.",
-        "pros": "Practical security scenarios; strong signal for capability.",
-        "cons": "Niche; dangerous if misused.",
-        "best_for": "Security research and red-team agents.",
-        "effort": "High",
-        "cost": "$2-20 per task"
-      },
-      {
-        "name": "SciWorld",
-        "tag": "Scientific reasoning",
-        "what": "Text-based scientific experiments in a simulated lab environment.",
-        "pros": "Tests hypothesis-driven reasoning and experimentation.",
-        "cons": "Niche domain; simulator complexity.",
-        "best_for": "Research assistant and lab-automation agents.",
-        "effort": "High",
-        "cost": "$1-10 per task"
-      }
-    ]
-  }
+  "benchmarks": [
+    {
+      "slug": "swe-bench",
+      "name": "SWE-bench",
+      "category": "coding",
+      "tests": "Real-world GitHub issues from popular Python repositories. The agent must edit code so the repository's own test suite passes.",
+      "pros": "Highly realistic; directly measures production software engineering ability.",
+      "cons": "Expensive to run; requires sandboxed execution and repo setup; not all issues are agent-friendly.",
+      "fit": "Code-generation agents, AI software engineers, and autonomous PR bots.",
+      "effort": "High",
+      "cost": "$500 – $5,000 per evaluation run",
+      "url": "https://www.swebench.com/"
+    },
+    {
+      "slug": "humaneval",
+      "name": "HumanEval",
+      "category": "coding",
+      "tests": "164 hand-written Python function-completion problems with unit-test validation.",
+      "pros": "Cheap, fast, and widely cited; great for comparing pass@1 coding skill across models.",
+      "cons": "Short functions only; may be memorized by large models; does not test repo-level work.",
+      "fit": "Quick model comparisons for code completion and small-function generation.",
+      "effort": "Low",
+      "cost": "$5 – $50 per run",
+      "url": "https://github.com/openai/human-eval"
+    },
+    {
+      "slug": "mbpp",
+      "name": "MBPP (Mostly Basic Python Problems)",
+      "category": "coding",
+      "tests": "Crowd-sourced Python programming problems with test cases, from beginner to intermediate difficulty.",
+      "pros": "Larger and more varied than HumanEval; includes docstrings and natural-language prompts.",
+      "cons": "Still focused on small, self-contained functions; less realistic than repo-level benchmarks.",
+      "fit": "Entry-level coding assistants and educational coding agents.",
+      "effort": "Low",
+      "cost": "$10 – $100 per run",
+      "url": "https://github.com/google-research/google-research/tree/master/mbpp"
+    },
+    {
+      "slug": "gaia",
+      "name": "GAIA",
+      "category": "reasoning",
+      "tests": "Multi-step question answering that requires reasoning, web browsing, file parsing, and tool use to answer real-world questions.",
+      "pros": "Very hard to game; rewards agents that can plan, search, and synthesize evidence.",
+      "cons": "Slow and expensive; requires web access; answers can be brittle to search-result changes.",
+      "fit": "General-purpose assistant agents, research agents, and agents with tool access.",
+      "effort": "High",
+      "cost": "$300 – $2,000 per run",
+      "url": "https://huggingface.co/spaces/gaia-benchmark/leaderboard"
+    },
+    {
+      "slug": "mmlu",
+      "name": "MMLU",
+      "category": "reasoning",
+      "tests": "57 multiple-choice tasks covering STEM, humanities, social sciences, and professional knowledge.",
+      "pros": "Standardized, cheap, and widely reported; good baseline for world knowledge.",
+      "cons": "Static multiple-choice benchmark; does not measure multi-step reasoning or agentic behavior.",
+      "fit": "Foundation-model selection and knowledge-heavy assistant agents.",
+      "effort": "Low",
+      "cost": "$10 – $100 per run",
+      "url": "https://github.com/hendrycks/test"
+    },
+    {
+      "slug": "livebench",
+      "name": "LiveBench",
+      "category": "reasoning",
+      "tests": "Continuously updated reasoning tasks drawn from recent data sources, designed to avoid contamination.",
+      "pros": "Harder to memorize; stays current; covers math, reasoning, language, and instruction following.",
+      "cons": "Less established than MMLU or HumanEval; questions can be noisy.",
+      "fit": "Agents that must stay current or claim strong general reasoning.",
+      "effort": "Medium",
+      "cost": "$50 – $500 per run",
+      "url": "https://livebench.ai/"
+    },
+    {
+      "slug": "webarena",
+      "name": "WebArena",
+      "category": "web",
+      "tests": "Independent, realistic web tasks across e-commerce, social forums, software development, maps, and admin panels.",
+      "pros": "Simulates real websites; measures end-to-end task completion in a live environment.",
+      "cons": "Requires hosted environments; can be flaky due to website changes; expensive to run at scale.",
+      "fit": "Browser agents, web assistants, and autonomous research agents.",
+      "effort": "High",
+      "cost": "$500 – $3,000 per run",
+      "url": "https://webarena.dev/"
+    },
+    {
+      "slug": "webvoyager",
+      "name": "WebVoyager",
+      "category": "web",
+      "tests": "Visual web navigation tasks where the agent must interact with live websites through screenshots and predicted actions.",
+      "pros": "Tests vision + web interaction; closer to how humans browse visually.",
+      "cons": "Latency is high; requires screenshot rendering; brittle to UI redesigns.",
+      "fit": "Vision-enabled browser agents and multimodal assistants.",
+      "effort": "High",
+      "cost": "$400 – $2,500 per run",
+      "url": "https://github.com/MinorJerry/WebVoyager"
+    },
+    {
+      "slug": "mind2web",
+      "name": "Mind2Web",
+      "category": "web",
+      "tests": "Diverse web tasks on real websites across multiple domains, annotated with expert demonstrations.",
+      "pros": "Large coverage of web domains; includes both action prediction and task completion metrics.",
+      "cons": "Benchmark is static; newer website versions may diverge from the dataset.",
+      "fit": "Generalist web agents and UI automation tools.",
+      "effort": "Medium",
+      "cost": "$100 – $800 per run",
+      "url": "https://osu-nlp-group.github.io/Mind2Web/"
+    },
+    {
+      "slug": "osworld",
+      "name": "OSWorld",
+      "category": "desktop",
+      "tests": "Open-ended tasks inside a real Ubuntu desktop: file management, browser use, office apps, and system configuration.",
+      "pros": "Real OS environment; captures messy, long-horizon computer use.",
+      "cons": "Very expensive and slow; needs VM infrastructure; high variance across runs.",
+      "fit": "Desktop automation agents, personal assistants, and OS-control agents.",
+      "effort": "Very High",
+      "cost": "$1,000 – $10,000 per run",
+      "url": "https://osworld-public.github.io/"
+    },
+    {
+      "slug": "windows-agent-arena",
+      "name": "Windows Agent Arena",
+      "category": "desktop",
+      "tests": "Tasks on a live Windows desktop spanning settings, apps, and cross-application workflows.",
+      "pros": "Tests the most common consumer OS; surfaces enterprise automation value.",
+      "cons": "Windows-specific licensing and VM setup; evaluation pipeline is complex.",
+      "fit": "Enterprise desktop-automation agents and Windows-centric copilots.",
+      "effort": "Very High",
+      "cost": "$1,500 – $8,000 per run",
+      "url": "https://microsoft.github.io/windows-agentArena/"
+    },
+    {
+      "slug": "agentbench",
+      "name": "AgentBench",
+      "category": "multi-agent",
+      "tests": "Eight environments (OS, database, knowledge graph, digital card game, web shopping, household, etc.) that exercise decision making, tool use, and multi-turn interaction.",
+      "pros": "Broad multi-environment coverage; compares agents across many dimensions.",
+      "cons": "Some environments are synthetic; setup can be heavy; scoring is nuanced.",
+      "fit": "Generalist agents, tool-use agents, and multi-environment systems.",
+      "effort": "High",
+      "cost": "$300 – $2,500 per run",
+      "url": "https://github.com/THUDM/AgentBench"
+    },
+    {
+      "slug": "benchmax",
+      "name": "BenchMAX",
+      "category": "multi-agent",
+      "tests": "Multi-agent collaboration tasks such as negotiation, team problem solving, and resource allocation.",
+      "pros": "Targets the unique failure modes of multi-agent communication and coordination.",
+      "cons": "Smaller community; less standardized than single-agent benchmarks.",
+      "fit": "Multi-agent orchestrators, agent teams, and collaborative AI systems.",
+      "effort": "Medium",
+      "cost": "$200 – $1,500 per run",
+      "url": "https://github.com/normandip/benchmax"
+    },
+    {
+      "slug": "gsm8k",
+      "name": "GSM8K",
+      "category": "domain",
+      "tests": "Grade-school math word problems that require multi-step arithmetic reasoning.",
+      "pros": "Clean, cheap, and widely used; strong signal for chain-of-thought reasoning.",
+      "cons": "Narrow domain; not representative of real agent deployments.",
+      "fit": "Tutoring agents, math copilots, and reasoning-heavy assistants.",
+      "effort": "Low",
+      "cost": "$5 – $50 per run",
+      "url": "https://github.com/openai/grade-school-math"
+    },
+    {
+      "slug": "cyber",
+      "name": "CYBER / CTF Evals",
+      "category": "domain",
+      "tests": "Capture-the-flag and cybersecurity challenges ranging from reconnaissance to exploit development.",
+      "pros": "Directly measures offensive-security and vulnerability-research capability.",
+      "cons": "High stakes; requires isolated sandbox; not suitable for public leaderboards without review.",
+      "fit": "Security research agents, red-team tools, and vulnerability-assessment copilots.",
+      "effort": "Very High",
+      "cost": "$1,000 – $10,000+ per run",
+      "url": "https://huggingface.co/datasets/cyber-vulnerability-assessment"
+    },
+    {
+      "slug": "sciworld",
+      "name": "SciWorld",
+      "category": "domain",
+      "tests": "Open-ended science experiments in a text-based simulation where agents must design and execute experiments.",
+      "pros": "Tests scientific reasoning and long-horizon planning in a controlled simulator.",
+      "cons": "Niche; requires domain expertise to interpret results; simulator limitations affect generalization.",
+      "fit": "Scientific research assistants, lab-automation agents, and hypothesis-testing systems.",
+      "effort": "High",
+      "cost": "$500 – $4,000 per run",
+      "url": "https://sciworld-game.github.io/"
+    }
+  ]
 }
