@@ -1,0 +1,224 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/no_code_agent_builders.json';
+
+const title = "No-Code AI Agent Builder Selector | Hermes Dispatch";
+const description = "Pick the best no-code or low-code AI agent builder for your use case, team size, and budget. Compare n8n, Zapier Central, Relevance AI, Make, Gumloop, Voiceflow, Synthflow, Dify, and more.";
+const builders = data.builders;
+const useCases = data.use_cases;
+
+const faqs = [
+  { q: "What is the best no-code AI agent builder for beginners?", a: "Zapier Central and Make are the easiest starting points if you already use Zapier or want visual automation. For AI-specific agents with memory and tools, Gumloop or Relevance AI are more purpose-built." },
+  { q: "Which no-code agent builder is cheapest at scale?", a: "n8n is free self-hosted and very cheap on cloud for heavy workloads. Make has a low entry price. Voice-centric agents like Synthflow or Vapi shift cost to per-minute usage, which can exceed flat-priced builders quickly." },
+  { q: "Can I self-host a no-code agent builder?", a: "Yes. n8n, FlowiseAI, CrewAI Studio, Dify, and Langflow all offer open-source, self-hosted options. Self-hosting removes SaaS fees but adds server/DevOps responsibility." },
+  { q: "Do I need coding skills for these tools?", a: "Most builders are no-code for simple flows. Multi-agent crews, custom tool integrations, or self-hosted deployments usually need JavaScript/Python knowledge. Each result card shows a learning-curve badge." },
+  { q: "How is the ranking calculated?", a: "The selector scores builders on use-case fit (must-have and nice-to-have features), integration breadth, price, learning curve, and an internal 'agent score'. You can bias results toward cheapest, easiest, or most powerful." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="No-Code AI Agent Builder Selector" description={description} url="https://hermesdispatch.dev/tools/no-code-agent-builder-selector/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4">No-Code AI Agent Builder Selector</h1>
+      <p class="text-slate-300 text-lg max-w-2xl mx-auto">Pick the right no-code or low-code platform for your AI agent. Filter by use case, budget, hosting preference, and team skill level.</p>
+    </div>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-10">
+      <h2 class="text-xl font-semibold text-white mb-6">What are you building?</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-slate-300 text-sm">Use case</span>
+          <select id="useCase" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            {useCases.map(u => <option value={u.id}>{u.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Max monthly budget</span>
+          <select id="budget" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            <option value="any">Any</option>
+            <option value="0">Free only</option>
+            <option value="25">Up to $25/mo</option>
+            <option value="50">Up to $50/mo</option>
+            <option value="100">Up to $100/mo</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Hosting</span>
+          <select id="hosting" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            <option value="any">Any</option>
+            <option value="cloud">Cloud SaaS</option>
+            <option value="self_hosted">Self-hosted</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Prioritize</span>
+          <select id="priority" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            <option value="balanced">Balanced</option>
+            <option value="cheap">Cheapest</option>
+            <option value="easy">Easiest</option>
+            <option value="powerful">Most powerful</option>
+          </select>
+        </label>
+      </div>
+      <p class="text-slate-400 text-sm mt-4">Data last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <section id="results" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      {builders.map((b, i) => (
+        <div class="builder-card bg-neutral-900 border border-neutral-800 rounded-xl p-6 hover:border-cyan-400 transition" data-builder={JSON.stringify(b)} data-index={i}>
+          <div class="flex items-start justify-between mb-3">
+            <h3 class="text-lg font-semibold text-white">{b.name}</h3>
+            <span class="text-xs bg-neutral-800 text-slate-300 px-2 py-1 rounded">{b.learning_curve}</span>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">{b.model}</p>
+          <div class="space-y-2 text-sm mb-4">
+            <div class="flex justify-between"><span class="text-slate-400">Price</span><span class="text-white font-medium">{b.pricing_model}</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Integrations</span><span class="text-white font-medium">{b.integrations.toLocaleString()}</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Hosting</span><span class="text-white font-medium">{b.cloud && b.self_hosted ? "Cloud + self-hosted" : b.self_hosted ? "Self-hosted" : "Cloud"}</span></div>
+          </div>
+          <div class="mb-4">
+            <p class="text-xs text-slate-500 mb-2 uppercase tracking-wide">Best for</p>
+            <div class="flex flex-wrap gap-2">
+              {b.best_for.map(id => {
+                const uc = useCases.find(u => u.id === id);
+                return <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded">{uc ? uc.name : id}</span>;
+              })}
+            </div>
+          </div>
+          <div class="mb-4">
+            <p class="text-xs text-slate-500 mb-2 uppercase tracking-wide">Pros</p>
+            <ul class="text-sm text-slate-300 space-y-1 list-disc list-inside">
+              {b.pros.slice(0,2).map(p => <li>{p}</li>)}
+            </ul>
+          </div>
+          <div class="mb-4">
+            <p class="text-xs text-slate-500 mb-2 uppercase tracking-wide">Cons</p>
+            <ul class="text-sm text-slate-400 space-y-1 list-disc list-inside">
+              {b.cons.slice(0,2).map(c => <li>{c}</li>)}
+            </ul>
+          </div>
+          <div class="flex items-center justify-between pt-4 border-t border-neutral-800">
+            <span class="text-xs text-slate-500">Agent score <span class="score text-cyan-400 font-bold">{b.agent_score}</span></span>
+            <a href={b.url} target="_blank" rel="noopener" class="text-sm text-cyan-400 hover:underline">Visit site →</a>
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section id="summary" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12 hidden">
+      <h2 class="text-lg font-semibold text-cyan-400 mb-2">Top pick</h2>
+      <p id="topPick" class="text-white text-xl font-medium">—</p>
+      <p class="text-slate-300 text-sm mt-2">Results are ranked by use-case fit and your selected priority. Always confirm current pricing and features on the platform's site.</p>
+    </section>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-slate-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <p id="note" class="text-slate-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ buildersJson: JSON.stringify(builders), useCasesJson: JSON.stringify(useCases) }}>
+    const builders = JSON.parse(buildersJson);
+    const useCases = JSON.parse(useCasesJson);
+
+    const curveWeight = { Low: 1, "Low-Medium": 0.85, Medium: 0.7, "Medium-High": 0.55, High: 0.4 };
+
+    function score(builder, useCaseId, budget, hosting, priority) {
+      const uc = useCases.find(u => u.id === useCaseId);
+      if (!uc) return { total: 0, fit: 0 };
+
+      // Feature fit
+      const mustMet = uc.must_have.filter(f => builder.features.includes(f)).length;
+      const niceMet = uc.nice_to_have.filter(f => builder.features.includes(f)).length;
+      const mustScore = (mustMet / uc.must_have.length) * 35;
+      const niceScore = (niceMet / uc.nice_to_have.length) * 15;
+
+      // Use-case affinity
+      const affinity = builder.best_for.includes(useCaseId) ? 15 : 0;
+
+      // Breadth
+      const breadth = Math.min(builder.integrations / 2000, 1) * 10;
+
+      // Agent score baseline
+      const baseline = builder.agent_score * 1.5;
+
+      // Learning curve
+      const ease = (curveWeight[builder.learning_curve] || 0.5) * 10;
+
+      // Price fit
+      let priceFit = 10;
+      if (budget !== 'any') {
+        const max = parseFloat(budget);
+        if (builder.typical_price_usd > max && !(max === 0 && builder.free_tier)) priceFit = Math.max(0, 10 - (builder.typical_price_usd - max) / 10);
+        if (max === 0 && builder.free_tier) priceFit = 10;
+      }
+
+      // Hosting fit
+      let hostingFit = 10;
+      if (hosting === 'cloud' && !builder.cloud) hostingFit = 0;
+      if (hosting === 'self_hosted' && !builder.self_hosted) hostingFit = 0;
+
+      let total = mustScore + niceScore + affinity + breadth + baseline + ease + priceFit + hostingFit;
+
+      // Apply priority bias
+      if (priority === 'cheap') total += (100 - builder.typical_price_usd) * 0.05;
+      if (priority === 'easy') total += ease;
+      if (priority === 'powerful') total += baseline * 0.8 + breadth * 0.5;
+
+      return { total, fit: mustMet + '/' + uc.must_have.length };
+    }
+
+    function compute() {
+      const useCaseId = document.getElementById('useCase').value;
+      const budget = document.getElementById('budget').value;
+      const hosting = document.getElementById('hosting').value;
+      const priority = document.getElementById('priority').value;
+
+      const results = builders.map(b => ({ ...b, ...score(b, useCaseId, budget, hosting, priority) }))
+        .sort((a, b) => b.total - a.total);
+
+      const container = document.getElementById('results');
+      const cards = Array.from(container.querySelectorAll('.builder-card'));
+
+      results.forEach((r, idx) => {
+        const card = cards.find(c => JSON.parse(c.dataset.builder).name === r.name);
+        if (!card) return;
+        card.style.order = idx;
+        card.querySelector('.score').textContent = Math.round(r.total) + ' (' + r.fit + ' must-have features)';
+        if (idx === 0) {
+          card.classList.add('border-cyan-400', 'bg-cyan-400/5');
+        } else {
+          card.classList.remove('border-cyan-400', 'bg-cyan-400/5');
+        }
+      });
+
+      const summary = document.getElementById('summary');
+      const top = results[0];
+      summary.classList.remove('hidden');
+      document.getElementById('topPick').textContent = `${top.name} — best fit for ${useCases.find(u => u.id === useCaseId).name} (${top.pricing_model}, ${top.learning_curve} learning curve).`;
+    }
+
+    ['useCase', 'budget', 'hosting', 'priority'].forEach(id => {
+      document.getElementById(id).addEventListener('change', compute);
+    });
+    compute();
+  </script>
+</Layout>
