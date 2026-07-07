@@ -1,0 +1,143 @@
+{
+  "last_updated": "2026-07-07",
+  "note": "Figures are directional based on U.S. fully-loaded labor costs and typical AI agent stack pricing. Replace with your own salary, benefit, and vendor data for a precise comparison.",
+  "roles": [
+    {
+      "slug": "customer-support",
+      "name": "Customer Support Rep",
+      "annual_salary": 52000,
+      "benefits_pct": 0.30,
+      "monthly_outputs": 1500,
+      "output_label": "tickets handled",
+      "agent_api_cost_per_output": 0.06,
+      "agent_setup_hours": 24,
+      "agent_maintenance_hours": 6,
+      "human_review_pct": 12
+    },
+    {
+      "slug": "sdr",
+      "name": "Sales Development Rep",
+      "annual_salary": 65000,
+      "benefits_pct": 0.30,
+      "monthly_outputs": 800,
+      "output_label": "qualified leads",
+      "agent_api_cost_per_output": 0.22,
+      "agent_setup_hours": 32,
+      "agent_maintenance_hours": 8,
+      "human_review_pct": 18
+    },
+    {
+      "slug": "content-writer",
+      "name": "Content Writer",
+      "annual_salary": 72000,
+      "benefits_pct": 0.25,
+      "monthly_outputs": 50,
+      "output_label": "articles drafted",
+      "agent_api_cost_per_output": 0.35,
+      "agent_setup_hours": 16,
+      "agent_maintenance_hours": 5,
+      "human_review_pct": 35
+    },
+    {
+      "slug": "data-entry",
+      "name": "Data Entry / Processor",
+      "annual_salary": 45000,
+      "benefits_pct": 0.30,
+      "monthly_outputs": 10000,
+      "output_label": "records processed",
+      "agent_api_cost_per_output": 0.005,
+      "agent_setup_hours": 20,
+      "agent_maintenance_hours": 4,
+      "human_review_pct": 8
+    },
+    {
+      "slug": "it-helpdesk",
+      "name": "IT Helpdesk Technician",
+      "annual_salary": 60000,
+      "benefits_pct": 0.30,
+      "monthly_outputs": 1200,
+      "output_label": "tickets resolved",
+      "agent_api_cost_per_output": 0.10,
+      "agent_setup_hours": 28,
+      "agent_maintenance_hours": 7,
+      "human_review_pct": 15
+    },
+    {
+      "slug": "paralegal",
+      "name": "Paralegal / Researcher",
+      "annual_salary": 70000,
+      "benefits_pct": 0.28,
+      "monthly_outputs": 300,
+      "output_label": "research summaries",
+      "agent_api_cost_per_output": 0.55,
+      "agent_setup_hours": 40,
+      "agent_maintenance_hours": 10,
+      "human_review_pct": 40
+    },
+    {
+      "slug": "bookkeeper",
+      "name": "Bookkeeper / AP Clerk",
+      "annual_salary": 55000,
+      "benefits_pct": 0.28,
+      "monthly_outputs": 2000,
+      "output_label": "documents processed",
+      "agent_api_cost_per_output": 0.04,
+      "agent_setup_hours": 24,
+      "agent_maintenance_hours": 5,
+      "human_review_pct": 10
+    },
+    {
+      "slug": "custom",
+      "name": "Custom role",
+      "annual_salary": 75000,
+      "benefits_pct": 0.30,
+      "monthly_outputs": 1000,
+      "output_label": "outputs",
+      "agent_api_cost_per_output": 0.12,
+      "agent_setup_hours": 24,
+      "agent_maintenance_hours": 6,
+      "human_review_pct": 15
+    }
+  ],
+  "stacks": [
+    {
+      "id": "cheap",
+      "name": "Budget stack",
+      "monthly_tooling": 50,
+      "description": "No-code builder + basic LLM API (e.g., GPT-4o-mini)."
+    },
+    {
+      "id": "standard",
+      "name": "Standard stack",
+      "monthly_tooling": 150,
+      "description": "RAG + vector DB + mid-tier LLM + observability."
+    },
+    {
+      "id": "advanced",
+      "name": "Advanced stack",
+      "monthly_tooling": 350,
+      "description": "Multi-agent orchestration, premium models, evals, monitoring."
+    },
+    {
+      "id": "voice",
+      "name": "Voice agent stack",
+      "monthly_tooling": 200,
+      "description": "Voice platform, telephony, CRM integration, call analytics."
+    },
+    {
+      "id": "custom",
+      "name": "Custom stack",
+      "monthly_tooling": 100,
+      "description": "Self-built or hybrid; set your own tooling cost."
+    }
+  ],
+  "defaults": {
+    "role_slug": "sdr",
+    "stack_id": "standard",
+    "setup_hourly_rate": 150,
+    "review_hourly_rate": 65,
+    "review_minutes_per_output": 4,
+    "projection_months": 12,
+    "agent_uptime_pct": 95
+  }
+}

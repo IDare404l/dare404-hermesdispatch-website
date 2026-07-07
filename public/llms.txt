@@ -431,10 +431,17 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||||- Outputs: recommended architecture, suggested stack, benchmark/KPI, common gotchas
 ||||- Audience: AI agent builders scoping projects
 ||||
-||||## No-Code AI Agent Builder Selector
-||||- URL: https://hermesdispatch.dev/tools/no-code-agent-builder-selector/
-||||- Description: Pick the best no-code or low-code AI agent builder for your use case, budget, hosting preference, and team skill level.
-||||- Inputs: use case, max monthly budget, hosting preference, priority (balanced/cheap/easy/powerful)
-||||- Outputs: ranked builder list, top pick, pricing model, integration count, pros/cons
-||||- Audience: AI agent builders choosing a no-code or low-code platform
-||||
+|||||## No-Code AI Agent Builder Selector
+|||||- URL: https://hermesdispatch.dev/tools/no-code-agent-builder-selector/
+|||||- Description: Pick the best no-code or low-code AI agent builder for your use case, budget, hosting preference, and team skill level.
+|||||- Inputs: use case, max monthly budget, hosting preference, priority (balanced/cheap/easy/powerful)
+|||||- Outputs: ranked builder list, top pick, pricing model, integration count, pros/cons
+|||||- Audience: AI agent builders choosing a no-code or low-code platform
+|||||
+|||||## AI Agent vs Human Hire Calculator
+|||||- URL: https://hermesdispatch.dev/tools/agent-vs-hire-calculator/
+|||||- Description: Compare the cost of deploying an AI agent versus hiring a human employee for the same task.
+|||||- Inputs: role preset, annual salary, benefits percentage, monthly outputs, agent stack, API cost per output, review rate, setup/maintenance hours, hourly rates, projection months
+|||||- Outputs: monthly human cost, monthly agent cost, 1-year savings, break-even month, month-by-month projection, verdict
+|||||- Audience: AI agent builders and operators deciding between hiring and automation
+|||||
