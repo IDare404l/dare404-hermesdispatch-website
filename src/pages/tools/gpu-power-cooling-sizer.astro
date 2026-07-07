@@ -1,0 +1,346 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/gpu_power_cooling.json';
+
+const title = "GPU Power Supply & Cooling Sizer | Hermes Dispatch";
+const description = "Calculate the minimum PSU wattage, required PCIe/EPS cables, heat output, and case airflow for multi-GPU AI inference or mining rigs.";
+const gpus = data.gpus;
+const cpus = data.cpus;
+const components = data.components;
+const psuEff = data.psu_efficiency;
+const airflowRules = data.airflow_rules;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "Why do I need a PSU headroom buffer?", a: "GPUs can spike well above their TDP for milliseconds under load. A 20-30% headroom buffer keeps the PSU in its efficient range, reduces fan noise, and absorbs transient peaks without shutdowns." },
+  { q: "How many PCIe power cables do I need?", a: "Each 12VHPWR cable supplies up to 600 W. Each 8-pin PCIe cable supplies up to 150 W (plus the slot's 75 W for older cards). The calculator sums connector counts across selected GPUs." },
+  { q: "Does the calculator account for wall draw?", a: "Yes. DC load is what components draw internally. Wall draw is DC load divided by PSU efficiency. We display both so you can size circuits and cooling." },
+  { q: "What case airflow do I need for an AI rig?", a: "Rough rule: 2.5 CFM per 100 W of heat output for average cases. Poorly ventilated cases need more; cases with mesh fronts and exhaust fans need less. Hot ambient rooms add a penalty." },
+  { q: "Can this size a mining-style open frame?", a: "Yes. Pick the Custom/Other GPU and set the count. Open frames get the 'good' airflow multiplier by default because there is no case restriction." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="GPU Power Supply & Cooling Sizer" description={description} url="https://hermesdispatch.dev/tools/gpu-power-cooling-sizer/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚡</div>
+      <h1 class="display-heading mb-4">GPU Power Supply & Cooling Sizer</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Calculate the minimum PSU wattage, required PCIe/EPS cables, heat output, and case airflow for multi-GPU AI inference or mining rigs.</p>
+    </div>
+
+    <section class="grid lg:grid-cols-3 gap-6 mb-10">
+      <div class="lg:col-span-2 glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Hardware inputs</h2>
+
+        <h3 class="text-lg font-bold mb-4 text-brand-gold">GPU(s)</h3>
+        <div class="grid md:grid-cols-2 gap-5 mb-6">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">GPU model</span>
+            <select id="gpuModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {gpus.map(g => (
+                <option value={g.name} selected={g.name === defaults.gpu_model}>{g.name}</option>
+              ))}
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">GPU count</span>
+            <input id="gpuCount" type="number" min="1" max="16" step="1" value={defaults.gpu_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+
+        <h3 class="text-lg font-bold mb-4 text-brand-gold">Host system</h3>
+        <div class="grid md:grid-cols-2 gap-5">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">CPU</span>
+            <select id="cpuModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {cpus.map(c => (
+                <option value={c.name} selected={c.name === defaults.cpu}>{c.name}</option>
+              ))}
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">RAM sticks</span>
+            <input id="ramSticks" type="number" min="0" max="16" step="1" value={defaults.ram_sticks} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">NVMe SSDs</span>
+            <input id="nvmeSsds" type="number" min="0" max="12" step="1" value={defaults.nvme_ssds} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">SATA SSDs</span>
+            <input id="sataSsds" type="number" min="0" max="12" step="1" value={defaults.sata_ssds} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">3.5" HDDs</span>
+            <input id="hdds" type="number" min="0" max="12" step="1" value={defaults.hdds} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Motherboard + onboard</span>
+            <input id="moboWatts" type="number" min="0" max="200" step="5" value={components.mobo} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+
+        <h3 class="text-lg font-bold mt-8 mb-4 text-brand-gold">Cooling & case</h3>
+        <div class="grid md:grid-cols-2 gap-5">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">120 mm fans</span>
+            <input id="fans120" type="number" min="0" max="24" step="1" value={defaults.fans_120} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">140 mm fans</span>
+            <input id="fans140" type="number" min="0" max="24" step="1" value={defaults.fans_140} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">AIO pumps</span>
+            <input id="aioPumps" type="number" min="0" max="4" step="1" value={defaults.aio_pumps} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Custom loop pumps</span>
+            <input id="customPumps" type="number" min="0" max="4" step="1" value={defaults.custom_pumps} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Case airflow</span>
+            <select id="caseAirflow" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              <option value="poor" selected={defaults.case_airflow === 'poor'}>Poor / closed case</option>
+              <option value="average" selected={defaults.case_airflow === 'average'}>Average / some vents</option>
+              <option value="good" selected={defaults.case_airflow === 'good'}>Good / mesh or open frame</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Ambient temp (°C)</span>
+            <input id="ambientC" type="number" min="10" max="45" step="1" value={defaults.ambient_c} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+
+        <h3 class="text-lg font-bold mt-8 mb-4 text-brand-gold">PSU sizing</h3>
+        <div class="grid md:grid-cols-2 gap-5">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Headroom (%)</span>
+            <input id="headroomPct" type="number" min="0" max="100" step="5" value={defaults.headroom_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">PSU efficiency target</span>
+            <select id="psuEff" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              <option value="80_plus">80 Plus (80%)</option>
+              <option value="bronze">80 Plus Bronze (82%)</option>
+              <option value="silver">80 Plus Silver (85%)</option>
+              <option value="gold" selected={defaults.psu_efficiency === 'gold'}>80 Plus Gold (87%)</option>
+              <option value="platinum">80 Plus Platinum (89%)</option>
+              <option value="titanium">80 Plus Titanium (92%)</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Estimated DC load</p>
+          <p id="dcLoad" class="text-3xl font-bold text-brand-gold">—</p>
+          <p class="text-xs text-neutral-500 mt-1">Wall draw: <span id="wallDraw">—</span></p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Recommended PSU</p>
+          <p id="psuRec" class="text-3xl font-bold text-brand-gold">—</p>
+          <p class="text-xs text-neutral-500 mt-1">Recommended 12V rail: <span id="railRec">—</span></p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Heat output</p>
+          <p id="heatBtu" class="text-3xl font-bold text-brand-gold">—</p>
+          <p class="text-xs text-neutral-500 mt-1"><span id="heatWatts">—</span> watts as heat</p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Target case airflow</p>
+          <p id="targetCfm" class="text-3xl font-bold text-brand-gold">—</p>
+          <p class="text-xs text-neutral-500 mt-1" id="cfmVerdict">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">12VHPWR cables</p>
+        <p id="cable12vhpwr" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">8-pin PCIe cables</p>
+        <p id="cable8pin" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">EPS 12V 8-pin cables</p>
+        <p id="cableEps" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">6-pin PCIe cables</p>
+        <p id="cable6pin" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/ai-pc-build-configurator/" class="btn-primary text-sm">AI PC Build Configurator →</a>
+      <a href="/tools/vram-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">VRAM Calculator →</a>
+      <a href="/compare/gpus/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">GPU Comparison →</a>
+      <a href="/tools/rig-repurposing-guide/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Rig Repurposing Guide →</a>
+    </div>
+
+    <p class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ gpusJson: JSON.stringify(gpus), cpusJson: JSON.stringify(cpus), componentsJson: JSON.stringify(components), psuEffJson: JSON.stringify(psuEff), rulesJson: JSON.stringify(airflowRules) }}>
+    const gpus = JSON.parse(gpusJson);
+    const cpus = JSON.parse(cpusJson);
+    const components = JSON.parse(componentsJson);
+    const psuEff = JSON.parse(psuEffJson);
+    const rules = JSON.parse(rulesJson);
+
+    const $ = id => document.getElementById(id);
+    const int = id => Math.max(0, parseInt($(id).value, 10) || 0);
+    const float = id => Math.max(0, parseFloat($(id).value) || 0);
+
+    function nearestPsu(watts) {
+      const sizes = [450, 550, 650, 750, 850, 1000, 1200, 1300, 1500, 1600, 2000, 2400, 3000];
+      for (const s of sizes) if (s >= watts) return s;
+      return Math.ceil(watts / 100) * 100;
+    }
+
+    function getGpu() {
+      return gpus.find(g => g.name === $('gpuModel').value) || gpus[0];
+    }
+
+    function getCpu() {
+      return cpus.find(c => c.name === $('cpuModel').value) || cpus[0];
+    }
+
+    function compute() {
+      const gpu = getGpu();
+      const cpu = getCpu();
+      const gpuCount = int('gpuCount');
+      const ramSticks = int('ramSticks');
+      const nvme = int('nvmeSsds');
+      const sata = int('sataSsds');
+      const hdd = int('hdds');
+      const fans120 = int('fans120');
+      const fans140 = int('fans140');
+      const aioPumps = int('aioPumps');
+      const customPumps = int('customPumps');
+      const headroom = clampPct(float('headroomPct')) / 100;
+      const ambient = Math.max(10, Math.min(45, float('ambientC')));
+      const caseAirflow = $('caseAirflow').value;
+      const effKey = $('psuEff').value;
+      const efficiency = psuEff[effKey] || 0.87;
+      const mobo = float('moboWatts');
+
+      const gpuWatts = gpu.tdp * gpuCount;
+      const cpuWatts = cpu.tdp;
+      const componentWatts = mobo
+        + ramSticks * components.ram_stick
+        + nvme * components.nvme_ssd
+        + sata * components.sata_ssd
+        + hdd * components.hdd
+        + fans120 * components.fan_120
+        + fans140 * components.fan_140
+        + aioPumps * components.aio_pump
+        + customPumps * components.custom_pump;
+
+      const dcLoad = gpuWatts + cpuWatts + componentWatts;
+      const wallDraw = dcLoad / efficiency;
+      const psuWatts = Math.max(450, Math.ceil(dcLoad * (1 + headroom) / 50) * 50);
+      const psuSize = nearestPsu(psuWatts);
+      const rail12v = Math.ceil((gpuWatts + cpuWatts * 0.9 + componentWatts * 0.5) / 10) * 10;
+
+      const heatWatts = dcLoad; // nearly all DC power becomes heat
+      const heatBtu = heatWatts * 3.412;
+
+      const baseCfm = (heatWatts / 100) * rules.cfm_per_100w;
+      const caseMulti = rules['case_' + caseAirflow] || 1;
+      const ambientPenalty = Math.max(0, Math.floor((ambient - 25) / 5) * rules.ambient_penalty_per_5c);
+      const targetCfm = Math.ceil(baseCfm * caseMulti * (1 + ambientPenalty));
+      const fanCfm = fans120 * 50 + fans140 * 70; // rough rated CFM at max speed
+
+      const cable12vhpwr = gpu.pcie_12vhpwr * gpuCount;
+      const cable8pin = gpu.pcie_8pin * gpuCount;
+      const cable6pin = gpu.pcie_6pin * gpuCount;
+      const cableEps = cpu.eps_8pin;
+
+      $('dcLoad').textContent = dcLoad.toLocaleString() + ' W';
+      $('wallDraw').textContent = Math.round(wallDraw).toLocaleString() + ' W';
+      $('psuRec').textContent = psuSize.toLocaleString() + ' W';
+      $('railRec').textContent = rail12v.toLocaleString() + ' A';
+      $('heatBtu').textContent = Math.round(heatBtu).toLocaleString() + ' BTU/hr';
+      $('heatWatts').textContent = heatWatts.toLocaleString();
+      $('targetCfm').textContent = targetCfm.toLocaleString() + ' CFM';
+      $('cable12vhpwr').textContent = cable12vhpwr;
+      $('cable8pin').textContent = cable8pin;
+      $('cable6pin').textContent = cable6pin;
+      $('cableEps').textContent = cableEps;
+
+      if (fanCfm >= targetCfm * 1.2) {
+        $('cfmVerdict').textContent = `Installed fan rating ~${fanCfm} CFM (headroom)`;
+        $('cfmVerdict').className = 'text-xs text-emerald-400 mt-1';
+      } else if (fanCfm >= targetCfm) {
+        $('cfmVerdict').textContent = `Installed fan rating ~${fanCfm} CFM (just enough)`;
+        $('cfmVerdict').className = 'text-xs text-amber-400 mt-1';
+      } else {
+        $('cfmVerdict').textContent = `Installed fan rating ~${fanCfm} CFM — add ~${Math.ceil(targetCfm - fanCfm)} CFM more`;
+        $('cfmVerdict').className = 'text-xs text-rose-400 mt-1';
+      }
+
+      let verdict = '';
+      if (gpuCount > 1) {
+        verdict += `Multi-GPU rig: ${gpuCount}x ${gpu.name} draws ~${dcLoad} W DC. `;
+      } else {
+        verdict += `Single ${gpu.name} build draws ~${dcLoad} W DC. `;
+      }
+      if (psuSize >= 1200) {
+        verdict += `You need a high-wattage ${psuSize} W ${effKey.replace('_', ' ')} PSU with a strong single +12V rail. Consider dedicated 240V circuits if wall draw exceeds ~1500 W. `;
+      } else if (psuSize >= 850) {
+        verdict += `A ${psuSize} W ${effKey.replace('_', ' ')} PSU is the safe minimum. `;
+      } else {
+        verdict += `A ${psuSize} W ${effKey.replace('_', ' ')} PSU is plenty. `;
+      }
+      if (cable12vhpwr > 0) verdict += `Budget ${cable12vhpwr}x 12VHPWR cable(s). `;
+      if (cable8pin > 0) verdict += `Budget ${cable8pin}x 8-pin PCIe cable(s). `;
+      if (cable6pin > 0) verdict += `Budget ${cable6pin}x 6-pin PCIe cable(s). `;
+      verdict += `Heat output is ~${Math.round(heatBtu).toLocaleString()} BTU/hr; target ${targetCfm} CFM of case airflow. `;
+      if (fanCfm < targetCfm) verdict += `Add more intake/exhaust fans or move to an open frame. `;
+      else if (fanCfm >= targetCfm * 1.5) verdict += `Fan capacity looks good. `;
+      if (ambient > 30) verdict += `High ambient temps raise airflow needs — prioritize exhaust and cool room air. `;
+
+      $('verdictText').textContent = verdict;
+    }
+
+    function clampPct(v) { return Math.min(100, Math.max(0, v)); }
+
+    ['gpuModel','gpuCount','cpuModel','ramSticks','nvmeSsds','sataSsds','hdds','moboWatts','fans120','fans140','aioPumps','customPumps','caseAirflow','ambientC','headroomPct','psuEff'].forEach(id => {
+      $(id).addEventListener('input', compute);
+      $(id).addEventListener('change', compute);
+    });
+
+    compute();
+  </script>
+</Layout>

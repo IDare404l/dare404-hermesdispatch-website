@@ -481,9 +481,18 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||||||||||||- Audience: AI agent builders budgeting API spend before launch
 |||||||||||||
 ||||||||||||||## AI Agent Outreach Campaign Cost Calculator
-||||||||||||||- URL: https://hermesdispatch.dev/tools/agent-outreach-cost-calculator/
-||||||||||||||- Description: Estimate per-contact and monthly cost for AI-powered email, SMS, LinkedIn, and voice outreach campaigns.
-||||||||||||||- Inputs: monthly contacts, channel mix (email/SMS/LinkedIn/voice %), list/enrichment cost per contact, platform subscription, email send cost, SMS cost, LinkedIn platform cost, voice cost per minute, average voice minutes, LLM API cost per contact, human review rate, review minutes, SDR hourly rate, positive reply rate, value per positive reply, setup/maintenance hours and rates, projection months
-||||||||||||||- Outputs: cost per contact, cost per positive reply, monthly campaign cost, monthly positive replies, monthly gross value, net monthly ROI, cost breakdown table, 12-month projection, verdict
-||||||||||||||- Audience: AI SDR teams, growth marketers, and agent builders budgeting outbound campaigns
-||||||||||||||- Cross-links: Agent Output Value Calculator, AI Voice Agent Cost Calculator, Agent vs Human Hire Calculator, API Pricing Comparator
+|||||||||||||||- URL: https://hermesdispatch.dev/tools/agent-outreach-cost-calculator/
+|||||||||||||||- Description: Estimate per-contact and monthly cost for AI-powered email, SMS, LinkedIn, and voice outreach campaigns.
+|||||||||||||||- Inputs: monthly contacts, channel mix (email/SMS/LinkedIn/voice %), list/enrichment cost per contact, platform subscription, email send cost, SMS cost, LinkedIn platform cost, voice cost per minute, average voice minutes, LLM API cost per contact, human review rate, review minutes, SDR hourly rate, positive reply rate, value per positive reply, setup/maintenance hours and rates, projection months
+|||||||||||||||- Outputs: cost per contact, cost per positive reply, monthly campaign cost, monthly positive replies, monthly gross value, net monthly ROI, cost breakdown table, 12-month projection, verdict
+|||||||||||||||- Audience: AI SDR teams, growth marketers, and agent builders budgeting outbound campaigns
+|||||||||||||||- Cross-links: Agent Output Value Calculator, AI Voice Agent Cost Calculator, Agent vs Human Hire Calculator, API Pricing Comparator
+
+## GPU Power Supply & Cooling Sizer
+|- URL: https://hermesdispatch.dev/tools/gpu-power-cooling-sizer/
+|- Description: Calculate the minimum PSU wattage, required PCIe/EPS cables, heat output, and case airflow for multi-GPU AI inference or mining rigs.
+|- Inputs: GPU model and count, CPU model, RAM sticks, NVMe/SATA/HDD count, motherboard estimate, 120/140 mm fans, AIO/custom pumps, case airflow class, ambient temperature, PSU headroom %, PSU efficiency target
+|- Outputs: estimated DC load, wall draw, recommended PSU wattage, recommended +12V rail current, 12VHPWR/8-pin/6-pin/EPS cable counts, heat output in BTU/hr, target case airflow in CFM, verdict
+|- Audience: AI hardware builders, crypto miners pivoting to inference, and DIY workstation assemblers
+|- Cross-links: AI PC Build Configurator, VRAM Calculator, GPU Comparison, Rig Repurposing Guide
+|
