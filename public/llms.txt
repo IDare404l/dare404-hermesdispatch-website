@@ -159,6 +159,13 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: context limit, output buffer recommendation
 - Audience: AI builders selecting models
 
+### AI Agent Context Window Budgeter
+- URL: https://hermesdispatch.dev/tools/context-window-budgeter/
+- Description: Plan how system prompts, few-shot examples, RAG chunks, chat history, output reserve, and safety buffer consume a model's context window.
+- Inputs: model, system prompt tokens, few-shot examples, RAG chunk count and size, history turns, output reserve %, safety buffer %
+- Outputs: available tokens, consumed tokens, free headroom, budget verdict, component breakdown
+- Audience: AI agent builders designing prompts and RAG
+
 ### Newsletter Topic Finder
 - URL: https://hermesdispatch.dev/tools/newsletter-topic-finder/
 - Description: Generate high-intent topic ideas for AI, crypto, and investing newsletters.

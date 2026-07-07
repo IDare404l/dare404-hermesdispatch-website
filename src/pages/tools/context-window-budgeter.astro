@@ -1,0 +1,374 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/context_window_budgeter.json';
+
+const title = "AI Agent Context Window Budgeter | Hermes Dispatch";
+const description = "Plan how your AI agent's context window is consumed by system prompt, few-shot examples, RAG chunks, chat history, output reserve, and safety buffer.";
+const models = data.models;
+const presets = data.presets;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "Why do I need to budget my context window?", a: "Even models with 128k+ token limits run out faster than expected. System prompts, few-shot examples, retrieved documents, and prior conversation turns all compete for the same space. Budgeting ahead of time prevents silent truncation, degraded answers, and surprise API costs." },
+  { q: "What is a 'safety buffer'?", a: "A safety buffer reserves extra tokens for tokenizer differences, formatting overhead, and unexpected prompt growth. We default to 10%; raise it if you use heavy JSON schemas, XML tags, or long tool definitions." },
+  { q: "How is output reserve calculated?", a: "The output reserve is a percentage of the total context window set aside for the model's response. Some providers also enforce a hard max_output limit (e.g., Claude 3.5 Sonnet = 8,192 tokens). The calculator uses the smaller of the two values." },
+  { q: "Can I use this for local LLMs?", a: "Yes. Select 'Local RTX 4090 (Q4)' or compare against cloud models. Local loaders often support shorter effective context than the theoretical model limit, so treat the result as a practical planning ceiling." },
+  { q: "What should I do if I'm over budget?", a: "Shrink few-shot examples, reduce retrieved chunks or chunk size, summarize older conversation history, use a model with a larger context window, or move non-essential instructions out of the system prompt into a separate retrieval step." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Context Window Budgeter" description={description} url="https://hermesdispatch.dev/tools/context-window-budgeter/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧮</div>
+      <h1 class="display-heading mb-4">AI Agent Context Window Budgeter</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Plan how system prompts, few-shot examples, RAG chunks, history, and output reserve consume your model's context window.</p>
+    </div>
+
+    <!-- Presets -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+      {presets.map(p => (
+        <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset={p.slug}>
+          <div class="text-2xl mb-2">{p.emoji}</div>
+          <h3 class="font-semibold text-sm">{p.name}</h3>
+        </button>
+      ))}
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6">
+      <!-- Inputs -->
+      <section class="lg:col-span-2 glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Context Budget Inputs</h2>
+
+        <label class="block mb-5">
+          <span class="text-neutral-400 text-sm">Model</span>
+          <select id="modelSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {models.map(m => (
+              <option value={m.slug} data-context={m.context_window} data-output={m.max_output} selected={m.slug === defaults.model_slug}>{m.name} — {m.note}</option>
+            ))}
+          </select>
+        </label>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">System prompt tokens</span>
+            <input id="systemPrompt" type="number" min="0" step="10" value={defaults.system_prompt_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Few-shot examples</span>
+            <input id="fewShotCount" type="number" min="0" step="1" value={defaults.few_shot_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Tokens per few-shot example</span>
+            <input id="fewShotTokens" type="number" min="0" step="10" value={defaults.few_shot_tokens_each} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">RAG chunks</span>
+            <input id="ragChunkCount" type="number" min="0" step="1" value={defaults.rag_chunk_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Tokens per RAG chunk</span>
+            <input id="ragChunkTokens" type="number" min="0" step="10" value={defaults.rag_chunk_tokens_each} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">History turns to keep</span>
+            <input id="historyTurns" type="number" min="0" step="1" value={defaults.history_turns} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Tokens per history turn</span>
+            <input id="historyTokens" type="number" min="0" step="10" value={defaults.history_tokens_per_turn} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Output reserve (%)</span>
+            <input id="outputReserve" type="number" min="0" max="100" step="1" value={defaults.output_reserve_percent} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Safety buffer (%)</span>
+            <input id="safetyBuffer" type="number" min="0" max="100" step="1" value={defaults.safety_buffer_percent} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+
+        <p class="text-neutral-500 text-sm mt-2">Token counts are planning estimates. Actual tokenizer counts vary by model family. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+      </section>
+
+      <!-- Results -->
+      <section class="glass-card rounded-2xl p-6 border border-cyan-400/20">
+        <h2 class="text-xl font-bold mb-6 text-cyan-400">Budget Result</h2>
+
+        <div class="mb-4">
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-neutral-400">Context window</span>
+            <span id="contextWindowDisplay" class="font-mono text-white">—</span>
+          </div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-neutral-400">Reserved for output</span>
+            <span id="outputReserveDisplay" class="font-mono text-white">—</span>
+          </div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-neutral-400">Safety buffer</span>
+            <span id="safetyBufferDisplay" class="font-mono text-white">—</span>
+          </div>
+          <div class="flex justify-between text-sm mb-3 pt-2 border-t border-neutral-800">
+            <span class="text-neutral-300">Available for inputs</span>
+            <span id="availableTokensDisplay" class="font-mono text-cyan-400 font-semibold">—</span>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-neutral-400">Consumed tokens</span>
+            <span id="consumedTokensDisplay" class="font-mono text-white">—</span>
+          </div>
+          <div class="w-full h-4 bg-neutral-800 rounded-full overflow-hidden mb-1">
+            <div id="budgetBar" class="h-full bg-gradient-to-r from-cyan-500 to-brand-gold transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <div class="flex justify-between text-xs">
+            <span id="consumedPercent" class="text-neutral-400">0%</span>
+            <span id="budgetVerdict" class="font-medium">—</span>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between py-2 border-b border-neutral-800">
+            <span class="text-neutral-400">System prompt</span>
+            <span id="systemPromptResult" class="font-mono text-white">—</span>
+          </div>
+          <div class="flex justify-between py-2 border-b border-neutral-800">
+            <span class="text-neutral-400">Few-shot examples</span>
+            <span id="fewShotResult" class="font-mono text-white">—</span>
+          </div>
+          <div class="flex justify-between py-2 border-b border-neutral-800">
+            <span class="text-neutral-400">RAG chunks</span>
+            <span id="ragResult" class="font-mono text-white">—</span>
+          </div>
+          <div class="flex justify-between py-2 border-b border-neutral-800">
+            <span class="text-neutral-400">Chat history</span>
+            <span id="historyResult" class="font-mono text-white">—</span>
+          </div>
+          <div class="flex justify-between py-2 border-b border-neutral-800">
+            <span class="text-neutral-400">Free tokens</span>
+            <span id="freeTokensDisplay" class="font-mono text-cyan-400">—</span>
+          </div>
+        </div>
+
+        <div id="warningBox" class="hidden mt-5 bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-sm text-red-300">
+          ⚠️ <span id="warningText">Over budget.</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- Breakdown table -->
+    <section class="glass-card rounded-2xl p-6 mt-6 border border-neutral-800">
+      <h2 class="text-xl font-bold mb-4">Component Breakdown</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <thead class="text-neutral-400 border-b border-neutral-800">
+            <tr>
+              <th class="py-2">Component</th>
+              <th class="py-2">Tokens</th>
+              <th class="py-2">% of context</th>
+              <th class="py-2">Note</th>
+            </tr>
+          </thead>
+          <tbody id="breakdownTable" class="text-neutral-200">
+            <!-- populated by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Notes -->
+    <section id="note" class="mt-8 text-neutral-400 text-sm max-w-3xl">
+      <h2 class="text-lg font-semibold text-white mb-2">Notes</h2>
+      <p class="mb-2">{data.note}</p>
+      <ul class="list-disc pl-5 space-y-1">
+        <li>Provider max-output limits may cap the output reserve even when the total context window is larger.</li>
+        <li>Tool definitions, JSON schemas, and XML formatting add hidden tokens not captured here — increase the safety buffer for complex agents.</li>
+        <li>For multi-turn chats, older turns are often summarized or dropped once the budget is exceeded.</li>
+      </ul>
+    </section>
+
+    <!-- Cross-links -->
+    <section class="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <a href="/tools/context-window-cheat-sheet/" class="glass-card rounded-xl p-4 hover:border-cyan-400 transition">
+        <h3 class="font-semibold text-sm mb-1">Context Window Cheat Sheet</h3>
+        <p class="text-xs text-neutral-400">Compare context limits across models.</p>
+      </a>
+      <a href="/tools/agent-memory-cost-calculator/" class="glass-card rounded-xl p-4 hover:border-cyan-400 transition">
+        <h3 class="font-semibold text-sm mb-1">Agent Memory / RAG Cost Calc</h3>
+        <p class="text-xs text-neutral-400">Estimate embedding and vector DB costs.</p>
+      </a>
+      <a href="/tools/agent-workflow-cost-calculator/" class="glass-card rounded-xl p-4 hover:border-cyan-400 transition">
+        <h3 class="font-semibold text-sm mb-1">Workflow Cost Calculator</h3>
+        <p class="text-xs text-neutral-400">Price multi-step agent workflows.</p>
+      </a>
+      <a href="/tools/prompt-tokenizer-pricing-estimator/" class="glass-card rounded-xl p-4 hover:border-cyan-400 transition">
+        <h3 class="font-semibold text-sm mb-1">Prompt Tokenizer</h3>
+        <p class="text-xs text-neutral-400">Count tokens in a real prompt.</p>
+      </a>
+    </section>
+
+    <!-- FAQ -->
+    <section class="mt-12 max-w-3xl">
+      <h2 class="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div class="glass-card rounded-xl p-5">
+            <h3 class="font-semibold mb-2">{f.q}</h3>
+            <p class="text-neutral-400 text-sm">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ presets, models, defaults }}>
+    (function() {
+      const els = {
+        modelSelect: document.getElementById('modelSelect'),
+        systemPrompt: document.getElementById('systemPrompt'),
+        fewShotCount: document.getElementById('fewShotCount'),
+        fewShotTokens: document.getElementById('fewShotTokens'),
+        ragChunkCount: document.getElementById('ragChunkCount'),
+        ragChunkTokens: document.getElementById('ragChunkTokens'),
+        historyTurns: document.getElementById('historyTurns'),
+        historyTokens: document.getElementById('historyTokens'),
+        outputReserve: document.getElementById('outputReserve'),
+        safetyBuffer: document.getElementById('safetyBuffer'),
+        contextWindowDisplay: document.getElementById('contextWindowDisplay'),
+        outputReserveDisplay: document.getElementById('outputReserveDisplay'),
+        safetyBufferDisplay: document.getElementById('safetyBufferDisplay'),
+        availableTokensDisplay: document.getElementById('availableTokensDisplay'),
+        consumedTokensDisplay: document.getElementById('consumedTokensDisplay'),
+        consumedPercent: document.getElementById('consumedPercent'),
+        budgetBar: document.getElementById('budgetBar'),
+        budgetVerdict: document.getElementById('budgetVerdict'),
+        systemPromptResult: document.getElementById('systemPromptResult'),
+        fewShotResult: document.getElementById('fewShotResult'),
+        ragResult: document.getElementById('ragResult'),
+        historyResult: document.getElementById('historyResult'),
+        freeTokensDisplay: document.getElementById('freeTokensDisplay'),
+        warningBox: document.getElementById('warningBox'),
+        warningText: document.getElementById('warningText'),
+        breakdownTable: document.getElementById('breakdownTable')
+      };
+
+      function fmt(n) { return Math.round(n).toLocaleString(); }
+
+      function getModel() {
+        const opt = els.modelSelect.options[els.modelSelect.selectedIndex];
+        return {
+          slug: els.modelSelect.value,
+          context: parseInt(opt.getAttribute('data-context'), 10),
+          maxOutput: parseInt(opt.getAttribute('data-output'), 10)
+        };
+      }
+
+      function update() {
+        const model = getModel();
+        const contextWindow = model.context;
+        const maxOutput = model.maxOutput;
+
+        const system = parseInt(els.systemPrompt.value, 10) || 0;
+        const fewShot = (parseInt(els.fewShotCount.value, 10) || 0) * (parseInt(els.fewShotTokens.value, 10) || 0);
+        const rag = (parseInt(els.ragChunkCount.value, 10) || 0) * (parseInt(els.ragChunkTokens.value, 10) || 0);
+        const history = (parseInt(els.historyTurns.value, 10) || 0) * (parseInt(els.historyTokens.value, 10) || 0);
+        const outputPercent = Math.min(100, Math.max(0, parseFloat(els.outputReserve.value) || 0));
+        const bufferPercent = Math.min(100, Math.max(0, parseFloat(els.safetyBuffer.value) || 0));
+
+        const outputReserveTokens = Math.min(maxOutput, Math.round(contextWindow * outputPercent / 100));
+        const safetyBufferTokens = Math.round(contextWindow * bufferPercent / 100);
+        const availableForInputs = Math.max(0, contextWindow - outputReserveTokens - safetyBufferTokens);
+        const consumed = system + fewShot + rag + history;
+        const free = availableForInputs - consumed;
+        const consumedPercentOfContext = Math.min(100, (consumed / contextWindow) * 100);
+        const consumedPercentOfAvailable = availableForInputs > 0 ? (consumed / availableForInputs) * 100 : 0;
+
+        els.contextWindowDisplay.textContent = fmt(contextWindow);
+        els.outputReserveDisplay.textContent = fmt(outputReserveTokens) + ' (' + outputPercent + '%)';
+        els.safetyBufferDisplay.textContent = fmt(safetyBufferTokens) + ' (' + bufferPercent + '%)';
+        els.availableTokensDisplay.textContent = fmt(availableForInputs);
+        els.consumedTokensDisplay.textContent = fmt(consumed);
+        els.consumedPercent.textContent = consumedPercentOfContext.toFixed(1) + '% of total context';
+        els.systemPromptResult.textContent = fmt(system);
+        els.fewShotResult.textContent = fmt(fewShot);
+        els.ragResult.textContent = fmt(rag);
+        els.historyResult.textContent = fmt(history);
+        els.freeTokensDisplay.textContent = fmt(free);
+
+        els.budgetBar.style.width = Math.min(100, consumedPercentOfContext) + '%';
+        els.budgetBar.className = 'h-full transition-all duration-300 ' + (free < 0 ? 'bg-red-500' : free < availableForInputs * 0.1 ? 'bg-brand-gold' : 'bg-gradient-to-r from-cyan-500 to-brand-gold');
+
+        if (free < 0) {
+          els.budgetVerdict.textContent = 'Over budget';
+          els.budgetVerdict.className = 'font-medium text-red-400';
+          els.warningBox.classList.remove('hidden');
+          els.warningText.textContent = 'Inputs exceed the available budget by ' + fmt(Math.abs(free)) + ' tokens. Trim components or choose a larger model.';
+        } else if (free < availableForInputs * 0.1) {
+          els.budgetVerdict.textContent = 'Tight';
+          els.budgetVerdict.className = 'font-medium text-brand-gold';
+          els.warningBox.classList.add('hidden');
+        } else {
+          els.budgetVerdict.textContent = 'Healthy';
+          els.budgetVerdict.className = 'font-medium text-green-400';
+          els.warningBox.classList.add('hidden');
+        }
+
+        const rows = [
+          { name: 'System prompt', tokens: system, note: 'Fixed per request' },
+          { name: 'Few-shot examples', tokens: fewShot, note: els.fewShotCount.value + ' × ' + els.fewShotTokens.value },
+          { name: 'RAG chunks', tokens: rag, note: els.ragChunkCount.value + ' × ' + els.ragChunkTokens.value },
+          { name: 'Chat history', tokens: history, note: els.historyTurns.value + ' turns' },
+          { name: 'Output reserve', tokens: outputReserveTokens, note: 'capped at ' + fmt(maxOutput) },
+          { name: 'Safety buffer', tokens: safetyBufferTokens, note: bufferPercent + '% of context' },
+          { name: 'Free / headroom', tokens: free, note: free >= 0 ? 'remaining' : 'overrun' }
+        ];
+        els.breakdownTable.innerHTML = rows.map(r => `
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-2">${r.name}</td>
+            <td class="py-2 font-mono">${fmt(r.tokens)}</td>
+            <td class="py-2 font-mono">${contextWindow > 0 ? (r.tokens / contextWindow * 100).toFixed(1) : '0.0'}%</td>
+            <td class="py-2 text-neutral-400">${r.note}</td>
+          </tr>
+        `).join('');
+      }
+
+      function applyPreset(slug) {
+        const p = presets.find(x => x.slug === slug);
+        if (!p) return;
+        els.modelSelect.value = p.model_slug;
+        els.systemPrompt.value = p.system_prompt_tokens;
+        els.fewShotCount.value = p.few_shot_count;
+        els.fewShotTokens.value = p.few_shot_tokens_each;
+        els.ragChunkCount.value = p.rag_chunk_count;
+        els.ragChunkTokens.value = p.rag_chunk_tokens_each;
+        els.historyTurns.value = p.history_turns;
+        els.historyTokens.value = p.history_tokens_per_turn;
+        els.outputReserve.value = p.output_reserve_percent;
+        els.safetyBuffer.value = p.safety_buffer_percent;
+        update();
+      }
+
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', function() { applyPreset(this.dataset.preset); });
+      });
+
+      Object.values(els).forEach(el => {
+        if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT')) {
+          el.addEventListener('input', update);
+        }
+      });
+
+      update();
+    })();
+  </script>
+</Layout>
