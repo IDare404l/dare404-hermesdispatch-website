@@ -368,7 +368,14 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Outputs: effective $/minute, monthly cost per provider, cheapest stack, rough concurrency estimate
 - Audience: AI agent builders comparing voice platforms
 
-## AI Agent Evaluation Planner
+## Voice-to-Text Cost Comparator
+- URL: https://hermesdispatch.dev/tools/voice-transcription-cost-comparator/
+- Description: Compare transcription costs across OpenAI Whisper, Deepgram, AssemblyAI, Google Cloud Speech-to-Text, Azure, AWS Transcribe, Rev AI, and Gladia for voice agents and meeting bots.
+- Inputs: audio minutes per month, batch percentage, diarization percentage, provider per-minute rates (editable)
+- Outputs: effective $/minute per provider, monthly cost, cheapest option, audio-hour estimate
+- Audience: AI agent builders comparing ASR APIs
+
+## LLM Fine-Tuning Cost Calculator
 - URL: https://hermesdispatch.dev/tools/agent-evaluation-planner/
 - Description: Choose the right benchmark, budget, and timeline for evaluating an AI agent.
 - Inputs: agent type, readiness goal, max budget per run

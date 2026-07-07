@@ -1,0 +1,90 @@
+{
+  "scenarios": [
+    { "name": "Voice support bot", "minutes": 5000, "audioHours": 83, "batch": false, "realtime": false, "diarization": false },
+    { "name": "Meeting assistant (monthly)", "minutes": 50000, "audioHours": 833, "batch": true, "realtime": false, "diarization": true },
+    { "name": "Real-time sales agent", "minutes": 20000, "audioHours": 333, "batch": false, "realtime": true, "diarization": false },
+    { "name": "Enterprise contact center", "minutes": 200000, "audioHours": 3333, "batch": true, "realtime": true, "diarization": true }
+  ],
+  "providers": [
+    {
+      "id": "openai-whisper",
+      "name": "OpenAI Whisper API",
+      "batchPerMin": 0.006,
+      "realtimePerMin": 0,
+      "diarizationPerMin": 0,
+      "model": "whisper-1",
+      "notes": "Simple, widely supported batch transcription. No native diarization or streaming.",
+      "bestFor": "quick batch transcription"
+    },
+    {
+      "id": "deepgram",
+      "name": "Deepgram Nova 2",
+      "batchPerMin": 0.00425,
+      "realtimePerMin": 0.00575,
+      "diarizationPerMin": 0,
+      "model": "Nova-2",
+      "notes": "Very fast batch and streaming. Diarization included on many tiers. Usage discounts at scale.",
+      "bestFor": "high-volume streaming or batch"
+    },
+    {
+      "id": "assemblyai",
+      "name": "AssemblyAI Universal",
+      "batchPerMin": 0.0065,
+      "realtimePerMin": 0.0123,
+      "diarizationPerMin": 0,
+      "model": "Universal-1",
+      "notes": "Strong diarization, PII redaction, and summarization as add-ons. Good for meeting assistants.",
+      "bestFor": "meetings with diarization"
+    },
+    {
+      "id": "google-cloud-stt",
+      "name": "Google Cloud Speech-to-Text",
+      "batchPerMin": 0.0048,
+      "realtimePerMin": 0.0048,
+      "diarizationPerMin": 0,
+      "model": "enhanced / latest",
+      "notes": "Pay-per-15-seconds model. Enhanced model costs more; diarization included in some tiers.",
+      "bestFor": "GCP-native workloads"
+    },
+    {
+      "id": "azure-speech",
+      "name": "Azure Speech Services",
+      "batchPerMin": 0.0084,
+      "realtimePerMin": 0.0084,
+      "diarizationPerMin": 0,
+      "model": "Fast/Custom",
+      "notes": "Commitment tiers lower effective rate. Strong enterprise controls and custom model support.",
+      "bestFor": "Microsoft shops and custom models"
+    },
+    {
+      "id": "aws-transcribe",
+      "name": "Amazon Transcribe",
+      "batchPerMin": 0.0048,
+      "realtimePerMin": 0.0048,
+      "diarizationPerMin": 0,
+      "model": "standard / medical",
+      "notes": "Low per-minute rate; medical and call analytics are separate SKUs.",
+      "bestFor": "AWS-native call analytics"
+    },
+    {
+      "id": "rev-ai",
+      "name": "Rev AI",
+      "batchPerMin": 0.02,
+      "realtimePerMin": 0.02,
+      "diarizationPerMin": 0,
+      "model": "Rev AI",
+      "notes": "Premium human + ASR hybrid available. Higher per-minute cost for higher accuracy.",
+      "bestFor": "premium accuracy and human review"
+    },
+    {
+      "id": "gladia",
+      "name": "Gladia",
+      "batchPerMin": 0.0061,
+      "realtimePerMin": 0.0061,
+      "diarizationPerMin": 0,
+      "model": "ASR",
+      "notes": "Simple API with diarization and summarization bundled in some plans.",
+      "bestFor": "developer-first projects"
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import costData from '../../data/voice_transcription_cost.json';
+
+const title = "Voice-to-Text Cost Comparator — ASR Pricing for Voice Agents";
+const description = "Compare transcription costs across OpenAI Whisper, Deepgram, AssemblyAI, Google Cloud Speech-to-Text, Azure, AWS Transcribe, Rev AI, and Gladia for voice agents and meeting bots.";
+
+const providers = costData.providers;
+const scenarios = costData.scenarios;
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much does voice transcription cost per minute?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Managed ASR APIs typically charge between $0.004 and $0.02 per minute of audio. Real-time streaming often costs 1.5-2x batch pricing. Add-on features like diarization, PII redaction, or custom models can increase cost."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which ASR provider is cheapest for real-time voice agents?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Deepgram Nova 2 and AWS Transcribe are usually the cheapest for real-time transcription at scale, while OpenAI Whisper API is simple and low-cost for batch uploads but lacks streaming."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Should I pay for diarization separately?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If you need to know who spoke when (meetings, sales calls, support QA), diarization is essential. Several providers include it free or at low incremental cost; others charge a separate per-minute fee."
+      }
+    }
+  ]
+};
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema
+    name="Voice-to-Text Cost Comparator"
+    description="Compare ASR and transcription costs across OpenAI Whisper, Deepgram, AssemblyAI, Google Cloud, Azure, AWS Transcribe, Rev AI, and Gladia for voice agents and meeting bots."
+    url="https://hermesdispatch.dev/tools/voice-transcription-cost-comparator/"
+    applicationCategory="FinanceApplication"
+  />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🎙️</div>
+        <h1 class="display-heading mb-4">Voice-to-Text Cost Comparator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate monthly ASR spend across major transcription APIs, then pick the cheapest provider for your voice-agent or meeting-bot workload.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Audio minutes / month</label>
+          <input id="minutes" type="number" value="20000" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Batch %</label>
+          <input id="batchPct" type="number" value="50" min="0" max="100" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Diarization %</label>
+          <input id="diarizationPct" type="number" value="0" min="0" max="100" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Scenario preset</label>
+          <select id="scenario" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+            <option value="">Custom</option>
+            {scenarios.map(s => (
+              <option value={JSON.stringify(s)}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 mb-8 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-neutral-500 border-b border-neutral-800">
+              <th class="pb-3">Provider</th>
+              <th class="pb-3">Model</th>
+              <th class="pb-3">Batch $/min</th>
+              <th class="pb-3">Realtime $/min</th>
+              <th class="pb-3">Diarization $/min</th>
+              <th class="pb-3">Effective $/min</th>
+              <th class="pb-3">Monthly cost</th>
+            </tr>
+          </thead>
+          <tbody id="costTable">
+            {providers.map(p => (
+              <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30" data-id={p.id}>
+                <td class="py-3 font-medium">{p.name}</td>
+                <td class="py-3 text-neutral-400 text-xs">{p.model}</td>
+                <td class="py-3"><input type="number" data-rate="batch" value={p.batchPerMin.toFixed(4)} step="0.0001" class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3"><input type="number" data-rate="realtime" value={p.realtimePerMin.toFixed(4)} step="0.0001" class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3"><input type="number" data-rate="diarization" value={p.diarizationPerMin.toFixed(4)} step="0.0001" class="w-24 px-2 py-1 rounded bg-neutral-800 border border-neutral-700 text-white text-xs" /></td>
+                <td class="py-3 effective-cell font-semibold text-brand-gold">—</td>
+                <td class="py-3 monthly-cell font-semibold text-brand-gold">—</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="text-xs text-neutral-500 mt-4">Rates are editable USD per minute. Diarization may be bundled in some tiers; add your actual add-on rate if charged separately.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-3">Cheapest option</h2>
+          <p class="text-neutral-300">At this volume and batch/realtime mix, the cheapest ASR option is <span id="cheapestName" class="text-brand-gold font-bold">—</span> at roughly <span id="cheapestMonthly" class="text-brand-gold font-bold">—</span>/month.</p>
+          <p class="text-sm text-neutral-500 mt-2">Does not include storage, egress, model customization, or seat fees.</p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-3">Audio-hour estimate</h2>
+          <p class="text-neutral-300"><span id="audioHours" class="text-brand-gold font-bold">—</span> hours of audio/month.</p>
+          <p class="text-sm text-neutral-500 mt-2">Useful for providers that price per hour or for capacity planning.</p>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 mb-8">
+        {providers.slice(0, 3).map(p => (
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="font-semibold text-brand-gold mb-2">{p.name}</h3>
+            <p class="text-sm text-neutral-300">{p.notes}</p>
+            <p class="text-xs text-neutral-500 mt-2">Best for: <span class="text-neutral-300">{p.bestFor}</span></p>
+          </div>
+        ))}
+      </div>
+      <div class="grid md:grid-cols-3 gap-6 mb-8">
+        {providers.slice(3, 6).map(p => (
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="font-semibold text-brand-gold mb-2">{p.name}</h3>
+            <p class="text-sm text-neutral-300">{p.notes}</p>
+            <p class="text-xs text-neutral-500 mt-2">Best for: <span class="text-neutral-300">{p.bestFor}</span></p>
+          </div>
+        ))}
+      </div>
+      <div class="grid md:grid-cols-3 gap-6 mb-8">
+        {providers.slice(6, 8).map(p => (
+          <div class="glass-card rounded-2xl p-5">
+            <h3 class="font-semibold text-brand-gold mb-2">{p.name}</h3>
+            <p class="text-sm text-neutral-300">{p.notes}</p>
+            <p class="text-xs text-neutral-500 mt-2">Best for: <span class="text-neutral-300">{p.bestFor}</span></p>
+          </div>
+        ))}
+      </div>
+
+      <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-3">How to use this estimate</h2>
+        <ul class="list-disc list-inside text-neutral-300 space-y-2">
+          <li>Set your monthly audio minutes and the split between batch uploads and real-time streaming.</li>
+          <li>Add a diarization percentage if your use case needs speaker separation.</li>
+          <li>Edit per-minute rates to match your actual vendor quotes or enterprise tiers.</li>
+          <li>Compare the effective $/minute and total monthly cost columns to shortlist providers.</li>
+        </ul>
+        <p class="text-sm text-neutral-500 mt-4">
+          Cross-links: <a href="/tools/ai-voice-agent-cost-calculator" class="text-brand-gold hover:underline">AI Voice Agent Cost Calculator</a>, <a href="/tools/agent-api-pricing-comparator" class="text-brand-gold hover:underline">API Pricing Comparator</a>, <a href="/tools/ai-startup-cost-calculator" class="text-brand-gold hover:underline">AI Startup Cost Calculator</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ providers, scenarios }}>
+    const minutesEl = document.getElementById('minutes');
+    const batchPctEl = document.getElementById('batchPct');
+    const diarizationPctEl = document.getElementById('diarizationPct');
+    const scenarioEl = document.getElementById('scenario');
+    const cheapestNameEl = document.getElementById('cheapestName');
+    const cheapestMonthlyEl = document.getElementById('cheapestMonthly');
+    const audioHoursEl = document.getElementById('audioHours');
+
+    function getNum(id) {
+      const el = document.getElementById(id);
+      return el ? parseFloat(el.value) || 0 : 0;
+    }
+
+    function calc() {
+      const minutes = Math.max(0, getNum('minutes'));
+      const batchPct = Math.max(0, Math.min(100, getNum('batchPct')));
+      const realtimePct = 100 - batchPct;
+      const diarizationPct = Math.max(0, Math.min(100, getNum('diarizationPct')));
+      const rows = document.querySelectorAll('#costTable tr');
+
+      let cheapest = null;
+      let cheapestCost = Infinity;
+
+      rows.forEach(row => {
+        const batch = parseFloat(row.querySelector('[data-rate="batch"]').value) || 0;
+        const realtime = parseFloat(row.querySelector('[data-rate="realtime"]').value) || 0;
+        const diarization = parseFloat(row.querySelector('[data-rate="diarization"]').value) || 0;
+        const effective = (batchPct / 100 * batch) + (realtimePct / 100 * realtime) + (diarizationPct / 100 * diarization);
+        const monthly = effective * minutes;
+        row.querySelector('.effective-cell').textContent = '$' + effective.toFixed(4);
+        row.querySelector('.monthly-cell').textContent = '$' + monthly.toLocaleString('en-US', { maximumFractionDigits: 0 });
+        if (monthly < cheapestCost) {
+          cheapestCost = monthly;
+          cheapest = row.querySelector('td').textContent;
+        }
+      });
+
+      cheapestNameEl.textContent = cheapest || '—';
+      cheapestMonthlyEl.textContent = cheapestCost === Infinity ? '—' : '$' + cheapestCost.toLocaleString('en-US', { maximumFractionDigits: 0 });
+      audioHoursEl.textContent = (minutes / 60).toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+
+    if (scenarioEl) {
+      scenarioEl.addEventListener('change', (e) => {
+        if (!e.target.value) return;
+        const s = JSON.parse(e.target.value);
+        minutesEl.value = s.minutes;
+        batchPctEl.value = Math.round((s.batch ? 100 : 0));
+        diarizationPctEl.value = Math.round((s.diarization ? 100 : 0));
+        calc();
+      });
+    }
+
+    [minutesEl, batchPctEl, diarizationPctEl].forEach(el => el.addEventListener('input', calc));
+    document.querySelectorAll('#costTable input').forEach(el => el.addEventListener('input', calc));
+    calc();
+  </script>
+</Layout>
