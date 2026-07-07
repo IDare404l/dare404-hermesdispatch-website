@@ -8,73 +8,11 @@ const description = "Copy-paste code snippets to use Hermes Dispatch tools insid
 const nowIso = new Date().toISOString().slice(0, 10);
 
 const toolkits = [
-  {
-    "name": "Revenue & Affiliates",
+{
+    "name": "Agent Operations",
     "description": "",
     "tools": [
-      {
-        "name": "Affiliate Link Revenue Estimator",
-        "path": "/tools/affiliate-revenue-estimator/",
-        "description": "Hermes Agent-compatible script: Affiliate Link Revenue Estimator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/affiliate_revenue_estimator.py"
-      }
-    ]
-  },
-  {
-    "name": "Agent Infrastructure",
-    "description": "",
-    "tools": [
-      {
-        "name": "Agent API Pricing Comparator",
-        "path": "/tools/agent-api-pricing-comparator/",
-        "description": "Hermes Agent-compatible script: Agent API Pricing Comparator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/agent_api_pricing_comparator.py"
-      },
-      {
-        "name": "AI Agent Benchmark Selector",
-        "path": "/tools/agent-benchmark-selector/",
-        "description": "Hermes Agent-compatible script: AI Agent Benchmark Selector.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/agent_benchmark_selector.py"
-      },
-      {
-        "name": "AI Agent Compliance Checker",
-        "path": "/tools/ai-agent-compliance-checker/",
-        "description": "Hermes Agent-compatible script: AI Agent Compliance Checker.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/agent_compliance_checker.py"
-      },
-      {
-        "name": "AI Agent Deployment Readiness Scorecard",
-        "path": "/tools/agent-deployment-scorecard/",
-        "description": "Hermes Agent-compatible script: AI Agent Deployment Readiness Scorecard.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/agent_deployment_scorecard.py"
-      },
-      {
-        "name": "AI Agent Evaluation Planner",
-        "path": "/tools/agent-evaluation-planner/",
-        "description": "Hermes Agent-compatible script: AI Agent Evaluation Planner.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/agent_evaluation_planner.py"
-      },
-      {
-        "name": "Agent Hosting Cost Comparator",
-        "path": "/tools/agent-hosting-cost-comparator/",
-        "description": "Hermes Agent-compatible script: Agent Hosting Cost Comparator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/agent_hosting_cost_comparator.py"
-      },
-      {
+{
         "name": "AI Agent Latency Budget Calculator",
         "path": "/tools/agent-latency-budget-calculator/",
         "description": "Hermes Agent-compatible script: AI Agent Latency Budget Calculator.",
@@ -82,15 +20,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/agent_latency_budget_calculator.py"
       },
-      {
-        "name": "Agent Marketplace Fee Comparator",
-        "path": "/tools/agent-marketplace-fee-comparator/",
-        "description": "Hermes Agent-compatible script: Agent Marketplace Fee Comparator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/agent_marketplace_fee_comparator.py"
-      },
-      {
+{
         "name": "AI Agent Memory / RAG Cost Calculator",
         "path": "/tools/agent-memory-cost-calculator/",
         "description": "Hermes Agent-compatible script: AI Agent Memory / RAG Cost Calculator.",
@@ -98,7 +28,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/agent_memory_cost_calculator.py"
       },
-      {
+{
         "name": "AI Agent Observability Cost Calculator",
         "path": "/tools/agent-observability-cost-calculator/",
         "description": "Hermes Agent-compatible script: AI Agent Observability Cost Calculator.",
@@ -106,7 +36,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/agent_observability_cost_calculator.py"
       },
-      {
+{
         "name": "Agent Prompt Injection Scanner",
         "path": "/tools/agent-prompt-injection-scanner/",
         "description": "Hermes Agent-compatible script: Agent Prompt Injection Scanner.",
@@ -114,7 +44,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/agent_prompt_injection_scanner.py"
       },
-      {
+{
         "name": "AI Agent Red Team Cost Calculator",
         "path": "/tools/agent-redteam-cost-calculator/",
         "description": "Hermes Agent-compatible script: AI Agent Red Team Cost Calculator.",
@@ -122,7 +52,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/agent_redteam_cost_calculator.py"
       },
-      {
+{
         "name": "AI Agent SLA / Uptime Calculator",
         "path": "/tools/agent-sla-calculator/",
         "description": "Hermes Agent-compatible script: AI Agent SLA / Uptime Calculator.",
@@ -130,7 +60,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/agent_sla_calculator.py"
       },
-      {
+{
         "name": "Agent Stack Builder",
         "path": "/tools/agent-stack-builder/",
         "description": "Hermes Agent-compatible script: Agent Stack Builder.",
@@ -138,15 +68,37 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/agent_stack_builder.py"
       },
-      {
+{
         "name": "AI Agent Workflow Cost Calculator",
         "path": "/tools/agent-workflow-cost-calculator/",
         "description": "Hermes Agent-compatible script: AI Agent Workflow Cost Calculator.",
         "locked": false,
         "unlockDate": null,
         "hermesScript": "/hermes-tools/agent_workflow_cost_calculator.py"
+      }
+    ]
+  },
+{
+    "name": "Agent Evaluation & Trust",
+    "description": "",
+    "tools": [
+{
+        "name": "AI Agent Benchmark Selector",
+        "path": "/tools/agent-benchmark-selector/",
+        "description": "Hermes Agent-compatible script: AI Agent Benchmark Selector.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/agent_benchmark_selector.py"
       },
-      {
+{
+        "name": "AI Agent Evaluation Planner",
+        "path": "/tools/agent-evaluation-planner/",
+        "description": "Hermes Agent-compatible script: AI Agent Evaluation Planner.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/agent_evaluation_planner.py"
+      },
+{
         "name": "AI Agent Compliance Checker",
         "path": "/tools/ai-agent-compliance-checker/",
         "description": "Hermes Agent-compatible script: AI Agent Compliance Checker.",
@@ -154,23 +106,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/ai_agent_compliance_checker.py"
       },
-      {
-        "name": "AI Startup Cost Calculator",
-        "path": "/tools/ai-startup-cost-calculator/",
-        "description": "Hermes Agent-compatible script: AI Startup Cost Calculator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/ai_startup_cost_calculator.py"
-      },
-      {
-        "name": "AI Voice Agent Cost Calculator",
-        "path": "/tools/ai-voice-agent-cost-calculator/",
-        "description": "Hermes Agent-compatible script: AI Voice Agent Cost Calculator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/ai_voice_agent_cost_calculator.py"
-      },
-      {
+{
         "name": "Claim Verifier",
         "path": "/tools/claim-verifier/",
         "description": "Hermes Agent-compatible script: Claim Verifier.",
@@ -178,121 +114,29 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/claim_verifier.py"
       },
-      {
+{
         "name": "Prompt Reliability Checker",
         "path": "/tools/prompt-reliability-checker/",
         "description": "Hermes Agent-compatible script: Prompt Reliability Checker.",
         "locked": false,
         "unlockDate": null,
         "hermesScript": "/hermes-tools/prompt_reliability_checker.py"
-      },
-      {
-        "name": "Agent RAG / Chunking Playground",
-        "path": "/tools/rag-playground/",
-        "description": "Hermes Agent-compatible script: Agent RAG / Chunking Playground.",
-        "locked": true,
-        "unlockDate": "2026-07-17",
-        "hermesScript": "/hermes-tools/rag_playground.py"
       }
     ]
   },
-  {
-    "name": "Hardware & Local AI",
+{
+    "name": "API & Pricing Intelligence",
     "description": "",
     "tools": [
-      {
-        "name": "Agent Hardware Sizer",
-        "path": "/tools/agent-hardware-sizer/",
-        "description": "Hermes Agent-compatible script: Agent Hardware Sizer.",
+{
+        "name": "Agent API Pricing Comparator",
+        "path": "/tools/agent-api-pricing-comparator/",
+        "description": "Hermes Agent-compatible script: Agent API Pricing Comparator.",
         "locked": false,
         "unlockDate": null,
-        "hermesScript": "/hermes-tools/agent_hardware_sizer.py"
+        "hermesScript": "/hermes-tools/agent_api_pricing_comparator.py"
       },
-      {
-        "name": "AI Hardware Deal Tracker",
-        "path": "/tools/ai-hardware-deal-tracker/",
-        "description": "Hermes Agent-compatible script: AI Hardware Deal Tracker.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/ai_hardware_deal_tracker.py"
-      },
-      {
-        "name": "AI PC Build Configurator",
-        "path": "/tools/ai-pc-build-configurator/",
-        "description": "Hermes Agent-compatible script: AI PC Build Configurator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/ai_pc_build_configurator.py"
-      },
-      {
-        "name": "GPU Cloud Rental vs Buy Calculator",
-        "path": "/tools/gpu-cloud-vs-buy-calculator/",
-        "description": "Hermes Agent-compatible script: GPU Cloud Rental vs Buy Calculator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/gpu_cloud_vs_buy_calculator.py"
-      },
-      {
-        "name": "GPU Comparison Lookup",
-        "path": "/compare/gpus/",
-        "description": "Hermes Agent-compatible script: GPU Comparison Lookup.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/gpu_comparison_lookup.py"
-      },
-      {
-        "name": "LLM VRAM Calculator",
-        "path": "/tools/vram-calculator/",
-        "description": "Hermes Agent-compatible script: LLM VRAM Calculator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/llm_vram_calculator.py"
-      },
-      {
-        "name": "Local LLM Hosting Revenue Estimator",
-        "path": "/tools/local-llm-hosting-revenue-estimator/",
-        "description": "Hermes Agent-compatible script: Local LLM Hosting Revenue Estimator.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/local_llm_hosting_revenue_estimator.py"
-      },
-      {
-        "name": "Mini PC Comparison Lookup",
-        "path": "/compare/mini-pcs/",
-        "description": "Hermes Agent-compatible script: Mini PC Comparison Lookup.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/mini_pc_comparison_lookup.py"
-      },
-      {
-        "name": "Mini PC Recommender for Local AI",
-        "path": "/tools/mini-pc-recommender/",
-        "description": "Hermes Agent-compatible script: Mini PC Recommender for Local AI.",
-        "locked": false,
-        "unlockDate": null,
-        "hermesScript": "/hermes-tools/mini_pc_recommender.py"
-      }
-    ]
-  },
-  {
-    "name": "Answer Engine & SEO",
-    "description": "",
-    "tools": [
-      {
-        "name": "Answer Engine Citation Tracker",
-        "path": "/tools/answer-engine-citation-tracker/",
-        "description": "Hermes Agent-compatible script: Answer Engine Citation Tracker.",
-        "locked": true,
-        "unlockDate": "2026-07-17",
-        "hermesScript": "/hermes-tools/answer_engine_citation_tracker.py"
-      }
-    ]
-  },
-  {
-    "name": "AI Operations",
-    "description": "",
-    "tools": [
-      {
+{
         "name": "Context Window Cheat Sheet",
         "path": "/tools/context-window-cheat-sheet/",
         "description": "Hermes Agent-compatible script: Context Window Cheat Sheet.",
@@ -300,7 +144,15 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/context_window_lookup.py"
       },
-      {
+{
+        "name": "LLM Cost Calculator",
+        "path": "/tools/llm-cost-calculator/",
+        "description": "Hermes Agent-compatible script: LLM Cost Calculator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/llm_cost_calculator.py"
+      },
+{
         "name": "LLM Fine-Tuning Cost Calculator",
         "path": "/tools/llm-fine-tuning-cost-calculator/",
         "description": "Hermes Agent-compatible script: LLM Fine-Tuning Cost Calculator.",
@@ -308,7 +160,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/llm_fine_tuning_cost_calculator.py"
       },
-      {
+{
         "name": "Prompt Tokenizer & Pricing Estimator",
         "path": "/tools/prompt-tokenizer-pricing-estimator/",
         "description": "Hermes Agent-compatible script: Prompt Tokenizer & Pricing Estimator.",
@@ -318,11 +170,89 @@ const toolkits = [
       }
     ]
   },
-  {
+{
+    "name": "Hardware & Local AI",
+    "description": "",
+    "tools": [
+{
+        "name": "Agent Hardware Sizer",
+        "path": "/tools/agent-hardware-sizer/",
+        "description": "Hermes Agent-compatible script: Agent Hardware Sizer.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/agent_hardware_sizer.py"
+      },
+{
+        "name": "AI Hardware Deal Tracker",
+        "path": "/tools/ai-hardware-deal-tracker/",
+        "description": "Hermes Agent-compatible script: AI Hardware Deal Tracker.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/ai_hardware_deal_tracker.py"
+      },
+{
+        "name": "AI PC Build Configurator",
+        "path": "/tools/ai-pc-build-configurator/",
+        "description": "Hermes Agent-compatible script: AI PC Build Configurator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/ai_pc_build_configurator.py"
+      },
+{
+        "name": "GPU Cloud Rental vs Buy Calculator",
+        "path": "/tools/gpu-cloud-vs-buy-calculator/",
+        "description": "Hermes Agent-compatible script: GPU Cloud Rental vs Buy Calculator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/gpu_cloud_vs_buy_calculator.py"
+      },
+{
+        "name": "GPU Comparison Lookup",
+        "path": "/compare/gpus/",
+        "description": "Hermes Agent-compatible script: GPU Comparison Lookup.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/gpu_comparison_lookup.py"
+      },
+{
+        "name": "LLM VRAM Calculator",
+        "path": "/tools/vram-calculator/",
+        "description": "Hermes Agent-compatible script: LLM VRAM Calculator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/llm_vram_calculator.py"
+      },
+{
+        "name": "Local LLM Hosting Revenue Estimator",
+        "path": "/tools/local-llm-hosting-revenue-estimator/",
+        "description": "Hermes Agent-compatible script: Local LLM Hosting Revenue Estimator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/local_llm_hosting_revenue_estimator.py"
+      },
+{
+        "name": "Mini PC Comparison Lookup",
+        "path": "/compare/mini-pcs/",
+        "description": "Hermes Agent-compatible script: Mini PC Comparison Lookup.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/mini_pc_comparison_lookup.py"
+      },
+{
+        "name": "Mini PC Recommender for Local AI",
+        "path": "/tools/mini-pc-recommender/",
+        "description": "Hermes Agent-compatible script: Mini PC Recommender for Local AI.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/mini_pc_recommender.py"
+      }
+    ]
+  },
+{
     "name": "Crypto & Mining Pivot",
     "description": "",
     "tools": [
-      {
+{
         "name": "Crypto Tax Loss Harvester",
         "path": "/tools/crypto-tax-loss-harvester/",
         "description": "Hermes Agent-compatible script: Crypto Tax Loss Harvester.",
@@ -330,7 +260,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/crypto_tax_loss_harvester.py"
       },
-      {
+{
         "name": "Hashrate to AI Inference Converter",
         "path": "/tools/hashrate-to-inference-converter/",
         "description": "Hermes Agent-compatible script: Hashrate to AI Inference Converter.",
@@ -338,7 +268,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/hashrate_to_inference_converter.py"
       },
-      {
+{
         "name": "Miner Pivot Calculator",
         "path": "/tools/miner-pivot-calculator/",
         "description": "Hermes Agent-compatible script: Miner Pivot Calculator.",
@@ -346,15 +276,15 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/miner_pivot_calculator.py"
       },
-      {
-        "name": "Miner Pivot Calculator",
+{
+        "name": "Miner Pivot Calculator \u2014 GPU Data",
         "path": "/tools/miner-pivot-calculator/",
-        "description": "Hermes Agent-compatible script: Miner Pivot Calculator.",
+        "description": "Hermes Agent-compatible script: Miner Pivot Calculator \u2014 GPU Data.",
         "locked": false,
         "unlockDate": null,
         "hermesScript": "/hermes-tools/miner_pivot_calculator_data.py"
       },
-      {
+{
         "name": "Crypto Mining Rig Repurposing Guide",
         "path": "/tools/rig-repurposing-guide/",
         "description": "Hermes Agent-compatible script: Crypto Mining Rig Repurposing Guide.",
@@ -364,33 +294,41 @@ const toolkits = [
       }
     ]
   },
-  {
-    "name": "Cost & ROI",
+{
+    "name": "Hosting & Deployment",
     "description": "",
     "tools": [
-      {
-        "name": "LLM Cost Calculator",
-        "path": "/tools/llm-cost-calculator/",
-        "description": "Hermes Agent-compatible script: LLM Cost Calculator.",
+{
+        "name": "AI Agent Deployment Readiness Scorecard",
+        "path": "/tools/agent-deployment-scorecard/",
+        "description": "Hermes Agent-compatible script: AI Agent Deployment Readiness Scorecard.",
         "locked": false,
         "unlockDate": null,
-        "hermesScript": "/hermes-tools/llm_cost_calculator.py"
+        "hermesScript": "/hermes-tools/agent_deployment_scorecard.py"
       },
-      {
-        "name": "Local LLM ROI Calculator",
-        "path": "/tools/local-llm-roi-calculator/",
-        "description": "Hermes Agent-compatible script: Local LLM ROI Calculator.",
+{
+        "name": "Agent Hosting Cost Comparator",
+        "path": "/tools/agent-hosting-cost-comparator/",
+        "description": "Hermes Agent-compatible script: Agent Hosting Cost Comparator.",
         "locked": false,
         "unlockDate": null,
-        "hermesScript": "/hermes-tools/local_llm_roi_calculator.py"
+        "hermesScript": "/hermes-tools/agent_hosting_cost_comparator.py"
+      },
+{
+        "name": "Agent Marketplace Fee Comparator",
+        "path": "/tools/agent-marketplace-fee-comparator/",
+        "description": "Hermes Agent-compatible script: Agent Marketplace Fee Comparator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/agent_marketplace_fee_comparator.py"
       }
     ]
   },
-  {
+{
     "name": "Newsletter & Content",
     "description": "",
     "tools": [
-      {
+{
         "name": "Newsletter Prompt Generator",
         "path": "/tools/newsletter-prompt-generator/",
         "description": "Hermes Agent-compatible script: Newsletter Prompt Generator.",
@@ -398,7 +336,7 @@ const toolkits = [
         "unlockDate": null,
         "hermesScript": "/hermes-tools/newsletter_prompt_generator.py"
       },
-      {
+{
         "name": "Newsletter Topic Finder",
         "path": "/tools/newsletter-topic-finder/",
         "description": "Hermes Agent-compatible script: Newsletter Topic Finder.",
@@ -408,11 +346,43 @@ const toolkits = [
       }
     ]
   },
-  {
-    "name": "Investing & Startups",
+{
+    "name": "Revenue & Startups",
     "description": "",
     "tools": [
-      {
+{
+        "name": "Affiliate Link Revenue Estimator",
+        "path": "/tools/affiliate-revenue-estimator/",
+        "description": "Hermes Agent-compatible script: Affiliate Link Revenue Estimator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/affiliate_revenue_estimator.py"
+      },
+{
+        "name": "AI Startup Cost Calculator",
+        "path": "/tools/ai-startup-cost-calculator/",
+        "description": "Hermes Agent-compatible script: AI Startup Cost Calculator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/ai_startup_cost_calculator.py"
+      },
+{
+        "name": "AI Voice Agent Cost Calculator",
+        "path": "/tools/ai-voice-agent-cost-calculator/",
+        "description": "Hermes Agent-compatible script: AI Voice Agent Cost Calculator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/ai_voice_agent_cost_calculator.py"
+      },
+{
+        "name": "Local LLM ROI Calculator",
+        "path": "/tools/local-llm-roi-calculator/",
+        "description": "Hermes Agent-compatible script: Local LLM ROI Calculator.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/local_llm_roi_calculator.py"
+      },
+{
         "name": "Startup Runway Calculator",
         "path": "/tools/startup-runway-calculator/",
         "description": "Hermes Agent-compatible script: Startup Runway Calculator.",
@@ -421,8 +391,30 @@ const toolkits = [
         "hermesScript": "/hermes-tools/startup_runway_calculator.py"
       }
     ]
+  },
+{
+    "name": "Early Access",
+    "description": "",
+    "tools": [
+{
+        "name": "Answer Engine Citation Tracker",
+        "path": "/tools/answer-engine-citation-tracker/",
+        "description": "Hermes Agent-compatible script: Answer Engine Citation Tracker.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/answer_engine_citation_tracker.py"
+      },
+{
+        "name": "Agent RAG / Chunking Playground",
+        "path": "/tools/rag-playground/",
+        "description": "Hermes Agent-compatible script: Agent RAG / Chunking Playground.",
+        "locked": false,
+        "unlockDate": null,
+        "hermesScript": "/hermes-tools/rag_playground.py"
+      }
+    ]
   }
-];
+];;;
 
 const allTools = toolkits.flatMap(k => k.tools);
 

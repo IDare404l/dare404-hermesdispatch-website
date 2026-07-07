@@ -10,315 +10,352 @@
       "page_url": "https://hermesdispatch.dev/tools/affiliate-revenue-estimator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/affiliate_revenue_estimator.py",
       "toolset": "revenue",
-      "file": "affiliate_revenue_estimator.py"
+      "file": "affiliate_revenue_estimator.py",
+      "category": "Revenue & Startups"
     },
     {
       "name": "Agent API Pricing Comparator",
       "page_url": "https://hermesdispatch.dev/tools/agent-api-pricing-comparator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_api_pricing_comparator.py",
       "toolset": "agents",
-      "file": "agent_api_pricing_comparator.py"
+      "file": "agent_api_pricing_comparator.py",
+      "category": "API & Pricing Intelligence"
     },
     {
       "name": "AI Agent Benchmark Selector",
       "page_url": "https://hermesdispatch.dev/tools/agent-benchmark-selector/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_benchmark_selector.py",
       "toolset": "agents",
-      "file": "agent_benchmark_selector.py"
-    },
-    {
-      "name": "AI Agent Compliance Checker",
-      "page_url": "https://hermesdispatch.dev/tools/ai-agent-compliance-checker/",
-      "script_url": "https://hermesdispatch.dev/hermes-tools/agent_compliance_checker.py",
-      "toolset": "agents",
-      "file": "agent_compliance_checker.py"
+      "file": "agent_benchmark_selector.py",
+      "category": "Agent Evaluation & Trust"
     },
     {
       "name": "AI Agent Deployment Readiness Scorecard",
       "page_url": "https://hermesdispatch.dev/tools/agent-deployment-scorecard/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_deployment_scorecard.py",
       "toolset": "agents",
-      "file": "agent_deployment_scorecard.py"
+      "file": "agent_deployment_scorecard.py",
+      "category": "Hosting & Deployment"
     },
     {
       "name": "AI Agent Evaluation Planner",
       "page_url": "https://hermesdispatch.dev/tools/agent-evaluation-planner/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_evaluation_planner.py",
       "toolset": "agents",
-      "file": "agent_evaluation_planner.py"
+      "file": "agent_evaluation_planner.py",
+      "category": "Agent Evaluation & Trust"
     },
     {
       "name": "Agent Hardware Sizer",
       "page_url": "https://hermesdispatch.dev/tools/agent-hardware-sizer/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_hardware_sizer.py",
       "toolset": "hardware",
-      "file": "agent_hardware_sizer.py"
+      "file": "agent_hardware_sizer.py",
+      "category": "Hardware & Local AI"
     },
     {
       "name": "Agent Hosting Cost Comparator",
       "page_url": "https://hermesdispatch.dev/tools/agent-hosting-cost-comparator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_hosting_cost_comparator.py",
       "toolset": "agents",
-      "file": "agent_hosting_cost_comparator.py"
+      "file": "agent_hosting_cost_comparator.py",
+      "category": "Hosting & Deployment"
     },
     {
       "name": "AI Agent Latency Budget Calculator",
       "page_url": "https://hermesdispatch.dev/tools/agent-latency-budget-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_latency_budget_calculator.py",
       "toolset": "agents",
-      "file": "agent_latency_budget_calculator.py"
+      "file": "agent_latency_budget_calculator.py",
+      "category": "Agent Operations"
     },
     {
       "name": "Agent Marketplace Fee Comparator",
       "page_url": "https://hermesdispatch.dev/tools/agent-marketplace-fee-comparator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_marketplace_fee_comparator.py",
       "toolset": "agents",
-      "file": "agent_marketplace_fee_comparator.py"
+      "file": "agent_marketplace_fee_comparator.py",
+      "category": "Hosting & Deployment"
     },
     {
       "name": "AI Agent Memory / RAG Cost Calculator",
       "page_url": "https://hermesdispatch.dev/tools/agent-memory-cost-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_memory_cost_calculator.py",
       "toolset": "agents",
-      "file": "agent_memory_cost_calculator.py"
+      "file": "agent_memory_cost_calculator.py",
+      "category": "Agent Operations"
     },
     {
       "name": "AI Agent Observability Cost Calculator",
       "page_url": "https://hermesdispatch.dev/tools/agent-observability-cost-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_observability_cost_calculator.py",
       "toolset": "agents",
-      "file": "agent_observability_cost_calculator.py"
+      "file": "agent_observability_cost_calculator.py",
+      "category": "Agent Operations"
     },
     {
       "name": "Agent Prompt Injection Scanner",
       "page_url": "https://hermesdispatch.dev/tools/agent-prompt-injection-scanner/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_prompt_injection_scanner.py",
       "toolset": "agents",
-      "file": "agent_prompt_injection_scanner.py"
+      "file": "agent_prompt_injection_scanner.py",
+      "category": "Agent Operations"
     },
     {
       "name": "AI Agent Red Team Cost Calculator",
       "page_url": "https://hermesdispatch.dev/tools/agent-redteam-cost-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_redteam_cost_calculator.py",
       "toolset": "agents",
-      "file": "agent_redteam_cost_calculator.py"
+      "file": "agent_redteam_cost_calculator.py",
+      "category": "Agent Operations"
     },
     {
       "name": "AI Agent SLA / Uptime Calculator",
       "page_url": "https://hermesdispatch.dev/tools/agent-sla-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_sla_calculator.py",
       "toolset": "agents",
-      "file": "agent_sla_calculator.py"
+      "file": "agent_sla_calculator.py",
+      "category": "Agent Operations"
     },
     {
       "name": "Agent Stack Builder",
       "page_url": "https://hermesdispatch.dev/tools/agent-stack-builder/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_stack_builder.py",
       "toolset": "agents",
-      "file": "agent_stack_builder.py"
+      "file": "agent_stack_builder.py",
+      "category": "Agent Operations"
     },
     {
       "name": "AI Agent Workflow Cost Calculator",
       "page_url": "https://hermesdispatch.dev/tools/agent-workflow-cost-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/agent_workflow_cost_calculator.py",
       "toolset": "agents",
-      "file": "agent_workflow_cost_calculator.py"
+      "file": "agent_workflow_cost_calculator.py",
+      "category": "Agent Operations"
     },
     {
       "name": "AI Agent Compliance Checker",
       "page_url": "https://hermesdispatch.dev/tools/ai-agent-compliance-checker/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/ai_agent_compliance_checker.py",
       "toolset": "agents",
-      "file": "ai_agent_compliance_checker.py"
+      "file": "ai_agent_compliance_checker.py",
+      "category": "Agent Evaluation & Trust"
     },
     {
       "name": "AI Hardware Deal Tracker",
       "page_url": "https://hermesdispatch.dev/tools/ai-hardware-deal-tracker/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/ai_hardware_deal_tracker.py",
       "toolset": "hardware",
-      "file": "ai_hardware_deal_tracker.py"
+      "file": "ai_hardware_deal_tracker.py",
+      "category": "Hardware & Local AI"
     },
     {
       "name": "AI PC Build Configurator",
       "page_url": "https://hermesdispatch.dev/tools/ai-pc-build-configurator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/ai_pc_build_configurator.py",
       "toolset": "hardware",
-      "file": "ai_pc_build_configurator.py"
+      "file": "ai_pc_build_configurator.py",
+      "category": "Hardware & Local AI"
     },
     {
       "name": "AI Startup Cost Calculator",
       "page_url": "https://hermesdispatch.dev/tools/ai-startup-cost-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/ai_startup_cost_calculator.py",
       "toolset": "agents",
-      "file": "ai_startup_cost_calculator.py"
+      "file": "ai_startup_cost_calculator.py",
+      "category": "Revenue & Startups"
     },
     {
       "name": "AI Voice Agent Cost Calculator",
       "page_url": "https://hermesdispatch.dev/tools/ai-voice-agent-cost-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/ai_voice_agent_cost_calculator.py",
       "toolset": "agents",
-      "file": "ai_voice_agent_cost_calculator.py"
+      "file": "ai_voice_agent_cost_calculator.py",
+      "category": "Revenue & Startups"
     },
     {
       "name": "Answer Engine Citation Tracker",
       "page_url": "https://hermesdispatch.dev/tools/answer-engine-citation-tracker/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/answer_engine_citation_tracker.py",
       "toolset": "seo",
-      "file": "answer_engine_citation_tracker.py"
+      "file": "answer_engine_citation_tracker.py",
+      "category": "Early Access"
     },
     {
       "name": "Claim Verifier",
       "page_url": "https://hermesdispatch.dev/tools/claim-verifier/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/claim_verifier.py",
       "toolset": "agents",
-      "file": "claim_verifier.py"
+      "file": "claim_verifier.py",
+      "category": "Agent Evaluation & Trust"
     },
     {
       "name": "Context Window Cheat Sheet",
       "page_url": "https://hermesdispatch.dev/tools/context-window-cheat-sheet/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/context_window_lookup.py",
       "toolset": "ai",
-      "file": "context_window_lookup.py"
+      "file": "context_window_lookup.py",
+      "category": "API & Pricing Intelligence"
     },
     {
       "name": "Crypto Tax Loss Harvester",
       "page_url": "https://hermesdispatch.dev/tools/crypto-tax-loss-harvester/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/crypto_tax_loss_harvester.py",
       "toolset": "crypto",
-      "file": "crypto_tax_loss_harvester.py"
+      "file": "crypto_tax_loss_harvester.py",
+      "category": "Crypto & Mining Pivot"
     },
     {
       "name": "GPU Cloud Rental vs Buy Calculator",
       "page_url": "https://hermesdispatch.dev/tools/gpu-cloud-vs-buy-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/gpu_cloud_vs_buy_calculator.py",
       "toolset": "hardware",
-      "file": "gpu_cloud_vs_buy_calculator.py"
+      "file": "gpu_cloud_vs_buy_calculator.py",
+      "category": "Hardware & Local AI"
     },
     {
       "name": "GPU Comparison Lookup",
       "page_url": "https://hermesdispatch.dev/compare/gpus/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/gpu_comparison_lookup.py",
       "toolset": "hardware",
-      "file": "gpu_comparison_lookup.py"
+      "file": "gpu_comparison_lookup.py",
+      "category": "Hardware & Local AI"
     },
     {
       "name": "Hashrate to AI Inference Converter",
       "page_url": "https://hermesdispatch.dev/tools/hashrate-to-inference-converter/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/hashrate_to_inference_converter.py",
       "toolset": "crypto",
-      "file": "hashrate_to_inference_converter.py"
+      "file": "hashrate_to_inference_converter.py",
+      "category": "Crypto & Mining Pivot"
     },
     {
       "name": "LLM Cost Calculator",
       "page_url": "https://hermesdispatch.dev/tools/llm-cost-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/llm_cost_calculator.py",
       "toolset": "cost",
-      "file": "llm_cost_calculator.py"
+      "file": "llm_cost_calculator.py",
+      "category": "API & Pricing Intelligence"
     },
     {
       "name": "LLM Fine-Tuning Cost Calculator",
       "page_url": "https://hermesdispatch.dev/tools/llm-fine-tuning-cost-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/llm_fine_tuning_cost_calculator.py",
       "toolset": "ai",
-      "file": "llm_fine_tuning_cost_calculator.py"
+      "file": "llm_fine_tuning_cost_calculator.py",
+      "category": "API & Pricing Intelligence"
     },
     {
       "name": "LLM VRAM Calculator",
       "page_url": "https://hermesdispatch.dev/tools/vram-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/llm_vram_calculator.py",
       "toolset": "hardware",
-      "file": "llm_vram_calculator.py"
+      "file": "llm_vram_calculator.py",
+      "category": "Hardware & Local AI"
     },
     {
       "name": "Local LLM Hosting Revenue Estimator",
       "page_url": "https://hermesdispatch.dev/tools/local-llm-hosting-revenue-estimator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/local_llm_hosting_revenue_estimator.py",
       "toolset": "hardware",
-      "file": "local_llm_hosting_revenue_estimator.py"
+      "file": "local_llm_hosting_revenue_estimator.py",
+      "category": "Hardware & Local AI"
     },
     {
       "name": "Local LLM ROI Calculator",
       "page_url": "https://hermesdispatch.dev/tools/local-llm-roi-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/local_llm_roi_calculator.py",
       "toolset": "cost",
-      "file": "local_llm_roi_calculator.py"
+      "file": "local_llm_roi_calculator.py",
+      "category": "Revenue & Startups"
     },
     {
       "name": "Miner Pivot Calculator",
       "page_url": "https://hermesdispatch.dev/tools/miner-pivot-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/miner_pivot_calculator.py",
       "toolset": "crypto",
-      "file": "miner_pivot_calculator.py"
+      "file": "miner_pivot_calculator.py",
+      "category": "Crypto & Mining Pivot"
     },
     {
-      "name": "Miner Pivot Calculator",
+      "name": "Miner Pivot Calculator \u2014 GPU Data",
       "page_url": "https://hermesdispatch.dev/tools/miner-pivot-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/miner_pivot_calculator_data.py",
       "toolset": "crypto",
-      "file": "miner_pivot_calculator_data.py"
+      "file": "miner_pivot_calculator_data.py",
+      "category": "Crypto & Mining Pivot"
     },
     {
       "name": "Mini PC Comparison Lookup",
       "page_url": "https://hermesdispatch.dev/compare/mini-pcs/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/mini_pc_comparison_lookup.py",
       "toolset": "hardware",
-      "file": "mini_pc_comparison_lookup.py"
+      "file": "mini_pc_comparison_lookup.py",
+      "category": "Hardware & Local AI"
     },
     {
       "name": "Mini PC Recommender for Local AI",
       "page_url": "https://hermesdispatch.dev/tools/mini-pc-recommender/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/mini_pc_recommender.py",
       "toolset": "hardware",
-      "file": "mini_pc_recommender.py"
+      "file": "mini_pc_recommender.py",
+      "category": "Hardware & Local AI"
     },
     {
       "name": "Newsletter Prompt Generator",
       "page_url": "https://hermesdispatch.dev/tools/newsletter-prompt-generator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/newsletter_prompt_generator.py",
       "toolset": "content",
-      "file": "newsletter_prompt_generator.py"
+      "file": "newsletter_prompt_generator.py",
+      "category": "Newsletter & Content"
     },
     {
       "name": "Newsletter Topic Finder",
       "page_url": "https://hermesdispatch.dev/tools/newsletter-topic-finder/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/newsletter_topic_finder.py",
       "toolset": "content",
-      "file": "newsletter_topic_finder.py"
+      "file": "newsletter_topic_finder.py",
+      "category": "Newsletter & Content"
     },
     {
       "name": "Prompt Reliability Checker",
       "page_url": "https://hermesdispatch.dev/tools/prompt-reliability-checker/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/prompt_reliability_checker.py",
       "toolset": "agents",
-      "file": "prompt_reliability_checker.py"
+      "file": "prompt_reliability_checker.py",
+      "category": "Agent Evaluation & Trust"
     },
     {
       "name": "Prompt Tokenizer & Pricing Estimator",
       "page_url": "https://hermesdispatch.dev/tools/prompt-tokenizer-pricing-estimator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/prompt_tokenizer_pricing_estimator.py",
       "toolset": "ai",
-      "file": "prompt_tokenizer_pricing_estimator.py"
+      "file": "prompt_tokenizer_pricing_estimator.py",
+      "category": "API & Pricing Intelligence"
     },
     {
       "name": "Agent RAG / Chunking Playground",
       "page_url": "https://hermesdispatch.dev/tools/rag-playground/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/rag_playground.py",
       "toolset": "agents",
-      "file": "rag_playground.py"
+      "file": "rag_playground.py",
+      "category": "Early Access"
     },
     {
       "name": "Crypto Mining Rig Repurposing Guide",
       "page_url": "https://hermesdispatch.dev/tools/rig-repurposing-guide/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/rig_repurposing_guide.py",
       "toolset": "crypto",
-      "file": "rig_repurposing_guide.py"
+      "file": "rig_repurposing_guide.py",
+      "category": "Crypto & Mining Pivot"
     },
     {
       "name": "Startup Runway Calculator",
       "page_url": "https://hermesdispatch.dev/tools/startup-runway-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/startup_runway_calculator.py",
       "toolset": "investing",
-      "file": "startup_runway_calculator.py"
+      "file": "startup_runway_calculator.py",
+      "category": "Revenue & Startups"
     }
   ]
 }
