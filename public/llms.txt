@@ -459,10 +459,17 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||||||||- Outputs: revenue loss, SLA penalties, support surge cost, churn impact, recovery cost, total outage cost, cost per minute, verdict
 ||||||||- Audience: AI agent operators planning reliability investments and incident response
 ||||||||
-||||||||## AI Agent Support Deflection ROI Calculator
-||||||||- URL: https://hermesdispatch.dev/tools/agent-deflection-roi-calculator/
-||||||||- Description: Estimate how many support tickets an AI agent can deflect, the human support cost saved, agent operating cost, and net monthly ROI.
-||||||||- Inputs: monthly tickets, target deflection rate, minutes per human ticket, fully-loaded hourly cost, agent API cost per ticket, review rate, review minutes, platform cost, setup hours, maintenance hours
-||||||||- Outputs: deflected tickets per month, human cost saved, agent operating cost, net monthly savings, break-even month, annual savings, savings per ticket, projection table
-||||||||- Audience: AI agent builders and support operators building a business case for ticket deflection
-|||||||
+|||||||||## AI Agent Support Deflection ROI Calculator
+|||||||||- URL: https://hermesdispatch.dev/tools/agent-deflection-roi-calculator/
+|||||||||- Description: Estimate how many support tickets an AI agent can deflect, the human support cost saved, agent operating cost, and net monthly ROI.
+|||||||||- Inputs: monthly tickets, target deflection rate, minutes per human ticket, fully-loaded hourly cost, agent API cost per ticket, review rate, review minutes, platform cost, setup hours, maintenance hours
+|||||||||- Outputs: deflected tickets per month, human cost saved, agent operating cost, net monthly savings, break-even month, annual savings, savings per ticket, projection table
+|||||||||- Audience: AI agent builders and support operators building a business case for ticket deflection
+|||||||||
+||||||||||## AI Agent Document Processing Cost Calculator
+||||||||||- URL: https://hermesdispatch.dev/tools/agent-document-processing-cost-calculator/
+||||||||||- Description: Estimate per-page and monthly cost for AI document extraction, OCR, classification, and summarization across cloud LLM APIs and local GPU stacks.
+||||||||||- Inputs: pages per month, words per page, extraction complexity, OCR percentage, classification toggle, human review rate, review minutes, review hourly cost, local GPU stack, electricity rate, projection months
+||||||||||- Outputs: cheapest cloud provider, monthly cloud cost, monthly local cost, cost per page, provider comparison table, local GPU throughput/electricity/amortized hardware, verdict
+||||||||||- Audience: AI agent builders designing document-processing, RAG, and data-extraction pipelines
+|||||||||

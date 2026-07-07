@@ -1,0 +1,220 @@
+{
+  "last_updated": "2026-07-07",
+  "note": "Cost estimates are directional. Cloud provider prices change frequently and do not include storage, egress, or human QA overhead. Local route assumes you already own a compatible GPU.",
+  "defaults": {
+    "pages_per_month": 10000,
+    "pages_per_document": 5,
+    "words_per_page": 350,
+    "extraction_complexity": "standard",
+    "ocr_required_pct": 50,
+    "classification_required": true,
+    "human_review_rate_pct": 8,
+    "review_minutes_per_page": 0.8,
+    "review_hourly_cost": 35,
+    "local_gpu": "rtx-4090",
+    "projection_months": 12
+  },
+  "extraction_complexities": [
+    {
+      "slug": "simple",
+      "name": "Simple structured fields",
+      "description": "10-20 short fields, clean PDFs, little nuance.",
+      "input_tokens_per_page": 1200,
+      "output_tokens_per_page": 300,
+      "vision_api_calls_per_page": 0,
+      "extra_tools_per_page": 0
+    },
+    {
+      "slug": "standard",
+      "name": "Standard extraction + summarization",
+      "description": "Mixed layouts, some tables, needs summarization.",
+      "input_tokens_per_page": 2500,
+      "output_tokens_per_page": 600,
+      "vision_api_calls_per_page": 0.5,
+      "extra_tools_per_page": 0.2
+    },
+    {
+      "slug": "complex",
+      "name": "Complex multi-page reasoning",
+      "description": "Contracts, financial reports, cross-document comparisons.",
+      "input_tokens_per_page": 5000,
+      "output_tokens_per_page": 1200,
+      "vision_api_calls_per_page": 1.0,
+      "extra_tools_per_page": 0.5
+    }
+  ],
+  "providers": [
+    {
+      "slug": "openai-gpt-4o",
+      "name": "OpenAI GPT-4o",
+      "model": "gpt-4o",
+      "input_per_1m": 2.5,
+      "output_per_1m": 10.0,
+      "cached_input_per_1m": 1.25,
+      "vision_per_1k_images": 5.0,
+      "tool_call_premium": 0.0,
+      "best_for": "High accuracy on mixed PDFs and tables",
+      "url": "https://openai.com/api/pricing/"
+    },
+    {
+      "slug": "openai-gpt-4o-mini",
+      "name": "OpenAI GPT-4o-mini",
+      "model": "gpt-4o-mini",
+      "input_per_1m": 0.15,
+      "output_per_1m": 0.6,
+      "cached_input_per_1m": 0.075,
+      "vision_per_1k_images": 0.3,
+      "tool_call_premium": 0.0,
+      "best_for": "Cheap high-volume structured extraction",
+      "url": "https://openai.com/api/pricing/"
+    },
+    {
+      "slug": "anthropic-claude-3-5-sonnet",
+      "name": "Anthropic Claude 3.5 Sonnet",
+      "model": "claude-3-5-sonnet-20240620",
+      "input_per_1m": 3.0,
+      "output_per_1m": 15.0,
+      "cached_input_per_1m": 3.75,
+      "vision_per_1k_images": 4.8,
+      "tool_call_premium": 0.0,
+      "best_for": "Long contracts and nuanced reasoning",
+      "url": "https://www.anthropic.com/pricing"
+    },
+    {
+      "slug": "anthropic-claude-3-haiku",
+      "name": "Anthropic Claude 3 Haiku",
+      "model": "claude-3-haiku-20240307",
+      "input_per_1m": 0.25,
+      "output_per_1m": 1.25,
+      "cached_input_per_1m": 0.03,
+      "vision_per_1k_images": 0.4,
+      "tool_call_premium": 0.0,
+      "best_for": "Fast, cheap classification and light extraction",
+      "url": "https://www.anthropic.com/pricing"
+    },
+    {
+      "slug": "google-gemini-1-5-pro",
+      "name": "Google Gemini 1.5 Pro",
+      "model": "gemini-1.5-pro",
+      "input_per_1m": 3.5,
+      "output_per_1m": 10.5,
+      "cached_input_per_1m": 0.0,
+      "vision_per_1k_images": 2.5,
+      "tool_call_premium": 0.0,
+      "best_for": "Very long documents and multimodal inputs",
+      "url": "https://ai.google.dev/pricing"
+    },
+    {
+      "slug": "google-gemini-1-5-flash",
+      "name": "Google Gemini 1.5 Flash",
+      "model": "gemini-1.5-flash",
+      "input_per_1m": 0.35,
+      "output_per_1m": 1.05,
+      "cached_input_per_1m": 0.0,
+      "vision_per_1k_images": 0.35,
+      "tool_call_premium": 0.0,
+      "best_for": "Low-latency bulk classification",
+      "url": "https://ai.google.dev/pricing"
+    },
+    {
+      "slug": "azure-document-intelligence",
+      "name": "Azure Document Intelligence + GPT-4o",
+      "model": "azure-di+gpt-4o",
+      "input_per_1m": 2.5,
+      "output_per_1m": 10.0,
+      "cached_input_per_1m": 0.0,
+      "vision_per_1k_images": 0.0,
+      "tool_call_premium": 0.015,
+      "best_for": "High-quality OCR + extraction in Microsoft ecosystem",
+      "url": "https://azure.microsoft.com/en-us/pricing/details/ai-document-intelligence/"
+    }
+  ],
+  "local_gpus": [
+    {
+      "slug": "rtx-4090",
+      "name": "NVIDIA RTX 4090 (24 GB)",
+      "hardware_cost": 1800,
+      "power_w": 350,
+      "pages_per_hour": 1200,
+      "best_for": "Fast local OCR + LLM on mid-size docs"
+    },
+    {
+      "slug": "rtx-3090",
+      "name": "NVIDIA RTX 3090 (24 GB)",
+      "hardware_cost": 900,
+      "power_w": 350,
+      "pages_per_hour": 900,
+      "best_for": "Cheaper used-card local route"
+    },
+    {
+      "slug": "mac-studio-m4-max",
+      "name": "Mac Studio M4 Max (128 GB)",
+      "hardware_cost": 4500,
+      "power_w": 120,
+      "pages_per_hour": 1400,
+      "best_for": "Silent, efficient local pipeline with MLX"
+    },
+    {
+      "slug": "dual-rtx-4090",
+      "name": "Dual RTX 4090 workstation",
+      "hardware_cost": 6000,
+      "power_w": 800,
+      "pages_per_hour": 2200,
+      "best_for": "High-throughput production pipeline"
+    }
+  ],
+  "scenarios": [
+    {
+      "slug": "invoice-processing",
+      "name": "Invoice processing",
+      "pages_per_month": 20000,
+      "pages_per_document": 1,
+      "words_per_page": 250,
+      "extraction_complexity": "simple",
+      "ocr_required_pct": 30,
+      "classification_required": true,
+      "human_review_rate_pct": 5,
+      "review_minutes_per_page": 0.5,
+      "review_hourly_cost": 30
+    },
+    {
+      "slug": "contract-review",
+      "name": "Contract review",
+      "pages_per_month": 3000,
+      "pages_per_document": 15,
+      "words_per_page": 500,
+      "extraction_complexity": "complex",
+      "ocr_required_pct": 20,
+      "classification_required": true,
+      "human_review_rate_pct": 15,
+      "review_minutes_per_page": 2.0,
+      "review_hourly_cost": 75
+    },
+    {
+      "slug": "receipt-classification",
+      "name": "Receipt classification",
+      "pages_per_month": 50000,
+      "pages_per_document": 1,
+      "words_per_page": 120,
+      "extraction_complexity": "simple",
+      "ocr_required_pct": 70,
+      "classification_required": true,
+      "human_review_rate_pct": 3,
+      "review_minutes_per_page": 0.3,
+      "review_hourly_cost": 25
+    },
+    {
+      "slug": "medical-records",
+      "name": "Medical records summarization",
+      "pages_per_month": 5000,
+      "pages_per_document": 8,
+      "words_per_page": 400,
+      "extraction_complexity": "standard",
+      "ocr_required_pct": 40,
+      "classification_required": false,
+      "human_review_rate_pct": 12,
+      "review_minutes_per_page": 1.5,
+      "review_hourly_cost": 55
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_document_processing_cost.json';
+
+const title = "AI Agent Document Processing Cost Calculator | Hermes Dispatch";
+const description = "Estimate per-page and monthly cost for AI document extraction, OCR, classification, and summarization across cloud LLM APIs and local GPU stacks.";
+const scenarios = data.scenarios;
+const complexities = data.extraction_complexities;
+const providers = data.providers;
+const gpus = data.local_gpus;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the monthly cost to process documents with an AI agent, including LLM tokens, vision/OCR calls, human review labor, and (for the local route) GPU hardware and electricity cost." },
+  { q: "How are input/output tokens calculated?", a: "Each complexity tier has average tokens per page. Total tokens = pages per month × tokens per page, plus classification overhead and vision API calls for pages that need OCR." },
+  { q: "When is the local GPU route cheaper?", a: "Local usually wins at very high page volumes or when documents contain sensitive data that can't leave your network. Cloud wins at lower volume, fast setup, and built-in multimodal models." },
+  { q: "What is the review rate?", a: "The percentage of pages that still need a human to check, correct, or approve the AI output. Review cost is added to both cloud and local routes." },
+  { q: "Does this include OCR cost?", a: "OCR is modeled as a percentage of pages requiring vision API calls (cloud) or local OCR+LLM time (local). Azure Document Intelligence has a per-page document-intelligence fee built into the tool-call premium." },
+  { q: "Which provider is best for contracts or long documents?", a: "Anthropic Claude 3.5 Sonnet and Google Gemini 1.5 Pro are strong for long-context reasoning. GPT-4o-mini and Gemini Flash are usually cheapest for simple classification." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Document Processing Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-document-processing-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📄</div>
+      <h1 class="display-heading mb-4">AI Agent Document Processing Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate per-page and monthly cost for document extraction, OCR, classification, and summarization across cloud APIs and local GPU stacks.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Document volume & complexity</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Pages per month</span>
+          <input id="pagesPerMonth" type="number" min="0" step="100" value={defaults.pages_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Words per page</span>
+          <input id="wordsPerPage" type="number" min="0" step="50" value={defaults.words_per_page} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Extraction complexity</span>
+          <select id="complexity" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {complexities.map(c => (
+              <option value={c.slug} selected={c.slug === defaults.extraction_complexity}>{c.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Pages needing OCR / vision (%)</span>
+          <input id="ocrPct" type="number" min="0" max="100" step="1" value={defaults.ocr_required_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Classify each document?</span>
+          <select id="classification" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            <option value="true" selected={defaults.classification_required}>Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="1" value={defaults.human_review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review minutes per page</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.1" value={defaults.review_minutes_per_page} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review hourly cost ($)</span>
+          <input id="reviewHourlyCost" type="number" min="0" step="1" value={defaults.review_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Local GPU stack</span>
+          <select id="localGpu" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {gpus.map(g => (
+              <option value={g.slug} selected={g.slug === defaults.local_gpu}>{g.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Electricity rate ($/kWh)</span>
+          <input id="electricityRate" type="number" min="0" step="0.01" value={0.13} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection months</span>
+          <input id="projectionMonths" type="number" min="1" max="36" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest cloud provider</p>
+        <p id="cheapestProvider" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cloud cost / month</p>
+        <p id="cloudCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Local cost / month</p>
+        <p id="localCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per page</p>
+        <p id="costPerPage" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20 overflow-x-auto">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider cost comparison</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4">Best for</th>
+            <th class="py-3 pr-4 text-right">Monthly cost</th>
+            <th class="py-3 pr-4 text-right">Cost / 1k pages</th>
+          </tr>
+        </thead>
+        <tbody id="providerBody" class="text-neutral-200"></tbody>
+      </table>
+    </section>
+
+    <!-- Local breakdown -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Local GPU throughput</p>
+        <p id="localThroughput" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Local electricity / month</p>
+        <p id="localElectricity" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Local hardware amortized / month</p>
+        <p id="localHardwareAmortized" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-memory-cost-calculator/" class="btn-primary text-sm">Agent Memory / RAG Cost Calc →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-workflow-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Workflow Cost Calc →</a>
+      <a href="/tools/local-llm-roi-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Local LLM ROI Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenariosJson: JSON.stringify(scenarios), complexitiesJson: JSON.stringify(complexities), providersJson: JSON.stringify(providers), gpusJson: JSON.stringify(gpus) }}>
+    const scenarios = JSON.parse(scenariosJson);
+    const complexities = JSON.parse(complexitiesJson);
+    const providers = JSON.parse(providersJson);
+    const gpus = JSON.parse(gpusJson);
+
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtMoney3 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 3, maximumFractionDigits: 3 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        pagesPerMonth: Math.max(0, parseFloat(document.getElementById('pagesPerMonth').value) || 0),
+        wordsPerPage: Math.max(1, parseFloat(document.getElementById('wordsPerPage').value) || 350),
+        complexitySlug: document.getElementById('complexity').value,
+        ocrPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('ocrPct').value) || 0)) / 100,
+        classification: document.getElementById('classification').value === 'true',
+        reviewRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewRate').value) || 0)) / 100,
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        reviewHourlyCost: Math.max(0, parseFloat(document.getElementById('reviewHourlyCost').value) || 0),
+        localGpuSlug: document.getElementById('localGpu').value,
+        electricityRate: Math.max(0, parseFloat(document.getElementById('electricityRate').value) || 0),
+        projectionMonths: Math.max(1, Math.min(36, parseInt(document.getElementById('projectionMonths').value) || 12))
+      };
+    }
+
+    function setInputs(s) {
+      if (s.pages_per_month !== undefined) document.getElementById('pagesPerMonth').value = s.pages_per_month;
+      if (s.words_per_page !== undefined) document.getElementById('wordsPerPage').value = s.words_per_page;
+      if (s.extraction_complexity !== undefined) document.getElementById('complexity').value = s.extraction_complexity;
+      if (s.ocr_required_pct !== undefined) document.getElementById('ocrPct').value = s.ocr_required_pct;
+      if (s.classification_required !== undefined) document.getElementById('classification').value = s.classification_required ? 'true' : 'false';
+      if (s.human_review_rate_pct !== undefined) document.getElementById('reviewRate').value = s.human_review_rate_pct;
+      if (s.review_minutes_per_page !== undefined) document.getElementById('reviewMinutes').value = s.review_minutes_per_page;
+      if (s.review_hourly_cost !== undefined) document.getElementById('reviewHourlyCost').value = s.review_hourly_cost;
+    }
+
+    function calculateCloudCost(p, i, c) {
+      // Scale base tokens by words per page relative to 350-word baseline
+      const wordScale = i.wordsPerPage / 350;
+      const inputTokens = i.pagesPerMonth * c.input_tokens_per_page * wordScale;
+      const outputTokens = i.pagesPerMonth * c.output_tokens_per_page * wordScale;
+      const classificationTokens = i.classification ? i.pagesPerMonth * 150 * wordScale : 0;
+      const visionCalls = i.pagesPerMonth * c.vision_api_calls_per_page * i.ocrPct;
+      const toolCalls = i.pagesPerMonth * c.extra_tools_per_page;
+
+      const inputCost = (inputTokens + classificationTokens) * (p.input_per_1m / 1_000_000);
+      const outputCost = outputTokens * (p.output_per_1m / 1_000_000);
+      const visionCost = visionCalls * (p.vision_per_1k_images / 1000);
+      const toolCost = toolCalls * p.tool_call_premium;
+      const reviewCost = i.pagesPerMonth * i.reviewRate * i.reviewMinutes / 60 * i.reviewHourlyCost;
+
+      return {
+        inputTokens,
+        outputTokens,
+        inputCost,
+        outputCost,
+        visionCost,
+        toolCost,
+        reviewCost,
+        total: inputCost + outputCost + visionCost + toolCost + reviewCost
+      };
+    }
+
+    function calculateLocalCost(i, c) {
+      const gpu = gpus.find(g => g.slug === i.localGpuSlug) || gpus[0];
+      const wordScale = i.wordsPerPage / 350;
+      const pagesPerHour = gpu.pages_per_hour / (1 + (wordScale - 1) * 0.5 + c.vision_api_calls_per_page * 0.3);
+      const hoursPerMonth = i.pagesPerMonth / pagesPerHour;
+      const electricityKwh = hoursPerMonth * gpu.power_w / 1000;
+      const electricityCost = electricityKwh * i.electricityRate;
+      const hardwareAmortized = gpu.hardware_cost / 36; // 36-month amortization
+      const reviewCost = i.pagesPerMonth * i.reviewRate * i.reviewMinutes / 60 * i.reviewHourlyCost;
+      // Local OCR/engine licensing estimate: small per-page fee for open-source stack
+      const localLicenseCost = i.pagesPerMonth * 0.002;
+      return {
+        gpu,
+        pagesPerHour,
+        hoursPerMonth,
+        electricityCost,
+        hardwareAmortized,
+        reviewCost,
+        localLicenseCost,
+        total: electricityCost + hardwareAmortized + reviewCost + localLicenseCost
+      };
+    }
+
+    function compute() {
+      const i = getInputs();
+      const c = complexities.find(x => x.slug === i.complexitySlug) || complexities[1];
+
+      const providerCosts = providers.map(p => {
+        const cost = calculateCloudCost(p, i, c);
+        return { provider: p, ...cost };
+      }).sort((a, b) => a.total - b.total);
+
+      const cheapest = providerCosts[0];
+      const local = calculateLocalCost(i, c);
+
+      document.getElementById('cheapestProvider').textContent = cheapest.provider.name;
+      document.getElementById('cloudCost').textContent = fmtMoney(cheapest.total);
+      document.getElementById('localCost').textContent = fmtMoney(local.total);
+      document.getElementById('costPerPage').textContent = fmtMoney3(cheapest.total / Math.max(1, i.pagesPerMonth));
+
+      // Provider table
+      let tbody = '';
+      providerCosts.forEach(pc => {
+        const per1k = pc.total / Math.max(1, i.pagesPerMonth) * 1000;
+        tbody += `<tr class="border-b border-neutral-800/50 ${pc.provider.slug === cheapest.provider.slug ? 'bg-brand-gold/10' : ''}">
+          <td class="py-3 pr-4 font-medium text-white">${pc.provider.name}</td>
+          <td class="py-3 pr-4 text-sm text-neutral-400">${pc.provider.best_for}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(pc.total)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney3(per1k)}</td>
+        </tr>`;
+      });
+      document.getElementById('providerBody').innerHTML = tbody;
+
+      // Local breakdown
+      document.getElementById('localThroughput').textContent = `${fmtNum(local.pagesPerHour)} pages/hour`;
+      document.getElementById('localElectricity').textContent = fmtMoney(local.electricityCost);
+      document.getElementById('localHardwareAmortized').textContent = fmtMoney(local.hardwareAmortized);
+
+      // Verdict
+      const diff = cheapest.total - local.total;
+      const savingsPct = cheapest.total > 0 ? (diff / cheapest.total) * 100 : 0;
+      let verdict = '';
+      if (i.pagesPerMonth < 2000) {
+        verdict = `At this low volume, cloud is usually simpler. ${cheapest.provider.name} is cheapest at ${fmtMoney(cheapest.total)}/mo. Local hardware is hard to justify unless data must stay on-prem.`;
+      } else if (local.total < cheapest.total * 0.85) {
+        verdict = `Local ${local.gpu.name} is the cheaper route by ${fmtMoney(Math.abs(diff))}/mo (${Math.abs(savingsPct).toFixed(0)}% savings vs cheapest cloud). Consider it if you have the DevOps bandwidth and data sensitivity is high.`;
+      } else if (cheapest.total < local.total * 0.9) {
+        verdict = `Cloud is the cheaper route. ${cheapest.provider.name} costs ${fmtMoney(cheapest.total)}/mo, while the local stack is ${fmtMoney(local.total)}/mo including amortized hardware and electricity. Cloud wins on elasticity and lower upfront capex.`;
+      } else {
+        verdict = `Cloud and local are close in cost. ${cheapest.provider.name} at ${fmtMoney(cheapest.total)}/mo vs ${local.gpu.name} at ${fmtMoney(local.total)}/mo. Decide based on latency, compliance, and whether you already own the hardware.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const s = JSON.parse(this.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['pagesPerMonth','wordsPerPage','complexity','ocrPct','classification','reviewRate','reviewMinutes','reviewHourlyCost','localGpu','electricityRate','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
