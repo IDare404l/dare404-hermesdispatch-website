@@ -1,0 +1,316 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_deflection_roi.json';
+
+const title = "AI Agent Support Deflection ROI Calculator | Hermes Dispatch";
+const description = "Estimate how many support tickets an AI agent can deflect, the human support cost saved, and the net monthly ROI.";
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is ticket deflection?", a: "A deflected ticket is one that would have gone to a human support agent but is resolved by an AI agent instead. It can be a full resolution or a self-service answer that removes the need for human involvement." },
+  { q: "How is human cost saved calculated?", a: "We multiply deflected tickets by the fully-loaded human cost per ticket. Cost per ticket is based on average minutes to resolve and your fully-loaded hourly labor cost." },
+  { q: "What is the review rate?", a: "Not every deflected ticket is perfect. The review rate is the percentage of deflected tickets that still need a quick human check or correction. Review cost reduces net savings." },
+  { q: "Does this include platform or infrastructure cost?", a: "Yes — the monthly platform/tooling field covers your agent builder, vector database, observability, and other fixed stack costs. Variable API cost is entered separately." },
+  { q: "When is an AI support agent a clear ROI?", a: "The best cases are high-volume, repetitive tickets with low complexity and a short human handle time. Complex, regulated, or emotionally sensitive tickets usually need a hybrid human-in-the-loop design." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Support Deflection ROI Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-deflection-roi-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🛡️</div>
+      <h1 class="display-heading mb-4">AI Agent Support Deflection ROI Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate how many support tickets an AI agent can deflect, the human support cost saved, and the net monthly ROI.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Deflection assumptions</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly tickets</span>
+          <input id="monthlyTickets" type="number" min="0" step="100" value={defaults.monthly_tickets} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Target deflection rate (%)</span>
+          <input id="deflectionRate" type="number" min="0" max="100" step="1" value={defaults.deflection_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Avg minutes per human ticket</span>
+          <input id="minutesPerTicket" type="number" min="0" step="0.5" value={defaults.minutes_per_human_ticket} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fully-loaded hourly cost ($)</span>
+          <input id="humanHourlyCost" type="number" min="0" step="1" value={defaults.human_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Agent API cost per ticket ($)</span>
+          <input id="apiCostPerTicket" type="number" min="0" step="0.01" value={defaults.agent_api_cost_per_ticket} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review rate of deflected tickets (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="1" value={defaults.review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review minutes per ticket</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.review_minutes_per_ticket} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review hourly cost ($)</span>
+          <input id="reviewHourlyCost" type="number" min="0" step="1" value={defaults.review_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly platform / tooling cost ($)</span>
+          <input id="platformCost" type="number" min="0" step="10" value={defaults.monthly_platform_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupHourlyRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceHourlyRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection months</span>
+          <input id="projectionMonths" type="number" min="1" max="36" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Tickets deflected / month</p>
+        <p id="deflectedTickets" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human cost saved / month</p>
+        <p id="humanCostSaved" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Net monthly savings</p>
+        <p id="netMonthlySavings" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Break-even month</p>
+        <p id="breakEven" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Agent operating cost / month</p>
+        <p id="agentOperatingCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Savings per deflected ticket</p>
+        <p id="savingsPerTicket" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Annual savings</p>
+        <p id="annualSavings" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Projection table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly projection</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Month</th>
+              <th class="py-3 pr-4 text-right">Human cost saved</th>
+              <th class="py-3 pr-4 text-right">Agent cost</th>
+              <th class="py-3 pr-4 text-right">Cumulative net savings</th>
+              <th class="py-3 pr-4 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="projectionBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-escalation-cost-calculator/" class="btn-primary text-sm">Human Escalation Cost Calc →</a>
+      <a href="/tools/agent-vs-hire-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent vs Hire Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value Calc →</a>
+      <a href="/tools/agent-sla-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">SLA / Uptime Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenariosJson: JSON.stringify(scenarios) }}>
+    const scenarios = JSON.parse(scenariosJson);
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        monthlyTickets: Math.max(0, parseFloat(document.getElementById('monthlyTickets').value) || 0),
+        deflectionRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('deflectionRate').value) || 0)) / 100,
+        minutesPerTicket: Math.max(0, parseFloat(document.getElementById('minutesPerTicket').value) || 0),
+        humanHourlyCost: Math.max(0, parseFloat(document.getElementById('humanHourlyCost').value) || 0),
+        apiCostPerTicket: Math.max(0, parseFloat(document.getElementById('apiCostPerTicket').value) || 0),
+        reviewRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewRate').value) || 0)) / 100,
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        reviewHourlyCost: Math.max(0, parseFloat(document.getElementById('reviewHourlyCost').value) || 0),
+        platformCost: Math.max(0, parseFloat(document.getElementById('platformCost').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupHourlyRate: Math.max(0, parseFloat(document.getElementById('setupHourlyRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceHourlyRate: Math.max(0, parseFloat(document.getElementById('maintenanceHourlyRate').value) || 0),
+        projectionMonths: Math.max(1, Math.min(36, parseInt(document.getElementById('projectionMonths').value) || 12))
+      };
+    }
+
+    function setInputs(s) {
+      if (s.monthly_tickets !== undefined) document.getElementById('monthlyTickets').value = s.monthly_tickets;
+      if (s.deflection_rate_pct !== undefined) document.getElementById('deflectionRate').value = s.deflection_rate_pct;
+      if (s.minutes_per_human_ticket !== undefined) document.getElementById('minutesPerTicket').value = s.minutes_per_human_ticket;
+      if (s.human_hourly_cost !== undefined) document.getElementById('humanHourlyCost').value = s.human_hourly_cost;
+      if (s.agent_api_cost_per_ticket !== undefined) document.getElementById('apiCostPerTicket').value = s.agent_api_cost_per_ticket;
+      if (s.review_rate_pct !== undefined) document.getElementById('reviewRate').value = s.review_rate_pct;
+      if (s.review_minutes_per_ticket !== undefined) document.getElementById('reviewMinutes').value = s.review_minutes_per_ticket;
+      if (s.review_hourly_cost !== undefined) document.getElementById('reviewHourlyCost').value = s.review_hourly_cost;
+      if (s.monthly_platform_cost !== undefined) document.getElementById('platformCost').value = s.monthly_platform_cost;
+      if (s.setup_hours !== undefined) document.getElementById('setupHours').value = s.setup_hours;
+      if (s.setup_hourly_rate !== undefined) document.getElementById('setupHourlyRate').value = s.setup_hourly_rate;
+      if (s.maintenance_hours_month !== undefined) document.getElementById('maintenanceHours').value = s.maintenance_hours_month;
+      if (s.maintenance_hourly_rate !== undefined) document.getElementById('maintenanceHourlyRate').value = s.maintenance_hourly_rate;
+    }
+
+    function compute() {
+      const i = getInputs();
+      const deflectedTickets = i.monthlyTickets * i.deflectionRate;
+      const humanCostPerTicket = i.humanHourlyCost * (i.minutesPerTicket / 60);
+      const humanCostSaved = deflectedTickets * humanCostPerTicket;
+      const reviewCost = deflectedTickets * i.reviewRate * i.reviewHourlyCost * (i.reviewMinutes / 60);
+      const apiCost = deflectedTickets * i.apiCostPerTicket;
+      const maintenanceCost = i.maintenanceHours * i.maintenanceHourlyRate;
+      const agentOperatingCost = i.platformCost + apiCost + reviewCost + maintenanceCost;
+      const netMonthlySavings = humanCostSaved - agentOperatingCost;
+      const savingsPerTicket = deflectedTickets > 0 ? netMonthlySavings / deflectedTickets : 0;
+      const setupCost = i.setupHours * i.setupHourlyRate;
+      const breakEven = netMonthlySavings > 0 ? Math.ceil(setupCost / netMonthlySavings) : Infinity;
+      const annualSavings = netMonthlySavings * 12;
+      const roiPct = setupCost > 0 ? (netMonthlySavings * 12) / setupCost * 100 : 0;
+
+      document.getElementById('deflectedTickets').textContent = fmtNum(deflectedTickets);
+      document.getElementById('humanCostSaved').textContent = fmtMoney(humanCostSaved);
+      const netEl = document.getElementById('netMonthlySavings');
+      netEl.textContent = fmtMoney(netMonthlySavings);
+      netEl.className = 'text-2xl font-bold ' + (netMonthlySavings > 0 ? 'text-green-400' : 'text-red-400');
+      const breakEl = document.getElementById('breakEven');
+      breakEl.textContent = isFinite(breakEven) ? breakEven : '∞';
+      breakEl.className = 'text-2xl font-bold ' + (isFinite(breakEven) && breakEven <= 6 ? 'text-green-400' : isFinite(breakEven) && breakEven <= 12 ? 'text-brand-gold' : 'text-red-400');
+      document.getElementById('agentOperatingCost').textContent = fmtMoney(agentOperatingCost);
+      document.getElementById('savingsPerTicket').textContent = fmtMoney2(savingsPerTicket);
+      const annualEl = document.getElementById('annualSavings');
+      annualEl.textContent = fmtMoney(annualSavings);
+      annualEl.className = 'text-xl font-semibold ' + (annualSavings > 0 ? 'text-green-400' : 'text-red-400');
+
+      // Projection table
+      let tbody = '';
+      let cumulative = -setupCost;
+      for (let m = 1; m <= i.projectionMonths; m++) {
+        cumulative += netMonthlySavings;
+        const status = cumulative > 0
+          ? '<span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Saving</span>'
+          : '<span class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Investing</span>';
+        tbody += `<tr class="border-b border-neutral-800/50">
+          <td class="py-3 pr-4">${m}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(humanCostSaved * m)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(agentOperatingCost * m + setupCost)}</td>
+          <td class="py-3 pr-4 text-right font-mono ${cumulative > 0 ? 'text-green-400' : 'text-red-400'}">${fmtMoney(cumulative)}</td>
+          <td class="py-3 pr-4 text-center">${status}</td>
+        </tr>`;
+      }
+      document.getElementById('projectionBody').innerHTML = tbody;
+
+      // Verdict
+      let verdict = '';
+      if (netMonthlySavings <= 0) {
+        verdict = `The agent does not save money at these assumptions. Monthly operating cost (${fmtMoney(agentOperatingCost)}) exceeds human cost saved (${fmtMoney(humanCostSaved)}). Lower platform cost, raise deflection rate, or target higher-cost tickets before scaling.`;
+      } else if (isFinite(breakEven) && breakEven <= 3 && annualSavings > setupCost * 2) {
+        verdict = `Strong ROI case: deflect ${fmtNum(deflectedTickets)} tickets/month, save ${fmtMoney(netMonthlySavings)} monthly, break even in month ${breakEven}, and return ${roiPct.toFixed(0)}% on setup cost in year one. This is a good candidate for a phased rollout.`;
+      } else if (isFinite(breakEven) && breakEven <= 6) {
+        verdict = `Good ROI case: break-even in month ${breakEven} with ${fmtMoney(annualSavings)} in first-year savings. Run a 60–90 day pilot to validate the real deflection rate and review cost before removing guardrails.`;
+      } else {
+        verdict = `Marginal ROI: break-even in month ${breakEven} with ${fmtMoney(annualSavings)} annual savings. Consider tightening the ticket scope, improving self-service content, or combining the agent with a lower-cost human tier to improve margins.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setInputs(JSON.parse(btn.dataset.scenario));
+          compute();
+        });
+      });
+
+      ['monthlyTickets','deflectionRate','minutesPerTicket','humanHourlyCost','apiCostPerTicket','reviewRate','reviewMinutes','reviewHourlyCost','platformCost','setupHours','setupHourlyRate','maintenanceHours','maintenanceHourlyRate','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+        document.getElementById(id).addEventListener('change', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
