@@ -1,0 +1,414 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_outreach_cost.json';
+
+const title = "AI Agent Outreach Campaign Cost Calculator | Hermes Dispatch";
+const description = "Estimate per-contact and monthly cost for AI-powered email, SMS, LinkedIn, and voice outreach. Includes list cost, deliverability, LLM API, human SDR review, reply value, and ROI.";
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What channels can this calculator model?", a: "Email, SMS, LinkedIn automation, and AI voice calls. You set the percentage mix and per-channel rates; the calculator sums list/enrichment, platform, API, labor, and review costs." },
+  { q: "What is included in the cost per contact?", a: "List/enrichment cost, channel delivery cost (email send, SMS message, LinkedIn platform, voice minutes), LLM API cost for drafting/personalization/replies, and the prorated human SDR review time for the contacts that need it." },
+  { q: "How does the value side work?", a: "You provide a positive-reply rate and a value per positive reply (e.g., booked meeting value, subscriber LTV, reactivated customer value). The calculator multiplies these to estimate monthly gross value and net ROI." },
+  { q: "Can I compare an AI agent campaign to a human-only SDR campaign?", a: "Yes. Use the human review rate and SDR hourly rate to model the human-in-the-loop portion, and compare the total monthly cost and positive replies to a fully manual workflow using the Agent vs Human Hire Calculator." },
+  { q: "Which outreach type has the best ROI?", a: "Warm audiences (reactivation, existing subscribers, event invitees) usually have higher reply rates and lower list cost, so they break even faster. Cold outbound requires higher reply value or volume to cover list and review costs." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Outreach Campaign Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-outreach-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📢</div>
+      <h1 class="display-heading mb-4">AI Agent Outreach Campaign Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate per-contact and monthly cost for AI-powered email, SMS, LinkedIn, and voice outreach. Includes list cost, deliverability, LLM API, human SDR review, reply value, and ROI.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario preset</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-3 gap-6 mb-10">
+      <div class="lg:col-span-2 glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Campaign inputs</h2>
+        <div class="grid md:grid-cols-2 gap-5">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Monthly contacts</span>
+            <input id="monthlyContacts" type="number" min="0" step="100" value={scenarios[0].monthly_contacts} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Platform / tooling subscription ($/mo)</span>
+            <input id="platformSub" type="number" min="0" step="10" value={scenarios[0].platform_subscription} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">List cost per contact ($)</span>
+            <input id="listCost" type="number" min="0" step="0.01" value={scenarios[0].list_cost_per_contact} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Enrichment cost per contact ($)</span>
+            <input id="enrichmentCost" type="number" min="0" step="0.01" value={scenarios[0].enrichment_cost_per_contact} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+
+        <h3 class="text-lg font-bold mt-8 mb-4 text-brand-gold">Channel mix (%)</h3>
+        <div class="grid md:grid-cols-2 gap-5">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Email %</span>
+            <input id="emailPct" type="number" min="0" max="100" step="5" value={scenarios[0].channel_mix.email} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Email send cost ($)</span>
+            <input id="emailSendCost" type="number" min="0" step="0.0001" value={scenarios[0].email_platform_cost_per_send} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">SMS %</span>
+            <input id="smsPct" type="number" min="0" max="100" step="5" value={scenarios[0].channel_mix.sms} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">SMS cost per message ($)</span>
+            <input id="smsCost" type="number" min="0" step="0.0001" value={scenarios[0].sms_cost_per_message} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">LinkedIn %</span>
+            <input id="linkedinPct" type="number" min="0" max="100" step="5" value={scenarios[0].channel_mix.linkedin} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">LinkedIn platform cost ($/mo)</span>
+            <input id="linkedinCost" type="number" min="0" step="10" value={scenarios[0].linkedin_platform_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Voice %</span>
+            <input id="voicePct" type="number" min="0" max="100" step="5" value={scenarios[0].channel_mix.voice} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Voice cost per minute ($)</span>
+            <input id="voiceMinuteCost" type="number" min="0" step="0.01" value={scenarios[0].voice_cost_per_minute} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block md:col-span-2">
+            <span class="text-neutral-400 text-sm">Average voice call minutes</span>
+            <input id="voiceMinutes" type="number" min="0" step="0.1" value={scenarios[0].avg_voice_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+
+        <h3 class="text-lg font-bold mt-8 mb-4 text-brand-gold">Agent & labor</h3>
+        <div class="grid md:grid-cols-2 gap-5">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">LLM API cost per contact ($)</span>
+            <input id="llmCost" type="number" min="0" step="0.001" value={scenarios[0].llm_cost_per_contact} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+            <input id="reviewPct" type="number" min="0" max="100" step="1" value={scenarios[0].human_review_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Review minutes per contact</span>
+            <input id="reviewMinutes" type="number" min="0" step="0.5" value={scenarios[0].human_review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">SDR / reviewer hourly rate ($)</span>
+            <input id="sdrRate" type="number" min="0" step="5" value={scenarios[0].sdr_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Setup hours</span>
+            <input id="setupHours" type="number" min="0" step="1" value={scenarios[0].setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+            <input id="setupRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+            <input id="maintenanceHours" type="number" min="0" step="0.5" value={scenarios[0].maintenance_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+            <input id="maintenanceRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Value inputs</h2>
+        <div class="space-y-4">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Positive reply rate (%)</span>
+            <input id="replyPct" type="number" min="0" max="100" step="0.1" value={scenarios[0].positive_reply_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Value per positive reply ($)</span>
+            <input id="replyValue" type="number" min="0" step="10" value={scenarios[0].value_per_positive_reply} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <p class="text-xs text-neutral-500 mt-2">Positive reply value can be a booked meeting pipeline value, subscriber LTV, reactivation ARPU, or candidate placement value.</p>
+        </div>
+
+        <div class="mt-8 p-4 rounded-xl bg-neutral-900/50 border border-neutral-800">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cost per contact</p>
+          <p id="costPerContact" class="text-2xl font-bold text-white">—</p>
+        </div>
+        <div class="mt-4 p-4 rounded-xl bg-neutral-900/50 border border-neutral-800">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cost per positive reply</p>
+          <p id="costPerReply" class="text-2xl font-bold text-white">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly campaign cost</p>
+        <p id="monthlyCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly positive replies</p>
+        <p id="monthlyReplies" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly gross value</p>
+        <p id="monthlyValue" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Net monthly ROI</p>
+        <p id="monthlyRoi" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost breakdown</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Category</th>
+              <th class="py-3 pr-4 text-right">Monthly cost</th>
+              <th class="py-3 pr-4 text-right">% of cost</th>
+            </tr>
+          </thead>
+          <tbody id="breakdownBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">12-month projection</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Month</th>
+              <th class="py-3 pr-4 text-right">Cost</th>
+              <th class="py-3 pr-4 text-right">Value</th>
+              <th class="py-3 pr-4 text-right">Net</th>
+              <th class="py-3 pr-4 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="projectionBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-output-value-calculator/" class="btn-primary text-sm">Agent Output Value Calc →</a>
+      <a href="/tools/ai-voice-agent-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI Voice Agent Cost Calc →</a>
+      <a href="/tools/agent-vs-hire-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent vs Hire Calc →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+    </div>
+
+    <p class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenariosJson: JSON.stringify(scenarios), defaultsJson: JSON.stringify(defaults) }}>
+    const scenarios = JSON.parse(scenariosJson);
+    const defaults = JSON.parse(defaultsJson);
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtPct = n => (n * 100).toFixed(1) + '%';
+
+    function clampPct(v) { return Math.min(100, Math.max(0, v)); }
+
+    function getInputs() {
+      return {
+        monthlyContacts: Math.max(0, parseFloat(document.getElementById('monthlyContacts').value) || 0),
+        platformSub: Math.max(0, parseFloat(document.getElementById('platformSub').value) || 0),
+        listCost: Math.max(0, parseFloat(document.getElementById('listCost').value) || 0),
+        enrichmentCost: Math.max(0, parseFloat(document.getElementById('enrichmentCost').value) || 0),
+        emailPct: clampPct(parseFloat(document.getElementById('emailPct').value) || 0) / 100,
+        emailSendCost: Math.max(0, parseFloat(document.getElementById('emailSendCost').value) || 0),
+        smsPct: clampPct(parseFloat(document.getElementById('smsPct').value) || 0) / 100,
+        smsCost: Math.max(0, parseFloat(document.getElementById('smsCost').value) || 0),
+        linkedinPct: clampPct(parseFloat(document.getElementById('linkedinPct').value) || 0) / 100,
+        linkedinCost: Math.max(0, parseFloat(document.getElementById('linkedinCost').value) || 0),
+        voicePct: clampPct(parseFloat(document.getElementById('voicePct').value) || 0) / 100,
+        voiceMinuteCost: Math.max(0, parseFloat(document.getElementById('voiceMinuteCost').value) || 0),
+        voiceMinutes: Math.max(0, parseFloat(document.getElementById('voiceMinutes').value) || 0),
+        llmCost: Math.max(0, parseFloat(document.getElementById('llmCost').value) || 0),
+        reviewPct: clampPct(parseFloat(document.getElementById('reviewPct').value) || 0) / 100,
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        sdrRate: Math.max(0, parseFloat(document.getElementById('sdrRate').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupRate: Math.max(0, parseFloat(document.getElementById('setupRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceRate: Math.max(0, parseFloat(document.getElementById('maintenanceRate').value) || 0),
+        replyPct: clampPct(parseFloat(document.getElementById('replyPct').value) || 0) / 100,
+        replyValue: Math.max(0, parseFloat(document.getElementById('replyValue').value) || 0),
+      };
+    }
+
+    function compute() {
+      const i = getInputs();
+      const totalMix = i.emailPct + i.smsPct + i.linkedinPct + i.voicePct;
+      const mixScale = totalMix > 0 ? 1 / totalMix : 0;
+      const emailContacts = i.monthlyContacts * i.emailPct * mixScale;
+      const smsContacts = i.monthlyContacts * i.smsPct * mixScale;
+      const linkedinContacts = i.monthlyContacts * i.linkedinPct * mixScale;
+      const voiceContacts = i.monthlyContacts * i.voicePct * mixScale;
+
+      const listCost = i.monthlyContacts * (i.listCost + i.enrichmentCost);
+      const platformCost = i.platformSub;
+      const emailCost = emailContacts * i.emailSendCost;
+      const smsCost = smsContacts * i.smsCost;
+      const linkedinCostFixed = i.linkedinCost;
+      const voiceCost = voiceContacts * i.voiceMinutes * i.voiceMinuteCost;
+      const channelCost = emailCost + smsCost + linkedinCostFixed + voiceCost;
+      const llmCost = i.monthlyContacts * i.llmCost;
+      const reviewHours = i.monthlyContacts * i.reviewPct * (i.reviewMinutes / 60);
+      const reviewCost = reviewHours * i.sdrRate;
+      const maintenanceCost = i.maintenanceHours * i.maintenanceRate;
+      const monthlyCost = listCost + platformCost + channelCost + llmCost + reviewCost + maintenanceCost;
+      const setupCost = i.setupHours * i.setupRate;
+
+      const monthlyReplies = i.monthlyContacts * i.replyPct;
+      const monthlyValue = monthlyReplies * i.replyValue;
+      const netMonthly = monthlyValue - monthlyCost;
+      const roi = monthlyCost > 0 ? (netMonthly / monthlyCost) : 0;
+      const costPerContact = i.monthlyContacts > 0 ? monthlyCost / i.monthlyContacts : 0;
+      const costPerReply = monthlyReplies > 0 ? monthlyCost / monthlyReplies : 0;
+
+      document.getElementById('costPerContact').textContent = fmtMoney2(costPerContact);
+      document.getElementById('costPerReply').textContent = fmtMoney2(costPerReply);
+      document.getElementById('monthlyCost').textContent = fmtMoney(monthlyCost);
+      document.getElementById('monthlyReplies').textContent = Math.round(monthlyReplies).toLocaleString();
+      document.getElementById('monthlyValue').textContent = fmtMoney(monthlyValue);
+      const roiEl = document.getElementById('monthlyRoi');
+      roiEl.textContent = fmtPct(roi);
+      roiEl.className = 'text-2xl font-bold ' + (roi > 0 ? 'text-green-400' : 'text-red-400');
+
+      // Breakdown
+      const categories = [
+        { name: 'List + enrichment', value: listCost },
+        { name: 'Platform subscription', value: platformCost },
+        { name: 'Channel delivery', value: channelCost },
+        { name: 'LLM API', value: llmCost },
+        { name: 'Human review', value: reviewCost },
+        { name: 'Maintenance', value: maintenanceCost },
+      ];
+      let tbody = '';
+      categories.forEach(c => {
+        const pct = monthlyCost > 0 ? (c.value / monthlyCost) : 0;
+        tbody += `<tr class="border-b border-neutral-800/50">
+          <td class="py-3 pr-4">${c.name}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(c.value)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtPct(pct)}</td>
+        </tr>`;
+      });
+      document.getElementById('breakdownBody').innerHTML = tbody;
+
+      // Projection
+      let proj = '';
+      let cumulative = -setupCost;
+      for (let m = 1; m <= 12; m++) {
+        cumulative += netMonthly;
+        const status = cumulative > 0
+          ? '<span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Profitable</span>'
+          : '<span class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Paying back</span>';
+        proj += `<tr class="border-b border-neutral-800/50">
+          <td class="py-3 pr-4">${m}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(monthlyCost)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(monthlyValue)}</td>
+          <td class="py-3 pr-4 text-right font-mono ${cumulative > 0 ? 'text-green-400' : 'text-red-400'}">${fmtMoney(cumulative)}</td>
+          <td class="py-3 pr-4 text-center">${status}</td>
+        </tr>`;
+      }
+      document.getElementById('projectionBody').innerHTML = proj;
+
+      // Verdict
+      let verdict = '';
+      if (roi > 0.5) {
+        verdict = `Strong campaign economics: ${fmtMoney(netMonthly)} net value per month on ${fmtMoney(monthlyCost)} of spend, a ${fmtPct(roi)} ROI. Cost per positive reply is ${fmtMoney2(costPerReply)}. This is a good candidate to scale if reply quality holds. Include the voice/SMS channels with the highest compliance risk only after testing. Compare with the Agent vs Human Hire Calculator if you are replacing an SDR team.`;
+      } else if (roi > 0) {
+        verdict = `Marginal but positive: ${fmtMoney(netMonthly)} net value per month and ${fmtPct(roi)} ROI. Cost per positive reply is ${fmtMoney2(costPerReply)}. Improve by raising reply rate, cutting list cost, or shifting volume toward lower-cost email/LinkedIn and away from voice/SMS unless voice has outsized reply value. Run a 30-day pilot before scaling.`;
+      } else {
+        verdict = `Campaign is not profitable at these assumptions: ${fmtMoney(monthlyCost)} monthly cost vs ${fmtMoney(monthlyValue)} value, a ${fmtPct(roi)} ROI. To break even, raise reply rate, increase value per reply, reduce list/enrichment cost, or lower review overhead. Use the Agent Output Value Calculator to test what each reply must be worth.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          document.getElementById('monthlyContacts').value = s.monthly_contacts;
+          document.getElementById('platformSub').value = s.platform_subscription;
+          document.getElementById('listCost').value = s.list_cost_per_contact;
+          document.getElementById('enrichmentCost').value = s.enrichment_cost_per_contact;
+          document.getElementById('emailPct').value = s.channel_mix.email;
+          document.getElementById('emailSendCost').value = s.email_platform_cost_per_send;
+          document.getElementById('smsPct').value = s.channel_mix.sms;
+          document.getElementById('smsCost').value = s.sms_cost_per_message;
+          document.getElementById('linkedinPct').value = s.channel_mix.linkedin;
+          document.getElementById('linkedinCost').value = s.linkedin_platform_monthly;
+          document.getElementById('voicePct').value = s.channel_mix.voice;
+          document.getElementById('voiceMinuteCost').value = s.voice_cost_per_minute;
+          document.getElementById('voiceMinutes').value = s.avg_voice_minutes;
+          document.getElementById('llmCost').value = s.llm_cost_per_contact;
+          document.getElementById('reviewPct').value = s.human_review_pct;
+          document.getElementById('reviewMinutes').value = s.human_review_minutes;
+          document.getElementById('sdrRate').value = s.sdr_hourly_rate;
+          document.getElementById('setupHours').value = s.setup_hours;
+          document.getElementById('maintenanceHours').value = s.maintenance_hours;
+          document.getElementById('replyPct').value = s.positive_reply_pct;
+          document.getElementById('replyValue').value = s.value_per_positive_reply;
+          compute();
+        });
+      });
+
+      const inputIds = ['monthlyContacts','platformSub','listCost','enrichmentCost','emailPct','emailSendCost','smsPct','smsCost','linkedinPct','linkedinCost','voicePct','voiceMinuteCost','voiceMinutes','llmCost','reviewPct','reviewMinutes','sdrRate','setupHours','setupRate','maintenanceHours','maintenanceRate','replyPct','replyValue'];
+      inputIds.forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
