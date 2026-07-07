@@ -1,0 +1,343 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+
+const title = "AI Agent Domain / Task Fit Selector — Pick the Right Agent Architecture";
+const description = "Describe a business task and get the right AI agent architecture: RAG, coding agent, multi-agent, workflow, voice, browser, or data extraction.";
+
+const domains = [
+  {
+    slug: "customer-support",
+    name: "Customer support",
+    icon: "🎧",
+    description: "Answer user questions, solve tickets, hand off to humans when needed.",
+    fit: "rag-workflow",
+    why: "Needs a knowledge base for grounded answers, a decision layer for simple vs complex issues, and an escalation path.",
+    stack: "RAG retriever (Pinecone/Qdrant) + GPT-4o mini/Claude 3 Haiku + human escalation router",
+    benchmark: "AgentBench (multi-turn), customer-support-specific evals",
+    gotchas: "Hallucinated refund/policy answers; keep a human-in-the-loop for high-stakes replies."
+  },
+  {
+    slug: "coding-assistant",
+    name: "Coding / dev assistance",
+    icon: "💻",
+    description: "Generate, refactor, debug, review, and test code.",
+    fit: "coding-agent",
+    why: "Needs long context, tool use for file edits/terminal/tests, and iterative self-correction.",
+    stack: "Claude 3.5 Sonnet / o3-mini + GitHub integration + test runner + lint tools",
+    benchmark: "SWE-bench, HumanEval, MBPP, LiveBench",
+    gotchas: "Be careful with auto-execution; sandbox every action that touches production."
+  },
+  {
+    slug: "content-marketing",
+    name: "Content & marketing automation",
+    icon: "✍️",
+    description: "Draft newsletters, ads, product descriptions, and social posts from briefs.",
+    fit: "workflow",
+    why: "Highly deterministic multi-step pipeline with review gates; not much exploration needed.",
+    stack: "LangGraph / n8n + GPT-4o + brand voice memory + human approval step",
+    benchmark: "Custom quality rubric + SEO/AEO checks",
+    gotchas: "Generic output without a strong style guide and examples; always review before publishing."
+  },
+  {
+    slug: "sales-sdr",
+    name: "Sales / SDR outreach",
+    icon: "📈",
+    description: "Research prospects, draft personalized emails, schedule meetings.",
+    fit: "multi-agent",
+    why: "Split research, copywriting, and send-time optimization across specialist agents.",
+    stack: "CrewAI / AutoGen + lead-research agent + writer agent + compliance reviewer",
+    benchmark: "Reply-rate A/B test, lead-quality score",
+    gotchas: "Spam regulations and low-quality personalization can damage sender reputation."
+  },
+  {
+    slug: "data-extraction",
+    name: "Document data extraction",
+    icon: "📄",
+    description: "Pull structured fields from PDFs, invoices, forms, and contracts.",
+    fit: "data-extraction",
+    why: "Structured output matters more than reasoning; accuracy and schema adherence are key.",
+    stack: "GPT-4o / Claude 3 Haiku + Pydantic output + vision OCR + validation rules",
+    benchmark: "F1 score per field, schema conformance",
+    gotchas: "PDF layout variation breaks extraction; add post-processing validation and confidence thresholds."
+  },
+  {
+    slug: "research-intelligence",
+    name: "Research & competitive intelligence",
+    icon: "🔬",
+    description: "Search the web, summarize reports, track competitors.",
+    fit: "browser-research",
+    why: "Needs web access, multi-page synthesis, and source citation for trust.",
+    stack: "Browser-use / Playwright agent + Perplexity-style retriever + citation memory",
+    benchmark: "GAIA, WebArena, custom citation accuracy",
+    gotchas: "Stale or wrong sources; always verify against primary sources before acting."
+  },
+  {
+    slug: "voice-assistant",
+    name: "Voice / phone agent",
+    icon: "📞",
+    description: "Handle inbound calls, scheduling, reminders, and basic Q&A.",
+    fit: "voice",
+    why: "Low-latency audio pipeline and interruption handling dominate model choice.",
+    stack: "Bland / Vapi / Retell + Twilio + appointment booking API + fallback to human",
+    benchmark: "Call completion rate, customer satisfaction, cost per minute",
+    gotchas: "Latency and transcription errors; keep complex flows short and confirm actions verbally."
+  },
+  {
+    slug: "process-automation",
+    name: "Back-office process automation",
+    icon: "⚙️",
+    description: "Approve expenses, reconcile records, trigger ERP actions.",
+    fit: "workflow",
+    why: "Rules-heavy, auditable steps with clear inputs/outputs and approval gates.",
+    stack: "n8n / LangGraph + database tools + approval notifications + audit log",
+    benchmark: "Error rate, cycle time, cost per transaction",
+    gotchas: "Do not give agents write access to financial systems without dual approval and logs."
+  },
+  {
+    slug: "it-helpdesk",
+    name: "Internal IT helpdesk",
+    icon: "🛠️",
+    description: "Reset passwords, diagnose tickets, provision accounts.",
+    fit: "rag-workflow",
+    why: "Most issues are known; a knowledge base plus safe ticket-creation tools covers most volume.",
+    stack: "RAG over runbooks + GPT-4o mini + ServiceNow/Jira tools + human escalation",
+    benchmark: "First-contact resolution, mean time to resolve",
+    gotchas: "Privileged actions must require manager approval and be fully logged."
+  },
+  {
+    slug: "compliance-review",
+    name: "Compliance & legal review",
+    icon: "⚖️",
+    description: "Check contracts, policies, and communications against rules.",
+    fit: "rag-workflow",
+    why: "Heavy reliance on a specific corpus of regulations or policies; low tolerance for hallucination.",
+    stack: "Claude 3.5 Sonnet + vectorized policy corpus + source citations + human sign-off",
+    benchmark: "Recall of violations, false-positive rate",
+    gotchas: "Never use as final legal advice; flag for human review by default."
+  }
+];
+
+const architectures = {
+  "rag-workflow": {
+    label: "RAG Workflow Agent",
+    summary: "Retrieval first, generation second. Best for question-answering grounded in private documents.",
+    when: "Knowledge base exists, answers are factual, low tolerance for hallucination.",
+    avoid: "Open-ended creative tasks or actions requiring multi-step planning.",
+    tools: ["vector DB", "embedding model", "reranker", "guardrails", "human escalation"],
+    costLevel: "low-medium"
+  },
+  "coding-agent": {
+    label: "Coding Agent",
+    summary: "Long-context reasoning with file/terminal/test tools for software engineering tasks.",
+    when: "Code generation, debugging, refactoring, or repo-wide changes.",
+    avoid: "Non-code tasks or environments without sandboxed execution.",
+    tools: ["repo access", "terminal", "test runner", "linter", "code review guard"],
+    costLevel: "medium-high"
+  },
+  "multi-agent": {
+    label: "Multi-Agent Team",
+    summary: "Specialist agents collaborate under an orchestrator. Good for complex end-to-end workflows.",
+    when: "Multiple distinct skills needed, parallel work, or role specialization helps.",
+    avoid: "Simple single-step tasks where orchestration overhead is not worth it.",
+    tools: ["orchestrator", "agent message bus", "shared memory", "human supervisor"],
+    costLevel: "high"
+  },
+  "workflow": {
+    label: "Deterministic Workflow",
+    summary: "Explicit DAG of steps with LLM calls at decision points. Most predictable and auditable.",
+    when: "Process is repeatable, inputs/outputs are structured, compliance matters.",
+    avoid: "Tasks requiring exploration or adaptation outside the defined flow.",
+    tools: ["workflow engine", "structured output parser", "approval gates", "audit log"],
+    costLevel: "low"
+  },
+  "voice": {
+    label: "Voice Agent",
+    summary: "Real-time speech pipeline optimized for latency, barge-in, and turn-taking.",
+    when: "Phone or voice UI with simple, bounded flows.",
+    avoid: "Complex research or long-form content creation over voice.",
+    tools: ["STT/TTS", "voice orchestrator", "call router", "latency monitor"],
+    costLevel: "medium"
+  },
+  "browser-research": {
+    label: "Browser / Research Agent",
+    summary: "Autonomous web browsing and synthesis. Good for up-to-date intelligence.",
+    when: "Answers depend on live web data and multi-source synthesis.",
+    avoid: "Tasks where primary sources are already in your knowledge base.",
+    tools: ["browser automation", "search API", "citation tracker", "content filter"],
+    costLevel: "medium-high"
+  },
+  "data-extraction": {
+    label: "Structured Data Extraction Agent",
+    summary: "Extracts fields from documents into a schema. Accuracy and validation over reasoning.",
+    when: "Inputs are documents or images; output must match a fixed schema.",
+    avoid: "Tasks needing interpretation beyond explicit fields.",
+    tools: ["vision model", "OCR", "schema validator", "confidence scorer"],
+    costLevel: "low-medium"
+  }
+};
+
+const faqs = [
+  { q: "How do I choose between RAG and a workflow agent?", a: "Use RAG when the task is answering questions from a document corpus. Use a workflow when the task is a repeatable process with defined steps, approvals, and structured outputs." },
+  { q: "When is a multi-agent system worth the complexity?", a: "Multi-agent is worth it when different parts of the task need different models, tools, or roles, and when those agents can work in parallel or need to negotiate. For simple tasks it adds cost and failure modes." },
+  { q: "Can one agent architecture handle every use case?", a: "No. A single chatbot often fails at long processes, structured extraction, and real-time voice. Pick the architecture that matches the input source, reasoning depth, and output structure of the task." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Domain / Task Fit Selector" description={description} url="https://hermesdispatch.dev/tools/agent-task-fit-selector/" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🎯</div>
+      <h1 class="display-heading mb-4">AI Agent Domain / Task Fit Selector</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Pick a business domain to see the agent architecture, stack, benchmark, and common gotchas that fit best.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Select a business task</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {domains.map((d) => (
+          <button type="button" data-slug={d.slug} class="domain-card glass-card rounded-xl p-5 text-left hover:border-brand-gold/50 transition-all">
+            <div class="text-2xl mb-2">{d.icon}</div>
+            <h3 class="font-semibold text-white">{d.name}</h3>
+            <p class="text-sm text-neutral-400 mt-1">{d.description}</p>
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section id="result" class="hidden">
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20">
+          <div class="flex items-center gap-4 mb-6">
+            <div id="resIcon" class="text-4xl"></div>
+            <div>
+              <h2 id="resDomain" class="text-2xl font-bold"></h2>
+              <p id="resWhy" class="text-neutral-400"></p>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Recommended architecture</p>
+              <p id="resArch" class="text-lg font-bold text-brand-gold"></p>
+            </div>
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Typical cost level</p>
+              <p id="resCost" class="text-lg font-bold text-brand-gold"></p>
+            </div>
+          </div>
+
+          <div class="space-y-4 mb-6">
+            <div>
+              <h3 class="font-bold text-brand-gold">Suggested stack</h3>
+              <p id="resStack" class="text-neutral-300"></p>
+            </div>
+            <div>
+              <h3 class="font-bold text-brand-gold">Benchmark / KPI</h3>
+              <p id="resBenchmark" class="text-neutral-300"></p>
+            </div>
+            <div>
+              <h3 class="font-bold text-brand-gold">Common gotchas</h3>
+              <p id="resGotchas" class="text-neutral-300"></p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <a href="/tools/agent-stack-builder/" class="btn-primary text-sm">Build the stack →</a>
+            <a href="/tools/agent-benchmark-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Find benchmarks →</a>
+            <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compare API costs →</a>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20 h-fit">
+          <h3 id="archTitle" class="text-xl font-bold mb-3 text-brand-gold"></h3>
+          <p id="archSummary" class="text-neutral-300 text-sm mb-4"></p>
+          <div class="space-y-3 text-sm">
+            <div>
+              <p class="text-neutral-500 uppercase text-xs">When to use</p>
+              <p id="archWhen" class="text-neutral-300"></p>
+            </div>
+            <div>
+              <p class="text-neutral-500 uppercase text-xs">When to avoid</p>
+              <p id="archAvoid" class="text-neutral-300"></p>
+            </div>
+            <div>
+              <p class="text-neutral-500 uppercase text-xs">Typical tools</p>
+              <ul id="archTools" class="list-disc list-inside text-neutral-300"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mt-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group">
+            <summary class="font-semibold cursor-pointer text-white">{f.q}</summary>
+            <p class="text-neutral-400 text-sm mt-2">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <script define:vars={{ domains: JSON.stringify(domains), architectures: JSON.stringify(architectures) }}>
+    const domainData = JSON.parse(domains);
+    const archData = JSON.parse(architectures);
+    const cards = document.querySelectorAll('.domain-card');
+    const result = document.getElementById('result');
+
+    function select(slug) {
+      const d = domainData.find(x => x.slug === slug);
+      if (!d) return;
+      const a = archData[d.fit];
+
+      cards.forEach(c => c.classList.remove('border-brand-gold'));
+      const active = document.querySelector(`[data-slug="${slug}"]`);
+      if (active) active.classList.add('border-brand-gold');
+
+      document.getElementById('resIcon').textContent = d.icon;
+      document.getElementById('resDomain').textContent = d.name;
+      document.getElementById('resWhy').textContent = d.why;
+      document.getElementById('resArch').textContent = a?.label || d.fit;
+      document.getElementById('resCost').textContent = a?.costLevel ? a.costLevel.charAt(0).toUpperCase() + a.costLevel.slice(1) : '—';
+      document.getElementById('resStack').textContent = d.stack;
+      document.getElementById('resBenchmark').textContent = d.benchmark;
+      document.getElementById('resGotchas').textContent = d.gotchas;
+
+      document.getElementById('archTitle').textContent = a?.label || '';
+      document.getElementById('archSummary').textContent = a?.summary || '';
+      document.getElementById('archWhen').textContent = a?.when || '';
+      document.getElementById('archAvoid').textContent = a?.avoid || '';
+      document.getElementById('archTools').innerHTML = (a?.tools || []).map(t => `<li>${t}</li>`).join('');
+
+      result.classList.remove('hidden');
+      result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => select(card.dataset.slug));
+    });
+
+    if (cards.length) select(cards[0].dataset.slug);
+  </script>
+
+  <AgentCodeBlock
+    toolName="AI Agent Domain / Task Fit Selector"
+    toolPath="/tools/agent-task-fit-selector/"
+    description="Copy-paste Hermes Agent script for agent task fit selector."
+    scriptPath="/hermes-tools/agent_task_fit_selector.py"
+    locked={false}
+  />
+</Layout>
