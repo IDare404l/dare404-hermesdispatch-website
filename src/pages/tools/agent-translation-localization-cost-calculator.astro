@@ -1,0 +1,384 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_translation_localization_cost.json';
+
+const title = "AI Agent Translation / Localization Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost to translate or localize AI agent outputs across NMT and LLM providers, language complexity, human review tiers, glossaries, and content types.";
+const providers = data.providers;
+const complexities = data.language_complexity;
+const reviewTiers = data.human_review_tiers;
+const contentTypes = data.content_types;
+const glossaries = data.glossary_storage;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "When is an LLM cheaper than a traditional translation API?", a: "LLM translation becomes cost-competitive for short, context-sensitive agent outputs and when you need style, tone, or terminology adaptation in one call. For high-volume generic text, NMT APIs like DeepL or Google Translate are usually cheaper per word." },
+  { q: "How do you convert between characters and tokens?", a: "The calculator uses a default of ~5.5 characters per word and ~4 characters per token for LLM routes. You can override the characters-per-word input if your content is shorter or longer than average." },
+  { q: "What does human review cost include?", a: "Post-editing, linguistic QA, terminology validation, and domain sign-off. Review minutes per 1,000 words vary by tier from light post-edit to certified/legal review." },
+  { q: "Why factor in language complexity?", a: "Character-based, morphologically rich, or low-resource languages generally need more LLM tokens and longer human review cycles. The complexity multiplier adjusts both translation quality assumptions and review overhead." },
+  { q: "Does this include document formatting or DTP?", a: "No. The estimate covers translation, review, glossary management, and project maintenance. Formatting, engineering, and desktop publishing should be estimated separately." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Translation / Localization Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-translation-localization-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🌐</div>
+      <h1 class="display-heading mb-4">AI Agent Translation / Localization Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly cost to translate or localize AI agent outputs across NMT and LLM providers, language complexity, human review tiers, glossaries, and content types.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Translation workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Units per month</span>
+          <input id="unitsPerMonth" type="number" min="1" step="10" value={defaults.units_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Content type</span>
+          <select id="contentType" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {contentTypes.map(ct => <option value={JSON.stringify(ct)} selected={ct.slug === defaults.content_type}>{ct.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Target languages</span>
+          <input id="targetLanguages" type="number" min="1" step="1" value={defaults.target_languages} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Translation provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Language complexity</span>
+          <select id="complexity" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {complexities.map(c => <option value={JSON.stringify(c)} selected={c.slug === defaults.complexity}>{c.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review tier</span>
+          <select id="reviewTier" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {reviewTiers.map(r => <option value={JSON.stringify(r)} selected={r.slug === defaults.review_tier}>{r.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review (% of units)</span>
+          <input id="reviewPct" type="number" min="0" max="100" step="5" value={defaults.review_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Glossary / style guide</span>
+          <select id="glossary" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {glossaries.map(g => <option value={JSON.stringify(g)} selected={g.slug === defaults.glossary}>{g.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Characters per word</span>
+          <input id="charsPerWord" type="number" min="1" step="0.1" value={defaults.chars_per_word} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupHourlyRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceHourlyRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per language / mo</p>
+        <p id="costPerLanguage" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per unit translated</p>
+        <p id="costPerUnit" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1k words</p>
+        <p id="costPer1kWords" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="totalMonthly" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Translation API / LLM cost / mo</p>
+        <p id="translationCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review cost / mo</p>
+        <p id="reviewCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Glossary & project maintenance / mo</p>
+        <p id="maintenanceCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total words / month</p>
+        <p id="totalWords" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Review hours / month</p>
+        <p id="reviewHours" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Period cost</p>
+        <p id="periodCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison (same workload)</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4 text-right">Translation cost / mo</th>
+            <th class="py-3 pr-4 text-right">Review cost / mo</th>
+            <th class="py-3 pr-4 text-right">Total / mo</th>
+          </tr>
+        </thead>
+        <tbody id="providerComparison" class="text-neutral-200">
+          <tr><td class="py-3 pr-4 text-neutral-500" colspan="4">Run a calculation to see comparison.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/agent-per-user-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Per-User Cost Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value Calc →</a>
+      <a href="/tools/agent-multimodal-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Multi-Modal Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney3 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getProvider() { return JSON.parse(document.getElementById('provider').value); }
+    function getComplexity() { return JSON.parse(document.getElementById('complexity').value); }
+    function getReviewTier() { return JSON.parse(document.getElementById('reviewTier').value); }
+    function getContentType() { return JSON.parse(document.getElementById('contentType').value); }
+    function getGlossary() { return JSON.parse(document.getElementById('glossary').value); }
+
+    function getInputs() {
+      return {
+        unitsPerMonth: Math.max(1, parseFloat(document.getElementById('unitsPerMonth').value) || 1),
+        targetLanguages: Math.max(1, parseFloat(document.getElementById('targetLanguages').value) || 1),
+        reviewPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewPct').value) || 0)),
+        charsPerWord: Math.max(1, parseFloat(document.getElementById('charsPerWord').value) || 5.5),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupHourlyRate: Math.max(0, parseFloat(document.getElementById('setupHourlyRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceHourlyRate: Math.max(0, parseFloat(document.getElementById('maintenanceHourlyRate').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.units_per_month !== undefined) document.getElementById('unitsPerMonth').value = obj.units_per_month;
+      if (obj.target_languages !== undefined) document.getElementById('targetLanguages').value = obj.target_languages;
+      if (obj.review_pct !== undefined) document.getElementById('reviewPct').value = obj.review_pct;
+      if (obj.chars_per_word !== undefined) document.getElementById('charsPerWord').value = obj.chars_per_word;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupHourlyRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_month;
+      if (obj.maintenance_hourly_rate !== undefined) document.getElementById('maintenanceHourlyRate').value = obj.maintenance_hourly_rate;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+      if (obj.provider !== undefined) setSelectBySlug('provider', obj.provider);
+      if (obj.complexity !== undefined) setSelectBySlug('complexity', obj.complexity);
+      if (obj.review_tier !== undefined) setSelectBySlug('reviewTier', obj.review_tier);
+      if (obj.content_type !== undefined) setSelectBySlug('contentType', obj.content_type);
+      if (obj.glossary !== undefined) setSelectBySlug('glossary', obj.glossary);
+    }
+
+    function setSelectBySlug(id, slug) {
+      const sel = document.getElementById(id);
+      for (let i = 0; i < sel.options.length; i++) {
+        const opt = JSON.parse(sel.options[i].value);
+        if (opt.slug === slug) { sel.selectedIndex = i; break; }
+      }
+    }
+
+    function calcWorkload(provider, complexity, contentType, inps) {
+      const wordsPerUnit = contentType.words_per_unit;
+      const totalUnits = inps.unitsPerMonth * inps.targetLanguages;
+      const totalWords = totalUnits * wordsPerUnit;
+      const totalChars = totalWords * inps.charsPerWord;
+
+      let translationCost = 0;
+      if (provider.cost_per_1m_chars > 0) {
+        translationCost = (totalChars / 1_000_000) * provider.cost_per_1m_chars;
+      } else if (provider.input_per_1k_tokens !== undefined) {
+        // LLM route: input = source + context, output = translated target
+        const inputCharsPerUnit = wordsPerUnit * inps.charsPerWord + (contentType.context_chars_per_unit || 0);
+        const outputCharsPerUnit = wordsPerUnit * inps.charsPerWord * complexity.llm_quality_multiplier;
+        const inputTokens = (totalUnits * inputCharsPerUnit) / provider.chars_per_input_token;
+        const outputTokens = (totalUnits * outputCharsPerUnit) / provider.chars_per_output_token;
+        translationCost = (inputTokens / 1000) * provider.input_per_1k_tokens + (outputTokens / 1000) * provider.output_per_1k_tokens;
+      }
+      return { totalUnits, totalWords, totalChars, translationCost };
+    }
+
+    function calcReviewCost(totalWords, reviewTier, complexity, reviewPct) {
+      const reviewedWords = totalWords * (reviewPct / 100);
+      const thousands = reviewedWords / 1000;
+      const hours = thousands * (reviewTier.review_minutes_per_1000_words / 60) * complexity.human_review_multiplier;
+      return { cost: hours * reviewTier.hourly_rate, hours };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const provider = getProvider();
+      const complexity = getComplexity();
+      const reviewTier = getReviewTier();
+      const contentType = getContentType();
+      const glossary = getGlossary();
+
+      const workload = calcWorkload(provider, complexity, contentType, inps);
+      const review = calcReviewCost(workload.totalWords, reviewTier, complexity, inps.reviewPct);
+
+      const setupCost = inps.setupHours * inps.setupHourlyRate;
+      const maintenanceCost = (inps.maintenanceHours * inps.maintenanceHourlyRate) + (glossary.monthly_hours * inps.maintenanceHourlyRate);
+      const setupAmortized = setupCost / inps.projectionMonths;
+
+      const totalMonthly = workload.translationCost + review.cost + maintenanceCost + setupAmortized;
+      const periodCost = totalMonthly * inps.projectionMonths;
+      const costPerLanguage = totalMonthly / inps.targetLanguages;
+      const costPerUnit = totalMonthly / (inps.unitsPerMonth * inps.targetLanguages);
+      const costPer1kWords = workload.totalWords > 0 ? (totalMonthly / workload.totalWords) * 1000 : 0;
+
+      document.getElementById('costPerLanguage').textContent = fmtMoney(costPerLanguage);
+      document.getElementById('costPerUnit').textContent = fmtMoney3(costPerUnit);
+      document.getElementById('costPer1kWords').textContent = fmtMoney3(costPer1kWords);
+      document.getElementById('totalMonthly').textContent = fmtMoney0(totalMonthly);
+
+      document.getElementById('translationCost').textContent = fmtMoney(workload.translationCost);
+      document.getElementById('reviewCost').textContent = fmtMoney(review.cost);
+      document.getElementById('maintenanceCost').textContent = fmtMoney(maintenanceCost + setupAmortized);
+      document.getElementById('totalWords').textContent = fmtInt(workload.totalWords);
+      document.getElementById('reviewHours').textContent = fmtNum(review.hours);
+      document.getElementById('periodCost').textContent = fmtMoney0(periodCost);
+
+      // Provider comparison table
+      const allProviders = JSON.parse(document.getElementById('provider').dataset.all || '[]');
+      let tableHtml = '';
+      const providerSelect = document.getElementById('provider');
+      for (let i = 0; i < providerSelect.options.length; i++) {
+        const p = JSON.parse(providerSelect.options[i].value);
+        const wl = calcWorkload(p, complexity, contentType, inps);
+        const rev = calcReviewCost(wl.totalWords, reviewTier, complexity, inps.reviewPct);
+        const total = wl.translationCost + rev.cost + maintenanceCost + setupAmortized;
+        const highlight = p.slug === provider.slug ? 'text-brand-gold font-semibold' : '';
+        tableHtml += `<tr class="border-b border-neutral-800/50">
+          <td class="py-3 pr-4 ${highlight}">${p.name}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(wl.translationCost)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(rev.cost)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(total)}</td>
+        </tr>`;
+      }
+      document.getElementById('providerComparison').innerHTML = tableHtml;
+
+      let verdict = '';
+      const revShare = totalMonthly > 0 ? (review.cost / totalMonthly) * 100 : 0;
+      const transShare = totalMonthly > 0 ? (workload.translationCost / totalMonthly) * 100 : 0;
+      if (costPer1kWords < 0.05) {
+        verdict = `Very low cost per 1,000 words (${fmtMoney3(costPer1kWords)}). This workload is dominated by ${transShare >= revShare ? 'translation/LLM spend' : 'human review'}. At scale, negotiate volume pricing or increase the share of light post-editing.`;
+      } else if (costPer1kWords < 0.15) {
+        verdict = `Moderate localization cost (${fmtMoney3(costPer1kWords)} per 1k words). ${fmtNum(revShare)}% of spend is human review. Consider switching to an NMT API for repetitive agent outputs and reserving LLM translation for nuanced content.`;
+      } else {
+        verdict = `High localization cost (${fmtMoney3(costPer1kWords)} per 1k words). Review is ${fmtNum(revShare)}% of spend. Tighten glossary/style-guide coverage, reduce review percentage for low-risk content, or test a cheaper provider for A/B quality parity.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['unitsPerMonth','targetLanguages','reviewPct','charsPerWord','setupHours','setupHourlyRate','maintenanceHours','maintenanceHourlyRate','projectionMonths','provider','complexity','reviewTier','contentType','glossary'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+        document.getElementById(id).addEventListener('change', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

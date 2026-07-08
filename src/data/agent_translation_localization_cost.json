@@ -1,0 +1,126 @@
+{
+  "last_updated": "2026-07-08",
+  "note": "Translation and localization cost estimates are directional. Provider rates change by volume tier, language pair, and contract. Replace defaults with your actual quotes for a precise forecast.",
+  "providers": [
+    { "slug": "deepl_api", "name": "DeepL API Pro", "cost_per_1m_chars": 20.0, "cost_per_1m_words": 0, "notes": "High-quality NMT; glossary and formality control included." },
+    { "slug": "google_translate", "name": "Google Cloud Translation", "cost_per_1m_chars": 20.0, "cost_per_1m_words": 0, "notes": "Pay per character; custom model training extra." },
+    { "slug": "azure_translator", "name": "Azure Translator", "cost_per_1m_chars": 10.0, "cost_per_1m_words": 0, "notes": "Standard tier; custom translator and document translation extra." },
+    { "slug": "aws_translate", "name": "Amazon Translate", "cost_per_1m_chars": 15.0, "cost_per_1m_words": 0, "notes": "Pay per character; active custom model hourly cost not included." },
+    { "slug": "openai_gpt4o", "name": "OpenAI GPT-4o (LLM translate)", "cost_per_1m_chars": 0, "cost_per_1m_words": 0, "input_per_1k_tokens": 0.00250, "output_per_1k_tokens": 0.01000, "chars_per_input_token": 4.0, "chars_per_output_token": 4.0, "notes": "Prompt-aware translation; good for style/tone adaptation." },
+    { "slug": "openai_gpt4omini", "name": "OpenAI GPT-4o mini (LLM translate)", "cost_per_1m_chars": 0, "cost_per_1m_words": 0, "input_per_1k_tokens": 0.00015, "output_per_1k_tokens": 0.00060, "chars_per_input_token": 4.0, "chars_per_output_token": 4.0, "notes": "Cheaper LLM route for low-stakes content." },
+    { "slug": "anthropic_sonnet", "name": "Anthropic Claude 3.5 Sonnet (LLM translate)", "cost_per_1m_chars": 0, "cost_per_1m_words": 0, "input_per_1k_tokens": 0.00300, "output_per_1k_tokens": 0.01500, "chars_per_input_token": 4.0, "chars_per_output_token": 4.0, "notes": "Strong for long-context document translation and nuance." },
+    { "slug": "assemblyai", "name": "AssemblyAI + translation workflow", "cost_per_1m_chars": 0, "cost_per_1m_words": 0, "input_per_1k_tokens": 0.00080, "output_per_1k_tokens": 0.00400, "chars_per_input_token": 4.0, "chars_per_output_token": 4.0, "notes": "Representative LLM cost for transcript translation pipeline." }
+  ],
+  "language_complexity": [
+    { "slug": "standard", "name": "Standard pairs (EN↔ES/FR/DE/IT/PT)", "llm_quality_multiplier": 1.0, "human_review_multiplier": 1.0, "notes": "Well-resourced language pairs." },
+    { "slug": "complex", "name": "Complex pairs (EN↔JA/ZH/AR/KO/RU)", "llm_quality_multiplier": 1.15, "human_review_multiplier": 1.4, "notes": "Higher review overhead and token count for morphologically rich or character-based languages." },
+    { "slug": "low_resource", "name": "Low-resource / niche", "llm_quality_multiplier": 1.3, "human_review_multiplier": 1.8, "notes": "Fewer training examples; higher human review needs." }
+  ],
+  "human_review_tiers": [
+    { "slug": "light", "name": "Light post-edit", "review_minutes_per_1000_words": 8, "hourly_rate": 35 },
+    { "slug": "standard", "name": "Standard review", "review_minutes_per_1000_words": 20, "hourly_rate": 55 },
+    { "slug": "expert", "name": "Expert/domain review", "review_minutes_per_1000_words": 40, "hourly_rate": 95 },
+    { "slug": "certified", "name": "Certified/legal review", "review_minutes_per_1000_words": 80, "hourly_rate": 150 }
+  ],
+  "content_types": [
+    { "slug": "ui_strings", "name": "UI strings / microcopy", "words_per_unit": 12, "context_chars_per_unit": 80 },
+    { "slug": "support_articles", "name": "Support articles", "words_per_unit": 600, "context_chars_per_unit": 0 },
+    { "slug": "help_docs", "name": "Help documentation", "words_per_unit": 1500, "context_chars_per_unit": 0 },
+    { "slug": "email_templates", "name": "Email / outreach templates", "words_per_unit": 250, "context_chars_per_unit": 120 },
+    { "slug": "agent_outputs", "name": "Agent output messages", "words_per_unit": 85, "context_chars_per_unit": 60 },
+    { "slug": "landing_pages", "name": "Landing / marketing pages", "words_per_unit": 800, "context_chars_per_unit": 0 },
+    { "slug": "legal", "name": "Legal / terms", "words_per_unit": 2500, "context_chars_per_unit": 0 },
+    { "slug": "custom", "name": "Custom", "words_per_unit": 500, "context_chars_per_unit": 0 }
+  ],
+  "glossary_storage": [
+    { "slug": "none", "name": "None", "setup_hours": 0, "monthly_hours": 0 },
+    { "slug": "basic", "name": "Basic glossary", "setup_hours": 4, "monthly_hours": 1 },
+    { "slug": "full", "name": "Glossary + style guide + term base", "setup_hours": 12, "monthly_hours": 3 }
+  ],
+  "defaults": {
+    "units_per_month": 500,
+    "content_type": "agent_outputs",
+    "target_languages": 5,
+    "provider": "deepl_api",
+    "complexity": "standard",
+    "review_tier": "standard",
+    "review_pct": 15,
+    "glossary": "basic",
+    "setup_hours": 16,
+    "setup_hourly_rate": 125,
+    "maintenance_hours_month": 6,
+    "maintenance_hourly_rate": 125,
+    "chars_per_word": 5.5,
+    "projection_months": 12
+  },
+  "scenarios": [
+    {
+      "name": "Support bot going global",
+      "units_per_month": 2000,
+      "content_type": "support_articles",
+      "target_languages": 8,
+      "provider": "deepl_api",
+      "complexity": "standard",
+      "review_tier": "standard",
+      "review_pct": 10,
+      "glossary": "basic",
+      "setup_hours": 20,
+      "setup_hourly_rate": 120,
+      "maintenance_hours_month": 8,
+      "maintenance_hourly_rate": 120,
+      "chars_per_word": 5.5,
+      "projection_months": 12
+    },
+    {
+      "name": "AI agent output localization",
+      "units_per_month": 10000,
+      "content_type": "agent_outputs",
+      "target_languages": 6,
+      "provider": "openai_gpt4omini",
+      "complexity": "complex",
+      "review_tier": "light",
+      "review_pct": 5,
+      "glossary": "full",
+      "setup_hours": 24,
+      "setup_hourly_rate": 150,
+      "maintenance_hours_month": 10,
+      "maintenance_hourly_rate": 150,
+      "chars_per_word": 5.5,
+      "projection_months": 12
+    },
+    {
+      "name": "Marketing site localization",
+      "units_per_month": 120,
+      "content_type": "landing_pages",
+      "target_languages": 10,
+      "provider": "anthropic_sonnet",
+      "complexity": "complex",
+      "review_tier": "expert",
+      "review_pct": 100,
+      "glossary": "full",
+      "setup_hours": 32,
+      "setup_hourly_rate": 140,
+      "maintenance_hours_month": 12,
+      "maintenance_hourly_rate": 140,
+      "chars_per_word": 5.5,
+      "projection_months": 12
+    },
+    {
+      "name": "Legal terms rollout",
+      "units_per_month": 20,
+      "content_type": "legal",
+      "target_languages": 12,
+      "provider": "deepl_api",
+      "complexity": "complex",
+      "review_tier": "certified",
+      "review_pct": 100,
+      "glossary": "full",
+      "setup_hours": 40,
+      "setup_hourly_rate": 180,
+      "maintenance_hours_month": 16,
+      "maintenance_hourly_rate": 180,
+      "chars_per_word": 5.5,
+      "projection_months": 12
+    }
+  ]
+}
