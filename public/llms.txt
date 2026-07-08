@@ -527,10 +527,18 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Audience: AI agent builders budgeting tool-use spend for retrieval, browser, code, and SaaS actions
 ||- Cross-links: Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Output Value Calculator, Agent Model Router Cost Calculator
 ||
-||## AI Agent LLM Router Benchmarker
-||- URL: https://hermesdispatch.dev/tools/agent-llm-router-benchmarker/
-||- Description: Benchmark and score multi-provider LLM routing strategies for an AI agent by cost, latency, quality, and fallback reliability.
-||- Inputs: routing strategy, scoring profile, monthly requests, input/output tokens per request, cached input ratio, fallback rate, retry rate, quality target, latency target, fallback depth
-||- Outputs: weighted benchmark score, cost/latency/quality/reliability sub-scores, estimated monthly routing cost, fallback success probability, Pareto frontier status, recommended strategy, verdict
-||- Audience: AI agent builders choosing or tuning multi-provider LLM routing
-||- Cross-links: Agent Model Router / Fallback Cost Calculator, Agent Benchmark Selector, API Pricing Comparator, Agent Latency Budget Calculator
+|||## AI Agent LLM Router Benchmarker
+||| - URL: https://hermesdispatch.dev/tools/agent-llm-router-benchmarker/
+||| - Description: Benchmark and score multi-provider LLM routing strategies for an AI agent by cost, latency, quality, and fallback reliability.
+||| - Inputs: routing strategy, scoring profile, monthly requests, input/output tokens per request, cached input ratio, fallback rate, retry rate, quality target, latency target, fallback depth
+||| - Outputs: weighted benchmark score, cost/latency/quality/reliability sub-scores, estimated monthly routing cost, fallback success probability, Pareto frontier status, recommended strategy, verdict
+||| - Audience: AI agent builders choosing or tuning multi-provider LLM routing
+||| - Cross-links: Agent Model Router / Fallback Cost Calculator, Agent Benchmark Selector, API Pricing Comparator, Agent Latency Budget Calculator
+
+## AI Agent Observability Cost Calculator
+- URL: https://hermesdispatch.dev/tools/agent-observability-cost-calculator/
+- Description: Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring across Langfuse, Sentry, Datadog, New Relic, Grafana Cloud, Honeycomb, and Axiom.
+- Inputs: agent requests per month, traces or observations per request, sampling percentage, average trace size (KB), error events per month, uptime/synthetic checks per month, team seats, projection months
+- Outputs: monthly cost per provider, cheapest provider, cost per 1M requests, projected period cost, provider comparison table, verdict
+- Audience: AI agent builders choosing observability and monitoring stacks
+- Cross-links: Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Tool Call Cost Calculator, AI Startup Cost Calculator
