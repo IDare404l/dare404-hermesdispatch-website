@@ -1,0 +1,441 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_retention_churn_cost.json';
+
+const title = "AI Agent Retention & Churn Cost Calculator | Hermes Dispatch";
+const description = "Estimate how much customer churn, support surge, and reactivation spend cost when an AI agent delivers bad experiences.";
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the monthly cost of AI-agent-driven churn: lost MRR, lost LTV, extra support tickets, reactivation campaigns, goodwill credits, and ongoing maintenance. It also shows what happens if you reduce the failure rate." },
+  { q: "How is agent-attributed churn calculated?", a: "We estimate failed sessions per month, then apply a churn-likelihood percentage to users who experienced at least one failure. This is added to the baseline monthly churn to show the incremental churn likely caused by agent failures." },
+  { q: "What counts as an agent failure?", a: "Any session that ends with a wrong answer, harmful output, escalation, or user-reported dissatisfaction. Use your own support-survey or escalation rate as the failure percentage." },
+  { q: "Does this include baseline churn?", a: "Yes, we separate baseline churn (users who would leave anyway) from incremental churn attributed to agent failures. The headline cost is the incremental portion." },
+  { q: "Why do I need MRR and LTV?", a: "MRR gives the immediate monthly revenue lost. LTV shows the total long-term value destroyed when a customer churns. Both are needed for a complete business-case view." },
+  { q: "How can I use the sensitivity table?", a: "It shows how churn cost changes at different failure rates. Use it to justify investment in prompt engineering, guardrails, human review, or a better model." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Retention & Churn Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-retention-churn-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📉</div>
+      <h1 class="display-heading mb-4">AI Agent Retention & Churn Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate how much customer churn, support surge, and reactivation spend cost when an AI agent delivers bad experiences.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Retention inputs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly active users (MAU)</span>
+          <input id="mau" type="number" min="1" step="100" value={defaults.mau} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Agent sessions / user / month</span>
+          <input id="sessionsPerUser" type="number" min="0" step="0.1" value={defaults.sessions_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Agent failure / unsatisfactory rate (%)</span>
+          <input id="failurePct" type="number" min="0" max="100" step="0.5" value={defaults.agent_failure_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Churn likelihood after a failure (%)</span>
+          <input id="churnLikelihood" type="number" min="0" max="100" step="0.5" value={defaults.churn_likelihood_after_fail} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Baseline monthly churn (%)</span>
+          <input id="baselineChurn" type="number" min="0" max="100" step="0.1" value={defaults.monthly_churn_baseline_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">MRR per user ($)</span>
+          <input id="mrrPerUser" type="number" min="0" step="1" value={defaults.mrr_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Gross margin (%)</span>
+          <input id="grossMargin" type="number" min="0" max="100" step="1" value={defaults.gross_margin_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Lifetime value (LTV) per user ($)</span>
+          <input id="ltv" type="number" min="0" step="10" value={defaults.ltv} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Support tickets per failure (%)</span>
+          <input id="ticketsPerFail" type="number" min="0" max="100" step="1" value={defaults.tickets_per_fail_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Support cost per ticket ($)</span>
+          <input id="supportCost" type="number" min="0" step="1" value={defaults.support_cost_per_ticket} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reactivation rate (%)</span>
+          <input id="reactivationRate" type="number" min="0" max="100" step="0.5" value={defaults.reactivation_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reactivation cost per user ($)</span>
+          <input id="reactivationCost" type="number" min="0" step="1" value={defaults.reactivation_cost_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Goodwill / refund cost per failure ($)</span>
+          <input id="goodwillCost" type="number" min="0" step="0.1" value={defaults.goodwill_cost_per_fail} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly agent-attributed churn cost</p>
+        <p id="monthlyChurnCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Churned users / month</p>
+        <p id="churnedUsers" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per failed session</p>
+        <p id="costPerFail" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Lost MRR / month</p>
+        <p id="lostMrr" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Lost gross margin / month</p>
+        <p id="lostMargin" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Lost LTV / month</p>
+        <p id="lostLtv" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Support surge cost / month</p>
+        <p id="supportSurge" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Reactivation cost / month</p>
+        <p id="reactivationSpend" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Goodwill / refunds / month</p>
+        <p id="goodwillSpend" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Lost gross margin from churn</td>
+            <td id="marginCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="marginShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Support surge</td>
+            <td id="supportCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="supportShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Reactivation campaigns</td>
+            <td id="reactivationCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reactivationShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Goodwill / refunds</td>
+            <td id="goodwillCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="goodwillShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Maintenance labor</td>
+            <td id="maintenanceCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="maintenanceShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Failure-rate sensitivity -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Sensitivity: failure rate vs monthly churn cost</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Failure rate</th>
+            <th class="py-3 pr-4 text-right">Monthly churn cost</th>
+            <th class="py-3 pr-4 text-right">Churned users / mo</th>
+            <th class="py-3 pr-4 text-right">vs current</th>
+          </tr>
+        </thead>
+        <tbody id="sensitivityBody" class="text-neutral-200">
+          <tr><td colspan="4" class="py-4 text-neutral-500">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-outage-cost-calculator/" class="btn-primary text-sm">Outage Cost Calculator →</a>
+      <a href="/tools/agent-escalation-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Human Escalation Cost Calc →</a>
+      <a href="/tools/agent-per-user-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Per-User Cost Calc →</a>
+      <a href="/tools/agent-deflection-roi-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Support Deflection ROI →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenariosJson: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    const scenarios = JSON.parse(scenariosJson);
+
+    function getInputs() {
+      return {
+        mau: Math.max(1, parseFloat(document.getElementById('mau').value) || 1),
+        sessionsPerUser: Math.max(0, parseFloat(document.getElementById('sessionsPerUser').value) || 0),
+        failurePct: Math.min(100, Math.max(0, parseFloat(document.getElementById('failurePct').value) || 0)),
+        churnLikelihood: Math.min(100, Math.max(0, parseFloat(document.getElementById('churnLikelihood').value) || 0)),
+        baselineChurn: Math.min(100, Math.max(0, parseFloat(document.getElementById('baselineChurn').value) || 0)),
+        mrrPerUser: Math.max(0, parseFloat(document.getElementById('mrrPerUser').value) || 0),
+        grossMargin: Math.min(100, Math.max(0, parseFloat(document.getElementById('grossMargin').value) || 0)),
+        ltv: Math.max(0, parseFloat(document.getElementById('ltv').value) || 0),
+        ticketsPerFail: Math.min(100, Math.max(0, parseFloat(document.getElementById('ticketsPerFail').value) || 0)),
+        supportCost: Math.max(0, parseFloat(document.getElementById('supportCost').value) || 0),
+        reactivationRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('reactivationRate').value) || 0)),
+        reactivationCost: Math.max(0, parseFloat(document.getElementById('reactivationCost').value) || 0),
+        goodwillCost: Math.max(0, parseFloat(document.getElementById('goodwillCost').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupRate: Math.max(0, parseFloat(document.getElementById('setupRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceRate: Math.max(0, parseFloat(document.getElementById('maintenanceRate').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      const map = {
+        'mau': obj.mau,
+        'sessionsPerUser': obj.sessions_per_user,
+        'failurePct': obj.agent_failure_pct,
+        'churnLikelihood': obj.churn_likelihood_after_fail,
+        'baselineChurn': obj.monthly_churn_baseline_pct,
+        'mrrPerUser': obj.mrr_per_user,
+        'grossMargin': obj.gross_margin_pct,
+        'ltv': obj.ltv,
+        'ticketsPerFail': obj.tickets_per_fail_pct,
+        'supportCost': obj.support_cost_per_ticket,
+        'reactivationRate': obj.reactivation_rate_pct,
+        'reactivationCost': obj.reactivation_cost_per_user,
+        'goodwillCost': obj.goodwill_cost_per_fail,
+        'setupHours': obj.setup_hours,
+        'setupRate': obj.setup_hourly_rate,
+        'maintenanceHours': obj.maintenance_hours,
+        'maintenanceRate': obj.maintenance_hourly_rate,
+        'projectionMonths': obj.projection_months
+      };
+      for (const [id, val] of Object.entries(map)) {
+        if (val !== undefined) document.getElementById(id).value = val;
+      }
+    }
+
+    function computeCore(inps) {
+      const totalSessions = inps.mau * inps.sessionsPerUser;
+      const failedSessions = totalSessions * (inps.failurePct / 100);
+      // Users who see at least one failure assuming independent sessions
+      const pNoFailPerUser = Math.pow(1 - inps.failurePct / 100, inps.sessionsPerUser);
+      const usersWithFailure = inps.mau * (1 - pNoFailPerUser);
+
+      const baselineChurned = inps.mau * (inps.baselineChurn / 100);
+      const incrementalChurned = usersWithFailure * (inps.churnLikelihood / 100);
+      const totalChurned = baselineChurned + incrementalChurned;
+
+      const lostMrr = incrementalChurned * inps.mrrPerUser;
+      const lostMargin = lostMrr * (inps.grossMargin / 100);
+      const lostLtv = incrementalChurned * inps.ltv;
+
+      const tickets = failedSessions * (inps.ticketsPerFail / 100);
+      const supportSurge = tickets * inps.supportCost;
+
+      const reactivated = incrementalChurned * (inps.reactivationRate / 100);
+      const reactivationSpend = reactivated * inps.reactivationCost;
+
+      const goodwillSpend = failedSessions * inps.goodwillCost;
+      const maintenanceCost = inps.maintenanceHours * inps.maintenanceRate;
+      const setupCost = inps.setupHours * inps.setupRate;
+
+      const monthlyChurnCost = lostMargin + supportSurge + reactivationSpend + goodwillSpend + maintenanceCost;
+      const periodCost = monthlyChurnCost * inps.projectionMonths + setupCost;
+      const costPerFail = failedSessions > 0 ? monthlyChurnCost / failedSessions : 0;
+
+      return {
+        totalSessions, failedSessions, usersWithFailure,
+        baselineChurned, incrementalChurned, totalChurned,
+        lostMrr, lostMargin, lostLtv,
+        tickets, supportSurge, reactivated, reactivationSpend, goodwillSpend,
+        maintenanceCost, setupCost, monthlyChurnCost, periodCost, costPerFail
+      };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const r = computeCore(inps);
+
+      document.getElementById('monthlyChurnCost').textContent = fmtMoney0(r.monthlyChurnCost);
+      document.getElementById('churnedUsers').textContent = fmtInt(r.totalChurned);
+      document.getElementById('costPerFail').textContent = fmtMoney(r.costPerFail);
+      document.getElementById('periodCost').textContent = fmtMoney0(r.periodCost);
+
+      document.getElementById('lostMrr').textContent = fmtMoney0(r.lostMrr);
+      document.getElementById('lostMargin').textContent = fmtMoney0(r.lostMargin);
+      document.getElementById('lostLtv').textContent = fmtMoney0(r.lostLtv);
+      document.getElementById('supportSurge').textContent = fmtMoney0(r.supportSurge);
+      document.getElementById('reactivationSpend').textContent = fmtMoney0(r.reactivationSpend);
+      document.getElementById('goodwillSpend').textContent = fmtMoney0(r.goodwillSpend);
+
+      const setShare = (id, cost) => {
+        document.getElementById(id).textContent = r.monthlyChurnCost > 0 ? (cost / r.monthlyChurnCost * 100).toFixed(1) + '%' : '0%';
+      };
+      document.getElementById('marginCostRow').textContent = fmtMoney(r.lostMargin);
+      setShare('marginShare', r.lostMargin);
+      document.getElementById('supportCostRow').textContent = fmtMoney(r.supportSurge);
+      setShare('supportShare', r.supportSurge);
+      document.getElementById('reactivationCostRow').textContent = fmtMoney(r.reactivationSpend);
+      setShare('reactivationShare', r.reactivationSpend);
+      document.getElementById('goodwillCostRow').textContent = fmtMoney(r.goodwillSpend);
+      setShare('goodwillShare', r.goodwillSpend);
+      document.getElementById('maintenanceCostRow').textContent = fmtMoney(r.maintenanceCost);
+      setShare('maintenanceShare', r.maintenanceCost);
+
+      const rates = [0.5, 1, 2, 3, 5, 7, 10, 15, 20];
+      const currentMonthly = r.monthlyChurnCost;
+      const tbody = document.getElementById('sensitivityBody');
+      tbody.innerHTML = rates.map(rate => {
+        const sim = computeCore({ ...inps, failurePct: rate });
+        const delta = sim.monthlyChurnCost - currentMonthly;
+        const current = Math.abs(rate - inps.failurePct) < 0.05;
+        return `<tr class="border-b border-neutral-800/50 ${current ? 'text-brand-gold' : ''}">
+          <td class="py-3 pr-4">${rate.toFixed(1)}% ${current ? '(current)' : ''}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(sim.monthlyChurnCost)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtInt(sim.totalChurned)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${delta >= 0 ? '+' : ''}${fmtMoney0(delta)}</td>
+        </tr>`;
+      }).join('');
+
+      let verdict = '';
+      if (r.monthlyChurnCost > 0 && r.lostMargin > r.supportSurge + r.goodwillSpend + r.reactivationSpend) {
+        verdict = `⚠️ Lost gross margin is the biggest driver (${fmtMoney0(r.lostMargin)}/mo). Reducing the agent failure rate is likely the highest-ROI improvement.`;
+      } else if (r.supportSurge > r.lostMargin) {
+        verdict = `⚠️ Support surge cost exceeds lost margin. Every failure creates human work; focus on self-serve resolution and better escalation routing.`;
+      } else {
+        verdict = `Costs are spread across churn, support, and reactivation. Pinpoint which cost line is easiest to reduce given your team.`;
+      }
+      if (r.costPerFail > inps.mrrPerUser * 0.5) {
+        verdict += ` At ${fmtMoney(r.costPerFail)} per failed session, a single bad experience is materially expensive relative to MRR.`;
+      } else if (r.costPerFail > 0) {
+        verdict += ` Each failed session costs about ${fmtMoney(r.costPerFail)}.`;
+      }
+      if (inps.failurePct > 10) {
+        verdict += ` A failure rate above 10% is high for most customer-facing agents; aim for <5% to materially reduce churn cost.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['mau','sessionsPerUser','failurePct','churnLikelihood','baselineChurn','mrrPerUser','grossMargin','ltv','ticketsPerFail','supportCost','reactivationRate','reactivationCost','goodwillCost','setupHours','setupRate','maintenanceHours','maintenanceRate','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

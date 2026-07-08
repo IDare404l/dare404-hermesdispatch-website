@@ -685,11 +685,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Cross-links: Agent Data Labeling Cost Calculator, LLM Fine-Tuning Cost Calculator, Agent Output Value Calculator, Agent API Pricing Comparator.
 
 ## AI Agent Shadow / A-B Test Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-shadow-ab-test-cost-calculator/
-|- Description: Estimate the cost to run an AI agent in shadow mode or A/B test against an existing system, including duplicated inference, human review, decision logging, and outcome tracking.
-|- Inputs: test type (shadow/A/B), production requests per month, test traffic percentage, agent tasks per request, input/output tokens per task, LLM provider, cached input percentage, decision log size (KB), storage backend, retention months, human review rate, review minutes, reviewer hourly cost, outcome tracking toggle, outcome cost per event, evaluation runs per month, eval input/output tokens, setup hours/rate, maintenance hours/rate, projection months.
-|- Outputs: monthly test requests, monthly inference cost, logging/storage cost, outcome tracking cost, human review cost, evaluation cost, total monthly cost, total period cost, cost per 1K production requests, cost per decision reviewed, provider comparison table, verdict.
-|- Audience: AI agent builders and operators running safe experiments before promoting a new agent to production.
-|- Cross-links: Agent Prompt Testing Budget Calculator, Agent API Pricing Comparator, Agent Output Value Calculator, Agent Evaluation Planner.
+||- URL: https://hermesdispatch.dev/tools/agent-shadow-ab-test-cost-calculator/
+||- Description: Estimate the cost to run an AI agent in shadow mode or A/B test against an existing system, including duplicated inference, human review, decision logging, and outcome tracking.
+||- Inputs: test type (shadow/A/B), production requests per month, test traffic percentage, agent tasks per request, input/output tokens per task, LLM provider, cached input percentage, decision log size (KB), storage backend, retention months, human review rate, review minutes, reviewer hourly cost, outcome tracking toggle, outcome cost per event, evaluation runs per month, eval input/output tokens, setup hours/rate, maintenance hours/rate, projection months.
+||- Outputs: monthly test requests, monthly inference cost, logging/storage cost, outcome tracking cost, human review cost, evaluation cost, total monthly cost, total period cost, cost per 1K production requests, cost per decision reviewed, provider comparison table, verdict.
+||- Audience: AI agent builders and operators running safe experiments before promoting a new agent to production.
+||- Cross-links: Agent Prompt Testing Budget Calculator, Agent API Pricing Comparator, Agent Output Value Calculator, Agent Evaluation Planner.
+
+## AI Agent Retention & Churn Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-retention-churn-cost-calculator/
+|- Description: Estimate how much customer churn, support surge, and reactivation spend cost when an AI agent delivers bad experiences.
+|- Inputs: MAU, agent sessions per user per month, agent failure/unsatisfactory rate (%), churn likelihood after a failure (%), baseline monthly churn (%), MRR per user ($), gross margin (%), LTV per user ($), support tickets per failure (%), support cost per ticket ($), reactivation rate (%), reactivation cost per user ($), goodwill/refund cost per failure ($), setup hours/rate, maintenance hours/rate, projection months.
+|- Outputs: monthly agent-attributed churn cost, churned users per month, cost per failed session, projected period cost, lost MRR, lost gross margin, lost LTV, support surge cost, reactivation spend, goodwill spend, failure-rate sensitivity table, verdict.
+|- Audience: AI agent builders and operators quantifying the business cost of agent failures and building the case for reliability investments.
+|- Cross-links: Agent Outage Cost Calculator, Human Escalation Cost Calculator, Per-User Cost Calculator, Support Deflection ROI Calculator.
 
 ## Hub Pages
