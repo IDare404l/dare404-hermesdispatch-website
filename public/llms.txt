@@ -661,14 +661,20 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Cross-links: Agent Tool Call Cost Calculator, Workflow Cost Calculator, API Pricing Comparator, Agent Output Value Calculator
 
 ## AI Agent Batch vs Real-Time Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-batch-vs-realtime-cost-calculator/
-|- Description: Compare batch API discounts against real-time API and local GPU costs for AI agent workloads. Find the cheapest architecture for evals, backfills, and hybrid traffic.
-|- Inputs: monthly requests, input/output tokens per request, batch share (0–1), provider, local GPU model/count, value per output, electricity rate, amortization months, utilization, self-hosted ops hourly rate
-|- Outputs: cheapest option, batch vs real-time cost split, total provider cost, total local cost, cost per 1k requests, monthly gross/net value, ROI estimate, verdict
-|- Audience: AI agent builders choosing between batch APIs, real-time APIs, and self-hosted GPUs
-|- Cross-links: Agent API Pricing Comparator, Inference Capacity Planner, GPU Cloud vs Buy Calculator, Local LLM ROI Calculator, Agent Output Value Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-batch-vs-realtime-cost-calculator/
+||- Description: Compare batch API discounts against real-time API and local GPU costs for AI agent workloads. Find the cheapest architecture for evals, backfills, and hybrid traffic.
+||- Inputs: monthly requests, input/output tokens per request, batch share (0–1), provider, local GPU model/count, value per output, electricity rate, amortization months, utilization, self-hosted ops hourly rate
+||- Outputs: cheapest option, batch vs real-time cost split, total provider cost, total local cost, cost per 1k requests, monthly gross/net value, ROI estimate, verdict
+||- Audience: AI agent builders choosing between batch APIs, real-time APIs, and self-hosted GPUs
+||- Cross-links: Agent API Pricing Comparator, Inference Capacity Planner, GPU Cloud vs Buy Calculator, Local LLM ROI Calculator, Agent Output Value Calculator
 
-## AI Agent Code Review Cost Calculator
+## AI Agent Batch Job / Offline Workload Cost Calculator
+|||- URL: https://hermesdispatch.dev/tools/agent-batch-job-cost-calculator/
+|||- Description: Compare managed batch APIs, real-time APIs, and local GPU routes for offline AI agent workloads like nightly reports, vector backfills, synthetic eval runs, and invoice processing.
+|||- Inputs: monthly jobs, tasks per job, input/output tokens per task, cached input percentage, batch fraction, API provider, local GPU route, electricity rate, GPU utilization, hardware amortization months, value per output, setup/maintenance hours and rates, projection months.
+|||- Outputs: cheapest route, monthly real-time/batch/local cost, time to complete, projected period cost, provider comparison table, local GPU comparison table, verdict.
+|||- Audience: AI agent builders budgeting offline, asynchronous, or batched agent workloads.
+|||- Cross-links: Agent Batch vs Real-Time Cost Calculator, Agent API Pricing Comparator, Agent Inference Capacity Planner, Local LLM ROI Calculator.
 ||- URL: https://hermesdispatch.dev/tools/agent-code-review-cost-calculator/
 ||- Description: Estimate monthly cost of an AI agent for code reviews across LLM APIs, agentic platforms, and human reviewer fallback.
 ||- Inputs: LLM provider, review platform, monthly PRs, files/lines/tokens per PR, output tokens per PR, cached input percentage, human review rate, review minutes, reviewer hourly cost, projection months.

@@ -1,0 +1,426 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_batch_job_cost.json';
+
+const title = "AI Agent Batch Job / Offline Workload Cost Calculator | Hermes Dispatch";
+const description = "Compare managed batch APIs, real-time APIs, and local GPU costs for offline AI agent workloads like nightly reports, backfills, evals, and invoice processing.";
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+const providers = data.providers;
+const localGpus = data.local_gpus;
+
+const faqs = [
+  { q: "What counts as an AI agent batch job?", a: "Any workload where the agent processes many tasks asynchronously: nightly report generation, vector backfills, synthetic eval runs, invoice extraction, content moderation, or log classification. The user does not wait on each individual response." },
+  { q: "When is a batch API cheaper than real-time?", a: "Batch APIs typically offer 25–50% discounts and are cheaper whenever latency is not critical. The savings grow with request volume and the fraction of repeated or cached context." },
+  { q: "Should I run batch jobs on a local GPU?", a: "Local GPU wins when you already own the hardware, run large volumes, or handle sensitive data. Cloud rental wins for bursty, short-duration jobs where you do not want capital expense." },
+  { q: "How is time-to-complete estimated?", a: "For API routes we divide total tokens by provider throughput and add the provider's typical maximum batch wait. For local GPU we divide total tokens by GPU tok/s and adjust for utilization." },
+  { q: "Does this include embedding jobs?", a: "Yes. Treat each embedding call as a job with input tokens and output tokens equal to the embedding dimensions. Batch discounts and local throughput still apply." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Batch Job / Offline Workload Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-batch-job-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🗂️</div>
+      <h1 class="display-heading mb-4">AI Agent Batch Job / Offline Workload Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Compare managed batch APIs, real-time APIs, and local GPU routes for offline agent workloads: nightly reports, backfills, evals, invoice processing, and more.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload inputs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly jobs</span>
+          <input id="monthlyJobs" type="number" min="1" step="100" value={defaults.monthly_jobs} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tasks per job</span>
+          <input id="tasksPerJob" type="number" min="1" step="1" value={defaults.tasks_per_job} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens per task</span>
+          <input id="inputTokens" type="number" min="0" step="100" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens per task</span>
+          <input id="outputTokens" type="number" min="0" step="100" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedPct" type="number" min="0" max="100" step="5" value={defaults.cached_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Batch fraction (%)</span>
+          <input id="batchFraction" type="number" min="0" max="100" step="5" value={defaults.batch_fraction} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">API provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={p.name} selected={p.name === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Local GPU route</span>
+          <select id="localGpu" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {localGpus.map(g => <option value={g.name} selected={g.name === defaults.local_gpu}>{g.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Electricity rate ($/kWh)</span>
+          <input id="electricityRate" type="number" min="0" step="0.01" value={defaults.electricity_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Local GPU utilization (%)</span>
+          <input id="utilizationPct" type="number" min="1" max="100" step="5" value={defaults.utilization_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Hardware amortization (months)</span>
+          <input id="amortizationMonths" type="number" min="1" max="120" step="1" value={defaults.amortization_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Value per output ($)</span>
+          <input id="valuePerOutput" type="number" min="0" step="0.01" value={defaults.value_per_output} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupRate" type="number" min="0" step="5" value={defaults.setup_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceRate" type="number" min="0" step="5" value={defaults.maintenance_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest route</p>
+        <p id="cheapestRoute" class="text-xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly cost (cheapest)</p>
+        <p id="monthlyCheapest" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Time to complete</p>
+        <p id="timeToComplete" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Route comparison -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Real-time API monthly</p>
+        <p id="realtimeCost" class="text-xl font-semibold text-white">—</p>
+        <p id="realtimeTime" class="text-sm text-neutral-400 mt-1">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Batch API monthly</p>
+        <p id="batchCost" class="text-xl font-semibold text-white">—</p>
+        <p id="batchTime" class="text-sm text-neutral-400 mt-1">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Local GPU monthly</p>
+        <p id="localCost" class="text-xl font-semibold text-white">—</p>
+        <p id="localTime" class="text-sm text-neutral-400 mt-1">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison (monthly)</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">Real-time</th>
+              <th class="py-3 pr-4 text-right">Batch</th>
+              <th class="py-3 pr-4 text-right">Time to complete</th>
+            </tr>
+          </thead>
+          <tbody id="providerTable" class="text-neutral-200">
+            <tr><td colspan="4" class="py-4 text-neutral-500">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Local GPU comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Local GPU comparison (monthly)</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">GPU route</th>
+              <th class="py-3 pr-4 text-right">Owned cost</th>
+              <th class="py-3 pr-4 text-right">Rental cost</th>
+              <th class="py-3 pr-4 text-right">Time to complete</th>
+            </tr>
+          </thead>
+          <tbody id="localTable" class="text-neutral-200">
+            <tr><td colspan="4" class="py-4 text-neutral-500">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-batch-vs-realtime-cost-calculator/" class="btn-primary text-sm">Batch vs Real-Time Cost Calc →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-inference-capacity-planner/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Inference Capacity Planner →</a>
+      <a href="/tools/local-llm-roi-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Local LLM ROI Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providersJson: JSON.stringify(providers), localGpusJson: JSON.stringify(localGpus) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const fmtHours = h => {
+      if (h < 1) return fmtNum(h * 60) + ' min';
+      if (h < 24) return fmtNum(h) + ' hrs';
+      return fmtNum(h / 24) + ' days';
+    };
+
+    const providers = JSON.parse(providersJson);
+    const localGpus = JSON.parse(localGpusJson);
+
+    function getInputs() {
+      return {
+        monthlyJobs: Math.max(1, parseFloat(document.getElementById('monthlyJobs').value) || 1),
+        tasksPerJob: Math.max(1, parseFloat(document.getElementById('tasksPerJob').value) || 1),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        cachedPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('cachedPct').value) || 0)),
+        batchFraction: Math.min(100, Math.max(0, parseFloat(document.getElementById('batchFraction').value) || 0)),
+        provider: document.getElementById('provider').value,
+        localGpu: document.getElementById('localGpu').value,
+        electricityRate: Math.max(0, parseFloat(document.getElementById('electricityRate').value) || 0),
+        utilizationPct: Math.min(100, Math.max(1, parseFloat(document.getElementById('utilizationPct').value) || 1)),
+        amortizationMonths: Math.max(1, parseFloat(document.getElementById('amortizationMonths').value) || 1),
+        valuePerOutput: Math.max(0, parseFloat(document.getElementById('valuePerOutput').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupRate: Math.max(0, parseFloat(document.getElementById('setupRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceRate: Math.max(0, parseFloat(document.getElementById('maintenanceRate').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      const map = {
+        'monthlyJobs': obj.monthly_jobs,
+        'tasksPerJob': obj.tasks_per_job,
+        'inputTokens': obj.input_tokens,
+        'outputTokens': obj.output_tokens,
+        'cachedPct': obj.cached_pct,
+        'batchFraction': obj.batch_fraction,
+        'provider': obj.provider,
+        'localGpu': obj.local_gpu,
+        'electricityRate': obj.electricity_rate,
+        'utilizationPct': obj.utilization_pct,
+        'amortizationMonths': obj.amortization_months,
+        'valuePerOutput': obj.value_per_output,
+        'setupHours': obj.setup_hours,
+        'setupRate': obj.setup_rate,
+        'maintenanceHours': obj.maintenance_hours,
+        'maintenanceRate': obj.maintenance_rate,
+        'projectionMonths': obj.projection_months
+      };
+      for (const [id, val] of Object.entries(map)) {
+        if (val !== undefined) {
+          const el = document.getElementById(id);
+          if (el) el.value = val;
+        }
+      }
+    }
+
+    function providerMonthly(p, inps) {
+      const requests = inps.monthlyJobs * inps.tasksPerJob;
+      const cachedTokens = inps.inputTokens * (inps.cachedPct / 100);
+      const uncachedTokens = inps.inputTokens - cachedTokens;
+      const realtime = requests * (uncachedTokens / 1e6 * p.input_per_1m + cachedTokens / 1e6 * p.cached_per_1m + inps.outputTokens / 1e6 * p.output_per_1m + p.req_cost);
+      const batch = requests * (uncachedTokens / 1e6 * p.batch_input_per_1m + cachedTokens / 1e6 * p.batch_cached_per_1m + inps.outputTokens / 1e6 * p.batch_output_per_1m + p.req_cost);
+      const totalTokens = requests * (inps.inputTokens + inps.outputTokens);
+      const realtimeHours = totalTokens / p.throughput_tok_per_sec / 3600;
+      const batchHours = realtimeHours + p.max_batch_wait_hours;
+      return { realtime, batch, realtimeHours, batchHours };
+    }
+
+    function localMonthly(g, inps) {
+      const requests = inps.monthlyJobs * inps.tasksPerJob;
+      const totalTokens = requests * (inps.inputTokens + inps.outputTokens);
+      const effectiveTokPerSec = g.tok_per_sec * (inps.utilizationPct / 100);
+      const hours = totalTokens / effectiveTokPerSec / 3600;
+      const electricity = hours * (g.power_w / 1000) * inps.electricityRate;
+      const rental = hours * g.hourly_rental;
+      const amortized = g.purchase_cost > 0 ? g.purchase_cost / inps.amortizationMonths : 0;
+      const owned = electricity + amortized;
+      return { hours, owned, rental };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const maintenance = inps.maintenanceHours * inps.maintenanceRate;
+      const setup = inps.setupHours * inps.setupRate;
+
+      const p = providers.find(x => x.name === inps.provider) || providers[0];
+      const pCost = providerMonthly(p, inps);
+      const hybridApi = (1 - inps.batchFraction / 100) * pCost.realtime + (inps.batchFraction / 100) * pCost.batch;
+      const apiTime = (1 - inps.batchFraction / 100) * pCost.realtimeHours + (inps.batchFraction / 100) * pCost.batchHours;
+
+      const g = localGpus.find(x => x.name === inps.localGpu) || localGpus[0];
+      const lCost = localMonthly(g, inps);
+      const selectedLocal = g.purchase_cost > 0 ? lCost.owned : lCost.rental;
+
+      const routes = [
+        { name: 'Hybrid API (' + inps.provider + ')', monthly: hybridApi + maintenance, time: apiTime },
+        { name: 'Real-time API (' + inps.provider + ')', monthly: pCost.realtime + maintenance, time: pCost.realtimeHours },
+        { name: 'Batch API (' + inps.provider + ')', monthly: pCost.batch + maintenance, time: pCost.batchHours },
+        { name: 'Local GPU (' + g.name + ')', monthly: selectedLocal + maintenance, time: lCost.hours }
+      ];
+
+      const cheapest = routes.slice().sort((a, b) => a.monthly - b.monthly)[0];
+      const periodCost = cheapest.monthly * inps.projectionMonths + setup;
+      const monthlyValue = inps.monthlyJobs * inps.valuePerOutput;
+      const netValue = monthlyValue - cheapest.monthly;
+
+      document.getElementById('cheapestRoute').textContent = cheapest.name;
+      document.getElementById('monthlyCheapest').textContent = fmtMoney0(cheapest.monthly);
+      document.getElementById('timeToComplete').textContent = fmtHours(cheapest.time);
+      document.getElementById('periodCost').textContent = fmtMoney0(periodCost);
+
+      document.getElementById('realtimeCost').textContent = fmtMoney0(pCost.realtime + maintenance);
+      document.getElementById('realtimeTime').textContent = fmtHours(pCost.realtimeHours);
+      document.getElementById('batchCost').textContent = fmtMoney0(pCost.batch + maintenance);
+      document.getElementById('batchTime').textContent = fmtHours(pCost.batchHours);
+      document.getElementById('localCost').textContent = fmtMoney0(selectedLocal + maintenance);
+      document.getElementById('localTime').textContent = fmtHours(lCost.hours);
+
+      // Provider table
+      const provRows = providers.map(pp => {
+        const c = providerMonthly(pp, inps);
+        const isSelected = pp.name === inps.provider;
+        return `<tr class="border-b border-neutral-800/50 ${isSelected ? 'text-brand-gold' : ''}">
+          <td class="py-3 pr-4">${pp.name} ${isSelected ? '(selected)' : ''}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(c.realtime + maintenance)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(c.batch + maintenance)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtHours(c.batchHours)}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('providerTable').innerHTML = provRows;
+
+      // Local table
+      const localRows = localGpus.map(gg => {
+        const c = localMonthly(gg, inps);
+        const isSelected = gg.name === inps.localGpu;
+        return `<tr class="border-b border-neutral-800/50 ${isSelected ? 'text-brand-gold' : ''}">
+          <td class="py-3 pr-4">${gg.name} ${isSelected ? '(selected)' : ''}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(c.owned + maintenance)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(c.rental + maintenance)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtHours(c.hours)}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('localTable').innerHTML = localRows;
+
+      // Verdict
+      let verdict = `Cheapest route is <strong>${cheapest.name}</strong> at ${fmtMoney0(cheapest.monthly)}/month and ${fmtHours(cheapest.time)} to complete the workload.`;
+      if (netValue > 0) {
+        verdict += ` At ${fmtMoney(inps.valuePerOutput)} per output, the workload generates ${fmtMoney0(monthlyValue)}/mo in value, leaving ${fmtMoney0(netValue)}/mo after cost.`;
+      } else if (inps.valuePerOutput > 0) {
+        verdict += ` The workload generates ${fmtMoney0(monthlyValue)}/mo in value, so it is currently ${fmtMoney0(-netValue)}/mo underwater on direct cost.`;
+      }
+      if (pCost.batch < pCost.realtime && inps.batchFraction < 50) {
+        verdict += ` ${p.name} batch pricing is ${fmtMoney0(pCost.realtime - pCost.batch)} cheaper per month than real-time; consider raising the batch fraction if latency allows.`;
+      }
+      if (selectedLocal < pCost.batch && selectedLocal < pCost.realtime) {
+        verdict += ` The selected local GPU route beats both API options. Local makes sense if utilization stays high and you can tolerate the one-time capital or rental cost.`;
+      }
+      if (cheapest.time > 24) {
+        verdict += ` The workload takes more than a day to complete; schedule it as a true batch/offline job and avoid blocking user-facing traffic.`;
+      }
+      document.getElementById('verdictText').innerHTML = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['monthlyJobs','tasksPerJob','inputTokens','outputTokens','cachedPct','batchFraction','provider','localGpu','electricityRate','utilizationPct','amortizationMonths','valuePerOutput','setupHours','setupRate','maintenanceHours','maintenanceRate','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
