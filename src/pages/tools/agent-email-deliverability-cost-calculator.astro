@@ -1,0 +1,437 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_email_deliverability_cost.json';
+
+const title = "AI Agent Email Deliverability Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly email deliverability cost for AI agents: ESP spend, list hygiene, warmup, DMARC monitoring, dedicated IPs, and human review.";
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+const providers = data.providers;
+const listHygiene = data.list_hygiene;
+const warmup = data.warmup;
+const dmarcTools = data.dmarc_tools;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the full monthly cost of sending AI-agent-generated email while preserving inbox placement: ESP fees, list-hygiene verification, warmup tooling, DMARC/deliverability monitoring, dedicated IPs, and human review time." },
+  { q: "Why is deliverability cost separate from the ESP bill?", a: "The raw send cost is only part of the story. Bounces, spam complaints, and low engagement hurt sender reputation, which lowers inbox placement and increases churn. List hygiene, warmup, and monitoring are insurance against that." },
+  { q: "How is inbox placement estimated?", a: "We start from a baseline of 82% inbox placement for a well-configured sender. The chosen provider, list-hygiene bounce reduction, warmup tool, engagement rates, dedicated IP, and complaint rate all adjust the estimate up or down. It is directional, not a guarantee." },
+  { q: "When should I use a dedicated IP?", a: "Dedicated IPs are usually worth it above ~50k emails/month or when your reputation matters more than cost. They isolate you from other senders but require warmup and monitoring." },
+  { q: "What counts as a high complaint rate?", a: "Above 0.3% is generally risky. Above 0.5% can trigger blocks at major mailbox providers. Aim for <0.1% for newsletters and <0.2% for SDR outbound." },
+  { q: "Does AI-generated email hurt deliverability?", a: "Not directly. But AI agents can send at scale with inconsistent quality, triggering spam complaints or irrelevant content. Good list hygiene, human review, and rate limits protect reputation." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Email Deliverability Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-email-deliverability-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📬</div>
+      <h1 class="display-heading mb-4">AI Agent Email Deliverability Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the true monthly cost of AI-agent-driven email: ESP, list hygiene, warmup, DMARC monitoring, dedicated IPs, and human review.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Email & deliverability inputs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly emails sent</span>
+          <input id="monthlyEmails" type="number" min="0" step="1000" value={defaults.monthly_emails} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">List size (subscribers)</span>
+          <input id="listSize" type="number" min="0" step="100" value={defaults.list_size} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Emails per subscriber / month</span>
+          <input id="emailsPerSub" type="number" min="0" step="0.1" value={defaults.emails_per_month_per_sub} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Bounce rate (%)</span>
+          <input id="bouncePct" type="number" min="0" max="100" step="0.1" value={defaults.bounce_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Spam complaint rate (%)</span>
+          <input id="complaintPct" type="number" min="0" max="100" step="0.01" value={defaults.complaint_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Open rate (%)</span>
+          <input id="openPct" type="number" min="0" max="100" step="0.5" value={defaults.open_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Click rate (%)</span>
+          <input id="clickPct" type="number" min="0" max="100" step="0.5" value={defaults.click_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Email provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={p.name} selected={p.name === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">List hygiene / verification</span>
+          <select id="listHygiene" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {listHygiene.map(h => <option value={h.name} selected={h.name === defaults.list_hygiene}>{h.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Warmup / reputation tool</span>
+          <select id="warmup" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {warmup.map(w => <option value={w.name} selected={w.name === defaults.warmup}>{w.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">DMARC / monitoring tool</span>
+          <select id="dmarcTool" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {dmarcTools.map(d => <option value={d.name} selected={d.name === defaults.dmarc_tool}>{d.name}</option>)}
+          </select>
+        </label>
+        <label class="flex items-center gap-3 mt-6">
+          <input id="dedicatedIp" type="checkbox" checked={defaults.dedicated_ip} class="w-5 h-5 rounded border-neutral-700 bg-neutral-900 text-brand-gold" />
+          <span class="text-neutral-300 text-sm">Dedicated IP</span>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sending domains</span>
+          <input id="domainCount" type="number" min="1" step="1" value={defaults.domain_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review hours / month</span>
+          <input id="reviewHours" type="number" min="0" step="0.5" value={defaults.human_review_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review hourly rate ($)</span>
+          <input id="reviewRate" type="number" min="0" step="5" value={defaults.human_review_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly deliverability cost</p>
+        <p id="monthlyCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1,000 emails</p>
+        <p id="costPer1k" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Estimated inbox placement</p>
+        <p id="inboxPlacement" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">ESP send cost</td>
+            <td id="espCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="espShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Dedicated IP</td>
+            <td id="ipCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="ipShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">List hygiene / verification</td>
+            <td id="hygieneCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="hygieneShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Warmup / reputation</td>
+            <td id="warmupCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="warmupShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">DMARC / monitoring</td>
+            <td id="dmarcCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="dmarcShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Human review</td>
+            <td id="reviewCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison at your volume</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">ESP cost/mo</th>
+              <th class="py-3 pr-4 text-right">+ Dedicated IP</th>
+              <th class="py-3 pr-4 text-right">Total stack/mo</th>
+              <th class="py-3 pr-4 text-right">Inbox boost</th>
+            </tr>
+          </thead>
+          <tbody id="providerComparisonBody" class="text-neutral-200">
+            <tr><td colspan="5" class="py-4 text-neutral-500">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/newsletter-revenue-calculator/" class="btn-primary text-sm">Newsletter Revenue Calculator →</a>
+      <a href="/tools/agent-outreach-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Outreach Campaign Cost Calc →</a>
+      <a href="/tools/newsletter-sponsorship-roi/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Sponsorship ROI Calc →</a>
+      <a href="/tools/agent-newsletter-production-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Newsletter Production Cost →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ dataJson: JSON.stringify({ providers, list_hygiene: listHygiene, warmup, dmarc_tools: dmarcTools, scenarios }) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    const { providers, list_hygiene, warmup, dmarc_tools, scenarios } = JSON.parse(dataJson);
+
+    function find(arr, name) { return arr.find(x => x.name === name); }
+
+    function getInputs() {
+      return {
+        monthlyEmails: Math.max(0, parseFloat(document.getElementById('monthlyEmails').value) || 0),
+        listSize: Math.max(0, parseFloat(document.getElementById('listSize').value) || 0),
+        emailsPerSub: Math.max(0, parseFloat(document.getElementById('emailsPerSub').value) || 0),
+        bouncePct: Math.min(100, Math.max(0, parseFloat(document.getElementById('bouncePct').value) || 0)),
+        complaintPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('complaintPct').value) || 0)),
+        openPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('openPct').value) || 0)),
+        clickPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('clickPct').value) || 0)),
+        provider: document.getElementById('provider').value,
+        listHygiene: document.getElementById('listHygiene').value,
+        warmup: document.getElementById('warmup').value,
+        dmarcTool: document.getElementById('dmarcTool').value,
+        dedicatedIp: document.getElementById('dedicatedIp').checked,
+        domainCount: Math.max(1, parseFloat(document.getElementById('domainCount').value) || 1),
+        reviewHours: Math.max(0, parseFloat(document.getElementById('reviewHours').value) || 0),
+        reviewRate: Math.max(0, parseFloat(document.getElementById('reviewRate').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      const ids = {
+        monthlyEmails: obj.monthly_emails,
+        listSize: obj.list_size,
+        emailsPerSub: obj.emails_per_month_per_sub,
+        bouncePct: obj.bounce_pct,
+        complaintPct: obj.complaint_pct,
+        openPct: obj.open_pct,
+        clickPct: obj.click_pct,
+        provider: obj.provider,
+        listHygiene: obj.list_hygiene,
+        warmup: obj.warmup,
+        dmarcTool: obj.dmarc_tool,
+        dedicatedIp: obj.dedicated_ip,
+        domainCount: obj.domain_count,
+        reviewHours: obj.human_review_hours,
+        reviewRate: obj.human_review_rate,
+        projectionMonths: obj.projection_months
+      };
+      for (const [id, val] of Object.entries(ids)) {
+        if (val === undefined) continue;
+        const el = document.getElementById(id);
+        if (el.type === 'checkbox') el.checked = !!val;
+        else el.value = val;
+      }
+    }
+
+    function espCost(p, monthlyEmails) {
+      if (p.per_subscriber_monthly) {
+        // ConvertKit/Beehiiv style: cost per subscriber, but cap by list size
+        const subs = Math.max(0, parseFloat(document.getElementById('listSize').value) || 0);
+        return subs * p.per_subscriber_monthly;
+      }
+      if (monthlyEmails <= p.free_tier_1k * 1000) {
+        return p.pro_monthly || 0;
+      }
+      const included = (p.pro_included_1k || 0) * 1000;
+      const over = Math.max(0, monthlyEmails - included);
+      return (p.pro_monthly || 0) + (over / 1000) * (p.pro_overage_per_1k || p.overage_per_1k || 0);
+    }
+
+    function computeCore(inps) {
+      const p = find(providers, inps.provider);
+      const h = find(list_hygiene, inps.listHygiene);
+      const w = find(warmup, inps.warmup);
+      const d = find(dmarc_tools, inps.dmarcTool);
+
+      const emails = inps.monthlyEmails;
+      const esp = espCost(p, emails);
+      const ip = inps.dedicatedIp ? (p.dedicated_ip_monthly || 0) : 0;
+      const hygiene = (emails / 1000) * (h.cost_per_1k_emails || 0);
+      const warmupCost = w.monthly_cost || 0;
+      const dmarcCost = d.monthly_cost || 0;
+      const reviewCost = inps.reviewHours * inps.reviewRate;
+
+      const monthlyCost = esp + ip + hygiene + warmupCost + dmarcCost + reviewCost;
+      const costPer1k = emails > 0 ? (monthlyCost / (emails / 1000)) : 0;
+
+      // Inbox placement model
+      let placement = 82;
+      placement += p.inbox_score_boost || 0;
+      placement += w.inbox_boost || 0;
+      // hygiene bounce reduction: each 10% bounce reduction adds ~0.5 point
+      placement += (h.bounce_reduction_pct || 0) * 0.05;
+      // engagement
+      placement += (inps.openPct - 30) * 0.15;
+      placement += (inps.clickPct - 5) * 0.25;
+      // dedicated IP small bump if volume high enough
+      if (inps.dedicatedIp && emails >= 30000) placement += 2;
+      // penalties
+      placement -= Math.max(0, (inps.bouncePct - 1)) * 1.2;
+      placement -= inps.complaintPct * 8;
+      placement = Math.min(98, Math.max(20, placement));
+
+      const periodCost = monthlyCost * inps.projectionMonths;
+
+      return { p, h, w, d, esp, ip, hygiene, warmupCost, dmarcCost, reviewCost, monthlyCost, costPer1k, placement, periodCost };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const r = computeCore(inps);
+
+      document.getElementById('monthlyCost').textContent = fmtMoney0(r.monthlyCost);
+      document.getElementById('costPer1k').textContent = fmtMoney(r.costPer1k);
+      document.getElementById('inboxPlacement').textContent = fmtNum(r.placement) + '%';
+      document.getElementById('periodCost').textContent = fmtMoney0(r.periodCost);
+
+      const total = r.monthlyCost;
+      const setRow = (costId, shareId, cost) => {
+        document.getElementById(costId).textContent = fmtMoney(cost);
+        document.getElementById(shareId).textContent = total > 0 ? (cost / total * 100).toFixed(1) + '%' : '0%';
+      };
+      setRow('espCostRow', 'espShare', r.esp);
+      setRow('ipCostRow', 'ipShare', r.ip);
+      setRow('hygieneCostRow', 'hygieneShare', r.hygiene);
+      setRow('warmupCostRow', 'warmupShare', r.warmupCost);
+      setRow('dmarcCostRow', 'dmarcShare', r.dmarcCost);
+      setRow('reviewCostRow', 'reviewShare', r.reviewCost);
+
+      // Provider comparison
+      const tbody = document.getElementById('providerComparisonBody');
+      const rows = providers.map(provider => {
+        const cost = espCost(provider, inps.monthlyEmails);
+        const ipCost = inps.dedicatedIp ? (provider.dedicated_ip_monthly || 0) : 0;
+        const stack = cost + ipCost + r.hygiene + r.warmupCost + r.dmarcCost + r.reviewCost;
+        const isCurrent = provider.name === inps.provider;
+        return `<tr class="border-b border-neutral-800/50 ${isCurrent ? 'text-brand-gold' : ''}">
+          <td class="py-3 pr-4">${provider.name} ${isCurrent ? '(selected)' : ''}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(cost)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(ipCost)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(stack)}</td>
+          <td class="py-3 pr-4 text-right font-mono">+${provider.inbox_score_boost}</td>
+        </tr>`;
+      }).join('');
+      tbody.innerHTML = rows;
+
+      // Verdict
+      let verdict = '';
+      const hygieneSavings = (inps.monthlyEmails / 1000) * (find(list_hygiene, inps.listHygiene).cost_per_1k_emails || 0);
+      if (r.placement < 75) {
+        verdict = `⚠️ Estimated inbox placement is ${fmtNum(r.placement)}%. Review list hygiene, complaint rate, and engagement before scaling sends.`;
+      } else if (r.placement < 85) {
+        verdict = `⚡ Inbox placement is ${fmtNum(r.placement)}% — acceptable, but small improvements in list hygiene or engagement could lift ROI.`;
+      } else {
+        verdict = `✅ Strong estimated inbox placement of ${fmtNum(r.placement)}%. Your deliverability stack is well-invested for this volume.`;
+      }
+      if (inps.complaintPct > 0.3) {
+        verdict += ` Complaint rate above 0.3% is risky; throttle sends and add human review.`;
+      }
+      if (r.ip > 0 && inps.monthlyEmails < 30000) {
+        verdict += ` Dedicated IP at <30k sends/month may be unnecessary cost.`;
+      }
+      if (hygieneSavings === 0 && inps.bouncePct > 1.5) {
+        verdict += ` List hygiene would likely pay for itself given your bounce rate.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['monthlyEmails','listSize','emailsPerSub','bouncePct','complaintPct','openPct','clickPct','provider','listHygiene','warmup','dmarcTool','dedicatedIp','domainCount','reviewHours','reviewRate','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(el.type === 'checkbox' ? 'change' : 'input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

@@ -693,11 +693,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Cross-links: Agent Prompt Testing Budget Calculator, Agent API Pricing Comparator, Agent Output Value Calculator, Agent Evaluation Planner.
 
 ## AI Agent Retention & Churn Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-retention-churn-cost-calculator/
-|- Description: Estimate how much customer churn, support surge, and reactivation spend cost when an AI agent delivers bad experiences.
-|- Inputs: MAU, agent sessions per user per month, agent failure/unsatisfactory rate (%), churn likelihood after a failure (%), baseline monthly churn (%), MRR per user ($), gross margin (%), LTV per user ($), support tickets per failure (%), support cost per ticket ($), reactivation rate (%), reactivation cost per user ($), goodwill/refund cost per failure ($), setup hours/rate, maintenance hours/rate, projection months.
-|- Outputs: monthly agent-attributed churn cost, churned users per month, cost per failed session, projected period cost, lost MRR, lost gross margin, lost LTV, support surge cost, reactivation spend, goodwill spend, failure-rate sensitivity table, verdict.
-|- Audience: AI agent builders and operators quantifying the business cost of agent failures and building the case for reliability investments.
-|- Cross-links: Agent Outage Cost Calculator, Human Escalation Cost Calculator, Per-User Cost Calculator, Support Deflection ROI Calculator.
+||- URL: https://hermesdispatch.dev/tools/agent-retention-churn-cost-calculator/
+||- Description: Estimate how much customer churn, support surge, and reactivation spend cost when an AI agent delivers bad experiences.
+||- Inputs: MAU, agent sessions per user per month, agent failure/unsatisfactory rate (%), churn likelihood after a failure (%), baseline monthly churn (%), MRR per user ($), gross margin (%), LTV per user ($), support tickets per failure (%), support cost per ticket ($), reactivation rate (%), reactivation cost per user ($), goodwill/refund cost per failure ($), setup hours/rate, maintenance hours/rate, projection months.
+||- Outputs: monthly agent-attributed churn cost, churned users per month, cost per failed session, projected period cost, lost MRR, lost gross margin, lost LTV, support surge cost, reactivation spend, goodwill spend, failure-rate sensitivity table, verdict.
+||- Audience: AI agent builders and operators quantifying the business cost of agent failures and building the case for reliability investments.
+||- Cross-links: Agent Outage Cost Calculator, Human Escalation Cost Calculator, Per-User Cost Calculator, Support Deflection ROI Calculator.
+
+## AI Agent Email Deliverability Cost Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-email-deliverability-cost-calculator/
+||- Description: Estimate monthly ESP, list hygiene, warmup, DMARC monitoring, dedicated IP, and human review costs for AI-agent-driven email.
+||- Inputs: monthly emails sent, list size, emails per subscriber per month, bounce rate (%), spam complaint rate (%), open rate (%), click rate (%), email provider, list hygiene provider, warmup tool, DMARC monitoring tool, dedicated IP toggle, sending domain count, human review hours/month, review hourly rate, projection months.
+||- Outputs: total monthly deliverability cost, cost per 1,000 emails, estimated inbox placement (%), projected period cost, cost breakdown, provider comparison table, verdict.
+||- Audience: newsletter publishers, AI SDR teams, and AI agent builders sending high-volume email.
+||- Cross-links: Newsletter Revenue Calculator, Outreach Campaign Cost Calculator, Sponsorship ROI Calculator, Newsletter Production Cost Calculator.
 
 ## Hub Pages
