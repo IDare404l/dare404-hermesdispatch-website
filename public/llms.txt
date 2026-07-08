@@ -441,15 +441,24 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||- Audience: AI agent builders designing multi-step workflows
 |||
 ## AI Agent Concurrency & Queue Cost Calculator
-- URL: https://hermesdispatch.dev/tools/agent-concurrency-cost-calculator/
-- Description: Estimate monthly cost and queue behavior for AI agents as concurrency, rate limits, retries, and container capacity scale.
-- Inputs: monthly requests, peak concurrency, requests per session, LLM provider, input/output tokens per request, cached input %, reasoning multiplier, queue depth target, provider rate limit, timeout, retry rate, retry multiplier, container size, extra infra monthly, projection months
-- Outputs: required containers, estimated queue wait, monthly LLM cost, monthly infra cost, peak RPM, utilization, cost per 1k requests, total monthly cost, concurrency sensitivity table, verdict
-- Audience: AI agent builders scaling production workloads
-
-## AI Agent Prompt Injection & Security Risk Scanner
-|- URL: https://hermesdispatch.dev/tools/agent-prompt-injection-scanner/
-|- Description: Score an AI agent's system prompt and tool setup for prompt injection, jailbreak, data exfiltration, tool hijacking, and indirect injection risks.
+|- URL: https://hermesdispatch.dev/tools/agent-concurrency-cost-calculator/
+|- Description: Estimate monthly cost and queue behavior for AI agents as concurrency, rate limits, retries, and container capacity scale.
+|- Inputs: monthly requests, peak concurrency, requests per session, LLM provider, input/output tokens per request, cached input %, reasoning multiplier, queue depth target, provider rate limit, timeout, retry rate, retry multiplier, container size, extra infra monthly, projection months
+|- Outputs: required containers, estimated queue wait, monthly LLM cost, monthly infra cost, peak RPM, utilization, cost per 1k requests, total monthly cost, concurrency sensitivity table, verdict
+|- Audience: AI agent builders scaling production workloads
+|- Cross-links: Inference Capacity Planner, API Pricing Comparator, Latency Budget Calculator, Model Router Cost Calculator
+|
+## AI Agent Workforce Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-workforce-cost-calculator/
+|- Description: Estimate monthly cost for multi-agent orchestration: planners, workers, reviewers, tool users, shared memory, handoffs, and human review.
+|- Inputs: tasks per month, coordination rounds, provider, cached input %, agent role counts (planner, worker, reviewer, tool-user, memory), tool preset, memory/RAG preset, human review rate/minutes/hourly cost, setup/maintenance hours and rates, projection months
+|- Outputs: agent calls per month, LLM orchestration cost, tool + memory cost, total monthly cost, cost per task, handoff cost, human review cost, setup cost, projected period cost, average agents per task, cost breakdown table, verdict
+|- Audience: AI agent builders designing multi-agent crews, swarms, or hierarchical orchestration
+|- Cross-links: Agent API Pricing Comparator, Memory / RAG Cost Calculator, Tool Call Cost Calculator, Agent Stack Builder
+|
+|## AI Agent Prompt Injection & Security Risk Scanner
+||- URL: https://hermesdispatch.dev/tools/agent-prompt-injection-scanner/
+||- Description: Score an AI agent's system prompt and tool setup for prompt injection, jailbreak, data exfiltration, tool hijacking, and indirect injection risks.
 |- Inputs: exposure profile, checklist of security controls
 |- Outputs: overall risk score, risk level label, per-category risk breakdown, estimated mitigation cost, prioritized fix list
 |- Audience: AI agent builders and security teams hardening agents before deployment

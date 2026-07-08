@@ -1,0 +1,405 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_workforce_cost.json';
+
+const title = "AI Agent Workforce Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost for multi-agent AI systems: planner, worker, reviewer, tool-user, and memory agents, plus handoff overhead, shared memory, tool calls, and human review.";
+const providers = data.providers;
+const roles = data.agent_roles;
+const toolPresets = data.tool_presets;
+const memoryPresets = data.memory_presets;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the all-in monthly cost of a multi-agent workforce: orchestration LLM calls for each agent role, handoff messages between agents, shared memory/RAG queries, external tool/API calls, and human review labor." },
+  { q: "How are handoff costs counted?", a: "Each coordination round adds handoff tokens per active agent. These represent summaries, context passing, and supervisor instructions exchanged between agents." },
+  { q: "What is a coordination round?", a: "A round is one cycle where agents pass outputs to a planner/supervisor or to each other. A simple pipeline has 1 round; an iterative reflection loop may have 3+." },
+  { q: "Why separate tool-user and memory agents?", a: "Some agents call external APIs (search, browser, code interpreters) while others manage shared context or retrieval. Separating them lets you size those cost buckets independently." },
+  { q: "Which is usually the biggest cost driver?", a: "Often the worker agents, because there are more of them and they produce the longest outputs. Large context windows in planner or memory agents can also dominate if not cached." },
+  { q: "How do I reduce multi-agent cost?", a: "Use cheaper models for routing and summarization, cache repeated context, limit coordination rounds, batch tool calls, and downsample human review where model confidence is high." }
+];
+
+const roleBySlug = Object.fromEntries(roles.map(r => [r.slug, r]));
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Workforce Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-workforce-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧑‍🤝‍🧑</div>
+      <h1 class="display-heading mb-4">AI Agent Workforce Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly cost for multi-agent orchestration: planners, workers, reviewers, tool users, shared memory, handoffs, and human review.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workforce configuration</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tasks per month</span>
+          <input id="tasksPerMonth" type="number" min="1" step="10" value={defaults.tasks_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Coordination rounds</span>
+          <input id="coordinationRounds" type="number" min="1" step="1" value={defaults.coordination_rounds} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+
+        {roles.map(r => (
+          <label class="block" key={r.slug}>
+            <span class="text-neutral-400 text-sm">{r.name} count</span>
+            <input id={`count-${r.slug}`} type="number" min="0" step="1" value={defaults[`${r.slug}_count` as keyof typeof defaults] ?? 0} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        ))}
+
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tool preset</span>
+          <select id="toolPreset" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {toolPresets.map(t => <option value={JSON.stringify(t)} selected={t.slug === defaults.tool_preset}>{t.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Memory / RAG preset</span>
+          <select id="memoryPreset" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {memoryPresets.map(m => <option value={JSON.stringify(m)} selected={m.slug === defaults.memory_preset}>{m.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="humanReviewRate" type="number" min="0" max="100" step="5" value={defaults.human_review_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review minutes / task</span>
+          <input id="humanReviewMinutes" type="number" min="0" step="0.25" value={defaults.human_review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly cost ($)</span>
+          <input id="reviewerHourly" type="number" min="0" step="5" value={defaults.reviewer_hourly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupHourlyRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="1" value={defaults.maintenance_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceHourlyRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Agent calls / month</p>
+        <p id="totalCalls" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">LLM orchestration cost</p>
+        <p id="llmCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Tool + memory cost</p>
+        <p id="toolMemoryCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="totalMonthly" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per task</p>
+        <p id="costPerTask" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Handoff cost / month</p>
+        <p id="handoffCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review cost / month</p>
+        <p id="reviewCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Setup cost (one-time)</p>
+        <p id="setupCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Avg agents per task</p>
+        <p id="avgAgents" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200" id="breakdownBody">
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Agent LLM calls</td><td id="agentCell" class="py-3 pr-4 text-right font-mono">—</td><td id="agentShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Handoff / coordination</td><td id="handoffCell" class="py-3 pr-4 text-right font-mono">—</td><td id="handoffShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Tool / API calls</td><td id="toolCell" class="py-3 pr-4 text-right font-mono">—</td><td id="toolShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Shared memory / RAG</td><td id="memoryCell" class="py-3 pr-4 text-right font-mono">—</td><td id="memoryShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Human review labor</td><td id="reviewCell" class="py-3 pr-4 text-right font-mono">—</td><td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Maintenance labor</td><td id="maintenanceCell" class="py-3 pr-4 text-right font-mono">—</td><td id="maintenanceShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-700 font-semibold"><td class="py-3 pr-4">Total monthly</td><td id="totalCell" class="py-3 pr-4 text-right font-mono">—</td><td id="totalShareCell" class="py-3 pr-4 text-right font-mono">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Memory / RAG Cost Calc →</a>
+      <a href="/tools/agent-tool-call-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Tool Call Cost Calc →</a>
+      <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ roles: JSON.stringify(roles) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney3 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    const roleList = JSON.parse(roles);
+    const roleSlugs = roleList.map(r => r.slug);
+
+    function getProvider() { return JSON.parse(document.getElementById('provider').value); }
+    function getToolPreset() { return JSON.parse(document.getElementById('toolPreset').value); }
+    function getMemoryPreset() { return JSON.parse(document.getElementById('memoryPreset').value); }
+
+    function getInputs() {
+      const out = {
+        tasksPerMonth: Number(document.getElementById('tasksPerMonth').value) || 1,
+        coordinationRounds: Number(document.getElementById('coordinationRounds').value) || 1,
+        cachedInputPct: Number(document.getElementById('cachedInputPct').value) || 0,
+        humanReviewRate: Number(document.getElementById('humanReviewRate').value) || 0,
+        humanReviewMinutes: Number(document.getElementById('humanReviewMinutes').value) || 0,
+        reviewerHourly: Number(document.getElementById('reviewerHourly').value) || 0,
+        setupHours: Number(document.getElementById('setupHours').value) || 0,
+        setupHourlyRate: Number(document.getElementById('setupHourlyRate').value) || 0,
+        maintenanceHours: Number(document.getElementById('maintenanceHours').value) || 0,
+        maintenanceHourlyRate: Number(document.getElementById('maintenanceHourlyRate').value) || 0,
+        projectionMonths: Number(document.getElementById('projectionMonths').value) || 1,
+      };
+      roleSlugs.forEach(slug => {
+        out[`${slug}_count`] = Number(document.getElementById(`count-${slug}`).value) || 0;
+      });
+      return out;
+    }
+
+    function setInputs(obj) {
+      if (obj.provider !== undefined) {
+        const sel = document.getElementById('provider');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.provider) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.tasks_per_month !== undefined) document.getElementById('tasksPerMonth').value = obj.tasks_per_month;
+      if (obj.coordination_rounds !== undefined) document.getElementById('coordinationRounds').value = obj.coordination_rounds;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cachedInputPct').value = obj.cached_input_pct;
+      if (obj.human_review_rate !== undefined) document.getElementById('humanReviewRate').value = obj.human_review_rate;
+      if (obj.human_review_minutes !== undefined) document.getElementById('humanReviewMinutes').value = obj.human_review_minutes;
+      if (obj.reviewer_hourly !== undefined) document.getElementById('reviewerHourly').value = obj.reviewer_hourly;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+      if (obj.tool_preset !== undefined) {
+        const sel = document.getElementById('toolPreset');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.tool_preset) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.memory_preset !== undefined) {
+        const sel = document.getElementById('memoryPreset');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.memory_preset) { sel.selectedIndex = i; break; }
+        }
+      }
+      roleSlugs.forEach(slug => {
+        const key = `${slug}_count`;
+        if (obj[key] !== undefined) document.getElementById(`count-${slug}`).value = obj[key];
+      });
+    }
+
+    function costPer1kTokens(provider, inputTokens, outputTokens, cachedInputPct) {
+      const cached = inputTokens * (cachedInputPct / 100);
+      const uncached = inputTokens - cached;
+      return (uncached / 1000) * provider.input_per_1k + (cached / 1000) * provider.cached_input_per_1k + (outputTokens / 1000) * provider.output_per_1k;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const provider = getProvider();
+      const toolPreset = getToolPreset();
+      const memoryPreset = getMemoryPreset();
+
+      const totalAgents = roleSlugs.reduce((sum, slug) => sum + inps[`${slug}_count`], 0);
+      const avgAgents = totalAgents / Math.max(roleSlugs.length, 1);
+
+      let agentCost = 0;
+      let handoffCost = 0;
+      roleList.forEach(r => {
+        const count = inps[`${r.slug}_count`] || 0;
+        if (count <= 0) return;
+        const calls = inps.tasksPerMonth * count;
+        const perCall = costPer1kTokens(provider, r.default_input_tokens, r.default_output_tokens, inps.cachedInputPct);
+        agentCost += calls * perCall;
+
+        const handoffCalls = inps.tasksPerMonth * inps.coordinationRounds * count;
+        const perHandoff = costPer1kTokens(provider, r.handoff_tokens, 50, inps.cachedInputPct); // 50 output tokens for ack/summary
+        handoffCost += handoffCalls * perHandoff;
+      });
+
+      const toolCost = inps.tasksPerMonth * toolPreset.calls_per_task * toolPreset.cost_per_call;
+      const memoryCost = inps.tasksPerMonth * memoryPreset.queries_per_task * memoryPreset.cost_per_query;
+
+      const reviewedTasks = inps.tasksPerMonth * (inps.humanReviewRate / 100);
+      const reviewHours = reviewedTasks * (inps.humanReviewMinutes / 60);
+      const reviewCost = reviewHours * inps.reviewerHourly;
+
+      const maintenanceCost = inps.maintenanceHours * inps.maintenanceHourlyRate;
+      const setupCost = inps.setupHours * inps.setupHourlyRate;
+      const totalMonthly = agentCost + handoffCost + toolCost + memoryCost + reviewCost + maintenanceCost;
+      const periodCost = totalMonthly * inps.projectionMonths + setupCost;
+      const costPerTask = totalMonthly / Math.max(inps.tasksPerMonth, 1);
+      const totalCalls = inps.tasksPerMonth * totalAgents + inps.tasksPerMonth * inps.coordinationRounds * totalAgents;
+
+      document.getElementById('totalCalls').textContent = fmtInt(totalCalls);
+      document.getElementById('llmCost').textContent = fmtMoney(agentCost + handoffCost);
+      document.getElementById('toolMemoryCost').textContent = fmtMoney(toolCost + memoryCost);
+      document.getElementById('totalMonthly').textContent = fmtMoney(totalMonthly);
+      document.getElementById('costPerTask').textContent = fmtMoney3(costPerTask);
+      document.getElementById('handoffCost').textContent = fmtMoney(handoffCost);
+      document.getElementById('reviewCost').textContent = fmtMoney(reviewCost);
+      document.getElementById('setupCost').textContent = fmtMoney(setupCost);
+      document.getElementById('periodCost').textContent = fmtMoney0(periodCost);
+      document.getElementById('avgAgents').textContent = fmtNum(avgAgents);
+
+      const updateRow = (cellId, shareId, val) => {
+        document.getElementById(cellId).textContent = fmtMoney(val);
+        document.getElementById(shareId).textContent = totalMonthly > 0 ? (val / totalMonthly * 100).toFixed(1) + '%' : '0%';
+      };
+      updateRow('agentCell', 'agentShare', agentCost);
+      updateRow('handoffCell', 'handoffShare', handoffCost);
+      updateRow('toolCell', 'toolShare', toolCost);
+      updateRow('memoryCell', 'memoryShare', memoryCost);
+      updateRow('reviewCell', 'reviewShare', reviewCost);
+      updateRow('maintenanceCell', 'maintenanceShare', maintenanceCost);
+      document.getElementById('totalCell').textContent = fmtMoney(totalMonthly);
+      document.getElementById('totalShareCell').textContent = '100%';
+
+      let verdict = '';
+      if (totalMonthly === 0) {
+        verdict = "Set task volume and at least one agent role to see a cost estimate.";
+      } else if (costPerTask < 0.05 && inps.tasksPerMonth > 100) {
+        verdict = `Very cheap per-task workforce: ${fmtMoney3(costPerTask)} each. Good for high-volume automation, but verify quality with spot human review.`;
+      } else if (totalMonthly < 500) {
+        verdict = `Lean multi-agent setup: ${fmtMoney(totalMonthly)}/mo. Cost per task is ${fmtMoney3(costPerTask)}. Review whether coordination rounds can be reduced without hurting quality.`;
+      } else if (totalMonthly < 3000) {
+        const biggest = agentCost >= handoffCost && agentCost >= toolCost && agentCost >= memoryCost && agentCost >= reviewCost ? 'agent LLM calls' : (handoffCost >= toolCost && handoffCost >= memoryCost && handoffCost >= reviewCost ? 'handoff / coordination overhead' : (toolCost >= memoryCost && toolCost >= reviewCost ? 'tool / API calls' : (memoryCost >= reviewCost ? 'shared memory / RAG' : 'human review')));
+        verdict = `Mid-size workforce: ${fmtMoney(totalMonthly)}/mo. The biggest driver is ${biggest}. Consider cheaper models for routing/summarization and cache repeated context to cut spend.`;
+      } else {
+        verdict = `Heavy multi-agent workload: ${fmtMoney(totalMonthly)}/mo (${fmtMoney0(periodCost)} over ${inps.projectionMonths} mo). Look for agent consolidation, fewer coordination rounds, batching tool calls, and stronger prompt caching.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      const ids = ['provider','tasksPerMonth','coordinationRounds','cachedInputPct','humanReviewRate','humanReviewMinutes','reviewerHourly','setupHours','setupHourlyRate','maintenanceHours','maintenanceHourlyRate','projectionMonths','toolPreset','memoryPreset'];
+      roleSlugs.forEach(slug => ids.push(`count-${slug}`));
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.addEventListener('input', compute); el.addEventListener('change', compute); }
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
