@@ -1,0 +1,471 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_per_user_cost.json';
+
+const title = "AI Agent Per-User Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly AI agent cost per active user across LLM API, vector memory, tool calls, human review, and hosting. Compare cost of revenue (COR), gross margin, and required price per seat.";
+const providers = data.providers;
+const embeddingModels = data.embedding_models;
+const vectorStores = data.vector_stores;
+const toolPresets = data.tool_presets;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "Why calculate cost per user instead of per request?", a: "Per-user economics make it easier to set subscription pricing, compare against customer lifetime value, and understand whether a fixed-price seat covers variable AI spend." },
+  { q: "What is included in the monthly per-user cost?", a: "LLM API tokens (input, cached input, output), vector/embedding storage and updates, tool calls, human review labor, and ongoing maintenance. One-time setup is shown separately and amortized over the projection period." },
+  { q: "How is gross margin calculated?", a: "Gross margin = (price per user per month - variable cost per user per month) / price per user per month. It excludes setup and fixed overhead." },
+  { q: "Does this include local GPU or cloud hosting cost?", a: "It includes vector storage hosting and tool-call rates. For full hosting infrastructure sizing, pair this with the Agent Hosting Cost Comparator or Inference Capacity Planner." },
+  { q: "What if my product is free or usage-based?", a: "Set price per user to $0 or use the results to decide what price or conversion rate you need to break even. The cost-per-session metric helps with usage-based billing." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Per-User Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-per-user-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">👤</div>
+      <h1 class="display-heading mb-4">AI Agent Per-User Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly AI agent cost per active user across LLM API, vector memory, tool calls, human review, and hosting. Compare cost of revenue, gross margin, and required seat price.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Per-user usage profile</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly active users (MAU)</span>
+          <input id="mau" type="number" min="1" step="50" value={defaults.mau} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sessions per user / month</span>
+          <input id="sessionsPerUser" type="number" min="0" step="1" value={defaults.sessions_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests per session</span>
+          <input id="requestsPerSession" type="number" min="0" step="1" value={defaults.requests_per_session} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" step="100" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" step="50" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage per user (GB)</span>
+          <input id="storageGbPerUser" type="number" min="0" step="0.01" value={defaults.storage_gb_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Embedding tokens / user / month</span>
+          <input id="embeddingTokens" type="number" min="0" step="1000" value={defaults.embedding_tokens_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Embedding model</span>
+          <select id="embeddingModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {embeddingModels.map(e => <option value={JSON.stringify(e)} selected={e.slug === defaults.embedding_model}>{e.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Vector store</span>
+          <select id="vectorStore" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {vectorStores.map(v => <option value={JSON.stringify(v)} selected={v.slug === defaults.vector_store}>{v.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tool preset</span>
+          <select id="toolPreset" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {toolPresets.map(t => <option value={JSON.stringify(t)} selected={t.slug === defaults.tool_preset}>{t.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="humanReviewPct" type="number" min="0" max="100" step="1" value={defaults.human_review_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review hourly cost ($)</span>
+          <input id="reviewHourlyCost" type="number" min="0" step="5" value={defaults.review_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Minutes to review one session</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupHourlyRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Price per user / month ($)</span>
+          <input id="pricePerUser" type="number" min="0" step="1" value={defaults.price_per_user_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per user / mo</p>
+        <p id="costPerUser" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per session</p>
+        <p id="costPerSession" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Gross margin</p>
+        <p id="grossMargin" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="totalMonthly" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">LLM API cost / user / mo</p>
+        <p id="llmCostPerUser" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Memory & storage / user / mo</p>
+        <p id="memoryCostPerUser" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Tool calls / user / mo</p>
+        <p id="toolCostPerUser" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review / user / mo</p>
+        <p id="reviewCostPerUser" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Setup cost amortized / mo</p>
+        <p id="setupCostAmortized" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Required price for 70% margin</p>
+        <p id="priceFor70" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Per user / mo</th>
+            <th class="py-3 pr-4 text-right">Total / mo</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">LLM API tokens</td>
+            <td id="llmCostUserCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="llmCostTotalCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="llmShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Embedding + vector storage</td>
+            <td id="memoryCostUserCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="memoryCostTotalCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="memoryShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Tool calls</td>
+            <td id="toolCostUserCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="toolCostTotalCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="toolShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Human review</td>
+            <td id="reviewCostUserCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewCostTotalCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Maintenance</td>
+            <td id="maintCostUserCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="maintCostTotalCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="maintShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-700 font-semibold">
+            <td class="py-3 pr-4">Variable cost per user / mo</td>
+            <td id="variableCostUserCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="variableCostTotalCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="variableShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Memory / RAG Cost Calc →</a>
+      <a href="/tools/agent-tool-call-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Tool Call Cost Calc →</a>
+      <a href="/tools/startup-runway-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Runway Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getProvider() {
+      return JSON.parse(document.getElementById('provider').value);
+    }
+    function getEmbeddingModel() {
+      return JSON.parse(document.getElementById('embeddingModel').value);
+    }
+    function getVectorStore() {
+      return JSON.parse(document.getElementById('vectorStore').value);
+    }
+    function getToolPreset() {
+      return JSON.parse(document.getElementById('toolPreset').value);
+    }
+
+    function getInputs() {
+      return {
+        mau: Math.max(1, parseFloat(document.getElementById('mau').value) || 1),
+        sessionsPerUser: Math.max(0, parseFloat(document.getElementById('sessionsPerUser').value) || 0),
+        requestsPerSession: Math.max(0, parseFloat(document.getElementById('requestsPerSession').value) || 0),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        cachedInputPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('cachedInputPct').value) || 0)),
+        storageGbPerUser: Math.max(0, parseFloat(document.getElementById('storageGbPerUser').value) || 0),
+        embeddingTokens: Math.max(0, parseFloat(document.getElementById('embeddingTokens').value) || 0),
+        humanReviewPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('humanReviewPct').value) || 0)),
+        reviewHourlyCost: Math.max(0, parseFloat(document.getElementById('reviewHourlyCost').value) || 0),
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupHourlyRate: Math.max(0, parseFloat(document.getElementById('setupHourlyRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        pricePerUser: Math.max(0, parseFloat(document.getElementById('pricePerUser').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.mau !== undefined) document.getElementById('mau').value = obj.mau;
+      if (obj.sessions_per_user !== undefined) document.getElementById('sessionsPerUser').value = obj.sessions_per_user;
+      if (obj.requests_per_session !== undefined) document.getElementById('requestsPerSession').value = obj.requests_per_session;
+      if (obj.input_tokens !== undefined) document.getElementById('inputTokens').value = obj.input_tokens;
+      if (obj.output_tokens !== undefined) document.getElementById('outputTokens').value = obj.output_tokens;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cachedInputPct').value = obj.cached_input_pct;
+      if (obj.provider !== undefined) {
+        const providerSelect = document.getElementById('provider');
+        for (let i = 0; i < providerSelect.options.length; i++) {
+          const opt = JSON.parse(providerSelect.options[i].value);
+          if (opt.slug === obj.provider) { providerSelect.selectedIndex = i; break; }
+        }
+      }
+      if (obj.storage_gb_per_user !== undefined) document.getElementById('storageGbPerUser').value = obj.storage_gb_per_user;
+      if (obj.embedding_tokens_per_user !== undefined) document.getElementById('embeddingTokens').value = obj.embedding_tokens_per_user;
+      if (obj.embedding_model !== undefined) {
+        const emSelect = document.getElementById('embeddingModel');
+        for (let i = 0; i < emSelect.options.length; i++) {
+          const opt = JSON.parse(emSelect.options[i].value);
+          if (opt.slug === obj.embedding_model) { emSelect.selectedIndex = i; break; }
+        }
+      }
+      if (obj.vector_store !== undefined) {
+        const vsSelect = document.getElementById('vectorStore');
+        for (let i = 0; i < vsSelect.options.length; i++) {
+          const opt = JSON.parse(vsSelect.options[i].value);
+          if (opt.slug === obj.vector_store) { vsSelect.selectedIndex = i; break; }
+        }
+      }
+      if (obj.tool_preset !== undefined) {
+        const tpSelect = document.getElementById('toolPreset');
+        for (let i = 0; i < tpSelect.options.length; i++) {
+          const opt = JSON.parse(tpSelect.options[i].value);
+          if (opt.slug === obj.tool_preset) { tpSelect.selectedIndex = i; break; }
+        }
+      }
+      if (obj.human_review_pct !== undefined) document.getElementById('humanReviewPct').value = obj.human_review_pct;
+      if (obj.review_hourly_cost !== undefined) document.getElementById('reviewHourlyCost').value = obj.review_hourly_cost;
+      if (obj.review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.review_minutes;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupHourlyRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours_per_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_per_month;
+      if (obj.price_per_user_month !== undefined) document.getElementById('pricePerUser').value = obj.price_per_user_month;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const provider = getProvider();
+      const em = getEmbeddingModel();
+      const vs = getVectorStore();
+      const tools = getToolPreset();
+      const requestsPerUser = inps.sessionsPerUser * inps.requestsPerSession;
+      const totalRequests = requestsPerUser * inps.mau;
+      const cachedInputTokens = inps.inputTokens * (inps.cachedInputPct / 100);
+      const uncachedInputTokens = inps.inputTokens - cachedInputTokens;
+      const costPerRequest = (
+        (uncachedInputTokens / 1000) * provider.input_per_1k +
+        (cachedInputTokens / 1000) * provider.cached_input_per_1k +
+        (inps.outputTokens / 1000) * provider.output_per_1k
+      );
+      const llmCostPerUser = costPerRequest * requestsPerUser;
+      const llmCostTotal = llmCostPerUser * inps.mau;
+
+      const embeddingCostPerUser = (inps.embeddingTokens / 1000000) * em.cost_per_1m_tokens;
+      const storageCostPerUser = inps.storageGbPerUser * vs.cost_per_gb_month;
+      const memoryCostPerUser = embeddingCostPerUser + storageCostPerUser;
+      const memoryCostTotal = memoryCostPerUser * inps.mau;
+
+      const toolCallsPerUser = requestsPerUser * tools.calls_per_session;
+      const toolCostPerUser = toolCallsPerUser * tools.cost_per_call;
+      const toolCostTotal = toolCostPerUser * inps.mau;
+
+      const reviewedSessionsPerUser = inps.sessionsPerUser * (inps.humanReviewPct / 100);
+      const reviewHoursPerUser = reviewedSessionsPerUser * (inps.reviewMinutes / 60);
+      const reviewCostPerUser = reviewHoursPerUser * inps.reviewHourlyCost;
+      const reviewCostTotal = reviewCostPerUser * inps.mau;
+
+      const maintenanceCostTotal = inps.maintenanceHours * inps.setupHourlyRate;
+      const maintenanceCostPerUser = inps.mau > 0 ? maintenanceCostTotal / inps.mau : 0;
+
+      const setupCost = inps.setupHours * inps.setupHourlyRate;
+      const setupAmortizedPerUser = setupCost / inps.mau / inps.projectionMonths;
+      const setupAmortizedTotal = setupCost / inps.projectionMonths;
+
+      const variableCostPerUser = llmCostPerUser + memoryCostPerUser + toolCostPerUser + reviewCostPerUser + maintenanceCostPerUser;
+      const variableCostTotal = llmCostTotal + memoryCostTotal + toolCostTotal + reviewCostTotal + maintenanceCostTotal;
+      const totalCostPerUser = variableCostPerUser + setupAmortizedPerUser;
+      const totalMonthly = variableCostTotal + setupAmortizedTotal;
+      const totalSessions = inps.mau * inps.sessionsPerUser;
+      const costPerSession = totalSessions > 0 ? totalMonthly / totalSessions : 0;
+      const grossMargin = inps.pricePerUser > 0 ? ((inps.pricePerUser - variableCostPerUser) / inps.pricePerUser) * 100 : 0;
+      const priceFor70 = variableCostPerUser / 0.30;
+
+      document.getElementById('costPerUser').textContent = fmtMoney(totalCostPerUser);
+      document.getElementById('costPerSession').textContent = fmtMoney2(costPerSession);
+      document.getElementById('grossMargin').textContent = fmtNum(grossMargin) + '%';
+      document.getElementById('totalMonthly').textContent = fmtMoney0(totalMonthly);
+
+      document.getElementById('llmCostPerUser').textContent = fmtMoney(llmCostPerUser);
+      document.getElementById('memoryCostPerUser').textContent = fmtMoney(memoryCostPerUser);
+      document.getElementById('toolCostPerUser').textContent = fmtMoney(toolCostPerUser);
+      document.getElementById('reviewCostPerUser').textContent = fmtMoney(reviewCostPerUser);
+      document.getElementById('setupCostAmortized').textContent = fmtMoney(setupAmortizedPerUser);
+      document.getElementById('priceFor70').textContent = fmtMoney2(priceFor70);
+
+      const updateRow = (userId, totalId, shareId, userVal, totalVal) => {
+        document.getElementById(userId).textContent = fmtMoney(userVal);
+        document.getElementById(totalId).textContent = fmtMoney0(totalVal);
+        document.getElementById(shareId).textContent = variableCostTotal > 0 ? (totalVal / variableCostTotal * 100).toFixed(1) + '%' : '0%';
+      };
+      updateRow('llmCostUserCell', 'llmCostTotalCell', 'llmShare', llmCostPerUser, llmCostTotal);
+      updateRow('memoryCostUserCell', 'memoryCostTotalCell', 'memoryShare', memoryCostPerUser, memoryCostTotal);
+      updateRow('toolCostUserCell', 'toolCostTotalCell', 'toolShare', toolCostPerUser, toolCostTotal);
+      updateRow('reviewCostUserCell', 'reviewCostTotalCell', 'reviewShare', reviewCostPerUser, reviewCostTotal);
+      updateRow('maintCostUserCell', 'maintCostTotalCell', 'maintShare', maintenanceCostPerUser, maintenanceCostTotal);
+      document.getElementById('variableCostUserCell').textContent = fmtMoney(variableCostPerUser);
+      document.getElementById('variableCostTotalCell').textContent = fmtMoney0(variableCostTotal);
+      document.getElementById('variableShare').textContent = '100%';
+
+      let verdict = '';
+      if (grossMargin >= 70) {
+        verdict = `Strong unit economics: ${fmtNum(grossMargin)}% gross margin at $${inps.pricePerUser}/seat. Cost per user is ${fmtMoney(totalCostPerUser)}. At scale, watch LLM token bloat and tool-call retry costs.`;
+      } else if (grossMargin >= 40) {
+        verdict = `Healthy but room to improve: ${fmtNum(grossMargin)}% gross margin. To reach 70% margin, price around ${fmtMoney2(priceFor70)}/user. Largest cost driver is usually ${llmCostPerUser >= memoryCostPerUser && llmCostPerUser >= toolCostPerUser ? 'LLM tokens' : (memoryCostPerUser >= toolCostPerUser ? 'memory/storage' : 'tool calls')}.`;
+      } else if (inps.pricePerUser === 0) {
+        verdict = `No seat price set. Variable cost per user is ${fmtMoney(variableCostPerUser)}; you need at least ${fmtMoney2(priceFor70)}/user for a 70% gross margin. Cost per session is ${fmtMoney2(costPerSession)}.`;
+      } else {
+        verdict = `Thin margin: ${fmtNum(grossMargin)}%. You are spending ${fmtMoney(variableCostPerUser)} to earn $${inps.pricePerUser}. Consider a cheaper model tier, caching more context, reducing tool calls, or raising price to ${fmtMoney2(priceFor70)} for 70% margin.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['mau','sessionsPerUser','requestsPerSession','inputTokens','outputTokens','cachedInputPct','storageGbPerUser','embeddingTokens','humanReviewPct','reviewHourlyCost','reviewMinutes','setupHours','setupHourlyRate','maintenanceHours','pricePerUser','projectionMonths','provider','embeddingModel','vectorStore','toolPreset'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+        document.getElementById(id).addEventListener('change', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
