@@ -1,0 +1,347 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_data_labeling_cost.json';
+
+const title = "AI Agent Data Labeling Cost Calculator | Hermes Dispatch";
+const description = "Estimate the cost, timeline, and review overhead for AI agent training data: image classification, NER, RLHF rankings, and synthetic labels with human validation.";
+const complexities = data.task_complexities;
+const workforces = data.workforces;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What types of labeling projects does this cover?", a: "It covers image classification, text classification, named-entity recognition (NER), search relevance, bounding boxes, RLHF preference rankings, and synthetic labels with human validation." },
+  { q: "How is cost per label calculated?", a: "For vendor/crowd work, cost equals the per-label price times the number of labels. For in-house teams, the calculator uses labels-per-hour and an implied hourly rate derived from your setup labor cost." },
+  { q: "What is the review rate?", a: "Review rate is the percentage of items that need a second-pass human review or quality audit. It adds labor cost and improves accuracy but slows delivery." },
+  { q: "When is synthetic labeling cheaper?", a: "Synthetic LLM labeling is usually cheapest for text-heavy tasks where exact ground truth is less critical, but it needs a validation layer to catch systematic errors." },
+  { q: "How can I reduce labeling spend?", a: "Start with active learning, label the most uncertain examples first, use weak labels and LLM pre-labeling, reduce overlap votes after quality stabilizes, and pool similar tasks into larger batches." },
+  { q: "Does this include model training cost?", a: "No. Use the LLM Fine-Tuning Cost Calculator or Agent Output Value Calculator to estimate downstream training and ROI." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Data Labeling Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-data-labeling-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🏷️</div>
+      <h1 class="display-heading mb-4">AI Agent Data Labeling Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate cost, timeline, and review overhead for training data: image classification, NER, RLHF rankings, and synthetic labels with human validation.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Labeling project inputs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Items to label</span>
+          <input id="itemsToLabel" type="number" min="0" step="100" value={defaults.items_to_label} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Labels per item</span>
+          <input id="labelsPerItem" type="number" min="1" step="1" value={defaults.labels_per_item} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Task complexity</span>
+          <select id="complexitySelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {complexities.map(c => <option value={JSON.stringify(c)} selected={c.slug === defaults.task_complexity}>{c.name}</option>)}
+          </select>
+          <p id="complexityNotes" class="text-neutral-500 text-xs mt-1">{complexities.find(c => c.slug === defaults.task_complexity)?.notes}</p>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Workforce / vendor</span>
+          <select id="workforceSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {workforces.map(w => <option value={JSON.stringify(w)} selected={w.slug === defaults.workforce}>{w.name}</option>)}
+          </select>
+          <p id="workforceNotes" class="text-neutral-500 text-xs mt-1">{workforces.find(w => w.slug === defaults.workforce)?.notes}</p>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cost per label ($)</span>
+          <input id="perLabelCost" type="number" min="0" step="0.01" value={defaults.per_label_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Labels per hour (implied throughput)</span>
+          <input id="labelsPerHour" type="number" min="1" step="5" value={defaults.labels_per_hour} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review rate (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="1" value={defaults.review_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Platform / tooling monthly ($)</span>
+          <input id="platformMonthly" type="number" min="0" step="10" value={defaults.platform_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Overlap / votes per item</span>
+          <input id="overlapVotes" type="number" min="1" step="1" value={defaults.overlap_votes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupHourlyRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Project duration (months)</span>
+          <input id="projectMonths" type="number" min="1" max="60" value={defaults.project_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Synthetic labels (%)</span>
+          <input id="syntheticPct" type="number" min="0" max="100" step="5" value={defaults.synthetic_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Synthetic input tokens / label</span>
+          <input id="syntheticInputTokens" type="number" min="0" step="10" value={defaults.synthetic_input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Synthetic output tokens / label</span>
+          <input id="syntheticOutputTokens" type="number" min="0" step="10" value={defaults.synthetic_output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM input cost / 1M tokens ($)</span>
+          <input id="syntheticInputCost" type="number" min="0" step="0.1" value={defaults.synthetic_cost_per_1k_input * 1000} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM output cost / 1M tokens ($)</span>
+          <input id="syntheticOutputCost" type="number" min="0" step="0.1" value={defaults.synthetic_cost_per_1k_output * 1000} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total labels</p>
+        <p id="totalLabels" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per label</p>
+        <p id="costPerLabel" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total project cost</p>
+        <p id="totalCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Estimated timeline</p>
+        <p id="timeline" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human label cost</p>
+        <p id="humanLabelCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Synthetic label cost</p>
+        <p id="syntheticLabelCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Review cost</p>
+        <p id="reviewCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Platform / tooling</p>
+        <p id="platformCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Setup cost</p>
+        <p id="setupCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Reviewed items</p>
+        <p id="reviewedItems" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/llm-fine-tuning-cost-calculator/" class="btn-primary text-sm">LLM Fine-Tuning Cost Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value Calc →</a>
+      <a href="/tools/agent-vs-hire-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent vs Hire Calc →</a>
+      <a href="/tools/agent-benchmark-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Benchmark Selector →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    function getInputs() {
+      return {
+        items: Math.max(0, parseFloat(document.getElementById('itemsToLabel').value) || 0),
+        labelsPerItem: Math.max(1, parseFloat(document.getElementById('labelsPerItem').value) || 1),
+        perLabelCost: Math.max(0, parseFloat(document.getElementById('perLabelCost').value) || 0),
+        labelsPerHour: Math.max(1, parseFloat(document.getElementById('labelsPerHour').value) || 1),
+        reviewRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewRate').value) || 0)),
+        platformMonthly: Math.max(0, parseFloat(document.getElementById('platformMonthly').value) || 0),
+        overlapVotes: Math.max(1, parseFloat(document.getElementById('overlapVotes').value) || 1),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupHourlyRate: Math.max(0, parseFloat(document.getElementById('setupHourlyRate').value) || 0),
+        projectMonths: Math.max(1, parseFloat(document.getElementById('projectMonths').value) || 1),
+        syntheticPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('syntheticPct').value) || 0)),
+        syntheticInputTokens: Math.max(0, parseFloat(document.getElementById('syntheticInputTokens').value) || 0),
+        syntheticOutputTokens: Math.max(0, parseFloat(document.getElementById('syntheticOutputTokens').value) || 0),
+        syntheticInputCost: Math.max(0, parseFloat(document.getElementById('syntheticInputCost').value) || 0),
+        syntheticOutputCost: Math.max(0, parseFloat(document.getElementById('syntheticOutputCost').value) || 0)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.items_to_label !== undefined) document.getElementById('itemsToLabel').value = obj.items_to_label;
+      if (obj.labels_per_item !== undefined) document.getElementById('labelsPerItem').value = obj.labels_per_item;
+      if (obj.per_label_cost !== undefined) document.getElementById('perLabelCost').value = obj.per_label_cost;
+      if (obj.labels_per_hour !== undefined) document.getElementById('labelsPerHour').value = obj.labels_per_hour;
+      if (obj.review_rate !== undefined) document.getElementById('reviewRate').value = obj.review_rate;
+      if (obj.platform_monthly !== undefined) document.getElementById('platformMonthly').value = obj.platform_monthly;
+      if (obj.overlap_votes !== undefined) document.getElementById('overlapVotes').value = obj.overlap_votes;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupHourlyRate').value = obj.setup_hourly_rate;
+      if (obj.project_months !== undefined) document.getElementById('projectMonths').value = obj.project_months;
+      if (obj.synthetic_pct !== undefined) document.getElementById('syntheticPct').value = obj.synthetic_pct;
+      if (obj.synthetic_input_tokens !== undefined) document.getElementById('syntheticInputTokens').value = obj.synthetic_input_tokens;
+      if (obj.synthetic_output_tokens !== undefined) document.getElementById('syntheticOutputTokens').value = obj.synthetic_output_tokens;
+      if (obj.synthetic_cost_per_1k_input !== undefined) document.getElementById('syntheticInputCost').value = obj.synthetic_cost_per_1k_input * 1000;
+      if (obj.synthetic_cost_per_1k_output !== undefined) document.getElementById('syntheticOutputCost').value = obj.synthetic_cost_per_1k_output * 1000;
+
+      if (obj.task_complexity) {
+        const select = document.getElementById('complexitySelect');
+        for (let opt of select.options) {
+          const c = JSON.parse(opt.value);
+          if (c.slug === obj.task_complexity) { opt.selected = true; document.getElementById('complexityNotes').textContent = c.notes; break; }
+        }
+      }
+      if (obj.workforce) {
+        const select = document.getElementById('workforceSelect');
+        for (let opt of select.options) {
+          const w = JSON.parse(opt.value);
+          if (w.slug === obj.workforce) { opt.selected = true; document.getElementById('workforceNotes').textContent = w.notes; break; }
+        }
+      }
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const totalLabels = inps.items * inps.labelsPerItem;
+      const syntheticLabels = totalLabels * (inps.syntheticPct / 100);
+      const humanLabels = totalLabels - syntheticLabels;
+      const humanLabelCost = humanLabels * inps.perLabelCost * inps.overlapVotes;
+      const syntheticTokensCost = syntheticLabels * (
+        (inps.syntheticInputTokens / 1e6) * inps.syntheticInputCost +
+        (inps.syntheticOutputTokens / 1e6) * inps.syntheticOutputCost
+      );
+      const reviewedItems = inps.items * (inps.reviewRate / 100);
+      const reviewHours = reviewedItems / inps.labelsPerHour;
+      const reviewCost = reviewHours * inps.setupHourlyRate;
+      const platformCost = inps.platformMonthly * inps.projectMonths;
+      const setupCost = inps.setupHours * inps.setupHourlyRate;
+      const totalCost = humanLabelCost + syntheticTokensCost + reviewCost + platformCost + setupCost;
+      const costPerLabel = totalLabels > 0 ? totalCost / totalLabels : 0;
+      const totalHours = totalLabels / inps.labelsPerHour;
+      const timelineMonths = totalHours / (160 * inps.projectMonths) * inps.projectMonths; // rough: 1 FTE = 160h/mo spread across project months
+      const displayMonths = Math.max(inps.projectMonths, timelineMonths);
+
+      document.getElementById('totalLabels').textContent = fmtInt(totalLabels);
+      document.getElementById('costPerLabel').textContent = fmtMoney(costPerLabel);
+      document.getElementById('totalCost').textContent = fmtMoney2(totalCost);
+      document.getElementById('timeline').textContent = displayMonths < 1 ? fmtNum(displayMonths * 30) + ' days' : fmtNum(displayMonths) + ' mo';
+      document.getElementById('humanLabelCost').textContent = fmtMoney2(humanLabelCost);
+      document.getElementById('syntheticLabelCost').textContent = fmtMoney2(syntheticTokensCost);
+      document.getElementById('reviewCost').textContent = fmtMoney2(reviewCost);
+      document.getElementById('platformCost').textContent = fmtMoney2(platformCost);
+      document.getElementById('setupCost').textContent = fmtMoney2(setupCost);
+      document.getElementById('reviewedItems').textContent = fmtInt(reviewedItems);
+
+      let verdict = '';
+      if (costPerLabel < 0.05) {
+        verdict = `Very cheap at ${fmtMoney(costPerLabel)} per label. Good for large-volume pre-training or filtering tasks. Verify quality with a held-out test set.`;
+      } else if (costPerLabel < 0.30) {
+        verdict = `Moderate cost at ${fmtMoney(costPerLabel)} per label. Total project cost is ${fmtMoney2(totalCost)}. Consider raising synthetic share if validation shows acceptable accuracy.`;
+      } else {
+        verdict = `High-cost annotation at ${fmtMoney(costPerLabel)} per label. Look for active learning, LLM pre-labeling, or domain-expert review only on edge cases to protect budget.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      document.getElementById('complexitySelect').addEventListener('change', e => {
+        const c = JSON.parse(e.target.value);
+        document.getElementById('perLabelCost').value = c.per_label_cost_default;
+        document.getElementById('labelsPerHour').value = c.labels_per_hour_default;
+        document.getElementById('reviewRate').value = c.review_rate_default;
+        document.getElementById('complexityNotes').textContent = c.notes;
+        compute();
+      });
+
+      document.getElementById('workforceSelect').addEventListener('change', e => {
+        const w = JSON.parse(e.target.value);
+        document.getElementById('perLabelCost').value = w.per_label_cost_default;
+        document.getElementById('labelsPerHour').value = w.labels_per_hour_default;
+        document.getElementById('platformMonthly').value = w.platform_monthly_default;
+        document.getElementById('workforceNotes').textContent = w.notes;
+        compute();
+      });
+
+      ['itemsToLabel','labelsPerItem','perLabelCost','labelsPerHour','reviewRate','platformMonthly','overlapVotes','setupHours','setupHourlyRate','projectMonths','syntheticPct','syntheticInputTokens','syntheticOutputTokens','syntheticInputCost','syntheticOutputCost'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

@@ -552,13 +552,21 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Cross-links: Agent Tool Call Cost Calculator, Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Output Value Calculator
 
 ## Open Source LLM Selector for Agents
-|- URL: https://hermesdispatch.dev/tools/open-source-llm-selector/
-|- Description: Pick the best open-weight LLM for an AI agent use case by comparing Llama, Qwen, Mistral, DeepSeek, Gemma, Phi, and others.
-|- Inputs: primary use case, max available VRAM (GB), minimum context length (k tokens), deployment preference (local/API/either), native vision required
-|- Outputs: ranked model recommendations, use-case fit score, VRAM fit badge, context and parameter comparison, Ollama and Hugging Face links
-|- Audience: AI agent builders choosing an open-source model for local or API deployment
-|- Cross-links: VRAM Calculator, Local LLM Inference Engine Selector, Agent API Pricing Comparator, Agent Benchmark Selector
-
+||- URL: https://hermesdispatch.dev/tools/open-source-llm-selector/
+||- Description: Pick the best open-weight LLM for an AI agent use case by comparing Llama, Qwen, Mistral, DeepSeek, Gemma, Phi, and others.
+||- Inputs: primary use case, max available VRAM (GB), minimum context length (k tokens), deployment preference (local/API/either), native vision required
+||- Outputs: ranked model recommendations, use-case fit score, VRAM fit badge, context and parameter comparison, Ollama and Hugging Face links
+||- Audience: AI agent builders choosing an open-source model for local or API deployment
+||- Cross-links: VRAM Calculator, Local LLM Inference Engine Selector, Agent API Pricing Comparator, Agent Benchmark Selector
+|
+## AI Agent Data Labeling Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-data-labeling-cost-calculator/
+|- Description: Estimate the cost, timeline, and review overhead for AI agent training data: image classification, NER, RLHF rankings, and synthetic labels with human validation.
+|- Inputs: items to label, labels per item, task complexity, workforce/vendor, per-label cost, labels per hour, review rate, platform tooling monthly, overlap votes, setup hours/rate, project months, synthetic label percentage, synthetic input/output tokens, LLM cost per 1M tokens
+|- Outputs: total labels, cost per label, total project cost, estimated timeline, human label cost, synthetic label cost, review cost, platform cost, setup cost, reviewed items, verdict
+|- Audience: AI agent builders and ML engineers budgeting training data for fine-tuning and evaluation
+|- Cross-links: LLM Fine-Tuning Cost Calculator, Agent Output Value Calculator, Agent vs Human Hire Calculator, Agent Benchmark Selector
+|
 ## AI Agent Observability Cost Calculator
 |- URL: https://hermesdispatch.dev/tools/agent-observability-cost-calculator/
 |- Description: Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring across Langfuse, Sentry, Datadog, New Relic, Grafana Cloud, Honeycomb, and Axiom.
