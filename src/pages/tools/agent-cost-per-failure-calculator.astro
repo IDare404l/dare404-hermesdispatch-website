@@ -1,0 +1,399 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_cost_per_failure.json';
+
+const title = "AI Agent Cost Per Failure / Resolution Cost Calculator | Hermes Dispatch";
+const description = "Estimate the all-in cost of each failed or escalated AI agent task, including retries, human review, reputation impact, churn, and lost opportunity.";
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+const providers = data.llm_providers;
+const severities = data.severity_presets;
+const channels = data.resolution_channels;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the full cost of an AI agent failure or escalation: retry inference, human review time, incident response, customer goodwill, reputation hit, churn, and lost opportunity." },
+  { q: "What counts as a failure?", a: "Any task the agent does not complete acceptably: wrong answer, missed escalation, bad tool call, policy violation, or user dissatisfaction requiring rework." },
+  { q: "Why is reputation impact modeled?", a: "Repeated failures degrade customer trust, increase churn, and can create negative reviews or compliance complaints. We translate that into dollars using MRR, customers at risk, and LTV." },
+  { q: "How is cost per resolved failure different from cost per raw failure?", a: "Some failures resolve automatically on retry. The calculator shows cost per failed attempt and a separate, usually higher, cost per failure that still needs human resolution." },
+  { q: "Can I compare providers?", a: "Yes. The comparison table shows the same workload for each LLM provider, isolating the inference portion of the failure cost." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Cost Per Failure / Resolution Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-cost-per-failure-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚠️</div>
+      <h1 class="display-heading mb-4">AI Agent Cost Per Failure / Resolution Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the all-in cost of every failed or escalated AI agent task. Include retries, human review, reputation, churn, and lost opportunity.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Agent workload & failure inputs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly agent tasks</span>
+          <input id="monthlyTasks" type="number" min="0" step="100" value={defaults.monthly_tasks} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Failure rate (%)</span>
+          <input id="failureRate" type="number" min="0" max="100" step="0.1" value={defaults.failure_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens per task</span>
+          <input id="inputsPerTask" type="number" min="0" step="10" value={defaults.inputs_per_task} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens per task</span>
+          <input id="outputsPerTask" type="number" min="0" step="10" value={defaults.outputs_per_task} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={p.name} selected={p.name === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Failure severity</span>
+          <select id="severity" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {severities.map(s => <option value={s.name} selected={s.name === defaults.severity}>{s.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Resolution channel</span>
+          <select id="channel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {channels.map(c => <option value={c.name} selected={c.name === defaults.channel}>{c.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review minutes / resolved failure</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.human_review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly rate ($)</span>
+          <input id="reviewerRate" type="number" min="0" step="5" value={defaults.reviewer_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Incident response hourly rate ($)</span>
+          <input id="incidentRate" type="number" min="0" step="5" value={defaults.incident_response_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">MRR per customer ($)</span>
+          <input id="mrrPerCustomer" type="number" min="0" step="10" value={defaults.mrr_per_customer} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Customers at risk after a failure (%)</span>
+          <input id="customersAtRiskPct" type="number" min="0" max="100" step="1" value={defaults.customers_at_risk_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LTV per customer ($)</span>
+          <input id="ltvPerCustomer" type="number" min="0" step="100" value={defaults.ltv_per_customer} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Opportunity cost per failure ($)</span>
+          <input id="opportunityCost" type="number" min="0" step="5" value={defaults.opportunity_cost_per_failure} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per failed task</p>
+        <p id="costPerFailure" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per resolved failure</p>
+        <p id="costPerResolved" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly failure cost</p>
+        <p id="monthlyCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost breakdown per failed task</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost component</th>
+            <th class="py-3 pr-4 text-right">Per failed task</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Base inference (the failure run)</td><td id="baseCostRow" class="py-3 pr-4 text-right font-mono">—</td><td id="baseShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Retry inference</td><td id="retryCostRow" class="py-3 pr-4 text-right font-mono">—</td><td id="retryShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Human review</td><td id="reviewCostRow" class="py-3 pr-4 text-right font-mono">—</td><td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Incident response</td><td id="incidentCostRow" class="py-3 pr-4 text-right font-mono">—</td><td id="incidentShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Customer goodwill / refund</td><td id="goodwillCostRow" class="py-3 pr-4 text-right font-mono">—</td><td id="goodwillShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Reputation / churn impact</td><td id="churnCostRow" class="py-3 pr-4 text-right font-mono">—</td><td id="churnShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Lost opportunity</td><td id="oppCostRow" class="py-3 pr-4 text-right font-mono">—</td><td id="oppShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider inference-cost comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">Base + retry / failure</th>
+              <th class="py-3 pr-4 text-right">Monthly failure inference</th>
+            </tr>
+          </thead>
+          <tbody id="providerComparisonBody" class="text-neutral-200">
+            <tr><td colspan="3" class="py-4 text-neutral-500">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-human-escalation-cost-calculator/" class="btn-primary text-sm">Human Escalation Cost Calc →</a>
+      <a href="/tools/agent-retention-churn-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Retention & Churn Cost Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Output Value Calculator →</a>
+      <a href="/tools/agent-redteam-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Red Team Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ dataJson: JSON.stringify({ providers, severities, channels, scenarios }) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    const { providers, severities, channels, scenarios } = JSON.parse(dataJson);
+
+    function find(arr, name) { return arr.find(x => x.name === name); }
+
+    function getInputs() {
+      return {
+        monthlyTasks: Math.max(0, parseFloat(document.getElementById('monthlyTasks').value) || 0),
+        failureRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('failureRate').value) || 0)),
+        inputsPerTask: Math.max(0, parseFloat(document.getElementById('inputsPerTask').value) || 0),
+        outputsPerTask: Math.max(0, parseFloat(document.getElementById('outputsPerTask').value) || 0),
+        cachedInputPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('cachedInputPct').value) || 0)),
+        provider: document.getElementById('provider').value,
+        severity: document.getElementById('severity').value,
+        channel: document.getElementById('channel').value,
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        reviewerRate: Math.max(0, parseFloat(document.getElementById('reviewerRate').value) || 0),
+        incidentRate: Math.max(0, parseFloat(document.getElementById('incidentRate').value) || 0),
+        mrrPerCustomer: Math.max(0, parseFloat(document.getElementById('mrrPerCustomer').value) || 0),
+        customersAtRiskPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('customersAtRiskPct').value) || 0)),
+        ltvPerCustomer: Math.max(0, parseFloat(document.getElementById('ltvPerCustomer').value) || 0),
+        opportunityCost: Math.max(0, parseFloat(document.getElementById('opportunityCost').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      const ids = {
+        monthlyTasks: obj.monthly_tasks,
+        failureRate: obj.failure_rate_pct,
+        inputsPerTask: obj.inputs_per_task,
+        outputsPerTask: obj.outputs_per_task,
+        cachedInputPct: obj.cached_input_pct,
+        provider: obj.provider,
+        severity: obj.severity,
+        channel: obj.channel,
+        reviewMinutes: obj.human_review_minutes,
+        reviewerRate: obj.reviewer_hourly_rate,
+        incidentRate: obj.incident_response_hourly_rate,
+        mrrPerCustomer: obj.mrr_per_customer,
+        customersAtRiskPct: obj.customers_at_risk_pct,
+        ltvPerCustomer: obj.ltv_per_customer,
+        opportunityCost: obj.opportunity_cost_per_failure,
+        projectionMonths: obj.projection_months
+      };
+      for (const [id, val] of Object.entries(ids)) {
+        if (val === undefined) continue;
+        document.getElementById(id).value = val;
+      }
+    }
+
+    function inferenceCost(provider, inputs, outputs, cachedPct) {
+      const cached = inputs * (cachedPct / 100);
+      const uncached = inputs - cached;
+      return (uncached / 1000) * provider.input_per_1k + (cached / 1000) * provider.cached_input_per_1k + (outputs / 1000) * provider.output_per_1k;
+    }
+
+    function computeCore(inps) {
+      const p = find(providers, inps.provider);
+      const sev = find(severities, inps.severity);
+      const ch = find(channels, inps.channel);
+
+      const monthlyFailures = inps.monthlyTasks * (inps.failureRate / 100);
+      const baseInference = inferenceCost(p, inps.inputsPerTask, inps.outputsPerTask, inps.cachedInputPct);
+      const retryRate = sev.api_retry_rate / 100;
+      const retryCost = baseInference * retryRate;
+
+      const resolutionRate = ch.resolution_rate / 100;
+      const unresolvedFailures = monthlyFailures * (1 - resolutionRate);
+      const resolvedFailures = monthlyFailures * resolutionRate;
+
+      const humanTakeoverRate = ch.human_takeover_rate / 100;
+      const humanReviewCostPerResolved = (inps.reviewMinutes / 60) * inps.reviewerRate;
+      const reviewCostPerFailure = humanTakeoverRate * humanReviewCostPerResolved;
+
+      const incidentHoursPerFailure = sev.incident_response_hours;
+      const incidentCostPerFailure = incidentHoursPerFailure * inps.incidentRate;
+
+      const goodwillPerFailure = sev.customer_goodwill_per_failure;
+
+      const churnCostPerFailure = (inps.mrrPerCustomer * (inps.customersAtRiskPct / 100) * (sev.churn_lift_pct / 100) * 12) + (inps.ltvPerCustomer * (inps.customersAtRiskPct / 100) * (sev.churn_lift_pct / 100));
+
+      const reputationCostPerFailure = (inps.mrrPerCustomer * (inps.customersAtRiskPct / 100) * (sev.reputation_hit_per_failure_pct / 100) * 12);
+
+      const opportunityCostPerFailure = inps.opportunityCost;
+
+      const costPerFailure = baseInference + retryCost + reviewCostPerFailure + incidentCostPerFailure + goodwillPerFailure + churnCostPerFailure + reputationCostPerFailure + opportunityCostPerFailure;
+      const costPerResolved = costPerFailure;
+      const monthlyCost = costPerFailure * monthlyFailures;
+      const periodCost = monthlyCost * inps.projectionMonths;
+
+      return {
+        p, sev, ch,
+        monthlyFailures, resolvedFailures, unresolvedFailures,
+        baseInference, retryCost, reviewCostPerFailure, incidentCostPerFailure,
+        goodwillPerFailure, churnCostPerFailure, reputationCostPerFailure, opportunityCostPerFailure,
+        costPerFailure, costPerResolved, monthlyCost, periodCost, resolutionRate, humanTakeoverRate
+      };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const r = computeCore(inps);
+
+      document.getElementById('costPerFailure').textContent = fmtMoney(r.costPerFailure);
+      document.getElementById('costPerResolved').textContent = fmtMoney(r.costPerResolved);
+      document.getElementById('monthlyCost').textContent = fmtMoney0(r.monthlyCost);
+      document.getElementById('periodCost').textContent = fmtMoney0(r.periodCost);
+
+      const total = r.costPerFailure;
+      const setRow = (costId, shareId, cost) => {
+        document.getElementById(costId).textContent = fmtMoney(cost);
+        document.getElementById(shareId).textContent = total > 0 ? (cost / total * 100).toFixed(1) + '%' : '0%';
+      };
+      setRow('baseCostRow', 'baseShare', r.baseInference);
+      setRow('retryCostRow', 'retryShare', r.retryCost);
+      setRow('reviewCostRow', 'reviewShare', r.reviewCostPerFailure);
+      setRow('incidentCostRow', 'incidentShare', r.incidentCostPerFailure);
+      setRow('goodwillCostRow', 'goodwillShare', r.goodwillPerFailure);
+      setRow('churnCostRow', 'churnShare', r.churnCostPerFailure + r.reputationCostPerFailure);
+      setRow('oppCostRow', 'oppShare', r.opportunityCostPerFailure);
+
+      // Provider comparison
+      const tbody = document.getElementById('providerComparisonBody');
+      const rows = providers.map(provider => {
+        const base = inferenceCost(provider, inps.inputsPerTask, inps.outputsPerTask, inps.cachedInputPct);
+        const sev = find(severities, inps.severity);
+        const retry = base * (sev.api_retry_rate / 100);
+        const perFailure = base + retry;
+        const monthly = perFailure * r.monthlyFailures;
+        const isCurrent = provider.name === inps.provider;
+        return `<tr class="border-b border-neutral-800/50 ${isCurrent ? 'text-brand-gold' : ''}">
+          <td class="py-3 pr-4">${provider.name} ${isCurrent ? '(selected)' : ''}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(perFailure)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(monthly)}</td>
+        </tr>`;
+      }).join('');
+      tbody.innerHTML = rows;
+
+      // Verdict
+      let verdict = '';
+      if (r.costPerFailure < 1) {
+        verdict = `✅ Each failure costs about ${fmtMoney(r.costPerFailure)}. Failures are cheap, but watch volume: ${fmtNum(r.monthlyFailures)} failures/month still adds up to ${fmtMoney0(r.monthlyCost)}.`;
+      } else if (r.costPerFailure < 10) {
+        verdict = `⚡ Each failure costs ~${fmtMoney(r.costPerFailure)}. This is moderate — prioritize reducing the failure rate and automating resolution to keep human review from scaling linearly.`;
+      } else {
+        verdict = `⚠️ Each failure costs ~${fmtMoney(r.costPerFailure)}. Failures are expensive. Invest in guardrails, evals, retries, and human-in-the-loop triggers before scaling volume.`;
+      }
+      if (r.humanTakeoverRate > 50) {
+        verdict += ` With ${(r.humanTakeoverRate * 100).toFixed(0)}% human takeover, labor is a large driver — consider a cheaper fallback model or better auto-resolution.`;
+      }
+      if (r.unresolvedFailures / Math.max(r.monthlyFailures, 1) > 0.1) {
+        verdict += ` ${fmtNum(r.unresolvedFailures)} failures/month are projected to stay unresolved; add alerts and a manual queue.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['monthlyTasks','failureRate','inputsPerTask','outputsPerTask','cachedInputPct','provider','severity','channel','reviewMinutes','reviewerRate','incidentRate','mrrPerCustomer','customersAtRiskPct','ltvPerCustomer','opportunityCost','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
