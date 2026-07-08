@@ -198,10 +198,10 @@ Each tool below is a web page with structured data and a clear input/output cont
 
 ### LLM Fine-Tuning Cost Calculator
 - URL: https://hermesdispatch.dev/tools/llm-fine-tuning-cost-calculator/
-- Description: Estimate training and hosting cost to fine-tune an LLM across managed APIs and local GPU routes.
-- Inputs: examples, tokens per example, epochs, monthly usage requests, input/output tokens per request, provider rates, local GPU choice
-- Outputs: one-time training cost, monthly usage cost, first-year total, cheapest managed route, local GPU rental estimate
-- Audience: AI builders choosing between managed fine-tuning APIs and local GPU training
+- Description: Estimate training and hosting cost to fine-tune an LLM across managed APIs and local/cloud GPU routes.
+- Inputs: training examples, tokens per example, epochs, monthly usage requests, input/output tokens per request, managed provider, local GPU route, electricity rate, utilization, projection months
+- Outputs: total training tokens, managed training cost, monthly managed usage cost, first-period managed total, local training cost, local GPU period total, cheapest managed provider, training hours, cost per 1k requests, break-even estimate, provider comparison table, verdict
+- Audience: AI builders choosing between managed fine-tuning APIs and local/cloud GPU training
 
 ### Local LLM Inference Engine Selector
 - URL: https://hermesdispatch.dev/tools/inference-engine-selector/
