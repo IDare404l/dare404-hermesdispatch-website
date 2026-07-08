@@ -1,0 +1,395 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_code_review_cost.json';
+
+const title = "AI Agent Code Review Cost Calculator | Hermes Dispatch";
+const description = "Estimate the monthly cost of running an AI agent for code reviews across LLM APIs, agentic platforms, and human reviewer fallback.";
+const providers = data.providers;
+const platforms = data.platforms;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the all-in monthly cost of an AI code-review agent: LLM tokens consumed per pull request, per-PR platform fees, and human reviewer fallback time for flagged reviews." },
+  { q: "How are input tokens calculated?", a: "Input tokens = files per PR × lines per file × tokens per line. We assume output tokens are the generated review comments, summary, and suggestions." },
+  { q: "What is cached input?", a: "Repeated code context across runs (e.g., shared codebase context, base branch diffs) may be eligible for provider prompt-cache discounts. Set the percentage that is cached." },
+  { q: "Which is cheaper: self-hosted API or a managed code-review platform?", a: "Self-hosted API is cheaper per PR if you already have infrastructure. Managed platforms add per-PR convenience and workflows but raise unit cost; use the platform fee slider to compare." },
+  { q: "Should I include human reviewer cost?", a: "Yes, unless the agent auto-approves everything. Human review rate, minutes per review, and hourly cost model the labor saved or added by the agent." },
+  { q: "How do I reduce code-review agent cost?", a: "Cache repeated context, limit files reviewed per PR, use a smaller model for first-pass comments, and batch trivial approvals to avoid token consumption." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Code Review Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-code-review-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🤖</div>
+      <h1 class="display-heading mb-4">AI Agent Code Review Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the monthly cost of running an AI agent for code reviews across LLM APIs, agentic platforms, and human reviewer fallback.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Review workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review platform</span>
+          <select id="platform" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {platforms.map(pf => <option value={JSON.stringify(pf)} selected={pf.slug === defaults.platform}>{pf.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly pull requests</span>
+          <input id="monthlyPRs" type="number" min="1" step="1" value={defaults.monthly_prs} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Files reviewed per PR</span>
+          <input id="filesPerPR" type="number" min="1" step="1" value={defaults.files_per_pr} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Lines per file</span>
+          <input id="linesPerFile" type="number" min="1" step="10" value={defaults.lines_per_file} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tokens per line</span>
+          <input id="tokensPerLine" type="number" min="1" step="1" value={defaults.tokens_per_line} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens per PR</span>
+          <input id="outputTokens" type="number" min="0" step="100" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="humanReviewRate" type="number" min="0" max="100" step="5" value={defaults.human_review_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review minutes / PR</span>
+          <input id="reviewMinutes" type="number" min="0" step="1" value={defaults.review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly cost ($)</span>
+          <input id="reviewerHourly" type="number" min="0" step="5" value={defaults.reviewer_hourly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Input tokens / PR</p>
+        <p id="tokensPerPR" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly LLM cost</p>
+        <p id="monthlyLLM" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly platform cost</p>
+        <p id="monthlyPlatform" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="totalMonthly" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per PR</p>
+        <p id="costPerPR" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1,000 PRs</p>
+        <p id="costPer1k" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review hours / month</p>
+        <p id="reviewHours" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review cost / month</p>
+        <p id="reviewCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">LLM vs platform vs review split</p>
+        <p id="split" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">LLM inference (input + output)</td>
+            <td id="llmCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="llmShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Review platform fees</td>
+            <td id="platformCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="platformShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Human review labor</td>
+            <td id="reviewCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-700 font-semibold">
+            <td class="py-3 pr-4">Total monthly</td>
+            <td id="totalCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="totalShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison for this workload</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[500px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">Monthly LLM cost</th>
+              <th class="py-3 pr-4 text-right">Cost per PR</th>
+              <th class="py-3 pr-4">Note</th>
+            </tr>
+          </thead>
+          <tbody id="providerTable" class="text-neutral-200">
+            <!-- populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/agent-vs-hire-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent vs Human Hire →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value →</a>
+      <a href="/tools/agent-prompt-testing-budget/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Prompt Testing Budget →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney3 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getProvider() { return JSON.parse(document.getElementById('provider').value); }
+    function getPlatform() { return JSON.parse(document.getElementById('platform').value); }
+
+    function getInputs() {
+      return {
+        monthlyPRs: Number(document.getElementById('monthlyPRs').value) || 1,
+        filesPerPR: Number(document.getElementById('filesPerPR').value) || 1,
+        linesPerFile: Number(document.getElementById('linesPerFile').value) || 1,
+        tokensPerLine: Number(document.getElementById('tokensPerLine').value) || 1,
+        outputTokens: Number(document.getElementById('outputTokens').value) || 0,
+        cachedInputPct: Number(document.getElementById('cachedInputPct').value) || 0,
+        humanReviewRate: Number(document.getElementById('humanReviewRate').value) || 0,
+        reviewMinutes: Number(document.getElementById('reviewMinutes').value) || 0,
+        reviewerHourly: Number(document.getElementById('reviewerHourly').value) || 0,
+        projectionMonths: Number(document.getElementById('projectionMonths').value) || 1,
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.provider !== undefined) {
+        const sel = document.getElementById('provider');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.provider) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.platform !== undefined) {
+        const sel = document.getElementById('platform');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.platform) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.monthly_prs !== undefined) document.getElementById('monthlyPRs').value = obj.monthly_prs;
+      if (obj.files_per_pr !== undefined) document.getElementById('filesPerPR').value = obj.files_per_pr;
+      if (obj.lines_per_file !== undefined) document.getElementById('linesPerFile').value = obj.lines_per_file;
+      if (obj.tokens_per_line !== undefined) document.getElementById('tokensPerLine').value = obj.tokens_per_line;
+      if (obj.output_tokens !== undefined) document.getElementById('outputTokens').value = obj.output_tokens;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cachedInputPct').value = obj.cached_input_pct;
+      if (obj.human_review_rate !== undefined) document.getElementById('humanReviewRate').value = obj.human_review_rate;
+      if (obj.review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.review_minutes;
+      if (obj.reviewer_hourly !== undefined) document.getElementById('reviewerHourly').value = obj.reviewer_hourly;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    function costForProvider(provider, inps) {
+      const inputTokens = inps.filesPerPR * inps.linesPerFile * inps.tokensPerLine;
+      const cachedInputTokens = inputTokens * (inps.cachedInputPct / 100);
+      const uncachedInputTokens = inputTokens - cachedInputTokens;
+      const costPerPR = (
+        (uncachedInputTokens / 1000) * provider.input_per_1k +
+        (cachedInputTokens / 1000) * provider.cached_input_per_1k +
+        (inps.outputTokens / 1000) * provider.output_per_1k
+      );
+      return { inputTokens, costPerPR };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const provider = getProvider();
+      const platform = getPlatform();
+      const { inputTokens, costPerPR } = costForProvider(provider, inps);
+      const monthlyLLM = costPerPR * inps.monthlyPRs;
+      const monthlyPlatform = platform.cost_per_pr * inps.monthlyPRs;
+      const reviewedPRs = inps.monthlyPRs * (inps.humanReviewRate / 100);
+      const reviewHours = reviewedPRs * (inps.reviewMinutes / 60);
+      const monthlyReview = reviewHours * inps.reviewerHourly;
+      const totalMonthly = monthlyLLM + monthlyPlatform + monthlyReview;
+      const periodCost = totalMonthly * inps.projectionMonths;
+      const costPer1k = totalMonthly / inps.monthlyPRs * 1000;
+
+      document.getElementById('tokensPerPR').textContent = fmtInt(inputTokens);
+      document.getElementById('monthlyLLM').textContent = fmtMoney(monthlyLLM);
+      document.getElementById('monthlyPlatform').textContent = fmtMoney(monthlyPlatform);
+      document.getElementById('totalMonthly').textContent = fmtMoney(totalMonthly);
+      document.getElementById('costPerPR').textContent = fmtMoney(totalMonthly / inps.monthlyPRs);
+      document.getElementById('costPer1k').textContent = fmtMoney0(costPer1k);
+      document.getElementById('reviewHours').textContent = fmtNum(reviewHours) + ' hr';
+      document.getElementById('reviewCost').textContent = fmtMoney(monthlyReview);
+      document.getElementById('periodCost').textContent = fmtMoney0(periodCost);
+      const split = totalMonthly > 0 ? fmtNum((monthlyLLM / totalMonthly) * 100) + '% LLM / ' + fmtNum((monthlyPlatform / totalMonthly) * 100) + '% platform / ' + fmtNum((monthlyReview / totalMonthly) * 100) + '% review' : '—';
+      document.getElementById('split').textContent = split;
+
+      const updateRow = (cellId, shareId, val) => {
+        document.getElementById(cellId).textContent = fmtMoney(val);
+        document.getElementById(shareId).textContent = totalMonthly > 0 ? (val / totalMonthly * 100).toFixed(1) + '%' : '0%';
+      };
+      updateRow('llmCell', 'llmShare', monthlyLLM);
+      updateRow('platformCell', 'platformShare', monthlyPlatform);
+      updateRow('reviewCell', 'reviewShare', monthlyReview);
+      document.getElementById('totalCell').textContent = fmtMoney(totalMonthly);
+      document.getElementById('totalShare').textContent = '100%';
+
+      // Provider comparison table
+      const providerSel = document.getElementById('provider');
+      const tbody = document.getElementById('providerTable');
+      let rows = [];
+      for (let i = 0; i < providerSel.options.length; i++) {
+        const prov = JSON.parse(providerSel.options[i].value);
+        const { costPerPR: cpp } = costForProvider(prov, inps);
+        rows.push({ name: prov.name, monthly: cpp * inps.monthlyPRs, perPR: cpp });
+      }
+      rows.sort((a, b) => a.monthly - b.monthly);
+      const cheapest = rows[0].monthly;
+      tbody.innerHTML = rows.map((r, idx) => {
+        const badge = r.monthly === cheapest ? '<span class="ml-2 text-xs bg-brand-gold text-neutral-950 px-2 py-0.5 rounded font-semibold">Cheapest</span>' : '';
+        return `<tr class="border-b border-neutral-800/50 ${idx === 0 ? 'text-brand-gold' : ''}"><td class="py-3 pr-4">${r.name}${badge}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney2(r.monthly)}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney3(r.perPR)}</td><td class="py-3 pr-4 text-sm text-neutral-400">${idx === 0 ? 'Lowest monthly LLM cost for this workload' : ''}</td></tr>`;
+      }).join('');
+
+      let verdict = '';
+      const cpp = totalMonthly / inps.monthlyPRs;
+      if (totalMonthly === 0) {
+        verdict = "Set a workload to see a cost estimate.";
+      } else if (cpp < 0.50) {
+        verdict = `Very cheap per-PR review: ${fmtMoney(cpp)}/PR, ${fmtMoney(totalMonthly)}/mo. Great for small teams or low-stakes repos; watch quality as volume grows.`;
+      } else if (cpp < 2.50) {
+        verdict = `Moderate cost: ${fmtMoney(cpp)}/PR, ${fmtMoney(totalMonthly)}/mo. Balance between model quality and spend; consider caching context and limiting reviewed files per PR.`;
+      } else if (cpp < 6.00) {
+        verdict = `Premium review agent: ${fmtMoney(cpp)}/PR, ${fmtMoney(totalMonthly)}/mo. Largest cost driver is ${monthlyLLM >= monthlyPlatform && monthlyLLM >= monthlyReview ? 'LLM tokens' : (monthlyPlatform >= monthlyReview ? 'platform fees' : 'human review')}. Compare providers in the table above.`;
+      } else {
+        verdict = `High-cost deployment: ${fmtMoney(cpp)}/PR, ${fmtMoney0(periodCost)} over ${inps.projectionMonths} mo. Reduce files reviewed per PR, switch to a smaller model, or lower human review rate to cut spend.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['provider','platform','monthlyPRs','filesPerPR','linesPerFile','tokensPerLine','outputTokens','cachedInputPct','humanReviewRate','reviewMinutes','reviewerHourly','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.addEventListener('input', compute); el.addEventListener('change', compute); }
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

@@ -631,3 +631,11 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Audience: AI agent builders choosing between batch APIs, real-time APIs, and self-hosted GPUs
 |- Cross-links: Agent API Pricing Comparator, Inference Capacity Planner, GPU Cloud vs Buy Calculator, Local LLM ROI Calculator, Agent Output Value Calculator
 
+## AI Agent Code Review Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-code-review-cost-calculator/
+|- Description: Estimate monthly cost of an AI agent for code reviews across LLM APIs, agentic platforms, and human reviewer fallback.
+|- Inputs: LLM provider, review platform, monthly PRs, files reviewed per PR, lines per file, tokens per line, output tokens per PR, cached input percentage, human review rate, review minutes, reviewer hourly cost, projection months
+|- Outputs: input tokens per PR, monthly LLM cost, monthly platform cost, total monthly cost, cost per PR, cost per 1k PRs, human review hours/cost, projected period cost, provider comparison table, verdict
+|- Audience: AI agent builders and engineering teams budgeting automated code-review agents
+|- Cross-links: Agent API Pricing Comparator, Agent vs Human Hire Calculator, Agent Output Value Calculator, Agent Prompt Testing Budget Calculator
+
