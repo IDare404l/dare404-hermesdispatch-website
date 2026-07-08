@@ -210,6 +210,20 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: ranked list of inference engines, setup links, complexity badges, throughput/latency notes
 - Audience: AI builders choosing between Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, and other local inference engines
 
+### AI Agent Shadow / A-B Test Cost Calculator
+- URL: https://hermesdispatch.dev/tools/agent-shadow-ab-test-cost-calculator/
+- Description: Estimate the cost to run an AI agent in shadow mode or A/B test against an existing system, including duplicated inference, human review, decision logging, and outcome tracking.
+- Inputs: test type, production requests/month, test traffic percentage, tasks/request, input/output tokens per task, provider, cached input percentage, decision log size (KB), storage backend, retention months, human review rate, review minutes, reviewer hourly cost, outcome tracking toggle, outcome cost/event, evaluation runs/month, eval input/output tokens, setup/maintenance hours and rates, projection months
+- Outputs: monthly test requests, monthly inference cost, logging/storage cost, outcome tracking cost, human review cost, evaluation cost, total monthly cost, total period cost, cost per 1K production requests, cost per decision reviewed, provider comparison table, verdict
+- Audience: AI agent builders evaluating shadow or A/B experiments
+
+### AI Agent Rollout & Canary Deployment Cost Calculator
+- URL: https://hermesdispatch.dev/tools/agent-rollout-cost-calculator/
+- Description: Estimate the cost of a canary or percentage rollout for an AI agent, including duplicated inference, guardrail checks, monitoring, human review, and expected rollback cost.
+- Inputs: monthly production requests, canary traffic percentage, canary duration (days), tasks/request, input/output tokens per task, LLM provider, cached input percentage, guardrail checks/request, monitoring cost/1K checks, rollback probability, rollback engineering hours and hourly cost, incident/communication cost, human review rate, review minutes, reviewer hourly cost, setup/maintenance hours and rates, projection months
+- Outputs: canary requests, canary inference cost, guardrail/monitoring cost, human review cost, expected rollback cost, setup + maintenance, total project cost, cost per canary request, cost per rollout, cost per production request, provider comparison table, verdict
+- Audience: AI agent builders planning canary or percentage rollouts
+
 ### Answer Engine Citation Tracker
 - URL: https://hermesdispatch.dev/tools/answer-engine-citation-tracker/
 - Description: Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.

@@ -1,0 +1,427 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_rollout_cost.json';
+
+const title = "AI Agent Rollout & Canary Deployment Cost Calculator | Hermes Dispatch";
+const description = "Estimate the cost of a canary or percentage rollout for an AI agent, including duplicated inference, guardrail checks, monitoring, human review, and expected rollback cost.";
+const providers = data.providers;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the incremental cost of rolling out a new AI agent version using a canary or percentage-based deployment: inference on the canary traffic, guardrail/monitoring checks, human review of edge cases, and the expected cost of a rollback." },
+  { q: "How are canary requests calculated?", a: "We take your monthly production request volume, multiply it by the canary traffic percentage, and scale it to the canary duration in days. A 10% canary over 3 days for 1M monthly requests is roughly 9,856 canary requests." },
+  { q: "What are guardrail checks?", a: "Guardrail checks are safety, policy, quality, or output validation calls run per request during the canary. They can be lightweight classifiers, LLM-as-judge calls, or rule-based validators." },
+  { q: "Why is rollback probability a cost?", a: "A rollback consumes engineering time and may trigger incident response, customer communication, or SLA impact. We multiply the rollback probability by the estimated rollback cost to get an expected value." },
+  { q: "Does this include the base production agent cost?", a: "No. The base production agent keeps running for the 100% minus canary share. This calculator only adds the new canary version's cost plus rollout-specific overhead." },
+  { q: "When is a canary cheaper than a direct full rollout?", a: "Canaries are usually cheaper in expected value because they catch regressions on a small slice of traffic before a full rollout, reducing rollback blast radius. The extra cost is the duplicated inference and monitoring during the canary window." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Rollout & Canary Deployment Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-rollout-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🚀</div>
+      <h1 class="display-heading mb-4">AI Agent Rollout & Canary Deployment Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the cost of a canary or percentage rollout for an AI agent, including duplicated inference, guardrail checks, monitoring, human review, and expected rollback cost.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Rollout assumptions</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Production requests / month</span>
+          <input id="monthlyRequests" type="number" min="1" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Canary traffic percentage (%)</span>
+          <input id="canaryTrafficPct" type="number" min="0.1" max="100" step="0.1" value={defaults.canary_traffic_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Canary duration (days)</span>
+          <input id="canaryDurationDays" type="number" min="0.1" max="90" step="0.5" value={defaults.canary_duration_days} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Agent tasks per request</span>
+          <input id="tasksPerRequest" type="number" min="1" step="1" value={defaults.tasks_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / task</span>
+          <input id="inputTokensPerTask" type="number" min="0" step="10" value={defaults.input_tokens_per_task} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / task</span>
+          <input id="outputTokensPerTask" type="number" min="0" step="10" value={defaults.output_tokens_per_task} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input tokens (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="1" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Guardrail checks / request</span>
+          <input id="guardrailChecks" type="number" min="0" step="0.5" value={defaults.guardrail_checks_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monitoring cost / 1K checks ($)</span>
+          <input id="monitoringCostPer1k" type="number" min="0" step="0.001" value={defaults.monitoring_cost_per_1k_checks} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Rollback probability (%)</span>
+          <input id="rollbackProb" type="number" min="0" max="100" step="0.1" value={defaults.rollback_probability_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Rollback engineering hours</span>
+          <input id="rollbackHours" type="number" min="0" step="0.5" value={defaults.rollback_engineering_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Rollback engineer hourly cost ($)</span>
+          <input id="rollbackHourlyCost" type="number" min="0" step="5" value={defaults.rollback_engineer_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Incident / communication cost ($)</span>
+          <input id="incidentCost" type="number" min="0" step="50" value={defaults.incident_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="0.1" value={defaults.human_review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review minutes / decision</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly cost ($)</span>
+          <input id="reviewerHourlyCost" type="number" min="0" step="5" value={defaults.reviewer_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="120" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Canary requests</p>
+        <p id="canaryRequests" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Canary inference cost</p>
+        <p id="canaryInferenceCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Expected rollback cost</p>
+        <p id="expectedRollbackCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total project cost</p>
+        <p id="totalProjectCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Guardrail / monitoring cost</p>
+        <p id="guardrailCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review cost</p>
+        <p id="humanReviewCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Setup + maintenance</p>
+        <p id="laborCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per canary request</p>
+        <p id="costPerCanaryRequest" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per rollout</p>
+        <p id="costPerRollout" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per production request</p>
+        <p id="costPerProductionRequest" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison (canary inference only)</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[600px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">Canary inference</th>
+              <th class="py-3 pr-4 text-right">Per canary request</th>
+              <th class="py-3 pr-4">Note</th>
+            </tr>
+          </thead>
+          <tbody id="providerTable" class="text-neutral-200">
+            <!-- populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-deployment-scorecard/" class="btn-primary text-sm">Deployment Readiness Scorecard →</a>
+      <a href="/tools/agent-shadow-ab-test-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Shadow / A-B Test Cost →</a>
+      <a href="/tools/agent-outage-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Outage Cost Calc →</a>
+      <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), scenarios: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const DAYS_PER_MONTH = 30.44;
+
+    function getProvider() { return JSON.parse(document.getElementById('provider').value); }
+
+    function getInputs() {
+      return {
+        monthlyRequests: Math.max(1, Number(document.getElementById('monthlyRequests').value) || 1),
+        canaryTrafficPct: Math.min(100, Math.max(0.1, Number(document.getElementById('canaryTrafficPct').value) || 0.1)),
+        canaryDurationDays: Math.min(90, Math.max(0.1, Number(document.getElementById('canaryDurationDays').value) || 0.1)),
+        tasksPerRequest: Math.max(1, Number(document.getElementById('tasksPerRequest').value) || 1),
+        inputTokensPerTask: Math.max(0, Number(document.getElementById('inputTokensPerTask').value) || 0),
+        outputTokensPerTask: Math.max(0, Number(document.getElementById('outputTokensPerTask').value) || 0),
+        cachedInputPct: Math.min(100, Math.max(0, Number(document.getElementById('cachedInputPct').value) || 0)),
+        guardrailChecks: Math.max(0, Number(document.getElementById('guardrailChecks').value) || 0),
+        monitoringCostPer1k: Math.max(0, Number(document.getElementById('monitoringCostPer1k').value) || 0),
+        rollbackProb: Math.min(100, Math.max(0, Number(document.getElementById('rollbackProb').value) || 0)),
+        rollbackHours: Math.max(0, Number(document.getElementById('rollbackHours').value) || 0),
+        rollbackHourlyCost: Math.max(0, Number(document.getElementById('rollbackHourlyCost').value) || 0),
+        incidentCost: Math.max(0, Number(document.getElementById('incidentCost').value) || 0),
+        reviewRate: Math.min(100, Math.max(0, Number(document.getElementById('reviewRate').value) || 0)),
+        reviewMinutes: Math.max(0, Number(document.getElementById('reviewMinutes').value) || 0),
+        reviewerHourlyCost: Math.max(0, Number(document.getElementById('reviewerHourlyCost').value) || 0),
+        setupHours: Math.max(0, Number(document.getElementById('setupHours').value) || 0),
+        setupRate: Math.max(0, Number(document.getElementById('setupRate').value) || 0),
+        maintenanceHours: Math.max(0, Number(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceRate: Math.max(0, Number(document.getElementById('maintenanceRate').value) || 0),
+        projectionMonths: Math.max(1, Number(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_requests !== undefined) document.getElementById('monthlyRequests').value = obj.monthly_requests;
+      if (obj.canary_traffic_pct !== undefined) document.getElementById('canaryTrafficPct').value = obj.canary_traffic_pct;
+      if (obj.canary_duration_days !== undefined) document.getElementById('canaryDurationDays').value = obj.canary_duration_days;
+      if (obj.tasks_per_request !== undefined) document.getElementById('tasksPerRequest').value = obj.tasks_per_request;
+      if (obj.input_tokens_per_task !== undefined) document.getElementById('inputTokensPerTask').value = obj.input_tokens_per_task;
+      if (obj.output_tokens_per_task !== undefined) document.getElementById('outputTokensPerTask').value = obj.output_tokens_per_task;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cachedInputPct').value = obj.cached_input_pct;
+      if (obj.provider !== undefined) {
+        const sel = document.getElementById('provider');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.provider) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.guardrail_checks_per_request !== undefined) document.getElementById('guardrailChecks').value = obj.guardrail_checks_per_request;
+      if (obj.monitoring_cost_per_1k_checks !== undefined) document.getElementById('monitoringCostPer1k').value = obj.monitoring_cost_per_1k_checks;
+      if (obj.rollback_probability_pct !== undefined) document.getElementById('rollbackProb').value = obj.rollback_probability_pct;
+      if (obj.rollback_engineering_hours !== undefined) document.getElementById('rollbackHours').value = obj.rollback_engineering_hours;
+      if (obj.rollback_engineer_hourly_cost !== undefined) document.getElementById('rollbackHourlyCost').value = obj.rollback_engineer_hourly_cost;
+      if (obj.incident_cost !== undefined) document.getElementById('incidentCost').value = obj.incident_cost;
+      if (obj.human_review_rate_pct !== undefined) document.getElementById('reviewRate').value = obj.human_review_rate_pct;
+      if (obj.review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.review_minutes;
+      if (obj.reviewer_hourly_cost !== undefined) document.getElementById('reviewerHourlyCost').value = obj.reviewer_hourly_cost;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_month;
+      if (obj.maintenance_hourly_rate !== undefined) document.getElementById('maintenanceRate').value = obj.maintenance_hourly_rate;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    function inferenceCost(requests, tasksPerRequest, inputTokens, outputTokens, cachedPct, provider) {
+      const cachedRatio = cachedPct / 100;
+      const uncachedRatio = 1 - cachedRatio;
+      const tasks = requests * tasksPerRequest;
+      const inputCost = tasks * (inputTokens / 1000) * (uncachedRatio * provider.input_cost_per_1k + cachedRatio * provider.cached_input_cost_per_1k);
+      const outputCost = tasks * (outputTokens / 1000) * provider.output_cost_per_1k;
+      return inputCost + outputCost;
+    }
+
+    const fmtMoney3 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 6 });
+
+    function compute() {
+      const inps = getInputs();
+      const provider = getProvider();
+      const providerList = JSON.parse(providers);
+
+      const canaryRequests = inps.monthlyRequests * (inps.canaryTrafficPct / 100) * (inps.canaryDurationDays / DAYS_PER_MONTH);
+      const canaryTasks = canaryRequests * inps.tasksPerRequest;
+      const canaryInference = inferenceCost(canaryRequests, inps.tasksPerRequest, inps.inputTokensPerTask, inps.outputTokensPerTask, inps.cachedInputPct, provider);
+
+      const guardrailCost = canaryRequests * inps.guardrailChecks * (inps.monitoringCostPer1k / 1000);
+
+      const reviewedDecisions = canaryTasks * (inps.reviewRate / 100);
+      const humanReviewCost = reviewedDecisions * (inps.reviewMinutes / 60) * inps.reviewerHourlyCost;
+
+      const rollbackExpectedCost = (inps.rollbackProb / 100) * (inps.rollbackHours * inps.rollbackHourlyCost + inps.incidentCost);
+
+      const setupCost = inps.setupHours * inps.setupRate;
+      const maintenanceCost = inps.maintenanceHours * inps.maintenanceRate;
+      const totalMaintenance = maintenanceCost * inps.projectionMonths;
+      const laborCost = setupCost + totalMaintenance;
+
+      const canaryWindowCost = canaryInference + guardrailCost + humanReviewCost + rollbackExpectedCost;
+      const totalProjectCost = canaryWindowCost + laborCost;
+
+      const costPerCanaryRequest = canaryRequests > 0 ? canaryWindowCost / canaryRequests : 0;
+      const costPerRollout = canaryWindowCost + setupCost;
+      const costPerProductionRequest = (inps.monthlyRequests * inps.projectionMonths) > 0 ? totalProjectCost / (inps.monthlyRequests * inps.projectionMonths) : 0;
+
+      // Provider comparison
+      const providerRows = providerList.map(p => {
+        const inf = inferenceCost(canaryRequests, inps.tasksPerRequest, inps.inputTokensPerTask, inps.outputTokensPerTask, inps.cachedInputPct, p);
+        return { name: p.name, inference: inf, perRequest: canaryRequests > 0 ? inf / canaryRequests : 0 };
+      }).sort((a, b) => a.inference - b.inference);
+
+      // Summary
+      document.getElementById('canaryRequests').textContent = fmtInt(canaryRequests);
+      document.getElementById('canaryInferenceCost').textContent = fmtMoney2(canaryInference);
+      document.getElementById('expectedRollbackCost').textContent = fmtMoney2(rollbackExpectedCost);
+      document.getElementById('totalProjectCost').textContent = fmtMoney0(totalProjectCost);
+
+      // Secondary
+      document.getElementById('guardrailCost').textContent = fmtMoney2(guardrailCost);
+      document.getElementById('humanReviewCost').textContent = fmtMoney2(humanReviewCost);
+      document.getElementById('laborCost').textContent = fmtMoney2(maintenanceCost) + '/mo + ' + fmtMoney2(setupCost) + ' setup';
+      document.getElementById('costPerCanaryRequest').textContent = fmtMoney2(costPerCanaryRequest);
+      document.getElementById('costPerRollout').textContent = fmtMoney2(costPerRollout);
+      document.getElementById('costPerProductionRequest').textContent = fmtMoney2(costPerProductionRequest);
+
+      // Provider table
+      const tbody = document.getElementById('providerTable');
+      tbody.innerHTML = '';
+      providerRows.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = idx === 0 ? 'border-b border-brand-gold/30' : 'border-b border-neutral-800/50';
+        tr.innerHTML = `<td class="py-3 pr-4">${row.name}${idx === 0 ? ' <span class="text-brand-gold text-xs">cheapest</span>' : ''}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney2(row.inference)}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney3(row.perRequest)}</td><td class="py-3 pr-4 text-sm text-neutral-400">${idx === 0 ? 'Lowest canary inference cost' : ''}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      // Verdict
+      const lines = [
+        { id: 'inference', cost: canaryInference, name: 'canary inference' },
+        { id: 'guardrail', cost: guardrailCost, name: 'guardrail / monitoring' },
+        { id: 'review', cost: humanReviewCost, name: 'human review' },
+        { id: 'rollback', cost: rollbackExpectedCost, name: 'expected rollback' }
+      ];
+      const biggest = lines.reduce((a, b) => a.cost > b.cost ? a : b);
+      let verdict = `This canary will serve about <strong>${fmtInt(canaryRequests)}</strong> requests over <strong>${fmtNum(inps.canaryDurationDays)} days</strong>. The canary window cost is about <strong>${fmtMoney2(canaryWindowCost)}</strong>, and the full project cost (including setup and maintenance) is about <strong>${fmtMoney0(totalProjectCost)}</strong> over ${inps.projectionMonths} months. The largest cost line is ${biggest.name}.`;
+      if (inps.rollbackProb > 10) {
+        verdict += ` With a <strong>${fmtNum(inps.rollbackProb)}%</strong> rollback probability, focus on tightening guardrails and automated tests before widening traffic.`;
+      } else if (inps.canaryTrafficPct > 25) {
+        verdict += ` At <strong>${fmtNum(inps.canaryTrafficPct)}%</strong> traffic, the blast radius is larger; make sure guardrails and automated rollback are in place.`;
+      } else {
+        verdict += ` This is a measured rollout profile. Track error rates, latency, and guardrail rejections before increasing traffic.`;
+      }
+      document.getElementById('verdictText').innerHTML = verdict;
+    }
+
+    const fmtMoney3 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 6 });
+
+    function bind() {
+      const ids = ['monthlyRequests','canaryTrafficPct','canaryDurationDays','tasksPerRequest','inputTokensPerTask','outputTokensPerTask','provider','cachedInputPct','guardrailChecks','monitoringCostPer1k','rollbackProb','rollbackHours','rollbackHourlyCost','incidentCost','reviewRate','reviewMinutes','reviewerHourlyCost','setupHours','setupRate','maintenanceHours','maintenanceRate','projectionMonths'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', compute);
+      });
+
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      compute();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bind);
+    } else {
+      bind();
+    }
+  </script>
+</Layout>

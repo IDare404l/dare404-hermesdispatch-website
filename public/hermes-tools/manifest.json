@@ -350,6 +350,22 @@
       "category": "Crypto & Mining Pivot"
     },
     {
+      "name": "AI Agent Shadow / A-B Test Cost Calculator",
+      "page_url": "https://hermesdispatch.dev/tools/agent-shadow-ab-test-cost-calculator/",
+      "script_url": "https://hermesdispatch.dev/hermes-tools/agent_shadow_ab_test_cost_calculator.py",
+      "toolset": "agents",
+      "file": "agent_shadow_ab_test_cost_calculator.py",
+      "category": "Agent Operations"
+    },
+    {
+      "name": "AI Agent Rollout & Canary Deployment Cost Calculator",
+      "page_url": "https://hermesdispatch.dev/tools/agent-rollout-cost-calculator/",
+      "script_url": "https://hermesdispatch.dev/hermes-tools/agent_rollout_cost_calculator.py",
+      "toolset": "agents",
+      "file": "agent_rollout_cost_calculator.py",
+      "category": "Agent Operations"
+    },
+    {
       "name": "Startup Runway Calculator",
       "page_url": "https://hermesdispatch.dev/tools/startup-runway-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/startup_runway_calculator.py",
