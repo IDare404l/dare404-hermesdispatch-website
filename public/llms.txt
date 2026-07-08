@@ -640,11 +640,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Cross-links: Agent API Pricing Comparator, Agent vs Human Hire Calculator, Agent Output Value Calculator, Agent Prompt Testing Budget Calculator.
 
 ## AI Agent Synthetic Data Generator Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-synthetic-data-cost-calculator/
-|- Description: Estimate the cost to generate synthetic training and evaluation data for AI agents with LLMs, managed platforms, storage, filtering, and human validation.
-|- Inputs: target usable records, generation approach, input/output tokens per record, LLM costs, platform cost per 1K records, local GPU hourly cost, success/pass rate, filter rate, validation tier, review rate, storage backend, record size, retention months, setup/maintenance hours and rates, projection months.
-|- Outputs: records to generate, generation cost, filtering waste cost, validation cost, storage cost, setup + maintenance labor, total period cost, cost per usable record, cost per 1K records, validation hours, approach comparison table, verdict.
-|- Audience: AI agent builders budgeting synthetic training/eval data for fine-tuning, RLHF, and agent trajectory generation.
-|- Cross-links: Agent Data Labeling Cost Calculator, LLM Fine-Tuning Cost Calculator, Agent Output Value Calculator, Agent API Pricing Comparator.
+||- URL: https://hermesdispatch.dev/tools/agent-synthetic-data-cost-calculator/
+||- Description: Estimate the cost to generate synthetic training and evaluation data for AI agents with LLMs, managed platforms, storage, filtering, and human validation.
+||- Inputs: target usable records, generation approach, input/output tokens per record, LLM costs, platform cost per 1K records, local GPU hourly cost, success/pass rate, filter rate, validation tier, review rate, storage backend, record size, retention months, setup/maintenance hours and rates, projection months.
+||- Outputs: records to generate, generation cost, filtering waste cost, validation cost, storage cost, setup + maintenance labor, total period cost, cost per usable record, cost per 1K records, validation hours, approach comparison table, verdict.
+||- Audience: AI agent builders budgeting synthetic training/eval data for fine-tuning, RLHF, and agent trajectory generation.
+||- Cross-links: Agent Data Labeling Cost Calculator, LLM Fine-Tuning Cost Calculator, Agent Output Value Calculator, Agent API Pricing Comparator.
+
+## AI Agent Shadow / A-B Test Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-shadow-ab-test-cost-calculator/
+|- Description: Estimate the cost to run an AI agent in shadow mode or A/B test against an existing system, including duplicated inference, human review, decision logging, and outcome tracking.
+|- Inputs: test type (shadow/A/B), production requests per month, test traffic percentage, agent tasks per request, input/output tokens per task, LLM provider, cached input percentage, decision log size (KB), storage backend, retention months, human review rate, review minutes, reviewer hourly cost, outcome tracking toggle, outcome cost per event, evaluation runs per month, eval input/output tokens, setup hours/rate, maintenance hours/rate, projection months.
+|- Outputs: monthly test requests, monthly inference cost, logging/storage cost, outcome tracking cost, human review cost, evaluation cost, total monthly cost, total period cost, cost per 1K production requests, cost per decision reviewed, provider comparison table, verdict.
+|- Audience: AI agent builders and operators running safe experiments before promoting a new agent to production.
+|- Cross-links: Agent Prompt Testing Budget Calculator, Agent API Pricing Comparator, Agent Output Value Calculator, Agent Evaluation Planner.
 
 ## Hub Pages

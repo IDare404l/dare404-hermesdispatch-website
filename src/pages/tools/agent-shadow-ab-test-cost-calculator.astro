@@ -1,0 +1,541 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_shadow_ab_test_cost.json';
+
+const title = "AI Agent Shadow / A-B Test Cost Calculator | Hermes Dispatch";
+const description = "Estimate the cost to run an AI agent in shadow mode or A/B test against an existing system, including duplicated inference, human review, decision logging, and outcome tracking.";
+const providers = data.providers;
+const storageBackends = data.storage_backends;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the incremental cost of running an AI agent alongside an existing system: shadow mode (duplicate inference on 100% of traffic without changing user output) or A/B test (serving the new agent to a percentage of users)." },
+  { q: "Does it include the cost of the existing production system?", a: "No. It only adds the new shadow/A/B test cost. The baseline production cost is assumed unchanged unless you are running an A/B test where some traffic now uses the new agent directly." },
+  { q: "What is decision logging?", a: "Every shadow or A/B agent run produces a decision record: input, output, latency, model version, and (in A/B tests) bucket assignment. Logging cost depends on record size, retention, and storage backend." },
+  { q: "Why is outcome tracking a separate cost?", a: "Outcome tracking connects an agent decision to a later business event (e.g., conversion, ticket resolution, churn). It may require event ingestion, attribution joins, or feedback labels." },
+  { q: "How is human review cost modeled?", a: "Reviewers inspect a percentage of decisions where the new agent disagrees with the old system or where confidence is low. Cost is review rate × decisions × review minutes × reviewer hourly rate." },
+  { q: "When is shadow mode cheaper than A/B?", a: "Shadow mode avoids user-facing risk and can often use a smaller traffic slice, but it duplicates every logged decision. A/B testing is cheaper per observed decision when you only need a sample, but it requires rollout tooling and may affect user outcomes." },
+  { q: "How can I reduce shadow/A/B test cost?", a: "Use a smaller, cheaper model for the candidate agent, cache repeated context, sample a lower traffic percentage, shorten retention, automate evaluation instead of full human review, and use object storage rather than managed databases." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Shadow / A-B Test Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-shadow-ab-test-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧪</div>
+      <h1 class="display-heading mb-4">AI Agent Shadow / A-B Test Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the cost to run an AI agent in shadow mode or A/B test against an existing system, including duplicated inference, human review, decision logging, and outcome tracking.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Test configuration</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Test type</span>
+          <select id="testType" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            <option value="shadow" selected={defaults.test_type === 'shadow'}>Shadow mode (parallel inference)</option>
+            <option value="ab_test" selected={defaults.test_type === 'ab_test'}>A/B test (candidate replaces baseline for % of traffic)</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Production requests / month</span>
+          <input id="productionRequests" type="number" min="1" step="1000" value={defaults.production_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Test traffic percentage (%)</span>
+          <input id="trafficPercentage" type="number" min="1" max="100" step="1" value={defaults.traffic_percentage} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Agent tasks per request</span>
+          <input id="tasksPerRequest" type="number" min="1" step="1" value={defaults.tasks_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / task</span>
+          <input id="inputTokensPerTask" type="number" min="0" step="10" value={defaults.input_tokens_per_task} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / task</span>
+          <input id="outputTokensPerTask" type="number" min="0" step="10" value={defaults.output_tokens_per_task} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input tokens (%)</span>
+          <input id="cachedInputPercentage" type="number" min="0" max="100" step="1" value={defaults.cached_input_percentage} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Decision log size (KB)</span>
+          <input id="loggingKB" type="number" min="0" step="0.5" value={defaults.logging_kb_per_decision} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage backend</span>
+          <select id="storageBackend" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {storageBackends.map(b => <option value={JSON.stringify(b)} selected={b.slug === defaults.storage_backend}>{b.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Log retention (months)</span>
+          <input id="storageRetention" type="number" min="1" max="120" step="1" value={defaults.storage_retention_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="1" value={defaults.review_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review minutes / decision</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly cost ($)</span>
+          <input id="reviewerHourlyCost" type="number" min="0" step="5" value={defaults.reviewer_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block flex items-center gap-2 mt-6">
+          <input id="outcomeTracking" type="checkbox" checked={defaults.outcome_tracking_enabled} class="w-4 h-4 rounded bg-neutral-900 border-neutral-700" />
+          <span class="text-neutral-300 text-sm">Enable outcome tracking</span>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Outcome cost / tracked event ($)</span>
+          <input id="outcomeCostPerEvent" type="number" min="0" step="0.001" value={defaults.outcome_cost_per_event} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Evaluation runs / month</span>
+          <input id="evalRuns" type="number" min="0" step="100" value={defaults.evaluation_runs_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Eval input tokens</span>
+          <input id="evalInputTokens" type="number" min="0" step="10" value={defaults.eval_input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Eval output tokens</span>
+          <input id="evalOutputTokens" type="number" min="0" step="10" value={defaults.eval_output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="120" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly test requests</p>
+        <p id="monthlyTestRequests" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly inference cost</p>
+        <p id="monthlyInferenceCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly review cost</p>
+        <p id="monthlyReviewCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total period cost</p>
+        <p id="totalPeriodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Logging & storage cost</p>
+        <p id="monthlyStorageCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Outcome tracking cost</p>
+        <p id="monthlyOutcomeCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Evaluation cost</p>
+        <p id="monthlyEvalCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Setup + maintenance</p>
+        <p id="laborCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1K production requests</p>
+        <p id="costPer1kRequests" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per decision reviewed</p>
+        <p id="costPerReviewed" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Period</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Duplicated inference</td>
+            <td id="infMonthlyCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="infPeriodCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="infShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Decision logging & storage</td>
+            <td id="logMonthlyCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="logPeriodCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="logShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Outcome tracking</td>
+            <td id="outcomeMonthlyCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="outcomePeriodCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="outcomeShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Human review</td>
+            <td id="reviewMonthlyCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewPeriodCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Evaluation runs</td>
+            <td id="evalMonthlyCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="evalPeriodCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="evalShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Setup & maintenance labor</td>
+            <td id="laborMonthlyCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="laborPeriodCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="laborShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-700 font-semibold">
+            <td class="py-3 pr-4">Total</td>
+            <td id="totalMonthlyCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="totalPeriodCell2" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="totalShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">LLM provider comparison (inference only)</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[600px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">Monthly inference</th>
+              <th class="py-3 pr-4 text-right">Period inference</th>
+              <th class="py-3 pr-4">Note</th>
+            </tr>
+          </thead>
+          <tbody id="providerTable" class="text-neutral-200">
+            <!-- populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-prompt-testing-budget/" class="btn-primary text-sm">Prompt Testing Budget →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value →</a>
+      <a href="/tools/agent-evaluation-planner/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Evaluation Planner →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), storageBackends: JSON.stringify(storageBackends), scenarios: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getProvider() { return JSON.parse(document.getElementById('provider').value); }
+    function getStorageBackend() { return JSON.parse(document.getElementById('storageBackend').value); }
+
+    function getInputs() {
+      return {
+        testType: document.getElementById('testType').value,
+        productionRequests: Math.max(1, Number(document.getElementById('productionRequests').value) || 1),
+        trafficPercentage: Math.min(100, Math.max(1, Number(document.getElementById('trafficPercentage').value) || 1)),
+        tasksPerRequest: Math.max(1, Number(document.getElementById('tasksPerRequest').value) || 1),
+        inputTokensPerTask: Math.max(0, Number(document.getElementById('inputTokensPerTask').value) || 0),
+        outputTokensPerTask: Math.max(0, Number(document.getElementById('outputTokensPerTask').value) || 0),
+        cachedInputPercentage: Math.min(100, Math.max(0, Number(document.getElementById('cachedInputPercentage').value) || 0)),
+        loggingKB: Math.max(0, Number(document.getElementById('loggingKB').value) || 0),
+        storageRetention: Math.max(1, Number(document.getElementById('storageRetention').value) || 1),
+        reviewRate: Math.min(100, Math.max(0, Number(document.getElementById('reviewRate').value) || 0)),
+        reviewMinutes: Math.max(0, Number(document.getElementById('reviewMinutes').value) || 0),
+        reviewerHourlyCost: Math.max(0, Number(document.getElementById('reviewerHourlyCost').value) || 0),
+        outcomeTracking: document.getElementById('outcomeTracking').checked,
+        outcomeCostPerEvent: Math.max(0, Number(document.getElementById('outcomeCostPerEvent').value) || 0),
+        evalRuns: Math.max(0, Number(document.getElementById('evalRuns').value) || 0),
+        evalInputTokens: Math.max(0, Number(document.getElementById('evalInputTokens').value) || 0),
+        evalOutputTokens: Math.max(0, Number(document.getElementById('evalOutputTokens').value) || 0),
+        setupHours: Math.max(0, Number(document.getElementById('setupHours').value) || 0),
+        setupRate: Math.max(0, Number(document.getElementById('setupRate').value) || 0),
+        maintenanceHours: Math.max(0, Number(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceRate: Math.max(0, Number(document.getElementById('maintenanceRate').value) || 0),
+        projectionMonths: Math.max(1, Number(document.getElementById('projectionMonths').value) || 1),
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.test_type !== undefined) document.getElementById('testType').value = obj.test_type;
+      if (obj.production_requests !== undefined) document.getElementById('productionRequests').value = obj.production_requests;
+      if (obj.traffic_percentage !== undefined) document.getElementById('trafficPercentage').value = obj.traffic_percentage;
+      if (obj.tasks_per_request !== undefined) document.getElementById('tasksPerRequest').value = obj.tasks_per_request;
+      if (obj.input_tokens_per_task !== undefined) document.getElementById('inputTokensPerTask').value = obj.input_tokens_per_task;
+      if (obj.output_tokens_per_task !== undefined) document.getElementById('outputTokensPerTask').value = obj.output_tokens_per_task;
+      if (obj.cached_input_percentage !== undefined) document.getElementById('cachedInputPercentage').value = obj.cached_input_percentage;
+      if (obj.provider !== undefined) {
+        const sel = document.getElementById('provider');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.provider) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.logging_kb_per_decision !== undefined) document.getElementById('loggingKB').value = obj.logging_kb_per_decision;
+      if (obj.storage_backend !== undefined) {
+        const sel = document.getElementById('storageBackend');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.storage_backend) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.storage_retention_months !== undefined) document.getElementById('storageRetention').value = obj.storage_retention_months;
+      if (obj.review_rate !== undefined) document.getElementById('reviewRate').value = obj.review_rate;
+      if (obj.review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.review_minutes;
+      if (obj.reviewer_hourly_cost !== undefined) document.getElementById('reviewerHourlyCost').value = obj.reviewer_hourly_cost;
+      if (obj.outcome_tracking_enabled !== undefined) document.getElementById('outcomeTracking').checked = obj.outcome_tracking_enabled;
+      if (obj.outcome_cost_per_event !== undefined) document.getElementById('outcomeCostPerEvent').value = obj.outcome_cost_per_event;
+      if (obj.evaluation_runs_per_month !== undefined) document.getElementById('evalRuns').value = obj.evaluation_runs_per_month;
+      if (obj.eval_input_tokens !== undefined) document.getElementById('evalInputTokens').value = obj.eval_input_tokens;
+      if (obj.eval_output_tokens !== undefined) document.getElementById('evalOutputTokens').value = obj.eval_output_tokens;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_month;
+      if (obj.maintenance_hourly_rate !== undefined) document.getElementById('maintenanceRate').value = obj.maintenance_hourly_rate;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    function inferenceCost(requests, tasksPerRequest, inputTokens, outputTokens, cachedPct, provider) {
+      const cachedRatio = cachedPct / 100;
+      const uncachedRatio = 1 - cachedRatio;
+      const monthlyTasks = requests * tasksPerRequest;
+      const inputCost = monthlyTasks * (inputTokens / 1000) * (uncachedRatio * provider.input_cost_per_1k + cachedRatio * provider.cached_input_cost_per_1k);
+      const outputCost = monthlyTasks * (outputTokens / 1000) * provider.output_cost_per_1k;
+      return inputCost + outputCost;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const provider = getProvider();
+      const backend = getStorageBackend();
+      const providerList = JSON.parse(providers);
+
+      const monthlyTestRequests = inps.productionRequests * (inps.trafficPercentage / 100);
+      const monthlyTasks = monthlyTestRequests * inps.tasksPerRequest;
+      const monthlyInference = inferenceCost(monthlyTestRequests, inps.tasksPerRequest, inps.inputTokensPerTask, inps.outputTokensPerTask, inps.cachedInputPercentage, provider);
+
+      // Logging: one record per task per request
+      const monthlyLogGB = (monthlyTasks * inps.loggingKB) / (1024 * 1024);
+      const storageMonthly = monthlyLogGB * backend.cost_per_gb_month;
+      const storageOneTime = monthlyLogGB * backend.cost_per_gb_month * Math.min(inps.storageRetention, inps.projectionMonths);
+      const requestCost = backend.request_cost_per_1k > 0 ? (monthlyTasks / 1000) * backend.request_cost_per_1k : 0;
+      const loggingMonthly = storageMonthly + requestCost;
+      const loggingPeriod = storageOneTime + (requestCost * inps.projectionMonths);
+
+      // Outcome tracking: one event per test request
+      const monthlyOutcome = inps.outcomeTracking ? monthlyTestRequests * inps.outcomeCostPerEvent : 0;
+
+      // Human review
+      const decisionsReviewed = monthlyTasks * (inps.reviewRate / 100);
+      const monthlyReview = decisionsReviewed * (inps.reviewMinutes / 60) * inps.reviewerHourlyCost;
+
+      // Evaluation runs
+      const monthlyEval = inferenceCost(inps.evalRuns, 1, inps.evalInputTokens, inps.evalOutputTokens, 0, provider);
+
+      // Labor
+      const setupCost = inps.setupHours * inps.setupRate;
+      const monthlyMaintenance = inps.maintenanceHours * inps.maintenanceRate;
+      const laborMonthly = monthlyMaintenance;
+      const laborPeriod = setupCost + monthlyMaintenance * inps.projectionMonths;
+
+      const totalMonthly = monthlyInference + loggingMonthly + monthlyOutcome + monthlyReview + monthlyEval + laborMonthly;
+      const totalPeriod = monthlyInference * inps.projectionMonths + loggingPeriod + monthlyOutcome * inps.projectionMonths + monthlyReview * inps.projectionMonths + monthlyEval * inps.projectionMonths + laborPeriod;
+
+      const costPer1kRequests = monthlyTestRequests > 0 ? (totalMonthly / monthlyTestRequests) * 1000 : 0;
+      const costPerReviewed = decisionsReviewed > 0 ? monthlyReview / decisionsReviewed : 0;
+
+      // Provider comparison
+      const providerRows = providerList.map(p => {
+        const inf = inferenceCost(monthlyTestRequests, inps.tasksPerRequest, inps.inputTokensPerTask, inps.outputTokensPerTask, inps.cachedInputPercentage, p);
+        return { name: p.name, monthly: inf, period: inf * inps.projectionMonths };
+      }).sort((a, b) => a.period - b.period);
+
+      // Update summary
+      document.getElementById('monthlyTestRequests').textContent = fmtInt(monthlyTestRequests);
+      document.getElementById('monthlyInferenceCost').textContent = fmtMoney2(monthlyInference);
+      document.getElementById('monthlyReviewCost').textContent = fmtMoney2(monthlyReview);
+      document.getElementById('totalPeriodCost').textContent = fmtMoney0(totalPeriod);
+
+      // Update secondary metrics
+      document.getElementById('monthlyStorageCost').textContent = fmtMoney2(loggingMonthly);
+      document.getElementById('monthlyOutcomeCost').textContent = fmtMoney2(monthlyOutcome);
+      document.getElementById('monthlyEvalCost').textContent = fmtMoney2(monthlyEval);
+      document.getElementById('laborCost').textContent = fmtMoney2(monthlyMaintenance) + ' /mo + ' + fmtMoney2(setupCost) + ' setup';
+      document.getElementById('costPer1kRequests').textContent = fmtMoney2(costPer1kRequests);
+      document.getElementById('costPerReviewed').textContent = fmtMoney2(costPerReviewed);
+
+      // Breakdown table
+      const infPeriod = monthlyInference * inps.projectionMonths;
+      const outcomePeriod = monthlyOutcome * inps.projectionMonths;
+      const reviewPeriod = monthlyReview * inps.projectionMonths;
+      const evalPeriod = monthlyEval * inps.projectionMonths;
+      const lines = [
+        { id: 'inf', monthly: monthlyInference, period: infPeriod },
+        { id: 'log', monthly: loggingMonthly, period: loggingPeriod },
+        { id: 'outcome', monthly: monthlyOutcome, period: outcomePeriod },
+        { id: 'review', monthly: monthlyReview, period: reviewPeriod },
+        { id: 'eval', monthly: monthlyEval, period: evalPeriod },
+        { id: 'labor', monthly: laborMonthly, period: laborPeriod },
+      ];
+      lines.forEach(line => {
+        const share = totalMonthly > 0 ? line.monthly / totalMonthly : 0;
+        document.getElementById(line.id + 'MonthlyCell').textContent = fmtMoney2(line.monthly);
+        document.getElementById(line.id + 'PeriodCell').textContent = fmtMoney0(line.period);
+        document.getElementById(line.id + 'Share').textContent = fmtNum(share * 100) + '%';
+      });
+      document.getElementById('totalMonthlyCell').textContent = fmtMoney2(totalMonthly);
+      document.getElementById('totalPeriodCell2').textContent = fmtMoney0(totalPeriod);
+      document.getElementById('totalShare').textContent = '100%';
+
+      // Provider table
+      const tbody = document.getElementById('providerTable');
+      tbody.innerHTML = '';
+      providerRows.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = idx === 0 ? 'border-b border-brand-gold/30' : 'border-b border-neutral-800/50';
+        tr.innerHTML = `<td class="py-3 pr-4">${row.name}${idx === 0 ? ' <span class="text-brand-gold text-xs">cheapest</span>' : ''}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney2(row.monthly)}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney0(row.period)}</td><td class="py-3 pr-4 text-sm text-neutral-400">${idx === 0 ? 'Lowest period inference cost' : ''}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      // Verdict
+      const verdictType = inps.testType === 'ab_test' ? 'A/B test' : 'shadow mode';
+      const biggestLine = lines.reduce((a, b) => a.monthly > b.monthly ? a : b);
+      const biggestName = { inf: 'duplicated inference', log: 'logging & storage', outcome: 'outcome tracking', review: 'human review', eval: 'evaluation runs', labor: 'setup & maintenance' }[biggestLine.id];
+      const ratio = monthlyTestRequests > 0 ? (totalMonthly / monthlyTestRequests) : 0;
+      let verdict = `Running this agent in ${verdictType} on ${fmtInt(monthlyTestRequests)} requests/month will add about <strong>${fmtMoney2(totalMonthly)}/month</strong> (${fmtMoney0(totalPeriod)} over ${inps.projectionMonths} months). The largest cost line is ${biggestName}.`;
+      if (ratio > 0.20) {
+        verdict += ` At <strong>${fmtMoney2(ratio)} per test request</strong>, the experiment is expensive relative to traffic — consider reducing the test percentage, switching to a cheaper model, or automating review.`;
+      } else if (ratio > 0.05) {
+        verdict += ` At <strong>${fmtMoney2(ratio)} per test request</strong>, the cost is moderate; sample a smaller traffic slice if you only need statistical significance.`;
+      } else {
+        verdict += ` At <strong>${fmtMoney2(ratio)} per test request</strong>, the experiment is cheap enough to run broadly.`;
+      }
+      if (inps.testType === 'shadow' && inps.trafficPercentage === 100) {
+        verdict += ` Shadow at 100% gives the richest comparison dataset but maximizes duplicated inference cost.`;
+      }
+      document.getElementById('verdictText').innerHTML = verdict;
+    }
+
+    function bind() {
+      const ids = ['testType','productionRequests','trafficPercentage','tasksPerRequest','inputTokensPerTask','outputTokensPerTask','cachedInputPercentage','provider','loggingKB','storageBackend','storageRetention','reviewRate','reviewMinutes','reviewerHourlyCost','outcomeTracking','outcomeCostPerEvent','evalRuns','evalInputTokens','evalOutputTokens','setupHours','setupRate','maintenanceHours','maintenanceRate','projectionMonths'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', compute);
+      });
+
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      compute();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bind);
+    } else {
+      bind();
+    }
+  </script>
+</Layout>

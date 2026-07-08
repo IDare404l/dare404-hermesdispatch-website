@@ -1,0 +1,236 @@
+{
+  "last_updated": "2026-07-08",
+  "note": "Directional estimates. Shadow and A/B tests duplicate inference on a subset of production traffic. Costs include duplicated LLM calls, decision logging, outcome tracking, and human review of disagreements. They do not include the base production agent cost, product engineering, or rollout tooling.",
+  "providers": [
+    {
+      "slug": "openai_gpt4o",
+      "name": "OpenAI GPT-4o",
+      "input_cost_per_1k": 0.0025,
+      "output_cost_per_1k": 0.0100,
+      "cached_input_cost_per_1k": 0.00125
+    },
+    {
+      "slug": "openai_gpt4o_mini",
+      "name": "OpenAI GPT-4o mini",
+      "input_cost_per_1k": 0.00015,
+      "output_cost_per_1k": 0.00060,
+      "cached_input_cost_per_1k": 0.000075
+    },
+    {
+      "slug": "anthropic_claude_sonnet",
+      "name": "Anthropic Claude 3.5 Sonnet",
+      "input_cost_per_1k": 0.0030,
+      "output_cost_per_1k": 0.0150,
+      "cached_input_cost_per_1k": 0.00030
+    },
+    {
+      "slug": "anthropic_claude_haiku",
+      "name": "Anthropic Claude 3.5 Haiku",
+      "input_cost_per_1k": 0.0008,
+      "output_cost_per_1k": 0.0040,
+      "cached_input_cost_per_1k": 0.00008
+    },
+    {
+      "slug": "google_gemini_pro",
+      "name": "Google Gemini 1.5 Pro",
+      "input_cost_per_1k": 0.00125,
+      "output_cost_per_1k": 0.0050,
+      "cached_input_cost_per_1k": 0.0003125
+    },
+    {
+      "slug": "google_gemini_flash",
+      "name": "Google Gemini 1.5 Flash",
+      "input_cost_per_1k": 0.000075,
+      "output_cost_per_1k": 0.00030,
+      "cached_input_cost_per_1k": 0.00001875
+    },
+    {
+      "slug": "together_llama3_70b",
+      "name": "Together AI Llama 3.1 70B",
+      "input_cost_per_1k": 0.00088,
+      "output_cost_per_1k": 0.00088,
+      "cached_input_cost_per_1k": 0.00044
+    },
+    {
+      "slug": "groq_llama3_70b",
+      "name": "Groq Llama 3.1 70B",
+      "input_cost_per_1k": 0.00059,
+      "output_cost_per_1k": 0.00079,
+      "cached_input_cost_per_1k": 0.000295
+    }
+  ],
+  "storage_backends": [
+    {
+      "slug": "s3",
+      "name": "AWS S3 (infrequent access)",
+      "cost_per_gb_month": 0.0125,
+      "request_cost_per_1k": 0.001
+    },
+    {
+      "slug": "gcs",
+      "name": "Google Cloud Storage (Nearline)",
+      "cost_per_gb_month": 0.010,
+      "request_cost_per_1k": 0.001
+    },
+    {
+      "slug": "azure_blob",
+      "name": "Azure Blob Cool",
+      "cost_per_gb_month": 0.010,
+      "request_cost_per_1k": 0.001
+    },
+    {
+      "slug": "postgres",
+      "name": "Managed Postgres (RDS/Cloud SQL)",
+      "cost_per_gb_month": 0.115,
+      "request_cost_per_1k": 0.00
+    },
+    {
+      "slug": "clickhouse",
+      "name": "ClickHouse Cloud",
+      "cost_per_gb_month": 0.024,
+      "request_cost_per_1k": 0.00
+    },
+    {
+      "slug": "local_minio",
+      "name": "Self-hosted MinIO/local disk",
+      "cost_per_gb_month": 0.005,
+      "request_cost_per_1k": 0.00
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Shadow mode — support bot rewrite",
+      "test_type": "shadow",
+      "production_requests": 50000,
+      "traffic_percentage": 100,
+      "tasks_per_request": 1,
+      "input_tokens_per_task": 2500,
+      "output_tokens_per_task": 300,
+      "cached_input_percentage": 30,
+      "provider": "openai_gpt4o_mini",
+      "logging_kb_per_decision": 4,
+      "storage_backend": "s3",
+      "storage_retention_months": 6,
+      "review_rate": 5,
+      "review_minutes": 3,
+      "reviewer_hourly_cost": 45,
+      "outcome_tracking_enabled": true,
+      "outcome_cost_per_event": 0.002,
+      "evaluation_runs_per_month": 500,
+      "eval_input_tokens": 500,
+      "eval_output_tokens": 100,
+      "setup_hours": 16,
+      "setup_hourly_rate": 100,
+      "maintenance_hours_month": 4,
+      "maintenance_hourly_rate": 100,
+      "projection_months": 6
+    },
+    {
+      "name": "A/B test — sales copy agent",
+      "test_type": "ab_test",
+      "production_requests": 100000,
+      "traffic_percentage": 50,
+      "tasks_per_request": 1,
+      "input_tokens_per_task": 800,
+      "output_tokens_per_task": 250,
+      "cached_input_percentage": 20,
+      "provider": "anthropic_claude_haiku",
+      "logging_kb_per_decision": 2,
+      "storage_backend": "postgres",
+      "storage_retention_months": 3,
+      "review_rate": 3,
+      "review_minutes": 2,
+      "reviewer_hourly_cost": 55,
+      "outcome_tracking_enabled": true,
+      "outcome_cost_per_event": 0.005,
+      "evaluation_runs_per_month": 1000,
+      "eval_input_tokens": 400,
+      "eval_output_tokens": 80,
+      "setup_hours": 24,
+      "setup_hourly_rate": 125,
+      "maintenance_hours_month": 6,
+      "maintenance_hourly_rate": 125,
+      "projection_months": 3
+    },
+    {
+      "name": "Shadow mode — code review assistant",
+      "test_type": "shadow",
+      "production_requests": 8000,
+      "traffic_percentage": 100,
+      "tasks_per_request": 2,
+      "input_tokens_per_task": 6000,
+      "output_tokens_per_task": 500,
+      "cached_input_percentage": 50,
+      "provider": "openai_gpt4o",
+      "logging_kb_per_decision": 8,
+      "storage_backend": "clickhouse",
+      "storage_retention_months": 12,
+      "review_rate": 10,
+      "review_minutes": 5,
+      "reviewer_hourly_cost": 80,
+      "outcome_tracking_enabled": true,
+      "outcome_cost_per_event": 0.001,
+      "evaluation_runs_per_month": 200,
+      "eval_input_tokens": 800,
+      "eval_output_tokens": 150,
+      "setup_hours": 32,
+      "setup_hourly_rate": 150,
+      "maintenance_hours_month": 8,
+      "maintenance_hourly_rate": 150,
+      "projection_months": 6
+    },
+    {
+      "name": "Small experiment — 10% shadow",
+      "test_type": "shadow",
+      "production_requests": 20000,
+      "traffic_percentage": 10,
+      "tasks_per_request": 1,
+      "input_tokens_per_task": 1200,
+      "output_tokens_per_task": 200,
+      "cached_input_percentage": 10,
+      "provider": "groq_llama3_70b",
+      "logging_kb_per_decision": 1,
+      "storage_backend": "s3",
+      "storage_retention_months": 3,
+      "review_rate": 10,
+      "review_minutes": 2,
+      "reviewer_hourly_cost": 40,
+      "outcome_tracking_enabled": false,
+      "outcome_cost_per_event": 0.00,
+      "evaluation_runs_per_month": 200,
+      "eval_input_tokens": 300,
+      "eval_output_tokens": 60,
+      "setup_hours": 8,
+      "setup_hourly_rate": 75,
+      "maintenance_hours_month": 2,
+      "maintenance_hourly_rate": 75,
+      "projection_months": 3
+    }
+  ],
+  "defaults": {
+    "test_type": "shadow",
+    "production_requests": 50000,
+    "traffic_percentage": 100,
+    "tasks_per_request": 1,
+    "input_tokens_per_task": 2500,
+    "output_tokens_per_task": 300,
+    "cached_input_percentage": 30,
+    "provider": "openai_gpt4o_mini",
+    "logging_kb_per_decision": 4,
+    "storage_backend": "s3",
+    "storage_retention_months": 6,
+    "review_rate": 5,
+    "review_minutes": 3,
+    "reviewer_hourly_cost": 45,
+    "outcome_tracking_enabled": true,
+    "outcome_cost_per_event": 0.002,
+    "evaluation_runs_per_month": 500,
+    "eval_input_tokens": 500,
+    "eval_output_tokens": 100,
+    "setup_hours": 16,
+    "setup_hourly_rate": 100,
+    "maintenance_hours_month": 4,
+    "maintenance_hourly_rate": 100,
+    "projection_months": 6
+  }
+}
