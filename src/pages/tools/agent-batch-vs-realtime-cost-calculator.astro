@@ -1,0 +1,334 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_batch_vs_realtime_cost.json';
+
+const title = "AI Agent Batch vs Real-Time Cost Calculator | Hermes Dispatch";
+const description = "Compare batch API discounts against real-time API and local GPU costs for AI agent workloads. Find the cheapest architecture for evals, backfills, and hybrid traffic.";
+const providers = data.providers;
+const gpus = data.gpu_models;
+const presets = data.presets;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "When should I use a batch API instead of real-time?", a: "Use batch when latency does not matter: nightly evals, content backfills, classification jobs, data enrichment, and offline audits. Batch APIs typically offer 25–50% discounts because providers can schedule work during idle capacity." },
+  { q: "How do I model a hybrid workload with both batch and real-time?", a: "Set the batch share slider or input to the percentage of requests that can tolerate async turnaround. The calculator splits token cost between the provider's batch price and its real-time price, then compares the total against self-hosted GPU options." },
+  { q: "Is a local GPU cheaper than batch APIs?", a: "Local GPUs win at high, steady volume where utilization stays above ~60–70%. Batch APIs win for bursty, offline, or experimental workloads because you pay only for tokens and avoid hardware capex." },
+  { q: "What hidden costs does this calculator include?", a: "For self-hosted GPUs it includes amortized hardware cost, electricity, and an optional hourly labor estimate. For managed APIs it only counts token pricing; add your own integration and storage costs if significant." },
+  { q: "Why does the batch share affect the GPU recommendation?", a: "Batch jobs can be queued and run at high utilization, making owned hardware more efficient. Real-time traffic needs headroom and fast failover, which raises the effective cost per request on local GPUs." }
+];
+
+function fmt(n, digits=0) {
+  return n.toLocaleString('en-US', { maximumFractionDigits: digits });
+}
+
+function fmtCur(n, digits=2) {
+  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: digits });
+}
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Batch vs Real-Time Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-batch-vs-realtime-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⏳</div>
+      <h1 class="display-heading mb-4">AI Agent Batch vs Real-Time Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">See when batch API discounts beat real-time APIs and when a local GPU is cheaper than either. Built for evals, backfills, and hybrid agent traffic.</p>
+    </div>
+
+    <!-- Presets -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {presets.map(p => (
+        <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset={p.slug}>
+          <div class="text-2xl mb-2">{p.emoji}</div>
+          <h3 class="font-semibold text-sm">{p.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1">{fmt(p.monthly_requests)} req/mo • {Math.round(p.batch_share*100)}% batch</p>
+        </button>
+      ))}
+    </div>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly requests</span>
+          <input id="monthlyRequests" type="number" min="1" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" step="100" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" step="100" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Batch share (0–1)</span>
+          <input id="batchShare" type="number" min="0" max="1" step="0.05" value={defaults.batch_share} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-xs text-neutral-500">Fraction sent to batch API</span>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.filter(p => p.slug !== 'local-gpu').map(p => (
+              <option value={p.slug} selected={p.slug === defaults.provider}>{p.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Local GPU model</span>
+          <select id="gpuModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {gpus.map(g => (
+              <option value={g.slug} selected={g.slug === defaults.gpu_model}>{g.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Local GPU count</span>
+          <input id="gpuCount" type="number" min="0" step="1" value={defaults.gpu_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Value per output ($)</span>
+          <input id="valuePerOutput" type="number" min="0" step="0.01" value={defaults.value_per_output_usd} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Electricity rate ($/kWh)</span>
+          <input id="electricityRate" type="number" min="0" step="0.01" value={defaults.electricity_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">GPU amortization (months)</span>
+          <input id="amortMonths" type="number" min="1" step="1" value={defaults.amortization_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">GPU utilization</span>
+          <input id="utilization" type="number" min="0.1" max="1" step="0.05" value={defaults.utilization} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Self-hosted ops cost ($/hr)</span>
+          <input id="hourlyRateSelf" type="number" min="0" step="5" value={defaults.hourly_rate_self} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-xs text-neutral-500">Maintenance & monitoring labor</span>
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Estimates are directional in USD. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/30 text-center">
+      <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest option</p>
+      <p id="cheapestLine" class="text-2xl font-bold text-brand-gold">—</p>
+      <p id="savingsLine" class="text-sm text-neutral-400 mt-1">—</p>
+      <p id="hybridLine" class="text-sm text-neutral-400 mt-1">—</p>
+    </section>
+
+    <!-- Results -->
+    <section class="grid md:grid-cols-2 gap-6 mb-12">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost breakdown</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span class="text-neutral-400">Batch requests</span><span id="batchRequests" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Real-time requests</span><span id="realtimeRequests" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Total tokens / mo</span><span id="totalTokens" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Provider batch cost</span><span id="batchCost" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Provider real-time cost</span><span id="realtimeCost" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Total provider cost</span><span id="totalProviderCost" class="font-mono text-brand-gold">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Local GPU hardware/mo</span><span id="gpuHardwareCost" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Local electricity/mo</span><span id="gpuElectricityCost" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Local ops/mo</span><span id="gpuOpsCost" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Total local cost</span><span id="totalLocalCost" class="font-mono text-brand-gold">—</span></div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Comparison & ROI</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span class="text-neutral-400">Provider cost / 1k requests</span><span id="providerCpm" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Local cost / 1k requests</span><span id="localCpm" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Monthly gross value</span><span id="grossValue" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Provider net value</span><span id="providerNet" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Local net value</span><span id="localNet" class="font-mono text-white">—</span></div>
+        </div>
+        <div id="verdictBox" class="mt-6 p-4 rounded-lg bg-neutral-900 border border-neutral-700">
+          <p class="text-sm text-neutral-300"><span class="font-semibold text-brand-gold">Verdict:</span> <span id="verdictText">—</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Provider table -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20 overflow-x-auto">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider batch discounts</h2>
+      <table class="w-full text-sm text-left">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400">
+            <th class="py-2">Provider</th>
+            <th class="py-2">Batch discount</th>
+            <th class="py-2">Batch input / 1M</th>
+            <th class="py-2">Batch output / 1M</th>
+            <th class="py-2">Typical turnaround</th>
+            <th class="py-2">Best for</th>
+          </tr>
+        </thead>
+        <tbody>
+          {providers.filter(p => p.slug !== 'local-gpu').map(p => (
+            <tr class="border-b border-neutral-800">
+              <td class="py-2 font-medium">{p.name}</td>
+              <td class="py-2">{Math.round(p.discount_vs_realtime * 100)}%</td>
+              <td class="py-2">${p.batch_input_per_1m.toFixed(2)}</td>
+              <td class="py-2">${p.batch_output_per_1m.toFixed(2)}</td>
+              <td class="py-2">{p.typical_batch_hours}h</td>
+              <td class="py-2 text-neutral-400">{p.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/agent-inference-capacity-planner/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Inference Capacity Planner →</a>
+      <a href="/tools/gpu-cloud-vs-buy-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">GPU Cloud vs Buy Calc →</a>
+      <a href="/tools/local-llm-roi-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Local LLM ROI Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providersJson: JSON.stringify(providers), gpusJson: JSON.stringify(gpus), presetsJson: JSON.stringify(presets) }}>
+    const providers = JSON.parse(providersJson);
+    const gpus = JSON.parse(gpusJson);
+    const presets = JSON.parse(presetsJson);
+
+    const fmt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const fmt1 = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtCur = (n, d=0) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: d });
+
+    function getInputs() {
+      return {
+        monthlyRequests: Math.max(1, parseFloat(document.getElementById('monthlyRequests').value) || 1),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        batchShare: Math.max(0, Math.min(1, parseFloat(document.getElementById('batchShare').value) || 0)),
+        providerSlug: document.getElementById('provider').value,
+        gpuSlug: document.getElementById('gpuModel').value,
+        gpuCount: Math.max(0, parseFloat(document.getElementById('gpuCount').value) || 0),
+        valuePerOutput: Math.max(0, parseFloat(document.getElementById('valuePerOutput').value) || 0),
+        electricityRate: Math.max(0, parseFloat(document.getElementById('electricityRate').value) || 0),
+        amortMonths: Math.max(1, parseFloat(document.getElementById('amortMonths').value) || 24),
+        utilization: Math.max(0.1, Math.min(1, parseFloat(document.getElementById('utilization').value) || 0.7)),
+        hourlyRateSelf: Math.max(0, parseFloat(document.getElementById('hourlyRateSelf').value) || 0)
+      };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const provider = providers.find(p => p.slug === inps.providerSlug) || providers[0];
+      const gpu = gpus.find(g => g.slug === inps.gpuSlug) || gpus[0];
+
+      const batchRequests = Math.floor(inps.monthlyRequests * inps.batchShare);
+      const realtimeRequests = inps.monthlyRequests - batchRequests;
+      const tokensPerRequest = inps.inputTokens + inps.outputTokens;
+      const totalTokens = inps.monthlyRequests * tokensPerRequest;
+
+      const batchCost = batchRequests * ((inps.inputTokens / 1e6) * provider.batch_input_per_1m + (inps.outputTokens / 1e6) * provider.batch_output_per_1m);
+      const realtimeCost = realtimeRequests * ((inps.inputTokens / 1e6) * provider.realtime_input_per_1m + (inps.outputTokens / 1e6) * provider.realtime_output_per_1m);
+      const totalProviderCost = batchCost + realtimeCost;
+
+      const hoursPerMonth = 730;
+      const gpuHardwareCost = inps.gpuCount > 0 ? (gpu.purchase_price * inps.gpuCount / inps.amortMonths) : 0;
+      const gpuElectricityCost = inps.gpuCount > 0 ? (gpu.power_w * inps.gpuCount / 1000) * inps.electricityRate * hoursPerMonth : 0;
+      const gpuOpsCost = inps.gpuCount > 0 ? inps.hourlyRateSelf * hoursPerMonth : 0;
+      const totalLocalCost = gpuHardwareCost + gpuElectricityCost + gpuOpsCost;
+
+      const providerCpm = totalProviderCost / (inps.monthlyRequests / 1000);
+      const localCpm = inps.gpuCount > 0 ? totalLocalCost / (inps.monthlyRequests / 1000) : 0;
+      const grossValue = inps.monthlyRequests * inps.valuePerOutput;
+
+      document.getElementById('batchRequests').textContent = fmt(batchRequests);
+      document.getElementById('realtimeRequests').textContent = fmt(realtimeRequests);
+      document.getElementById('totalTokens').textContent = fmt(totalTokens);
+      document.getElementById('batchCost').textContent = fmtCur(batchCost);
+      document.getElementById('realtimeCost').textContent = fmtCur(realtimeCost);
+      document.getElementById('totalProviderCost').textContent = fmtCur(totalProviderCost);
+      document.getElementById('gpuHardwareCost').textContent = fmtCur(gpuHardwareCost);
+      document.getElementById('gpuElectricityCost').textContent = fmtCur(gpuElectricityCost);
+      document.getElementById('gpuOpsCost').textContent = fmtCur(gpuOpsCost);
+      document.getElementById('totalLocalCost').textContent = fmtCur(totalLocalCost);
+      document.getElementById('providerCpm').textContent = fmtCur(providerCpm, 2);
+      document.getElementById('localCpm').textContent = fmtCur(localCpm, 2);
+      document.getElementById('grossValue').textContent = fmtCur(grossValue);
+      document.getElementById('providerNet').textContent = fmtCur(grossValue - totalProviderCost);
+      document.getElementById('localNet').textContent = fmtCur(grossValue - totalLocalCost);
+
+      const options = [
+        { name: provider.name, cost: totalProviderCost },
+        { name: `Self-hosted ${gpu.name}${inps.gpuCount > 1 ? ' x' + inps.gpuCount : ''}`, cost: totalLocalCost }
+      ];
+      const cheapest = options.reduce((a, b) => a.cost < b.cost ? a : b);
+      const other = options.find(o => o.name !== cheapest.name);
+      const savings = other ? other.cost - cheapest.cost : 0;
+
+      document.getElementById('cheapestLine').textContent = cheapest.name;
+      document.getElementById('savingsLine').textContent = `Estimated ${fmtCur(savings)}/mo vs ${other?.name}`;
+      document.getElementById('hybridLine').textContent = `${Math.round(inps.batchShare * 100)}% batch • ${fmt(inps.monthlyRequests)} requests/mo • ${fmt(totalTokens)} tokens/mo`;
+
+      let verdict = `Cheapest: ${cheapest.name} at ${fmtCur(cheapest.cost)}/mo. `;
+      if (inps.gpuCount === 0) {
+        verdict += 'Add a local GPU to compare capex route. ';
+      } else if (inps.batchShare === 1 && totalProviderCost < totalLocalCost) {
+        verdict += 'Batch API wins for fully offline workloads with no hardware investment. ';
+      } else if (inps.batchShare < 0.3 && totalLocalCost < totalProviderCost) {
+        verdict += 'Mostly real-time traffic favors self-hosted hardware. ';
+      }
+      if (grossValue > 0) {
+        const providerRoi = totalProviderCost > 0 ? ((grossValue - totalProviderCost) / totalProviderCost * 100).toFixed(0) : 0;
+        const localRoi = totalLocalCost > 0 ? ((grossValue - totalLocalCost) / totalLocalCost * 100).toFixed(0) : 0;
+        verdict += `Provider ROI ${providerRoi}%; local ROI ${localRoi}%.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    function applyPreset(slug) {
+      const p = presets.find(x => x.slug === slug);
+      if (!p) return;
+      document.getElementById('monthlyRequests').value = p.monthly_requests;
+      document.getElementById('inputTokens').value = p.input_tokens;
+      document.getElementById('outputTokens').value = p.output_tokens;
+      document.getElementById('batchShare').value = p.batch_share;
+      document.getElementById('provider').value = p.provider;
+      document.getElementById('gpuModel').value = p.gpu_model;
+      document.getElementById('gpuCount').value = p.gpu_count;
+      document.getElementById('valuePerOutput').value = p.value_per_output_usd;
+      compute();
+    }
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
+
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
+
+    compute();
+  </script>
+</Layout>

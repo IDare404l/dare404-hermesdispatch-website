@@ -1,0 +1,178 @@
+{
+  "last_updated": "2026-07-08",
+  "note": "Pricing and throughput estimates are directional benchmarks. Always verify current provider pricing before committing to a production architecture. Batch APIs may have different SLAs, latency guarantees, and availability regions than real-time endpoints.",
+  "providers": [
+    {
+      "slug": "openai-batch",
+      "name": "OpenAI Batch API",
+      "discount_vs_realtime": 0.50,
+      "realtime_input_per_1m": 2.50,
+      "realtime_output_per_1m": 10.00,
+      "batch_input_per_1m": 1.25,
+      "batch_output_per_1m": 5.00,
+      "typical_batch_hours": 24,
+      "best_for": "Large offline jobs, evals, backfills, content generation"
+    },
+    {
+      "slug": "anthropic-batch",
+      "name": "Anthropic Batch API",
+      "discount_vs_realtime": 0.50,
+      "realtime_input_per_1m": 3.00,
+      "realtime_output_per_1m": 15.00,
+      "batch_input_per_1m": 1.50,
+      "batch_output_per_1m": 7.50,
+      "typical_batch_hours": 24,
+      "best_for": "Long-context research, document review, classification"
+    },
+    {
+      "slug": "google-batch",
+      "name": "Google Gemini Batch Prediction",
+      "discount_vs_realtime": 0.40,
+      "realtime_input_per_1m": 0.50,
+      "realtime_output_per_1m": 1.50,
+      "batch_input_per_1m": 0.30,
+      "batch_output_per_1m": 0.90,
+      "typical_batch_hours": 12,
+      "best_for": "High-volume, price-sensitive classification and extraction"
+    },
+    {
+      "slug": "together-batch",
+      "name": "Together AI Batch",
+      "discount_vs_realtime": 0.30,
+      "realtime_input_per_1m": 0.90,
+      "realtime_output_per_1m": 0.90,
+      "batch_input_per_1m": 0.63,
+      "batch_output_per_1m": 0.63,
+      "typical_batch_hours": 6,
+      "best_for": "Open-weight model fine-tuning inference at scale"
+    },
+    {
+      "slug": "fireworks-batch",
+      "name": "Fireworks AI Batch",
+      "discount_vs_realtime": 0.25,
+      "realtime_input_per_1m": 0.90,
+      "realtime_output_per_1m": 0.90,
+      "batch_input_per_1m": 0.68,
+      "batch_output_per_1m": 0.68,
+      "typical_batch_hours": 4,
+      "best_for": "Fast open-weight batch inference"
+    },
+    {
+      "slug": "local-gpu",
+      "name": "Local GPU self-hosted",
+      "discount_vs_realtime": 1.00,
+      "realtime_input_per_1m": 0,
+      "realtime_output_per_1m": 0,
+      "batch_input_per_1m": 0,
+      "batch_output_per_1m": 0,
+      "typical_batch_hours": 0,
+      "best_for": "Both batch and real-time if you own the hardware"
+    }
+  ],
+  "gpu_models": [
+    {
+      "slug": "rtx4090",
+      "name": "NVIDIA RTX 4090",
+      "purchase_price": 2000,
+      "power_w": 450,
+      "typical_tok_s": 120,
+      "hourly_rental_typical": 1.20,
+      "model_fit": "Good for 8B–70B quantized models"
+    },
+    {
+      "slug": "rtx3090",
+      "name": "NVIDIA RTX 3090",
+      "purchase_price": 1000,
+      "power_w": 350,
+      "typical_tok_s": 75,
+      "hourly_rental_typical": 0.60,
+      "model_fit": "Best value for 7B–30B models"
+    },
+    {
+      "slug": "a100-80gb",
+      "name": "NVIDIA A100 80GB",
+      "purchase_price": 12000,
+      "power_w": 400,
+      "typical_tok_s": 180,
+      "hourly_rental_typical": 3.00,
+      "model_fit": "Data-center grade, 70B+ models"
+    },
+    {
+      "slug": "h100",
+      "name": "NVIDIA H100 80GB",
+      "purchase_price": 25000,
+      "power_w": 700,
+      "typical_tok_s": 350,
+      "hourly_rental_typical": 5.00,
+      "model_fit": "Maximum throughput for large models"
+    }
+  ],
+  "presets": [
+    {
+      "slug": "nightly-eval",
+      "name": "Nightly eval run",
+      "emoji": "🧪",
+      "monthly_requests": 100000,
+      "input_tokens": 2000,
+      "output_tokens": 500,
+      "batch_share": 1.00,
+      "provider": "openai-batch",
+      "gpu_model": "rtx3090",
+      "gpu_count": 0,
+      "value_per_output_usd": 0.05
+    },
+    {
+      "slug": "content-backfill",
+      "name": "Content backfill",
+      "emoji": "📝",
+      "monthly_requests": 500000,
+      "input_tokens": 1500,
+      "output_tokens": 1500,
+      "batch_share": 1.00,
+      "provider": "anthropic-batch",
+      "gpu_model": "rtx4090",
+      "gpu_count": 0,
+      "value_per_output_usd": 0.20
+    },
+    {
+      "slug": "support-hybrid",
+      "name": "Support ticket hybrid",
+      "emoji": "🎫",
+      "monthly_requests": 200000,
+      "input_tokens": 3000,
+      "output_tokens": 800,
+      "batch_share": 0.40,
+      "provider": "openai-batch",
+      "gpu_model": "rtx4090",
+      "gpu_count": 2,
+      "value_per_output_usd": 0.15
+    },
+    {
+      "slug": "realtime-agent",
+      "name": "Real-time agent only",
+      "emoji": "⚡",
+      "monthly_requests": 50000,
+      "input_tokens": 2500,
+      "output_tokens": 1000,
+      "batch_share": 0.00,
+      "provider": "openai-batch",
+      "gpu_model": "a100-80gb",
+      "gpu_count": 2,
+      "value_per_output_usd": 0.30
+    }
+  ],
+  "defaults": {
+    "monthly_requests": 100000,
+    "input_tokens": 2000,
+    "output_tokens": 500,
+    "batch_share": 0.75,
+    "provider": "openai-batch",
+    "gpu_model": "rtx4090",
+    "gpu_count": 0,
+    "value_per_output_usd": 0.10,
+    "electricity_rate": 0.12,
+    "amortization_months": 24,
+    "utilization": 0.70,
+    "hourly_rate_self": 50
+  }
+}

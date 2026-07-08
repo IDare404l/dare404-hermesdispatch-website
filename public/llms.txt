@@ -616,10 +616,18 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||- Cross-links: Agent API Pricing Comparator, Red Team Cost Calculator, Prompt Reliability Checker, Evaluation Planner
 |||
 ## AI Agent Browser / Web Scraping Cost Calculator
-||- URL: https://hermesdispatch.dev/tools/agent-browser-scraping-cost-calculator/
-||- Description: Estimate monthly cost for AI agents that browse, scrape, and extract structured data from the web. Compare Browserbase, Steel.dev, ScrapeGraphAI Cloud, Firecrawl, ScrapingBee, Zyte API, Bright Data, and self-hosted Playwright.
-||- Inputs: pages per month, average steps per page, LLM extractor, extraction input/output tokens per page, base success rate, proxy/CAPTCHA percentage and cost per page, human review rate/minutes/hourly cost, self-hosted toggle and monthly infra cost, projection months
-||- Outputs: cheapest provider, monthly cost per provider (scrape + extraction + proxy + review + hosting), cost per 1k pages, projected period cost, verdict
-||- Audience: AI agent builders budgeting web browsing, data extraction, and research agents
-||- Cross-links: Agent Tool Call Cost Calculator, Workflow Cost Calculator, API Pricing Comparator, Agent Output Value Calculator
-|||
+|- URL: https://hermesdispatch.dev/tools/agent-browser-scraping-cost-calculator/
+|- Description: Estimate monthly cost for AI agents that browse, scrape, and extract structured data from the web. Compare Browserbase, Steel.dev, ScrapeGraphAI Cloud, Firecrawl, ScrapingBee, Zyte API, Bright Data, and self-hosted Playwright.
+|- Inputs: pages per month, average steps per page, LLM extractor, extraction input/output tokens per page, base success rate, proxy/CAPTCHA percentage and cost per page, human review rate/minutes/hourly cost, self-hosted toggle and monthly infra cost, projection months
+|- Outputs: cheapest provider, monthly cost per provider (scrape + extraction + proxy + review + hosting), cost per 1k pages, projected period cost, verdict
+|- Audience: AI agent builders budgeting web browsing, data extraction, and research agents
+|- Cross-links: Agent Tool Call Cost Calculator, Workflow Cost Calculator, API Pricing Comparator, Agent Output Value Calculator
+
+## AI Agent Batch vs Real-Time Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-batch-vs-realtime-cost-calculator/
+|- Description: Compare batch API discounts against real-time API and local GPU costs for AI agent workloads. Find the cheapest architecture for evals, backfills, and hybrid traffic.
+|- Inputs: monthly requests, input/output tokens per request, batch share (0–1), provider, local GPU model/count, value per output, electricity rate, amortization months, utilization, self-hosted ops hourly rate
+|- Outputs: cheapest option, batch vs real-time cost split, total provider cost, total local cost, cost per 1k requests, monthly gross/net value, ROI estimate, verdict
+|- Audience: AI agent builders choosing between batch APIs, real-time APIs, and self-hosted GPUs
+|- Cross-links: Agent API Pricing Comparator, Inference Capacity Planner, GPU Cloud vs Buy Calculator, Local LLM ROI Calculator, Agent Output Value Calculator
+
