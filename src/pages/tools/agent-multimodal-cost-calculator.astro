@@ -1,0 +1,278 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_multimodal_cost.json';
+
+const title = "AI Agent Multi-Modal Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost for AI agents that process text, images, audio, and video across OpenAI, Anthropic, and Google multimodal APIs.";
+const providers = data.providers;
+const scenarios = data.scenarios;
+const imageResolutions = data.image_resolutions;
+const faqs = [
+  { q: "Which provider is cheapest for image-heavy agents?", a: "Google Gemini 1.5 Flash and OpenAI GPT-4o-mini are usually the cheapest for vision workloads. Claude 3 Haiku is also competitive for high-quality image reasoning. Use your actual image count and resolution to compare." },
+  { q: "How is audio/video cost estimated?", a: "Audio is priced per minute of input and video is priced per minute of input (or per frame, depending on provider). The calculator uses representative per-minute rates; edit them to match the latest provider pricing." },
+  { q: "Can I change the provider rates?", a: "Yes. Every rate is editable inline. Click a cell, type a new value, and the calculator updates instantly. Use this when providers change pricing or you have negotiated rates." },
+  { q: "What is not included?", a: "Output media generation (image/audio generation), storage, bandwidth, vector DB, retries, fallback, and human review are not included. Pair this with the Agent API Pricing Comparator, Voice Agent Cost Calculator, and Document Processing Cost Calculator for full TCO." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Multi-Modal Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-multimodal-cost-calculator/" applicationCategory="FinanceApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4">AI Agent Multi-Modal Cost Calculator</h1>
+      <p class="text-slate-300 text-lg max-w-2xl mx-auto">Estimate monthly spend for agents that read images, audio, and video alongside text. Compare OpenAI, Anthropic, and Google. Edit rates to match your negotiated pricing.</p>
+    </div>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-10">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h2 class="text-xl font-semibold text-white">Workload</h2>
+        <select id="scenarioSelect" class="bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm">
+          <option value="">— Load a scenario preset —</option>
+          {scenarios.map((s, i) => <option value={i}>{s.name}</option>)}
+        </select>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        <label class="block">
+          <span class="text-slate-300 text-sm">Requests / month</span>
+          <input id="requests" type="number" min="0" value={data.inputs.requests_per_month} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Text input tokens / req</span>
+          <input id="inputTokens" type="number" min="0" value={data.inputs.text_input_tokens} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Text output tokens / req</span>
+          <input id="outputTokens" type="number" min="0" value={data.inputs.text_output_tokens} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Cached input %</span>
+          <input id="cacheHit" type="number" min="0" max="100" value={data.inputs.cached_input_percent} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-slate-300 text-sm">Images / request</span>
+          <input id="imagesPerReq" type="number" min="0" value={data.inputs.images_per_request} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Image resolution</span>
+          <select id="imageResolution" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            {Object.entries(imageResolutions).map(([key, r]) => <option value={key}>{r.label}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Audio minutes / req</span>
+          <input id="audioMinutes" type="number" min="0" step="0.1" value={data.inputs.audio_minutes_per_request} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Video seconds / req</span>
+          <input id="videoSeconds" type="number" min="0" value={data.inputs.video_seconds_per_request} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-slate-400 text-sm mt-4">Rates are per 1M tokens or per unit. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <section class="overflow-x-auto mb-10">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-600 text-slate-300 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider / Model</th>
+            <th class="py-3 pr-4 text-right">Text input</th>
+            <th class="py-3 pr-4 text-right">Cached</th>
+            <th class="py-3 pr-4 text-right">Text output</th>
+            <th class="py-3 pr-4 text-right">Image</th>
+            <th class="py-3 pr-4 text-right">Audio / min</th>
+            <th class="py-3 pr-4 text-right">Video / min</th>
+            <th class="py-3 pr-4 text-right">Monthly cost</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-slate-200">
+          {providers.map((p, idx) => (
+            <tr class="border-b border-slate-700/50" data-idx={idx}>
+              <td class="py-3 pr-4">
+                <div class="font-medium text-white">{p.name}</div>
+                <div class="text-xs text-slate-400">{p.model}</div>
+              </td>
+              <td class="py-3 pr-4 text-right"><input type="number" min="0" step="0.001" data-field="text_input" value={p.text_input_per_1m.toFixed(3)} class="rate-input w-20 bg-slate-950 border border-slate-600 rounded px-2 py-1 text-right text-sm" /></td>
+              <td class="py-3 pr-4 text-right"><input type="number" min="0" step="0.001" data-field="cached_input" value={(p.cached_input_per_1m ?? 0).toFixed(3)} class="rate-input w-20 bg-slate-950 border border-slate-600 rounded px-2 py-1 text-right text-sm" /></td>
+              <td class="py-3 pr-4 text-right"><input type="number" min="0" step="0.001" data-field="text_output" value={p.text_output_per_1m.toFixed(3)} class="rate-input w-20 bg-slate-950 border border-slate-600 rounded px-2 py-1 text-right text-sm" /></td>
+              <td class="py-3 pr-4 text-right"><input type="number" min="0" step="0.0001" data-field="image_cost" value={(p[`image_${data.inputs.image_resolution}_per_image`] ?? 0).toFixed(4)} class="rate-input w-24 bg-slate-950 border border-slate-600 rounded px-2 py-1 text-right text-sm" /></td>
+              <td class="py-3 pr-4 text-right"><input type="number" min="0" step="0.0001" data-field="audio" value={(p.audio_per_minute ?? 0).toFixed(4)} class="rate-input w-24 bg-slate-950 border border-slate-600 rounded px-2 py-1 text-right text-sm" /></td>
+              <td class="py-3 pr-4 text-right"><input type="number" min="0" step="0.0001" data-field="video" value={(p.video_per_minute ?? 0).toFixed(4)} class="rate-input w-24 bg-slate-950 border border-slate-600 rounded px-2 py-1 text-right text-sm" /></td>
+              <td class="py-3 pr-4 text-right font-mono cost-cell font-semibold">—</td>
+              <td class="py-3 pr-4 text-sm">{p.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section id="summary" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+      <h2 class="text-lg font-semibold text-cyan-400 mb-2">Cheapest option</h2>
+      <p id="cheapestLine" class="text-white text-xl font-medium">Enter a workload to see the cheapest provider.</p>
+      <p class="text-slate-400 text-sm mt-2">Media cost dominates for image, audio, and video agents. Compare the per-request breakdown below.</p>
+    </section>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Cost breakdown per 1,000 requests</h2>
+      <div id="breakdown" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <p class="text-slate-400 text-sm">Enter a workload to see the breakdown.</p>
+      </div>
+    </section>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-slate-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Related calculators</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <a href="/tools/agent-api-pricing-comparator/" class="block p-4 rounded-lg bg-slate-950 border border-slate-700 hover:border-cyan-400 transition">
+          <h3 class="font-medium text-white">AI Agent API Pricing Comparator</h3>
+          <p class="text-slate-400 text-sm mt-1">Text-only provider cost comparison.</p>
+        </a>
+        <a href="/tools/ai-voice-agent-cost-calculator/" class="block p-4 rounded-lg bg-slate-950 border border-slate-700 hover:border-cyan-400 transition">
+          <h3 class="font-medium text-white">AI Voice Agent Cost Calculator</h3>
+          <p class="text-slate-400 text-sm mt-1">Per-minute voice agent platform costs.</p>
+        </a>
+        <a href="/tools/agent-document-processing-cost-calculator/" class="block p-4 rounded-lg bg-slate-950 border border-slate-700 hover:border-cyan-400 transition">
+          <h3 class="font-medium text-white">Document Processing Cost Calculator</h3>
+          <p class="text-slate-400 text-sm mt-1">Per-page extraction, OCR, and summarization costs.</p>
+        </a>
+      </div>
+    </section>
+
+    <p id="note" class="text-slate-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ jsonData: JSON.stringify({ providers, scenarios, imageResolutions, defaultResolution: data.inputs.image_resolution }) }}>
+    const DATA = JSON.parse(jsonData);
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const round2 = n => Math.round(n * 100) / 100;
+
+    function getRatesFromRow(tr) {
+      const rates = {};
+      tr.querySelectorAll('.rate-input').forEach(input => {
+        rates[input.dataset.field] = parseFloat(input.value) || 0;
+      });
+      return rates;
+    }
+
+    function compute() {
+      const requests = parseFloat(document.getElementById('requests').value) || 0;
+      const inputTokens = parseFloat(document.getElementById('inputTokens').value) || 0;
+      const outputTokens = parseFloat(document.getElementById('outputTokens').value) || 0;
+      const cacheHit = Math.min(100, Math.max(0, parseFloat(document.getElementById('cacheHit').value) || 0)) / 100;
+      const imagesPerReq = parseFloat(document.getElementById('imagesPerReq').value) || 0;
+      const audioMin = parseFloat(document.getElementById('audioMinutes').value) || 0;
+      const videoSec = parseFloat(document.getElementById('videoSeconds').value) || 0;
+
+      const rows = [];
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const idx = parseInt(tr.dataset.idx, 10);
+        const p = DATA.providers[idx];
+        const rates = getRatesFromRow(tr);
+        const effectiveInput = (1 - cacheHit) * rates.text_input + cacheHit * (rates.cached_input || rates.text_input);
+        const textInputCost = requests * inputTokens / 1_000_000 * effectiveInput;
+        const textOutputCost = requests * outputTokens / 1_000_000 * rates.text_output;
+        const imageCost = requests * imagesPerReq * rates.image_cost;
+        const audioCost = requests * audioMin * rates.audio;
+        const videoCost = requests * (videoSec / 60) * rates.video;
+        const total = textInputCost + textOutputCost + imageCost + audioCost + videoCost;
+        rows.push({ idx, name: p.name, total, textInputCost, textOutputCost, imageCost, audioCost, videoCost, best_for: p.best_for });
+      });
+
+      rows.sort((a, b) => a.total - b.total);
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const row = rows.find(r => r.idx === parseInt(tr.dataset.idx, 10));
+        const cell = tr.querySelector('.cost-cell');
+        if (cell && row) cell.textContent = fmt(row.total);
+        tr.classList.toggle('bg-cyan-400/10', rows.length > 0 && rows[0].idx === parseInt(tr.dataset.idx, 10));
+      });
+
+      document.getElementById('cheapestLine').textContent = rows.length
+        ? `${rows[0].name} — ${fmt(rows[0].total)} / month (${rows[0].best_for}).`
+        : 'Enter a workload to see the cheapest provider.';
+
+      // Breakdown per 1k requests for top 3 cheapest
+      const top = rows.slice(0, 3);
+      const div = document.getElementById('breakdown');
+      if (top.length === 0 || requests === 0) {
+        div.innerHTML = '<p class="text-slate-400 text-sm">Enter a workload to see the breakdown.</p>';
+      } else {
+        div.innerHTML = top.map(r => {
+          const k = 1000;
+          const scale = k / requests;
+          return `
+            <div class="p-4 rounded-lg bg-slate-950 border ${r.idx === top[0].idx ? 'border-cyan-400' : 'border-slate-700'}">
+              <h3 class="font-semibold text-white mb-2">${r.name}</h3>
+              <p class="text-sm text-slate-300">Total per 1k requests: <span class="font-mono text-white">${fmt(r.total * scale)}</span></p>
+              <ul class="text-xs text-slate-400 mt-2 space-y-1">
+                <li>Text input: ${fmt(r.textInputCost * scale)}</li>
+                <li>Text output: ${fmt(r.textOutputCost * scale)}</li>
+                <li>Images: ${fmt(r.imageCost * scale)}</li>
+                <li>Audio: ${fmt(r.audioCost * scale)}</li>
+                <li>Video: ${fmt(r.videoCost * scale)}</li>
+              </ul>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function setScenario(i) {
+      const s = DATA.scenarios[i];
+      if (!s) return;
+      document.getElementById('requests').value = s.requests_per_month;
+      document.getElementById('inputTokens').value = s.text_input_tokens;
+      document.getElementById('outputTokens').value = s.text_output_tokens;
+      document.getElementById('cacheHit').value = s.cached_input_percent;
+      document.getElementById('imagesPerReq').value = s.images_per_request;
+      document.getElementById('imageResolution').value = s.image_resolution;
+      document.getElementById('audioMinutes').value = s.audio_minutes_per_request;
+      document.getElementById('videoSeconds').value = s.video_seconds_per_request;
+      updateImageRates();
+      compute();
+    }
+
+    function updateImageRates() {
+      const res = document.getElementById('imageResolution').value;
+      const key = `image_${res}_per_image`;
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const idx = parseInt(tr.dataset.idx, 10);
+        const val = DATA.providers[idx][key] || 0;
+        const input = tr.querySelector('[data-field="image_cost"]');
+        if (input) input.value = val.toFixed(4);
+      });
+    }
+
+    document.getElementById('scenarioSelect').addEventListener('change', e => setScenario(parseInt(e.target.value, 10)));
+    document.getElementById('imageResolution').addEventListener('change', () => { updateImageRates(); compute(); });
+
+    ['requests', 'inputTokens', 'outputTokens', 'cacheHit', 'imagesPerReq', 'audioMinutes', 'videoSeconds'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+    document.querySelectorAll('.rate-input').forEach(input => input.addEventListener('input', compute));
+
+    updateImageRates();
+    compute();
+  </script>
+</Layout>
