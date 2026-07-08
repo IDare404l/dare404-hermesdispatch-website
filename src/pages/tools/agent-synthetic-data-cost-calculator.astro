@@ -1,0 +1,490 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_synthetic_data_cost.json';
+
+const title = "AI Agent Synthetic Data Generator Cost Calculator | Hermes Dispatch";
+const description = "Estimate the cost to generate synthetic training and evaluation data for AI agents with LLMs, managed platforms, storage, filtering, and human validation.";
+const approaches = data.generation_approaches;
+const validators = data.validators;
+const storageBackends = data.storage_backends;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the all-in cost to produce synthetic data for AI agents: generation (LLM API, managed platform, or local GPU), filtering/retry waste, human validation, storage, setup, and ongoing maintenance." },
+  { q: "Which generation approach should I pick?", a: "Use LLM API for unstructured text, QA pairs, dialogues, and agent trajectories. Use managed platforms for tabular/relational privacy-safe datasets. Use local GPU for high-volume or sensitive workloads." },
+  { q: "How is the filter rate used?", a: "Some generated records fail quality checks or schema validation and must be regenerated. The filter rate models how many extra records need to be generated to hit your target usable count." },
+  { q: "Does storage cost matter?", a: "For small text datasets it is usually negligible. For high-volume or long-retention datasets (especially tabular or embedded data), storage can add hundreds of dollars per year." },
+  { q: "What is the difference between review rate and validator?", a: "The validator preset sets the per-record validation cost and throughput. The review rate is the percentage of records you actually send through that validation step. Set review rate to 0 if you rely only on automated filters." },
+  { q: "How do I reduce synthetic-data cost?", a: "Shorten prompts, reduce output tokens, use a smaller model for first-pass generation, filter aggressively, spot-check instead of full human review, and delete old datasets once they are no longer needed." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Synthetic Data Generator Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-synthetic-data-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧬</div>
+      <h1 class="display-heading mb-4">AI Agent Synthetic Data Generator Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the cost to generate synthetic training and evaluation data for AI agents with LLMs, managed platforms, storage, filtering, and human validation.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Generation workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Target usable records</span>
+          <input id="records" type="number" min="1" step="100" value={defaults.records} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Generation approach</span>
+          <select id="approach" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {approaches.map(a => <option value={JSON.stringify(a)} selected={a.slug === defaults.approach}>{a.name}</option>)}
+          </select>
+        </label>
+        <label class="block" id="inputTokensRow">
+          <span class="text-neutral-400 text-sm">Input tokens / record</span>
+          <input id="inputTokensPerRecord" type="number" min="0" step="10" value={defaults.input_tokens_per_record} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block" id="outputTokensRow">
+          <span class="text-neutral-400 text-sm">Output tokens / record</span>
+          <input id="outputTokensPerRecord" type="number" min="0" step="10" value={defaults.output_tokens_per_record} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block" id="inputCostRow">
+          <span class="text-neutral-400 text-sm">LLM input cost / 1K tokens ($)</span>
+          <input id="inputCostPer1k" type="number" min="0" step="0.01" value={defaults.provider_input_cost_per_1k} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block" id="outputCostRow">
+          <span class="text-neutral-400 text-sm">LLM output cost / 1K tokens ($)</span>
+          <input id="outputCostPer1k" type="number" min="0" step="0.01" value={defaults.provider_output_cost_per_1k} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block hidden" id="platformCostRow">
+          <span class="text-neutral-400 text-sm">Platform cost / 1K records ($)</span>
+          <input id="platformCostPer1k" type="number" min="0" step="0.5" value={defaults.platform_cost_per_1k} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block hidden" id="hardwareHourlyRow">
+          <span class="text-neutral-400 text-sm">Local GPU cost / hour ($)</span>
+          <input id="hardwareHourly" type="number" min="0" step="0.05" value={defaults.hardware_hourly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Base success / pass rate (%)</span>
+          <input id="successRate" type="number" min="0" max="100" step="1" value={defaults.base_success_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Filter / discard rate (%)</span>
+          <input id="filterRate" type="number" min="0" max="100" step="1" value={defaults.filter_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human validation tier</span>
+          <select id="validator" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {validators.map(v => <option value={JSON.stringify(v)} selected={v.slug === defaults.validator}>{v.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Validation review rate (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="1" value={defaults.review_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage backend</span>
+          <select id="storageBackend" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {storageBackends.map(b => <option value={JSON.stringify(b)} selected={b.slug === defaults.storage_backend}>{b.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Average record size (KB)</span>
+          <input id="recordSizeKB" type="number" min="0.1" step="0.1" value={defaults.avg_record_size_kb} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage retention (months)</span>
+          <input id="storageMonths" type="number" min="1" max="120" step="1" value={defaults.storage_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="120" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Records to generate</p>
+        <p id="recordsToGenerate" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Generation cost</p>
+        <p id="generationCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Validation cost</p>
+        <p id="validationCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total first-period cost</p>
+        <p id="totalPeriodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per usable record</p>
+        <p id="costPerRecord" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Storage cost ({defaults.storage_months} mo)</p>
+        <p id="storageCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Setup + maintenance</p>
+        <p id="laborCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Wasted/filtered records</p>
+        <p id="wastedRecords" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Validation hours</p>
+        <p id="validationHours" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1K usable records</p>
+        <p id="costPer1k" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Amount</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Generation</td>
+            <td id="genCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="genShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Filtering / retry waste</td>
+            <td id="wasteCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="wasteShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Human validation</td>
+            <td id="valCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="valShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Storage</td>
+            <td id="storeCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="storeShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Setup + maintenance labor</td>
+            <td id="laborCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="laborShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-700 font-semibold">
+            <td class="py-3 pr-4">Total</td>
+            <td id="totalCell" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="totalShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Approach comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Generation approach comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[600px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Approach</th>
+              <th class="py-3 pr-4 text-right">Generation cost</th>
+              <th class="py-3 pr-4 text-right">Cost / 1K records</th>
+              <th class="py-3 pr-4">Note</th>
+            </tr>
+          </thead>
+          <tbody id="approachTable" class="text-neutral-200">
+            <!-- populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-data-labeling-cost-calculator/" class="btn-primary text-sm">Data Labeling Cost Calc →</a>
+      <a href="/tools/llm-fine-tuning-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Fine-Tuning Cost Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getApproach() { return JSON.parse(document.getElementById('approach').value); }
+    function getValidator() { return JSON.parse(document.getElementById('validator').value); }
+    function getStorageBackend() { return JSON.parse(document.getElementById('storageBackend').value); }
+
+    function getInputs() {
+      return {
+        records: Math.max(1, Number(document.getElementById('records').value) || 1),
+        inputTokensPerRecord: Math.max(0, Number(document.getElementById('inputTokensPerRecord').value) || 0),
+        outputTokensPerRecord: Math.max(0, Number(document.getElementById('outputTokensPerRecord').value) || 0),
+        inputCostPer1k: Math.max(0, Number(document.getElementById('inputCostPer1k').value) || 0),
+        outputCostPer1k: Math.max(0, Number(document.getElementById('outputCostPer1k').value) || 0),
+        platformCostPer1k: Math.max(0, Number(document.getElementById('platformCostPer1k').value) || 0),
+        hardwareHourly: Math.max(0, Number(document.getElementById('hardwareHourly').value) || 0),
+        successRate: Math.min(100, Math.max(0, Number(document.getElementById('successRate').value) || 0)),
+        filterRate: Math.min(100, Math.max(0, Number(document.getElementById('filterRate').value) || 0)),
+        reviewRate: Math.min(100, Math.max(0, Number(document.getElementById('reviewRate').value) || 0)),
+        recordSizeKB: Math.max(0.1, Number(document.getElementById('recordSizeKB').value) || 0.1),
+        storageMonths: Math.max(1, Number(document.getElementById('storageMonths').value) || 1),
+        setupHours: Math.max(0, Number(document.getElementById('setupHours').value) || 0),
+        setupRate: Math.max(0, Number(document.getElementById('setupRate').value) || 0),
+        maintenanceHours: Math.max(0, Number(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceRate: Math.max(0, Number(document.getElementById('maintenanceRate').value) || 0),
+        projectionMonths: Math.max(1, Number(document.getElementById('projectionMonths').value) || 1),
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.records !== undefined) document.getElementById('records').value = obj.records;
+      if (obj.approach !== undefined) {
+        const sel = document.getElementById('approach');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.approach) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.provider_input_cost_per_1k !== undefined) document.getElementById('inputCostPer1k').value = obj.provider_input_cost_per_1k;
+      if (obj.provider_output_cost_per_1k !== undefined) document.getElementById('outputCostPer1k').value = obj.provider_output_cost_per_1k;
+      if (obj.input_tokens_per_record !== undefined) document.getElementById('inputTokensPerRecord').value = obj.input_tokens_per_record;
+      if (obj.output_tokens_per_record !== undefined) document.getElementById('outputTokensPerRecord').value = obj.output_tokens_per_record;
+      if (obj.platform_cost_per_1k !== undefined) document.getElementById('platformCostPer1k').value = obj.platform_cost_per_1k;
+      if (obj.hardware_hourly !== undefined) document.getElementById('hardwareHourly').value = obj.hardware_hourly;
+      if (obj.base_success_rate !== undefined) document.getElementById('successRate').value = obj.base_success_rate;
+      if (obj.filter_rate !== undefined) document.getElementById('filterRate').value = obj.filter_rate;
+      if (obj.validator !== undefined) {
+        const sel = document.getElementById('validator');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.validator) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.review_rate !== undefined) document.getElementById('reviewRate').value = obj.review_rate;
+      if (obj.storage_backend !== undefined) {
+        const sel = document.getElementById('storageBackend');
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === obj.storage_backend) { sel.selectedIndex = i; break; }
+        }
+      }
+      if (obj.avg_record_size_kb !== undefined) document.getElementById('recordSizeKB').value = obj.avg_record_size_kb;
+      if (obj.storage_months !== undefined) document.getElementById('storageMonths').value = obj.storage_months;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_month;
+      if (obj.maintenance_hourly_rate !== undefined) document.getElementById('maintenanceRate').value = obj.maintenance_hourly_rate;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+      updateApproachVisibility();
+    }
+
+    function updateApproachVisibility() {
+      const approach = getApproach();
+      const isLLM = approach.slug === 'llm_api';
+      const isManaged = approach.slug === 'managed_synthetic';
+      const isLocal = approach.slug === 'local_gpu';
+      document.getElementById('inputTokensRow').classList.toggle('hidden', !isLLM);
+      document.getElementById('outputTokensRow').classList.toggle('hidden', !isLLM);
+      document.getElementById('inputCostRow').classList.toggle('hidden', !isLLM);
+      document.getElementById('outputCostRow').classList.toggle('hidden', !isLLM);
+      document.getElementById('platformCostRow').classList.toggle('hidden', !isManaged);
+      document.getElementById('hardwareHourlyRow').classList.toggle('hidden', !isLocal);
+    }
+
+    function generationCostForApproach(approach, records, inps) {
+      if (approach.slug === 'llm_api') {
+        const perRecord = (inps.inputTokensPerRecord / 1000) * inps.inputCostPer1k + (inps.outputTokensPerRecord / 1000) * inps.outputCostPer1k;
+        return perRecord * records;
+      } else if (approach.slug === 'managed_synthetic') {
+        return (inps.platformCostPer1k / 1000) * records;
+      } else if (approach.slug === 'local_gpu') {
+        const hours = records / approach.records_per_hour_default;
+        return hours * inps.hardwareHourly;
+      }
+      return 0;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const approach = getApproach();
+      const validator = getValidator();
+      const storageBackend = getStorageBackend();
+
+      const effectivePassRate = (inps.successRate / 100) * (1 - inps.filterRate / 100);
+      const recordsToGenerate = effectivePassRate > 0 ? Math.ceil(inps.records / effectivePassRate) : inps.records;
+      const wastedRecords = recordsToGenerate - inps.records;
+      const generationCost = generationCostForApproach(approach, recordsToGenerate, inps);
+      const wasteCost = generationCost - generationCostForApproach(approach, inps.records, inps);
+      const reviewedRecords = inps.records * (inps.reviewRate / 100);
+      const validationCost = reviewedRecords * validator.per_record_cost + (validator.per_hour_records > 0 ? reviewedRecords / validator.per_hour_records * validator.hourly_rate : 0);
+      const validationHours = validator.per_hour_records > 0 ? reviewedRecords / validator.per_hour_records : 0;
+      const dataGB = (inps.records * inps.recordSizeKB) / (1024 * 1024);
+      const storageCost = dataGB * storageBackend.cost_per_gb_month * inps.storageMonths;
+      const setupCost = inps.setupHours * inps.setupRate;
+      const maintenanceCost = inps.maintenanceHours * inps.maintenanceRate * inps.projectionMonths;
+      const laborCost = setupCost + maintenanceCost;
+      const totalCost = generationCost + wasteCost + validationCost + storageCost + laborCost;
+      const costPerRecord = totalCost / inps.records;
+      const costPer1k = costPerRecord * 1000;
+
+      document.getElementById('recordsToGenerate').textContent = fmtInt(recordsToGenerate);
+      document.getElementById('generationCost').textContent = fmtMoney(generationCost + wasteCost);
+      document.getElementById('validationCost').textContent = fmtMoney(validationCost);
+      document.getElementById('totalPeriodCost').textContent = fmtMoney0(totalCost);
+      document.getElementById('costPerRecord').textContent = fmtMoney2(costPerRecord);
+      document.getElementById('storageCost').textContent = fmtMoney(storageCost);
+      document.getElementById('laborCost').textContent = fmtMoney(laborCost);
+      document.getElementById('wastedRecords').textContent = fmtInt(wastedRecords);
+      document.getElementById('validationHours').textContent = fmtNum(validationHours) + ' hr';
+      document.getElementById('costPer1k').textContent = fmtMoney2(costPer1k);
+
+      const updateRow = (cellId, shareId, val) => {
+        document.getElementById(cellId).textContent = fmtMoney(val);
+        document.getElementById(shareId).textContent = totalCost > 0 ? (val / totalCost * 100).toFixed(1) + '%' : '0%';
+      };
+      updateRow('genCell', 'genShare', generationCost);
+      updateRow('wasteCell', 'wasteShare', wasteCost);
+      updateRow('valCell', 'valShare', validationCost);
+      updateRow('storeCell', 'storeShare', storageCost);
+      updateRow('laborCell', 'laborShare', laborCost);
+      document.getElementById('totalCell').textContent = fmtMoney(totalCost);
+      document.getElementById('totalShare').textContent = '100%';
+
+      // Approach comparison table
+      const approachSel = document.getElementById('approach');
+      const tbody = document.getElementById('approachTable');
+      let rows = [];
+      for (let i = 0; i < approachSel.options.length; i++) {
+        const appr = JSON.parse(approachSel.options[i].value);
+        const cost = generationCostForApproach(appr, recordsToGenerate, inps);
+        rows.push({ name: appr.name, cost, per1k: cost / inps.records * 1000 });
+      }
+      rows.sort((a, b) => a.cost - b.cost);
+      const cheapest = rows[0].cost;
+      tbody.innerHTML = rows.map((r, idx) => {
+        const badge = r.cost === cheapest ? '<span class="ml-2 text-xs bg-brand-gold text-neutral-950 px-2 py-0.5 rounded font-semibold">Cheapest</span>' : '';
+        return `<tr class="border-b border-neutral-800/50 ${idx === 0 ? 'text-brand-gold' : ''}"><td class="py-3 pr-4">${r.name}${badge}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney2(r.cost)}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney2(r.per1k)}</td><td class="py-3 pr-4 text-sm text-neutral-400">${idx === 0 ? 'Lowest generation cost for this workload' : ''}</td></tr>`;
+      }).join('');
+
+      let verdict = '';
+      if (totalCost === 0) {
+        verdict = "Set a workload to see a cost estimate.";
+      } else if (costPerRecord < 0.05) {
+        verdict = `Very cheap per record (${fmtMoney2(costPerRecord)}). Great for experiments and small datasets; watch quality as scale grows.`;
+      } else if (costPerRecord < 0.25) {
+        verdict = `Moderate cost (${fmtMoney2(costPerRecord)}/record, ${fmtMoney0(totalCost)} total). Balance between generation quality and validation overhead.`;
+      } else if (costPerRecord < 0.75) {
+        verdict = `Premium synthetic data: ${fmtMoney2(costPerRecord)}/record. Largest cost driver is ${generationCost >= validationCost && generationCost >= storageCost ? 'generation' : (validationCost >= storageCost ? 'validation' : 'storage')}. Consider a managed platform or local GPU if volume is high.`;
+      } else {
+        verdict = `High-cost dataset: ${fmtMoney2(costPerRecord)}/record, ${fmtMoney0(totalCost)} total. Reduce output tokens, filter rate, or validation rate to cut spend.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['approach'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => { updateApproachVisibility(); compute(); });
+      });
+
+      ['records','inputTokensPerRecord','outputTokensPerRecord','inputCostPer1k','outputCostPer1k','platformCostPer1k','hardwareHourly','successRate','filterRate','validator','reviewRate','storageBackend','recordSizeKB','storageMonths','setupHours','setupRate','maintenanceHours','maintenanceRate','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.addEventListener('input', compute); el.addEventListener('change', compute); }
+      });
+
+      updateApproachVisibility();
+      compute();
+    });
+  </script>
+</Layout>

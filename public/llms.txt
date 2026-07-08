@@ -632,10 +632,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Cross-links: Agent API Pricing Comparator, Inference Capacity Planner, GPU Cloud vs Buy Calculator, Local LLM ROI Calculator, Agent Output Value Calculator
 
 ## AI Agent Code Review Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-code-review-cost-calculator/
-|- Description: Estimate monthly cost of an AI agent for code reviews across LLM APIs, agentic platforms, and human reviewer fallback.
-|- Inputs: LLM provider, review platform, monthly PRs, files reviewed per PR, lines per file, tokens per line, output tokens per PR, cached input percentage, human review rate, review minutes, reviewer hourly cost, projection months
-|- Outputs: input tokens per PR, monthly LLM cost, monthly platform cost, total monthly cost, cost per PR, cost per 1k PRs, human review hours/cost, projected period cost, provider comparison table, verdict
-|- Audience: AI agent builders and engineering teams budgeting automated code-review agents
-|- Cross-links: Agent API Pricing Comparator, Agent vs Human Hire Calculator, Agent Output Value Calculator, Agent Prompt Testing Budget Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-code-review-cost-calculator/
+||- Description: Estimate monthly cost of an AI agent for code reviews across LLM APIs, agentic platforms, and human reviewer fallback.
+||- Inputs: LLM provider, review platform, monthly PRs, files/lines/tokens per PR, output tokens per PR, cached input percentage, human review rate, review minutes, reviewer hourly cost, projection months.
+||- Outputs: input tokens per PR, monthly LLM cost, monthly platform cost, total monthly cost, cost per PR, cost per 1k PRs, human review hours/cost, projected period cost, provider comparison table, verdict.
+||- Audience: AI agent builders and engineering teams budgeting automated code-review agents.
+||- Cross-links: Agent API Pricing Comparator, Agent vs Human Hire Calculator, Agent Output Value Calculator, Agent Prompt Testing Budget Calculator.
 
+## AI Agent Synthetic Data Generator Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-synthetic-data-cost-calculator/
+|- Description: Estimate the cost to generate synthetic training and evaluation data for AI agents with LLMs, managed platforms, storage, filtering, and human validation.
+|- Inputs: target usable records, generation approach, input/output tokens per record, LLM costs, platform cost per 1K records, local GPU hourly cost, success/pass rate, filter rate, validation tier, review rate, storage backend, record size, retention months, setup/maintenance hours and rates, projection months.
+|- Outputs: records to generate, generation cost, filtering waste cost, validation cost, storage cost, setup + maintenance labor, total period cost, cost per usable record, cost per 1K records, validation hours, approach comparison table, verdict.
+|- Audience: AI agent builders budgeting synthetic training/eval data for fine-tuning, RLHF, and agent trajectory generation.
+|- Cross-links: Agent Data Labeling Cost Calculator, LLM Fine-Tuning Cost Calculator, Agent Output Value Calculator, Agent API Pricing Comparator.
+
+## Hub Pages
