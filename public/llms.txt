@@ -294,6 +294,14 @@ Hermes Dispatch publishes each tool as a downloadable Python script that registe
 - Outputs: readiness score (0-100), maturity level, risk level, top 5 blockers, launch verdict, applicable compliance frameworks
 - Audience: AI agent builders preparing for beta or production launch
 
+## AI Agent Newsletter Production Cost Calculator
+- URL: https://hermesdispatch.dev/tools/agent-newsletter-production-cost-calculator/
+- Description: Estimate monthly cost to produce a newsletter with AI agents: research, writing, fact-checking, images, email delivery, and human editorial review.
+- Inputs: issues per month, subscribers, sections per issue, research queries and tokens per section, writer LLM, writing input/output tokens, image provider and images per issue, email delivery provider, human review rate and hours per issue, editor hourly rate, fact-check queries and tokens, tools/plugins monthly, setup/maintenance hours and rates, projection months.
+- Outputs: monthly production cost, cost per issue, cost per subscriber per month, projected period cost, monthly LLM/delivery/editorial/image/tools/maintenance costs, cost breakdown table, writer LLM comparison table, verdict.
+- Audience: newsletter publishers, AI agent builders, and media operators budgeting AI-assisted newsletter production.
+- Cross-links: Newsletter Revenue & Growth Calculator, Daily Newsletter Prompt Generator, Newsletter Topic Finder, Newsletter Sponsorship ROI Calculator.
+
 ## Newsletter Revenue & Growth Calculator
 - URL: https://hermesdispatch.dev/tools/newsletter-revenue-calculator/
 - Description: Estimate monthly newsletter revenue from sponsorships, affiliate links, and paid subscriptions. Forecast subscriber growth, opens, clicks, and ARPU.

@@ -1,0 +1,510 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_newsletter_production_cost.json';
+
+const title = "AI Agent Newsletter Production Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost to produce a newsletter with AI agents: research, writing, fact-checking, images, delivery, and human editorial review.";
+const providers = data.providers;
+const imageProviders = data.image_providers;
+const deliveryProviders = data.delivery_providers;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the all-in monthly cost of producing a newsletter using AI agents: research queries, drafting, fact-checking, image generation, email delivery, and human editorial review. It also shows cost per issue and cost per subscriber." },
+  { q: "How are AI writing costs calculated?", a: "We multiply issues per month by the number of research queries, writing passes, and fact-check queries per issue. Each query is priced using the selected LLM provider's input and output rates per 1M tokens." },
+  { q: "What is included in delivery cost?", a: "Delivery cost is the email platform's monthly base fee plus any per-send charges above free tiers. For example, Resend includes 3,000 free emails per month and then charges per send." },
+  { q: "Does this include subscriber acquisition cost?", a: "No. This calculator covers production and delivery only. Use the Affiliate Revenue Estimator and Newsletter Revenue & Growth Calculator to model subscriber growth and monetization." },
+  { q: "Why does editorial review matter?", a: "Even a fully AI-generated newsletter usually needs a human editor for brand voice, accuracy, and compliance. We model review hours per issue and the editor's hourly rate." },
+  { q: "Which scenario is cheapest?", a: "The solo AI-curated digest scenario is usually cheapest because it uses a smaller model, fewer sections, and lower review overhead. Premium research newsletters cost more because of deeper research and higher editorial standards." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Newsletter Production Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-newsletter-production-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🗞️</div>
+      <h1 class="display-heading mb-4">AI Agent Newsletter Production Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly cost to produce a newsletter with AI agents: research, writing, fact-checking, images, delivery, and human editorial review.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Production inputs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Issues per month</span>
+          <input id="issuesPerMonth" type="number" min="1" step="1" value={defaults.issues_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Subscribers</span>
+          <input id="subscribers" type="number" min="0" step="100" value={defaults.subscribers} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sections per issue</span>
+          <input id="sectionsPerIssue" type="number" min="1" step="1" value={defaults.sections_per_issue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Research queries per section</span>
+          <input id="researchQueries" type="number" min="0" step="1" value={defaults.research_queries_per_section} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Research input tokens</span>
+          <input id="researchInput" type="number" min="0" step="50" value={defaults.research_input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Research output tokens</span>
+          <input id="researchOutput" type="number" min="0" step="50" value={defaults.research_output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Writer / editor LLM</span>
+          <select id="writerProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.writer_provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Writing input tokens</span>
+          <input id="writingInput" type="number" min="0" step="100" value={defaults.writing_input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Writing output tokens</span>
+          <input id="writingOutput" type="number" min="0" step="100" value={defaults.writing_output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Image provider</span>
+          <select id="imageProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {imageProviders.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.image_provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Images per issue</span>
+          <input id="imagesPerIssue" type="number" min="0" step="1" value={defaults.images_per_issue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Email delivery provider</span>
+          <select id="deliveryProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {deliveryProviders.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.delivery_provider}>{p.name}</option>)}
+          </select>
+        </label>
+
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="5" value={defaults.review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review hours per issue</span>
+          <input id="reviewHours" type="number" min="0" step="0.1" value={defaults.review_hours_per_issue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Editor hourly rate ($)</span>
+          <input id="editorRate" type="number" min="0" step="5" value={defaults.editor_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fact-check queries per issue</span>
+          <input id="factcheckQueries" type="number" min="0" step="1" value={defaults.factcheck_queries_per_issue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fact-check input tokens</span>
+          <input id="factcheckInput" type="number" min="0" step="50" value={defaults.factcheck_input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fact-check output tokens</span>
+          <input id="factcheckOutput" type="number" min="0" step="50" value={defaults.factcheck_output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tools & plugins ($/mo)</span>
+          <input id="toolsMonthly" type="number" min="0" step="10" value={defaults.tools_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly production cost</p>
+        <p id="monthlyCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per issue</p>
+        <p id="costPerIssue" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per subscriber / month</p>
+        <p id="costPerSubscriber" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly LLM cost</p>
+        <p id="llmCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly delivery cost</p>
+        <p id="deliveryCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly editorial cost</p>
+        <p id="editorialCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly image cost</p>
+        <p id="imageCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly tools cost</p>
+        <p id="toolsCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly maintenance cost</p>
+        <p id="maintenanceCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Research</td>
+            <td id="researchCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="researchShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Writing / editing LLM</td>
+            <td id="writingCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="writingShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Fact-checking</td>
+            <td id="factcheckCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="factcheckShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Images</td>
+            <td id="imagesCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="imagesShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Delivery</td>
+            <td id="deliveryCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="deliveryShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Human editorial review</td>
+            <td id="reviewCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Tools & plugins</td>
+            <td id="toolsCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="toolsShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Maintenance labor</td>
+            <td id="maintenanceCostRow" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="maintenanceShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Writer LLM cost comparison (per month)</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4 text-right">Research + writing + fact-check</th>
+          </tr>
+        </thead>
+        <tbody id="providerBody" class="text-neutral-200">
+          <tr><td colspan="2" class="py-4 text-neutral-500">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/newsletter-revenue-calculator/" class="btn-primary text-sm">Newsletter Revenue Calculator →</a>
+      <a href="/tools/newsletter-prompt-generator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Daily Prompt Generator →</a>
+      <a href="/tools/newsletter-topic-finder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Topic Finder →</a>
+      <a href="/tools/newsletter-sponsorship-roi/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Sponsorship ROI →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providersJson: JSON.stringify(providers), imageProvidersJson: JSON.stringify(imageProviders), deliveryProvidersJson: JSON.stringify(deliveryProviders) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    const providers = JSON.parse(providersJson);
+    const imageProviders = JSON.parse(imageProvidersJson);
+    const deliveryProviders = JSON.parse(deliveryProvidersJson);
+
+    function getWriter() { return JSON.parse(document.getElementById('writerProvider').value); }
+    function getImage() { return JSON.parse(document.getElementById('imageProvider').value); }
+    function getDelivery() { return JSON.parse(document.getElementById('deliveryProvider').value); }
+
+    function getInputs() {
+      return {
+        issues: Math.max(1, parseFloat(document.getElementById('issuesPerMonth').value) || 1),
+        subscribers: Math.max(0, parseFloat(document.getElementById('subscribers').value) || 0),
+        sections: Math.max(1, parseFloat(document.getElementById('sectionsPerIssue').value) || 1),
+        researchQueries: Math.max(0, parseFloat(document.getElementById('researchQueries').value) || 0),
+        researchInput: Math.max(0, parseFloat(document.getElementById('researchInput').value) || 0),
+        researchOutput: Math.max(0, parseFloat(document.getElementById('researchOutput').value) || 0),
+        writingInput: Math.max(0, parseFloat(document.getElementById('writingInput').value) || 0),
+        writingOutput: Math.max(0, parseFloat(document.getElementById('writingOutput').value) || 0),
+        imagesPerIssue: Math.max(0, parseFloat(document.getElementById('imagesPerIssue').value) || 0),
+        reviewRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewRate').value) || 0)),
+        reviewHours: Math.max(0, parseFloat(document.getElementById('reviewHours').value) || 0),
+        editorRate: Math.max(0, parseFloat(document.getElementById('editorRate').value) || 0),
+        factcheckQueries: Math.max(0, parseFloat(document.getElementById('factcheckQueries').value) || 0),
+        factcheckInput: Math.max(0, parseFloat(document.getElementById('factcheckInput').value) || 0),
+        factcheckOutput: Math.max(0, parseFloat(document.getElementById('factcheckOutput').value) || 0),
+        toolsMonthly: Math.max(0, parseFloat(document.getElementById('toolsMonthly').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceRate: Math.max(0, parseFloat(document.getElementById('maintenanceRate').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.issues_per_month !== undefined) document.getElementById('issuesPerMonth').value = obj.issues_per_month;
+      if (obj.subscribers !== undefined) document.getElementById('subscribers').value = obj.subscribers;
+      if (obj.sections_per_issue !== undefined) document.getElementById('sectionsPerIssue').value = obj.sections_per_issue;
+      if (obj.research_queries_per_section !== undefined) document.getElementById('researchQueries').value = obj.research_queries_per_section;
+      if (obj.research_input_tokens !== undefined) document.getElementById('researchInput').value = obj.research_input_tokens;
+      if (obj.research_output_tokens !== undefined) document.getElementById('researchOutput').value = obj.research_output_tokens;
+      if (obj.writer_provider !== undefined) {
+        const opts = document.getElementById('writerProvider').options;
+        for (let i = 0; i < opts.length; i++) {
+          const p = JSON.parse(opts[i].value);
+          if (p.slug === obj.writer_provider) { opts[i].selected = true; break; }
+        }
+      }
+      if (obj.writing_input_tokens !== undefined) document.getElementById('writingInput').value = obj.writing_input_tokens;
+      if (obj.writing_output_tokens !== undefined) document.getElementById('writingOutput').value = obj.writing_output_tokens;
+      if (obj.image_provider !== undefined) {
+        const opts = document.getElementById('imageProvider').options;
+        for (let i = 0; i < opts.length; i++) {
+          const p = JSON.parse(opts[i].value);
+          if (p.slug === obj.image_provider) { opts[i].selected = true; break; }
+        }
+      }
+      if (obj.images_per_issue !== undefined) document.getElementById('imagesPerIssue').value = obj.images_per_issue;
+      if (obj.delivery_provider !== undefined) {
+        const opts = document.getElementById('deliveryProvider').options;
+        for (let i = 0; i < opts.length; i++) {
+          const p = JSON.parse(opts[i].value);
+          if (p.slug === obj.delivery_provider) { opts[i].selected = true; break; }
+        }
+      }
+      if (obj.review_rate_pct !== undefined) document.getElementById('reviewRate').value = obj.review_rate_pct;
+      if (obj.review_hours_per_issue !== undefined) document.getElementById('reviewHours').value = obj.review_hours_per_issue;
+      if (obj.editor_hourly_rate !== undefined) document.getElementById('editorRate').value = obj.editor_hourly_rate;
+      if (obj.factcheck_queries_per_issue !== undefined) document.getElementById('factcheckQueries').value = obj.factcheck_queries_per_issue;
+      if (obj.factcheck_input_tokens !== undefined) document.getElementById('factcheckInput').value = obj.factcheck_input_tokens;
+      if (obj.factcheck_output_tokens !== undefined) document.getElementById('factcheckOutput').value = obj.factcheck_output_tokens;
+      if (obj.tools_monthly !== undefined) document.getElementById('toolsMonthly').value = obj.tools_monthly;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours;
+      if (obj.maintenance_hourly_rate !== undefined) document.getElementById('maintenanceRate').value = obj.maintenance_hourly_rate;
+    }
+
+    function llmCostForProvider(p, inps) {
+      const researchCalls = inps.issues * inps.sections * inps.researchQueries;
+      const writingCalls = inps.issues;
+      const factcheckCalls = inps.issues * inps.factcheckQueries;
+      const researchCost = researchCalls * ((inps.researchInput / 1e6) * p.input_per_1m + (inps.researchOutput / 1e6) * p.output_per_1m);
+      const writingCost = writingCalls * ((inps.writingInput / 1e6) * p.input_per_1m + (inps.writingOutput / 1e6) * p.output_per_1m);
+      const factcheckCost = factcheckCalls * ((inps.factcheckInput / 1e6) * p.input_per_1m + (inps.factcheckOutput / 1e6) * p.output_per_1m);
+      return { researchCost, writingCost, factcheckCost, total: researchCost + writingCost + factcheckCost };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const writer = getWriter();
+      const image = getImage();
+      const delivery = getDelivery();
+
+      const llm = llmCostForProvider(writer, inps);
+      const imageCost = inps.issues * inps.imagesPerIssue * image.cost_per_image;
+      const monthlySends = inps.issues * inps.subscribers;
+      const billableSends = Math.max(0, monthlySends - delivery.free_per_month);
+      const deliveryCost = delivery.base_monthly + billableSends * delivery.cost_per_send;
+      const reviewCost = inps.issues * (inps.reviewRate / 100) * inps.reviewHours * inps.editorRate;
+      const toolsCost = inps.toolsMonthly;
+      const maintenanceCost = inps.maintenanceHours * inps.maintenanceRate;
+      const monthlyCost = llm.total + imageCost + deliveryCost + reviewCost + toolsCost + maintenanceCost;
+      const periodCost = monthlyCost * inps.projectionMonths;
+
+      document.getElementById('monthlyCost').textContent = fmtMoney0(monthlyCost);
+      document.getElementById('costPerIssue').textContent = fmtMoney(monthlyCost / inps.issues);
+      document.getElementById('costPerSubscriber').textContent = inps.subscribers > 0 ? fmtMoney(monthlyCost / inps.subscribers) : '—';
+      document.getElementById('periodCost').textContent = fmtMoney0(periodCost);
+      document.getElementById('llmCost').textContent = fmtMoney0(llm.total);
+      document.getElementById('deliveryCost').textContent = fmtMoney0(deliveryCost);
+      document.getElementById('editorialCost').textContent = fmtMoney0(reviewCost);
+      document.getElementById('imageCost').textContent = fmtMoney0(imageCost);
+      document.getElementById('toolsCost').textContent = fmtMoney0(toolsCost);
+      document.getElementById('maintenanceCost').textContent = fmtMoney0(maintenanceCost);
+
+      const setShare = (id, cost) => {
+        document.getElementById(id).textContent = monthlyCost > 0 ? (cost / monthlyCost * 100).toFixed(1) + '%' : '0%';
+      };
+      document.getElementById('researchCost').textContent = fmtMoney(llm.researchCost);
+      setShare('researchShare', llm.researchCost);
+      document.getElementById('writingCost').textContent = fmtMoney(llm.writingCost);
+      setShare('writingShare', llm.writingCost);
+      document.getElementById('factcheckCost').textContent = fmtMoney(llm.factcheckCost);
+      setShare('factcheckShare', llm.factcheckCost);
+      document.getElementById('imagesCost').textContent = fmtMoney(imageCost);
+      setShare('imagesShare', imageCost);
+      document.getElementById('deliveryCostRow').textContent = fmtMoney(deliveryCost);
+      setShare('deliveryShare', deliveryCost);
+      document.getElementById('reviewCostRow').textContent = fmtMoney(reviewCost);
+      setShare('reviewShare', reviewCost);
+      document.getElementById('toolsCostRow').textContent = fmtMoney(toolsCost);
+      setShare('toolsShare', toolsCost);
+      document.getElementById('maintenanceCostRow').textContent = fmtMoney(maintenanceCost);
+      setShare('maintenanceShare', maintenanceCost);
+
+      const tbody = document.getElementById('providerBody');
+      tbody.innerHTML = providers.map(p => {
+        const cost = llmCostForProvider(p, inps).total;
+        const cheapest = p.slug === writer.slug;
+        return `<tr class="border-b border-neutral-800/50 ${cheapest ? 'text-brand-gold' : ''}">
+          <td class="py-3 pr-4">${p.name}${cheapest ? ' (selected)' : ''}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(cost)}</td>
+        </tr>`;
+      }).join('');
+
+      let verdict = '';
+      const editorialShare = monthlyCost > 0 ? reviewCost / monthlyCost : 0;
+      const deliveryShare = monthlyCost > 0 ? deliveryCost / monthlyCost : 0;
+      const llmShare = monthlyCost > 0 ? llm.total / monthlyCost : 0;
+      if (inps.subscribers > 0 && monthlyCost / inps.subscribers < 0.05) {
+        verdict = `✅ Production cost is low at ${fmtMoney(monthlyCost / inps.subscribers)} per subscriber per month. `;
+      } else if (inps.subscribers > 0) {
+        verdict = `⚠️ Production cost is ${fmtMoney(monthlyCost / inps.subscribers)} per subscriber per month. `;
+      } else {
+        verdict = `Set a subscriber count to see per-subscriber economics. `;
+      }
+      if (llmShare > 0.5) {
+        verdict += `LLM inference is the biggest line item (${(llmShare*100).toFixed(0)}%). Switching to a smaller model or reducing research queries would help. `;
+      } else if (editorialShare > 0.4) {
+        verdict += `Editorial review dominates (${(editorialShare*100).toFixed(0)}%). Consider lowering review rate on low-risk sections or using a smaller model to cut draft prep time. `;
+      } else if (deliveryShare > 0.4) {
+        verdict += `Delivery is the biggest cost (${(deliveryShare*100).toFixed(0)}%). Negotiate ESP volume pricing or move to a provider with a higher free tier. `;
+      } else {
+        verdict += `Costs are fairly balanced across production, review, and delivery.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['issuesPerMonth','subscribers','sectionsPerIssue','researchQueries','researchInput','researchOutput','writingInput','writingOutput','imagesPerIssue','reviewRate','reviewHours','editorRate','factcheckQueries','factcheckInput','factcheckOutput','toolsMonthly','maintenanceHours','maintenanceRate','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+      document.getElementById('writerProvider').addEventListener('change', compute);
+      document.getElementById('imageProvider').addEventListener('change', compute);
+      document.getElementById('deliveryProvider').addEventListener('change', compute);
+
+      compute();
+    });
+  </script>
+</Layout>
