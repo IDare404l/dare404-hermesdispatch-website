@@ -1,0 +1,335 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/newsletter_sponsorship_roi.json';
+
+const title = "Newsletter Sponsorship ROI Calculator | Hermes Dispatch";
+const description = "Estimate newsletter sponsorship ROI for publishers and advertisers. Compare package price, CPM, CPC, cost per conversion, suggested rate card, and advertiser profit.";
+const defaults = data.defaults;
+const scenarios = data.scenarios;
+const cpmBenchmarks = data.cpm_benchmarks;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It models a newsletter sponsorship from both sides: the publisher's sponsorship revenue and the advertiser's expected gross profit and ROI. You enter subscribers, engagement, package price, and the sponsor's economics to see if the deal is likely to perform." },
+  { q: "How is effective CPM calculated?", a: "Effective CPM is the package price divided by subscribers, multiplied by 1,000. A $750 sponsorship to 5,000 subscribers is a $150 CPM." },
+  { q: "How is advertiser ROI calculated?", a: "ROI compares the sponsor's estimated gross profit from conversions to the sponsorship cost. If the sponsor expects $1,500 in gross profit from a $750 placement, that's a 100% ROI." },
+  { q: "What is the suggested rate card?", a: "It is the package price that would give the sponsor exactly its target ROI, assuming your engagement and the sponsor's conversion economics stay the same. Price above it only if audience quality or exclusivity justifies a lower ROI for the advertiser." },
+  { q: "Are these numbers guaranteed?", a: "No. Click and conversion rates vary by creative, offer, landing page, and audience fit. Use this as a negotiation baseline, not a contract." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Newsletter Sponsorship ROI Calculator" description={description} url="https://hermesdispatch.dev/tools/newsletter-sponsorship-roi/" applicationCategory="BusinessApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📢</div>
+      <h1 class="display-heading mb-4">Newsletter Sponsorship ROI Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Price newsletter ad placements with confidence. Compare CPM, CPC, cost per conversion, publisher revenue, and advertiser ROI.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Sponsorship inputs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Current subscribers</span>
+          <input id="subscribers" type="number" min="0" step="100" value={defaults.subscribers} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Open rate (%)</span>
+          <input id="openRate" type="number" min="0" max="100" step="0.5" value={defaults.open_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Click rate (% of opens)</span>
+          <input id="clickRate" type="number" min="0" max="100" step="0.1" value={defaults.click_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Issues per month</span>
+          <input id="issuesPerMonth" type="number" min="0" max="31" value={defaults.issues_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sponsor slots per issue</span>
+          <input id="slotsPerIssue" type="number" min="1" max="10" value={defaults.slots_per_issue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Package price ($ / slot / issue)</span>
+          <input id="packagePrice" type="number" min="0" step="10" value={defaults.package_price} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sponsor AOV ($)</span>
+          <input id="sponsorAov" type="number" min="0" step="5" value={defaults.sponsor_aov} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sponsor conversion (% of clicks)</span>
+          <input id="sponsorConversion" type="number" min="0" max="100" step="0.1" value={defaults.sponsor_conversion_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sponsor gross margin (%)</span>
+          <input id="sponsorMargin" type="number" min="0" max="100" step="1" value={defaults.sponsor_margin_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Target advertiser ROI (%)</span>
+          <input id="targetRoi" type="number" min="-100" max="1000" step="10" value={defaults.target_advertiser_roi_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">CPM benchmark ($)</span>
+          <input id="cpmBenchmark" type="number" min="0" step="5" value={defaults.cpm_benchmark} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="24" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Effective CPM</p>
+        <p id="effectiveCpm" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Clicks per issue</p>
+        <p id="clicksPerIssue" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per click</p>
+        <p id="cpc" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per conversion</p>
+        <p id="cpa" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Publisher vs advertiser -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Publisher & advertiser economics</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <h3 class="font-semibold text-cyan-400 mb-2">Publisher revenue</h3>
+          <table class="w-full text-left border-collapse text-sm">
+            <tbody class="text-neutral-200">
+              <tr class="border-b border-neutral-800/50"><td class="py-2">Revenue per issue</td><td id="pubRevenuePerIssue" class="py-2 text-right font-mono">—</td></tr>
+              <tr class="border-b border-neutral-800/50"><td class="py-2">Monthly sponsorship revenue</td><td id="pubMonthlyRevenue" class="py-2 text-right font-mono">—</td></tr>
+              <tr class="border-b border-neutral-800/50"><td class="py-2">Revenue per 1,000 opens</td><td id="pubRevenuePerKOpens" class="py-2 text-right font-mono">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h3 class="font-semibold text-cyan-400 mb-2">Advertiser ROI</h3>
+          <table class="w-full text-left border-collapse text-sm">
+            <tbody class="text-neutral-200">
+              <tr class="border-b border-neutral-800/50"><td class="py-2">Expected conversions / issue</td><td id="conversionsPerIssue" class="py-2 text-right font-mono">—</td></tr>
+              <tr class="border-b border-neutral-800/50"><td class="py-2">Sponsor gross profit / month</td><td id="sponsorMonthlyProfit" class="py-2 text-right font-mono">—</td></tr>
+              <tr class="border-b border-neutral-800/50"><td class="py-2">Advertiser ROI</td><td id="advertiserRoi" class="py-2 text-right font-mono">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Suggested rate card -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Suggested rate card</h2>
+      <div class="grid md:grid-cols-3 gap-5 mb-4">
+        <div class="text-center p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Current package price</p>
+          <p id="currentPrice" class="text-xl font-bold text-white">—</p>
+        </div>
+        <div class="text-center p-4 rounded-xl bg-neutral-900 border border-brand-gold/30">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Suggested price (target ROI)</p>
+          <p id="suggestedPrice" class="text-xl font-bold text-brand-gold">—</p>
+        </div>
+        <div class="text-center p-4 rounded-xl bg-neutral-900 border border-neutral-800">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Price vs benchmark</p>
+          <p id="priceVsBenchmark" class="text-xl font-bold text-white">—</p>
+        </div>
+      </div>
+      <p class="text-sm text-neutral-400">The suggested price is what the newsletter could charge while still delivering the sponsor's target ROI. If your audience is highly qualified, advertisers may accept a lower ROI; if it is broad or unproven, expect to price below suggestion.</p>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/newsletter-revenue-calculator/" class="btn-primary text-sm">Newsletter Revenue Calculator →</a>
+      <a href="/tools/affiliate-revenue-estimator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Affiliate Revenue Estimator →</a>
+      <a href="/tools/newsletter-topic-finder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Newsletter Topic Finder →</a>
+      <a href="/advertise/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Advertise →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios) }}>
+    const inputs = {
+      subscribers: document.getElementById('subscribers'),
+      openRate: document.getElementById('openRate'),
+      clickRate: document.getElementById('clickRate'),
+      issuesPerMonth: document.getElementById('issuesPerMonth'),
+      slotsPerIssue: document.getElementById('slotsPerIssue'),
+      packagePrice: document.getElementById('packagePrice'),
+      sponsorAov: document.getElementById('sponsorAov'),
+      sponsorConversion: document.getElementById('sponsorConversion'),
+      sponsorMargin: document.getElementById('sponsorMargin'),
+      targetRoi: document.getElementById('targetRoi'),
+      cpmBenchmark: document.getElementById('cpmBenchmark'),
+      projectionMonths: document.getElementById('projectionMonths'),
+    };
+
+    const outputs = {
+      effectiveCpm: document.getElementById('effectiveCpm'),
+      clicksPerIssue: document.getElementById('clicksPerIssue'),
+      cpc: document.getElementById('cpc'),
+      cpa: document.getElementById('cpa'),
+      pubRevenuePerIssue: document.getElementById('pubRevenuePerIssue'),
+      pubMonthlyRevenue: document.getElementById('pubMonthlyRevenue'),
+      pubRevenuePerKOpens: document.getElementById('pubRevenuePerKOpens'),
+      conversionsPerIssue: document.getElementById('conversionsPerIssue'),
+      sponsorMonthlyProfit: document.getElementById('sponsorMonthlyProfit'),
+      advertiserRoi: document.getElementById('advertiserRoi'),
+      currentPrice: document.getElementById('currentPrice'),
+      suggestedPrice: document.getElementById('suggestedPrice'),
+      priceVsBenchmark: document.getElementById('priceVsBenchmark'),
+      verdictText: document.getElementById('verdictText'),
+    };
+
+    function fmt(n) {
+      if (!isFinite(n)) return '—';
+      return n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
+    function fmtCur(n) {
+      if (!isFinite(n)) return '—';
+      return '$' + n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+    function fmtPct(n) {
+      if (!isFinite(n)) return '—';
+      return n.toFixed(1) + '%';
+    }
+
+    function val(el) { return parseFloat(el?.value) || 0; }
+
+    function compute() {
+      const subscribers = val(inputs.subscribers);
+      const openRate = val(inputs.openRate) / 100;
+      const clickRate = val(inputs.clickRate) / 100;
+      const issues = val(inputs.issuesPerMonth);
+      const slots = val(inputs.slotsPerIssue);
+      const price = val(inputs.packagePrice);
+      const aov = val(inputs.sponsorAov);
+      const convPct = val(inputs.sponsorConversion) / 100;
+      const margin = val(inputs.sponsorMargin) / 100;
+      const targetRoi = val(inputs.targetRoi) / 100;
+      const cpmBench = val(inputs.cpmBenchmark);
+
+      const opens = subscribers * openRate;
+      const clicks = opens * clickRate;
+      const conversions = clicks * convPct;
+      const cpm = subscribers ? (price / subscribers) * 1000 : 0;
+      const cpc = clicks ? price / clicks : 0;
+      const cpa = conversions ? price / conversions : 0;
+
+      const pubRevPerIssue = price * slots;
+      const pubMonthly = pubRevPerIssue * issues;
+      const pubRevPerKOpens = opens ? (pubRevPerIssue / opens) * 1000 : 0;
+
+      const sponsorGrossPerIssue = conversions * aov * margin;
+      const sponsorCostPerIssue = price;
+      const sponsorMonthlyProfit = (sponsorGrossPerIssue - sponsorCostPerIssue) * issues;
+      const advertiserRoi = sponsorCostPerIssue ? ((sponsorGrossPerIssue - sponsorCostPerIssue) / sponsorCostPerIssue) * 100 : 0;
+
+      // Suggested price = gross per issue / (1 + target ROI)
+      const suggested = (1 + targetRoi) ? sponsorGrossPerIssue / (1 + targetRoi) : 0;
+      const benchmarkMonthly = (subscribers / 1000) * cpmBench * slots * issues;
+      const benchPrice = subscribers ? (cpmBench * subscribers) / 1000 : 0;
+      const priceVsBench = benchPrice ? ((price - benchPrice) / benchPrice) * 100 : 0;
+
+      outputs.effectiveCpm.textContent = fmtCur(cpm);
+      outputs.clicksPerIssue.textContent = fmt(clicks);
+      outputs.cpc.textContent = fmtCur(cpc);
+      outputs.cpa.textContent = fmtCur(cpa);
+      outputs.pubRevenuePerIssue.textContent = fmtCur(pubRevPerIssue);
+      outputs.pubMonthlyRevenue.textContent = fmtCur(pubMonthly);
+      outputs.pubRevenuePerKOpens.textContent = fmtCur(pubRevPerKOpens);
+      outputs.conversionsPerIssue.textContent = fmt(conversions);
+      outputs.sponsorMonthlyProfit.textContent = fmtCur(sponsorMonthlyProfit);
+      outputs.advertiserRoi.textContent = fmtPct(advertiserRoi);
+      outputs.currentPrice.textContent = fmtCur(price);
+      outputs.suggestedPrice.textContent = fmtCur(suggested);
+      outputs.priceVsBenchmark.textContent = isFinite(priceVsBench) ? fmtPct(priceVsBench) : '—';
+
+      let verdict = '';
+      if (!subscribers || !price) {
+        verdict = 'Enter subscribers and a package price to evaluate the sponsorship.';
+      } else if (advertiserRoi >= targetRoi) {
+        verdict = `Strong for advertisers: expected ROI is ${fmtPct(advertiserRoi)}, above the ${fmtPct(targetRoi * 100)} target. You can likely raise price toward ${fmtCur(suggested)} without hurting sponsor returns.`;
+      } else if (advertiserRoi >= 0) {
+        verdict = `Fair but below target: expected ROI is ${fmtPct(advertiserRoi)} vs the ${fmtPct(targetRoi * 100)} target. Consider improving engagement or lowering price toward ${fmtCur(suggested)}.`;
+      } else {
+        verdict = `Likely overpriced for advertisers: expected ROI is negative (${fmtPct(advertiserRoi)}). To hit the ${fmtPct(targetRoi * 100)} target, the package price should be around ${fmtCur(suggested)} or the sponsor needs better conversion economics.`;
+      }
+      outputs.verdictText.textContent = verdict;
+    }
+
+    Object.values(inputs).forEach(el => { if (el) { el.addEventListener('input', compute); el.addEventListener('change', compute); } });
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const s = JSON.parse(btn.dataset.scenario);
+        inputs.subscribers.value = s.subscribers;
+        inputs.openRate.value = s.open_rate_pct;
+        inputs.clickRate.value = s.click_rate_pct;
+        inputs.issuesPerMonth.value = s.issues_per_month;
+        inputs.slotsPerIssue.value = s.slots_per_issue;
+        inputs.packagePrice.value = s.package_price;
+        inputs.sponsorAov.value = s.sponsor_aov;
+        inputs.sponsorConversion.value = s.sponsor_conversion_pct;
+        inputs.sponsorMargin.value = s.sponsor_margin_pct;
+        inputs.targetRoi.value = s.target_advertiser_roi_pct;
+        inputs.cpmBenchmark.value = s.cpm_benchmark;
+        inputs.projectionMonths.value = s.projection_months;
+        compute();
+      });
+    });
+
+    compute();
+  </script>
+</Layout>

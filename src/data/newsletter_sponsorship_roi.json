@@ -1,0 +1,86 @@
+{
+  "last_updated": "2026-07-08",
+  "note": "Estimates are directional. Actual sponsor ROI depends on audience fit, creative quality, landing page conversion, and tracking accuracy. Use the suggested rate card as a starting point and replace assumptions with your historical data.",
+  "defaults": {
+    "subscribers": 5000,
+    "open_rate_pct": 42,
+    "click_rate_pct": 6,
+    "issues_per_month": 22,
+    "slots_per_issue": 1,
+    "package_price": 750,
+    "sponsor_aov": 150,
+    "sponsor_conversion_pct": 2.5,
+    "sponsor_margin_pct": 40,
+    "target_advertiser_roi_pct": 200,
+    "cpm_benchmark": 150,
+    "projection_months": 3
+  },
+  "scenarios": [
+    {
+      "name": "Niche AI newsletter",
+      "subscribers": 5000,
+      "open_rate_pct": 45,
+      "click_rate_pct": 7,
+      "issues_per_month": 22,
+      "slots_per_issue": 1,
+      "package_price": 900,
+      "sponsor_aov": 200,
+      "sponsor_conversion_pct": 3.5,
+      "sponsor_margin_pct": 45,
+      "target_advertiser_roi_pct": 250,
+      "cpm_benchmark": 180,
+      "projection_months": 3
+    },
+    {
+      "name": "Broad tech/media newsletter",
+      "subscribers": 25000,
+      "open_rate_pct": 35,
+      "click_rate_pct": 4,
+      "issues_per_month": 20,
+      "slots_per_issue": 2,
+      "package_price": 2000,
+      "sponsor_aov": 80,
+      "sponsor_conversion_pct": 1.5,
+      "sponsor_margin_pct": 30,
+      "target_advertiser_roi_pct": 150,
+      "cpm_benchmark": 80,
+      "projection_months": 3
+    },
+    {
+      "name": "Premium paid newsletter",
+      "subscribers": 2000,
+      "open_rate_pct": 55,
+      "click_rate_pct": 10,
+      "issues_per_month": 12,
+      "slots_per_issue": 1,
+      "package_price": 600,
+      "sponsor_aov": 300,
+      "sponsor_conversion_pct": 5,
+      "sponsor_margin_pct": 50,
+      "target_advertiser_roi_pct": 300,
+      "cpm_benchmark": 300,
+      "projection_months": 3
+    },
+    {
+      "name": "Affiliate-heavy list",
+      "subscribers": 12000,
+      "open_rate_pct": 40,
+      "click_rate_pct": 8,
+      "issues_per_month": 24,
+      "slots_per_issue": 1,
+      "package_price": 1200,
+      "sponsor_aov": 120,
+      "sponsor_conversion_pct": 2,
+      "sponsor_margin_pct": 35,
+      "target_advertiser_roi_pct": 180,
+      "cpm_benchmark": 100,
+      "projection_months": 3
+    }
+  ],
+  "cpm_benchmarks": [
+    { "min_subscribers": 0, "max_subscribers": 5000, "typical_cpm": 80, "range": "$40–$120" },
+    { "min_subscribers": 5000, "max_subscribers": 20000, "typical_cpm": 120, "range": "$80–$180" },
+    { "min_subscribers": 20000, "max_subscribers": 50000, "typical_cpm": 150, "range": "$100–$220" },
+    { "min_subscribers": 50000, "max_subscribers": 200000, "typical_cpm": 200, "range": "$140–$300" }
+  ]
+}

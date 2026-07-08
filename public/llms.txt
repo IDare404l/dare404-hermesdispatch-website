@@ -576,9 +576,17 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Cross-links: LLM Fine-Tuning Cost Calculator, Agent Output Value Calculator, Agent vs Human Hire Calculator, Agent Benchmark Selector
 |
 ## AI Agent Observability Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-observability-cost-calculator/
-|- Description: Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring across Langfuse, Sentry, Datadog, New Relic, Grafana Cloud, Honeycomb, and Axiom.
-|- Inputs: agent requests per month, traces or observations per request, sampling percentage, average trace size (KB), error events per month, uptime/synthetic checks per month, team seats, projection months
-|- Outputs: monthly cost per provider, cheapest provider, cost per 1M requests, projected period cost, provider comparison table, verdict
-|- Audience: AI agent builders choosing observability and monitoring stacks
-|- Cross-links: Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Tool Call Cost Calculator, AI Startup Cost Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-observability-cost-calculator/
+||- Description: Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring across Langfuse, Sentry, Datadog, New Relic, Grafana Cloud, Honeycomb, and Axiom.
+||- Inputs: agent requests per month, traces or observations per request, sampling percentage, average trace size (KB), error events per month, uptime/synthetic checks per month, team seats, projection months
+||- Outputs: monthly cost per provider, cheapest provider, cost per 1M requests, projected period cost, provider comparison table, verdict
+||- Audience: AI agent builders choosing observability and monitoring stacks
+||- Cross-links: Workflow Cost Calc, API Pricing Comparator, Tool Call Cost Calc, Startup Cost Calc
+
+## Newsletter Sponsorship ROI Calculator
+- URL: https://hermesdispatch.dev/tools/newsletter-sponsorship-roi/
+- Description: Estimate newsletter sponsorship ROI for publishers and advertisers, including CPM, CPC, cost per conversion, publisher revenue, advertiser gross profit, and a suggested rate card.
+- Inputs: current subscribers, open rate, click rate, issues per month, sponsor slots per issue, package price, sponsor AOV, sponsor conversion rate, sponsor gross margin, target advertiser ROI, CPM benchmark, projection months
+- Outputs: effective CPM, clicks per issue, cost per click, cost per conversion, publisher revenue per issue/month, sponsor conversions, sponsor monthly profit, advertiser ROI, suggested package price, price vs benchmark verdict
+- Audience: newsletter publishers pricing sponsorships and advertisers evaluating newsletter ad placements
+- Cross-links: Newsletter Revenue Calculator, Affiliate Revenue Estimator, Newsletter Topic Finder, Advertise page
