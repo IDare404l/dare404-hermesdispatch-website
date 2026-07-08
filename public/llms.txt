@@ -536,17 +536,25 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||| - Cross-links: Agent Model Router / Fallback Cost Calculator, Agent Benchmark Selector, API Pricing Comparator, Agent Latency Budget Calculator
 
 ## AI Agent Multi-Modal Cost Calculator
-- URL: https://hermesdispatch.dev/tools/agent-multimodal-cost-calculator/
-- Description: Estimate monthly cost for AI agents that process text, images, audio, and video across OpenAI, Anthropic, and Google multimodal APIs.
-- Inputs: requests per month, text input/output tokens per request, cached input percentage, images per request, image resolution, audio minutes per request, video seconds per request
-- Outputs: monthly cost per provider, cheapest provider, cost per 1,000 requests, media cost breakdown, verdict
-- Audience: AI agent builders budgeting vision, speech, and video agents
-- Cross-links: Agent API Pricing Comparator, AI Voice Agent Cost Calculator, Agent Document Processing Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-multimodal-cost-calculator/
+|- Description: Estimate monthly cost for AI agents that process text, images, audio, and video across OpenAI, Anthropic, and Google multimodal APIs.
+|- Inputs: requests per month, text input/output tokens per request, cached input percentage, images per request, image resolution, audio minutes per request, video seconds per request
+|- Outputs: monthly cost per provider, cheapest provider, cost per 1,000 requests, media cost breakdown, verdict
+|- Audience: AI agent builders budgeting vision, speech, and video agents
+|- Cross-links: Agent API Pricing Comparator, AI Voice Agent Cost Calculator, Agent Document Processing Cost Calculator
+
+## AI Agent MCP Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-mcp-cost-calculator/
+|- Description: Estimate monthly cost for Model Context Protocol (MCP) servers powering AI agents: web search, file system, database, browser, code execution, Slack/GitHub, and custom integrations.
+|- Inputs: MCP server preset, monthly agent tasks, MCP calls per task, cost per call, failure rate, retry rate, retry multiplier, self-hosted percentage, self-hosting monthly cost, latency per call, human review rate, review cost, setup and maintenance hours, projection months
+|- Outputs: monthly MCP calls, hosted and self-hosted cost, retry cost, human review cost, maintenance cost, all-in monthly cost, cost per task, cost per 1k tasks, latency overhead per task, projected period cost, verdict
+|- Audience: AI agent builders budgeting MCP server integrations for retrieval, browser, code, and SaaS actions
+|- Cross-links: Agent Tool Call Cost Calculator, Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Output Value Calculator
 
 ## AI Agent Observability Cost Calculator
-- URL: https://hermesdispatch.dev/tools/agent-observability-cost-calculator/
-- Description: Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring across Langfuse, Sentry, Datadog, New Relic, Grafana Cloud, Honeycomb, and Axiom.
-- Inputs: agent requests per month, traces or observations per request, sampling percentage, average trace size (KB), error events per month, uptime/synthetic checks per month, team seats, projection months
-- Outputs: monthly cost per provider, cheapest provider, cost per 1M requests, projected period cost, provider comparison table, verdict
-- Audience: AI agent builders choosing observability and monitoring stacks
-- Cross-links: Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Tool Call Cost Calculator, AI Startup Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-observability-cost-calculator/
+|- Description: Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring across Langfuse, Sentry, Datadog, New Relic, Grafana Cloud, Honeycomb, and Axiom.
+|- Inputs: agent requests per month, traces or observations per request, sampling percentage, average trace size (KB), error events per month, uptime/synthetic checks per month, team seats, projection months
+|- Outputs: monthly cost per provider, cheapest provider, cost per 1M requests, projected period cost, provider comparison table, verdict
+|- Audience: AI agent builders choosing observability and monitoring stacks
+|- Cross-links: Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Tool Call Cost Calculator, AI Startup Cost Calculator

@@ -1,0 +1,377 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_mcp_cost.json';
+
+const title = "AI Agent MCP Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost for Model Context Protocol (MCP) servers powering AI agents: web search, file system, database, browser, code execution, Slack/GitHub, and custom integrations. Includes latency, retry, and review overhead.";
+const mcpServers = data.mcp_servers;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is an MCP server?", a: "MCP (Model Context Protocol) is an open protocol that lets AI agents connect to external data sources and tools such as web search, databases, browsers, code sandboxes, and SaaS APIs through a standardized interface." },
+  { q: "What does this calculator include?", a: "It estimates per-call and monthly MCP server cost, retry and failure overhead, self-hosting infrastructure, human review labor, setup, and maintenance. It does not include base LLM token cost." },
+  { q: "How are retries costed?", a: "Failed MCP calls still cost the base call. A configurable share of failures are retried, and retries can use a more expensive fallback provider or longer execution, captured by the retry cost multiplier." },
+  { q: "When should I self-host MCP servers?", a: "Self-hosting lowers per-call SaaS fees but adds compute, storage, and maintenance cost. The calculator lets you blend hosted and self-hosted MCP usage to find the cheapest route for your volume." },
+  { q: "Does latency affect cost?", a: "Latency itself is not billed directly, but slow calls reduce throughput and can increase concurrency needs. The calculator reports total latency overhead so you can size workers or queue infrastructure." },
+  { q: "How can I reduce MCP spend?", a: "Cache search and DB results, batch MCP calls, choose cheaper providers for low-risk lookups, self-host stable integrations, and reduce retry loops with better timeouts and idempotent calls." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent MCP Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-mcp-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧩</div>
+      <h1 class="display-heading mb-4">AI Agent MCP Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly cost for Model Context Protocol (MCP) servers: web search, databases, browsers, code execution, Slack/GitHub, and custom tools. Includes retries, latency, and review overhead.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">MCP server economics</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block sm:col-span-2 lg:col-span-3">
+          <span class="text-neutral-400 text-sm">MCP server preset</span>
+          <select id="mcpSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {mcpServers.map(s => <option value={JSON.stringify(s)} selected={s.slug === 'custom'}>{s.name}</option>)}
+          </select>
+          <p id="mcpNotes" class="text-neutral-500 text-xs mt-1">Select a preset to load typical cost, failure, retry, and latency defaults.</p>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly agent tasks</span>
+          <input id="monthlyTasks" type="number" min="0" step="100" value={defaults.monthly_tasks} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">MCP calls per task</span>
+          <input id="callsPerTask" type="number" min="0" step="0.5" value={defaults.calls_per_task} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cost per MCP call ($)</span>
+          <input id="costPerCall" type="number" min="0" step="0.001" value={defaults.cost_per_call} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Failure rate (%)</span>
+          <input id="failureRate" type="number" min="0" max="100" step="0.5" value={defaults.failure_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retry rate (% of failures)</span>
+          <input id="retryRate" type="number" min="0" max="100" step="5" value={defaults.retry_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retry cost multiplier</span>
+          <input id="retryMultiplier" type="number" min="1" step="0.1" value={defaults.retry_multiplier} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Self-hosted calls (%)</span>
+          <input id="localHostingPct" type="number" min="0" max="100" step="5" value={defaults.local_hosting_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Self-hosting monthly ($)</span>
+          <input id="localHostingMonthly" type="number" min="0" step="5" value={defaults.local_hosting_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Latency per call (ms)</span>
+          <input id="latencyMs" type="number" min="0" step="10" value={defaults.latency_ms_per_call} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="humanReviewPct" type="number" min="0" max="100" step="1" value={defaults.human_review_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review hourly cost ($)</span>
+          <input id="reviewHourlyCost" type="number" min="0" step="5" value={defaults.review_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Minutes to review one task</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupHourlyRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly MCP calls</p>
+        <p id="totalCalls" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly MCP cost</p>
+        <p id="totalCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per task</p>
+        <p id="costPerTask" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1k tasks</p>
+        <p id="costPer1kTasks" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Failed calls / mo</p>
+        <p id="failedCalls" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Retry calls / mo</p>
+        <p id="retryCalls" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Latency overhead / task</p>
+        <p id="latencyPerTask" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review hours / mo</p>
+        <p id="reviewHours" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">All-in monthly cost</p>
+        <p id="allInMonthly" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected <span id="periodLabel">12</span>-month cost</p>
+        <p id="periodCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Hosted MCP calls</td>
+            <td id="hostedCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="hostedShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Self-hosting infrastructure</td>
+            <td id="localCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="localShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Retry cost</td>
+            <td id="retryCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="retryShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Human review labor</td>
+            <td id="reviewCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Maintenance</td>
+            <td id="maintenanceCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="maintenanceShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-tool-call-cost-calculator/" class="btn-primary text-sm">Tool Call Cost Calc →</a>
+      <a href="/tools/agent-workflow-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Workflow Cost Calc →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios: JSON.stringify(scenarios) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        monthlyTasks: Math.max(0, parseFloat(document.getElementById('monthlyTasks').value) || 0),
+        callsPerTask: Math.max(0, parseFloat(document.getElementById('callsPerTask').value) || 0),
+        costPerCall: Math.max(0, parseFloat(document.getElementById('costPerCall').value) || 0),
+        failureRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('failureRate').value) || 0)),
+        retryRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('retryRate').value) || 0)),
+        retryMultiplier: Math.max(1, parseFloat(document.getElementById('retryMultiplier').value) || 1),
+        localHostingPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('localHostingPct').value) || 0)),
+        localHostingMonthly: Math.max(0, parseFloat(document.getElementById('localHostingMonthly').value) || 0),
+        latencyMs: Math.max(0, parseFloat(document.getElementById('latencyMs').value) || 0),
+        humanReviewPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('humanReviewPct').value) || 0)),
+        reviewHourlyCost: Math.max(0, parseFloat(document.getElementById('reviewHourlyCost').value) || 0),
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupHourlyRate: Math.max(0, parseFloat(document.getElementById('setupHourlyRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_tasks !== undefined) document.getElementById('monthlyTasks').value = obj.monthly_tasks;
+      if (obj.calls_per_task !== undefined) document.getElementById('callsPerTask').value = obj.calls_per_task;
+      if (obj.cost_per_call !== undefined) document.getElementById('costPerCall').value = obj.cost_per_call;
+      if (obj.failure_rate !== undefined) document.getElementById('failureRate').value = obj.failure_rate;
+      if (obj.retry_rate !== undefined) document.getElementById('retryRate').value = obj.retry_rate;
+      if (obj.retry_multiplier !== undefined) document.getElementById('retryMultiplier').value = obj.retry_multiplier;
+      if (obj.local_hosting_pct !== undefined) document.getElementById('localHostingPct').value = obj.local_hosting_pct;
+      if (obj.local_hosting_monthly !== undefined) document.getElementById('localHostingMonthly').value = obj.local_hosting_monthly;
+      if (obj.latency_ms_per_call !== undefined) document.getElementById('latencyMs').value = obj.latency_ms_per_call;
+      if (obj.human_review_pct !== undefined) document.getElementById('humanReviewPct').value = obj.human_review_pct;
+      if (obj.review_hourly_cost !== undefined) document.getElementById('reviewHourlyCost').value = obj.review_hourly_cost;
+      if (obj.review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.review_minutes;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupHourlyRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours_per_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_per_month;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const baseCalls = inps.monthlyTasks * inps.callsPerTask;
+      const failureCalls = baseCalls * (inps.failureRate / 100);
+      const retryCalls = failureCalls * (inps.retryRate / 100);
+      const hostedCalls = baseCalls * (1 - inps.localHostingPct / 100);
+      const hostedCost = hostedCalls * inps.costPerCall;
+      const retryCost = retryCalls * inps.costPerCall * inps.retryMultiplier;
+      const totalMcpCost = hostedCost + retryCost + inps.localHostingMonthly;
+
+      const reviewedTasks = inps.monthlyTasks * (inps.humanReviewPct / 100);
+      const reviewHours = reviewedTasks * (inps.reviewMinutes / 60);
+      const reviewCost = reviewHours * inps.reviewHourlyCost;
+      const maintenanceCost = inps.maintenanceHours * inps.setupHourlyRate;
+      const totalMonthly = totalMcpCost + reviewCost + maintenanceCost;
+      const setupCost = inps.setupHours * inps.setupHourlyRate;
+      const periodCost = totalMonthly * inps.projectionMonths + setupCost;
+      const costPerTask = inps.monthlyTasks > 0 ? totalMonthly / inps.monthlyTasks : 0;
+      const costPer1kTasks = inps.monthlyTasks > 0 ? costPerTask * 1000 : 0;
+      const latencyPerTaskMs = inps.callsPerTask * inps.latencyMs;
+
+      document.getElementById('totalCalls').textContent = fmtInt(baseCalls + retryCalls);
+      document.getElementById('totalCost').textContent = fmtMoney0(totalMcpCost);
+      document.getElementById('costPerTask').textContent = fmtMoney(costPerTask);
+      document.getElementById('costPer1kTasks').textContent = fmtMoney(costPer1kTasks);
+      document.getElementById('failedCalls').textContent = fmtInt(failureCalls);
+      document.getElementById('retryCalls').textContent = fmtInt(retryCalls);
+      document.getElementById('latencyPerTask').textContent = fmtNum(latencyPerTaskMs / 1000) + ' s';
+      document.getElementById('reviewHours').textContent = fmtNum(reviewHours);
+      document.getElementById('allInMonthly').textContent = fmtMoney0(totalMonthly);
+      document.getElementById('periodCost').textContent = fmtMoney0(periodCost);
+      document.getElementById('periodLabel').textContent = inps.projectionMonths;
+
+      document.getElementById('hostedCost').textContent = fmtMoney(hostedCost);
+      document.getElementById('hostedShare').textContent = totalMonthly > 0 ? (hostedCost / totalMonthly * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('localCost').textContent = fmtMoney(inps.localHostingMonthly);
+      document.getElementById('localShare').textContent = totalMonthly > 0 ? (inps.localHostingMonthly / totalMonthly * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('retryCost').textContent = fmtMoney(retryCost);
+      document.getElementById('retryShare').textContent = totalMonthly > 0 ? (retryCost / totalMonthly * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('reviewCost').textContent = fmtMoney(reviewCost);
+      document.getElementById('reviewShare').textContent = totalMonthly > 0 ? (reviewCost / totalMonthly * 100).toFixed(1) + '%' : '0%';
+      document.getElementById('maintenanceCost').textContent = fmtMoney(maintenanceCost);
+      document.getElementById('maintenanceShare').textContent = totalMonthly > 0 ? (maintenanceCost / totalMonthly * 100).toFixed(1) + '%' : '0%';
+
+      const failurePct = baseCalls > 0 ? (failureCalls / baseCalls * 100) : 0;
+      let verdict = '';
+      if (costPerTask < 0.05) {
+        verdict = `Very low MCP cost at ${fmtMoney(costPerTask)} per task. Failures are ${fmtNum(failurePct)}%. Good candidate for high-volume automation. Watch latency if browser or code-execution MCPs dominate.`;
+      } else if (costPerTask < 0.25) {
+        verdict = `Moderate MCP cost at ${fmtMoney(costPerTask)} per task. Total monthly MCP cost is ${fmtMoney0(totalMcpCost)}. If review or retry cost is growing, add caching or self-host stable integrations.`;
+      } else {
+        verdict = `High MCP cost at ${fmtMoney(costPerTask)} per task. Consider self-hosting more calls, switching to cheaper providers, or reducing calls per task. Retry and failure overhead add ${fmtMoney(retryCost)} / mo.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      document.getElementById('mcpSelect').addEventListener('change', e => {
+        const s = JSON.parse(e.target.value);
+        document.getElementById('costPerCall').value = s.cost_per_call;
+        document.getElementById('failureRate').value = s.failure_rate_default;
+        document.getElementById('retryRate').value = s.retry_rate_default;
+        document.getElementById('retryMultiplier').value = s.retry_multiplier_default;
+        document.getElementById('latencyMs').value = s.latency_ms_default;
+        document.getElementById('mcpNotes').textContent = s.notes;
+        compute();
+      });
+
+      ['monthlyTasks','callsPerTask','costPerCall','failureRate','retryRate','retryMultiplier','localHostingPct','localHostingMonthly','latencyMs','humanReviewPct','reviewHourlyCost','reviewMinutes','setupHours','setupHourlyRate','maintenanceHours','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
