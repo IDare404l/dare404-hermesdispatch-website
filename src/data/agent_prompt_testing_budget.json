@@ -1,0 +1,88 @@
+{
+  "last_updated": "2026-07-08",
+  "note": "Prices are approximate per-token list rates as of mid-2026. Managed evaluation platforms may charge per-record or per-run rather than per-token; treat results as directional for budgeting.",
+  "providers": [
+    { "slug": "openai-gpt-4o", "name": "OpenAI GPT-4o", "input_per_1k": 0.0025, "cached_input_per_1k": 0.00125, "output_per_1k": 0.01 },
+    { "slug": "openai-gpt-4o-mini", "name": "OpenAI GPT-4o mini", "input_per_1k": 0.00015, "cached_input_per_1k": 0.000075, "output_per_1k": 0.0006 },
+    { "slug": "anthropic-claude-3-5-sonnet", "name": "Anthropic Claude 3.5 Sonnet", "input_per_1k": 0.003, "cached_input_per_1k": 0.0015, "output_per_1k": 0.015 },
+    { "slug": "anthropic-claude-3-haiku", "name": "Anthropic Claude 3 Haiku", "input_per_1k": 0.00025, "cached_input_per_1k": 0.000125, "output_per_1k": 0.00125 },
+    { "slug": "google-gemini-1-5-pro", "name": "Google Gemini 1.5 Pro", "input_per_1k": 0.00125, "cached_input_per_1k": 0.000625, "output_per_1k": 0.005 },
+    { "slug": "google-gemini-1-5-flash", "name": "Google Gemini 1.5 Flash", "input_per_1k": 0.000075, "cached_input_per_1k": 0.0000375, "output_per_1k": 0.0003 },
+    { "slug": "groq-llama-3-1-70b", "name": "Groq Llama 3.1 70B", "input_per_1k": 0.00059, "cached_input_per_1k": 0.000295, "output_per_1k": 0.00079 },
+    { "slug": "together-llama-3-1-70b", "name": "Together AI Llama 3.1 70B", "input_per_1k": 0.00088, "cached_input_per_1k": 0.00044, "output_per_1k": 0.00088 },
+    { "slug": "local-rtx-4090", "name": "Local RTX 4090 (amortized)", "input_per_1k": 0.00005, "cached_input_per_1k": 0.00005, "output_per_1k": 0.0001 }
+  ],
+  "evaluators": [
+    { "slug": "human-review", "name": "Human reviewer", "cost_per_run": 0.0, "hourly_rate": 50, "minutes_per_run": 2, "per_output": false },
+    { "slug": "llm-as-judge", "name": "LLM-as-judge (same model)", "cost_per_run": 0.0, "hourly_rate": 0, "minutes_per_run": 0, "per_output": true },
+    { "slug": "llm-as-judge-cheap", "name": "LLM-as-judge (cheap model)", "cost_per_run": 0.0, "hourly_rate": 0, "minutes_per_run": 0, "per_output": true },
+    { "slug": "rubric", "name": "Rule/rubric scorer", "cost_per_run": 0.0, "hourly_rate": 0, "minutes_per_run": 0, "per_output": false },
+    { "slug": "managed", "name": "Managed eval platform", "cost_per_run": 0.05, "hourly_rate": 0, "minutes_per_run": 0, "per_output": false }
+  ],
+  "scenarios": [
+    {
+      "name": "Lean prompt sanity check",
+      "slug": "lean",
+      "runs_per_variant": 20,
+      "variants": 1,
+      "input_tokens": 800,
+      "output_tokens": 250,
+      "cached_input_pct": 50,
+      "evaluator": "llm-as-judge-cheap",
+      "reviewer_hourly": 50,
+      "review_minutes": 0,
+      "projection_months": 1
+    },
+    {
+      "name": "A/B prompt experiment",
+      "slug": "ab",
+      "runs_per_variant": 50,
+      "variants": 4,
+      "input_tokens": 1200,
+      "output_tokens": 400,
+      "cached_input_pct": 40,
+      "evaluator": "llm-as-judge-cheap",
+      "reviewer_hourly": 50,
+      "review_minutes": 1,
+      "projection_months": 1
+    },
+    {
+      "name": "Production regression suite",
+      "slug": "regression",
+      "runs_per_variant": 100,
+      "variants": 6,
+      "input_tokens": 2000,
+      "output_tokens": 600,
+      "cached_input_pct": 60,
+      "evaluator": "llm-as-judge",
+      "reviewer_hourly": 75,
+      "review_minutes": 2,
+      "projection_months": 1
+    },
+    {
+      "name": "Safety / policy red-team batch",
+      "slug": "redteam",
+      "runs_per_variant": 100,
+      "variants": 8,
+      "input_tokens": 1500,
+      "output_tokens": 500,
+      "cached_input_pct": 20,
+      "evaluator": "human-review",
+      "reviewer_hourly": 100,
+      "review_minutes": 3,
+      "projection_months": 1
+    }
+  ],
+  "defaults": {
+    "provider": "openai-gpt-4o-mini",
+    "runs_per_variant": 30,
+    "variants": 3,
+    "input_tokens": 1000,
+    "output_tokens": 350,
+    "cached_input_pct": 40,
+    "evaluator": "llm-as-judge-cheap",
+    "reviewer_hourly": 50,
+    "review_minutes": 1,
+    "projection_months": 1
+  }
+}
