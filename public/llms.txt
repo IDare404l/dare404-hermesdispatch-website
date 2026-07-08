@@ -456,7 +456,15 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Audience: AI agent builders designing multi-agent crews, swarms, or hierarchical orchestration
 |- Cross-links: Agent API Pricing Comparator, Memory / RAG Cost Calculator, Tool Call Cost Calculator, Agent Stack Builder
 |
-|## AI Agent Prompt Injection & Security Risk Scanner
+## AI Agent Webhook / Event-Driven Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-webhook-cost-calculator/
+|- Description: Estimate monthly cost for event-driven AI agents powered by webhooks: listener infra, queue, retries, idempotency storage, LLM invocations, and downstream actions.
+|- Inputs: events per month, LLM invocations per event, provider, input/output tokens per invocation, cached input %, listener preset, queue preset, idempotency storage preset, idempotency check rate, retry rate, retry multiplier, downstream action preset, human review rate/minutes/hourly cost, setup/maintenance hours and rates, projection months.
+|- Outputs: events per month, LLM cost, listener cost, queue cost, storage cost, retry cost, action cost, human review cost, maintenance cost, setup cost, total monthly cost, cost per event, cost per 1,000 events, projected period cost, provider comparison table, verdict.
+|- Audience: AI agent builders designing webhook-triggered, event-driven, or serverless agent pipelines.
+|- Cross-links: Agent Tool Call Cost Calculator, API Pricing Comparator, Concurrency & Queue Cost Calculator, Agent Outage Cost Calculator.
+|
+## AI Agent Prompt Injection & Security Risk Scanner
 ||- URL: https://hermesdispatch.dev/tools/agent-prompt-injection-scanner/
 ||- Description: Score an AI agent's system prompt and tool setup for prompt injection, jailbreak, data exfiltration, tool hijacking, and indirect injection risks.
 |- Inputs: exposure profile, checklist of security controls

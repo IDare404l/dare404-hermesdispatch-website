@@ -1,0 +1,452 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_webhook_cost.json';
+
+const title = "AI Agent Webhook / Event-Driven Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost for event-driven AI agents powered by webhooks: listener infra, queue, retries, idempotency storage, LLM invocations, and downstream actions.";
+const providers = data.providers;
+const listenerPresets = data.listener_presets;
+const queuePresets = data.queue_presets;
+const storagePresets = data.storage_presets;
+const actionPresets = data.action_presets;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the all-in monthly cost of running an AI agent that responds to webhooks or events: receiving events, queueing them, deduplicating with idempotency storage, invoking an LLM, retrying failures, performing a downstream action, and maintaining the pipeline." },
+  { q: "How is idempotency storage cost counted?", a: "Every event has a storage record for deduplication or audit. The storage preset has a base monthly cost plus a per-1,000-records rate applied to the share of events that pass the idempotency check." },
+  { q: "What is the retry multiplier?", a: "Failed events are retried and consume extra compute. The multiplier is applied to the variable LLM and action cost of the retried share. A value of 1.2 means retries add 20% to those costs." },
+  { q: "Should I count every webhook or only successful ones?", a: "Count all delivered webhooks or events. Failed retries and idempotent duplicates are modeled separately with the retry rate and idempotency check rate inputs." },
+  { q: "Which cost driver usually dominates?", a: "At high volume with small LLM calls, listener/queue/storage infrastructure can dominate. At low volume with large LLM calls, the LLM provider dominates. Downstream browser or sandbox actions can also quickly exceed LLM cost." },
+  { q: "How do I reduce event-driven agent cost?", a: "Filter events before invoking the LLM, batch related events, cache repeated context, use cheaper models for routing, keep idempotency TTL short, and avoid high-cost downstream actions on low-signal events." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Webhook / Event-Driven Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-webhook-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔗</div>
+      <h1 class="display-heading mb-4">AI Agent Webhook / Event-Driven Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly cost for event-driven agents: webhooks, queues, retries, idempotency storage, LLM invocations, and downstream actions.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Webhook & agent configuration</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Events per month</span>
+          <input id="eventsPerMonth" type="number" min="1" step="100" value={defaults.events_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM invocations per event</span>
+          <input id="llmInvocations" type="number" min="0" step="0.1" value={defaults.llm_invocations_per_event} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / LLM call</span>
+          <input id="inputTokens" type="number" min="1" step="100" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / LLM call</span>
+          <input id="outputTokens" type="number" min="1" step="50" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Webhook listener</span>
+          <select id="listenerPreset" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {listenerPresets.map(l => <option value={JSON.stringify(l)} selected={l.slug === defaults.listener_preset}>{l.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Queue / event bus</span>
+          <select id="queuePreset" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {queuePresets.map(q => <option value={JSON.stringify(q)} selected={q.slug === defaults.queue_preset}>{q.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Idempotency storage</span>
+          <select id="storagePreset" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {storagePresets.map(s => <option value={JSON.stringify(s)} selected={s.slug === defaults.storage_preset}>{s.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Idempotency check rate (%)</span>
+          <input id="idempotencyRate" type="number" min="0" max="100" step="5" value={defaults.idempotency_check_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retry rate (%)</span>
+          <input id="retryRate" type="number" min="0" max="100" step="0.5" value={defaults.retry_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retry cost multiplier</span>
+          <input id="retryMultiplier" type="number" min="1" step="0.1" value={defaults.retry_multiplier} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Downstream action</span>
+          <select id="actionPreset" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {actionPresets.map(a => <option value={JSON.stringify(a)} selected={a.slug === defaults.action_preset}>{a.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="humanReviewRate" type="number" min="0" max="100" step="0.5" value={defaults.human_review_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review minutes / event</span>
+          <input id="humanReviewMinutes" type="number" min="0" step="0.25" value={defaults.human_review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly cost ($)</span>
+          <input id="reviewerHourly" type="number" min="0" step="5" value={defaults.reviewer_hourly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupHourlyRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="1" value={defaults.maintenance_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceHourlyRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Events / month</p>
+        <p id="eventsTotal" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">LLM cost / month</p>
+        <p id="llmCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Infra + actions / month</p>
+        <p id="infraActionCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="totalMonthly" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per event</p>
+        <p id="costPerEvent" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1,000 events</p>
+        <p id="costPer1k" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Retry cost / month</p>
+        <p id="retryCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review cost / month</p>
+        <p id="reviewCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Setup cost (one-time)</p>
+        <p id="setupCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200" id="breakdownBody">
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">LLM invocations</td><td id="llmCell" class="py-3 pr-4 text-right font-mono">—</td><td id="llmShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Webhook listener</td><td id="listenerCell" class="py-3 pr-4 text-right font-mono">—</td><td id="listenerShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Queue / event bus</td><td id="queueCell" class="py-3 pr-4 text-right font-mono">—</td><td id="queueShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Idempotency storage</td><td id="storageCell" class="py-3 pr-4 text-right font-mono">—</td><td id="storageShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Retry overhead</td><td id="retryCell" class="py-3 pr-4 text-right font-mono">—</td><td id="retryShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Downstream actions</td><td id="actionCell" class="py-3 pr-4 text-right font-mono">—</td><td id="actionShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Human review labor</td><td id="reviewCell" class="py-3 pr-4 text-right font-mono">—</td><td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Maintenance labor</td><td id="maintenanceCell" class="py-3 pr-4 text-right font-mono">—</td><td id="maintenanceShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-700 font-semibold"><td class="py-3 pr-4">Total monthly</td><td id="totalCell" class="py-3 pr-4 text-right font-mono">—</td><td id="totalShareCell" class="py-3 pr-4 text-right font-mono">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison (same inputs)</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">Monthly LLM cost</th>
+              <th class="py-3 pr-4 text-right">Total monthly cost</th>
+            </tr>
+          </thead>
+          <tbody id="providerBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-tool-call-cost-calculator/" class="btn-primary text-sm">Tool Call Cost Calc →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-concurrency-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Concurrency & Queue Cost Calc →</a>
+      <a href="/tools/agent-outage-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Outage Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney4 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const providerList = JSON.parse(providers);
+
+    function getProvider() { return JSON.parse(document.getElementById('provider').value); }
+    function getListener() { return JSON.parse(document.getElementById('listenerPreset').value); }
+    function getQueue() { return JSON.parse(document.getElementById('queuePreset').value); }
+    function getStorage() { return JSON.parse(document.getElementById('storagePreset').value); }
+    function getAction() { return JSON.parse(document.getElementById('actionPreset').value); }
+
+    function getInputs() {
+      return {
+        eventsPerMonth: Number(document.getElementById('eventsPerMonth').value) || 1,
+        llmInvocations: Number(document.getElementById('llmInvocations').value) || 0,
+        inputTokens: Number(document.getElementById('inputTokens').value) || 0,
+        outputTokens: Number(document.getElementById('outputTokens').value) || 0,
+        cachedInputPct: Number(document.getElementById('cachedInputPct').value) || 0,
+        idempotencyRate: Number(document.getElementById('idempotencyRate').value) || 0,
+        retryRate: Number(document.getElementById('retryRate').value) || 0,
+        retryMultiplier: Number(document.getElementById('retryMultiplier').value) || 1,
+        humanReviewRate: Number(document.getElementById('humanReviewRate').value) || 0,
+        humanReviewMinutes: Number(document.getElementById('humanReviewMinutes').value) || 0,
+        reviewerHourly: Number(document.getElementById('reviewerHourly').value) || 0,
+        setupHours: Number(document.getElementById('setupHours').value) || 0,
+        setupHourlyRate: Number(document.getElementById('setupHourlyRate').value) || 0,
+        maintenanceHours: Number(document.getElementById('maintenanceHours').value) || 0,
+        maintenanceHourlyRate: Number(document.getElementById('maintenanceHourlyRate').value) || 0,
+        projectionMonths: Number(document.getElementById('projectionMonths').value) || 1,
+      };
+    }
+
+    function setInputs(obj) {
+      const setSelect = (id, slug) => {
+        const sel = document.getElementById(id);
+        for (let i = 0; i < sel.options.length; i++) {
+          const opt = JSON.parse(sel.options[i].value);
+          if (opt.slug === slug) { sel.selectedIndex = i; break; }
+        }
+      };
+      if (obj.provider) setSelect('provider', obj.provider);
+      if (obj.listener_preset) setSelect('listenerPreset', obj.listener_preset);
+      if (obj.queue_preset) setSelect('queuePreset', obj.queue_preset);
+      if (obj.storage_preset) setSelect('storagePreset', obj.storage_preset);
+      if (obj.action_preset) setSelect('actionPreset', obj.action_preset);
+      if (obj.events_per_month !== undefined) document.getElementById('eventsPerMonth').value = obj.events_per_month;
+      if (obj.llm_invocations_per_event !== undefined) document.getElementById('llmInvocations').value = obj.llm_invocations_per_event;
+      if (obj.input_tokens !== undefined) document.getElementById('inputTokens').value = obj.input_tokens;
+      if (obj.output_tokens !== undefined) document.getElementById('outputTokens').value = obj.output_tokens;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cachedInputPct').value = obj.cached_input_pct;
+      if (obj.idempotency_check_rate !== undefined) document.getElementById('idempotencyRate').value = obj.idempotency_check_rate;
+      if (obj.retry_rate !== undefined) document.getElementById('retryRate').value = obj.retry_rate;
+      if (obj.retry_multiplier !== undefined) document.getElementById('retryMultiplier').value = obj.retry_multiplier;
+      if (obj.human_review_rate !== undefined) document.getElementById('humanReviewRate').value = obj.human_review_rate;
+      if (obj.human_review_minutes !== undefined) document.getElementById('humanReviewMinutes').value = obj.human_review_minutes;
+      if (obj.reviewer_hourly !== undefined) document.getElementById('reviewerHourly').value = obj.reviewer_hourly;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupHourlyRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours;
+      if (obj.maintenance_hourly_rate !== undefined) document.getElementById('maintenanceHourlyRate').value = obj.maintenance_hourly_rate;
+    }
+
+    function costPer1kTokens(provider, inputTokens, outputTokens, cachedInputPct) {
+      const cached = inputTokens * (cachedInputPct / 100);
+      const uncached = inputTokens - cached;
+      return (uncached / 1000) * provider.input_per_1k + (cached / 1000) * provider.cached_input_per_1k + (outputTokens / 1000) * provider.output_per_1k;
+    }
+
+    function computeForProvider(provider, inps, listener, queue, storage, action) {
+      const events = inps.eventsPerMonth;
+      const llmCost = events * inps.llmInvocations * costPer1kTokens(provider, inps.inputTokens, inps.outputTokens, inps.cachedInputPct);
+      const listenerCost = listener.monthly_base + (events / 1000) * listener.cost_per_1k;
+      const queueCost = queue.monthly_base + (events / 1000) * queue.cost_per_1k;
+      const storageChecks = events * (inps.idempotencyRate / 100);
+      const storageCost = storage.monthly_base + (storageChecks / 1000) * storage.cost_per_1k_records;
+      const actionCost = events * action.cost_per_event;
+      const retryCost = (llmCost + actionCost) * (inps.retryRate / 100) * (inps.retryMultiplier - 1);
+      const reviewCost = events * (inps.humanReviewRate / 100) * (inps.humanReviewMinutes / 60) * inps.reviewerHourly;
+      const maintenanceCost = inps.maintenanceHours * inps.maintenanceHourlyRate;
+      const totalMonthly = llmCost + listenerCost + queueCost + storageCost + retryCost + actionCost + reviewCost + maintenanceCost;
+      return { llmCost, listenerCost, queueCost, storageCost, retryCost, actionCost, reviewCost, maintenanceCost, totalMonthly };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const provider = getProvider();
+      const listener = getListener();
+      const queue = getQueue();
+      const storage = getStorage();
+      const action = getAction();
+
+      const costs = computeForProvider(provider, inps, listener, queue, storage, action);
+      const setupCost = inps.setupHours * inps.setupHourlyRate;
+      const periodCost = costs.totalMonthly * inps.projectionMonths + setupCost;
+      const costPerEvent = costs.totalMonthly / Math.max(inps.eventsPerMonth, 1);
+      const costPer1k = costPerEvent * 1000;
+
+      document.getElementById('eventsTotal').textContent = fmtInt(inps.eventsPerMonth);
+      document.getElementById('llmCost').textContent = fmtMoney(costs.llmCost);
+      document.getElementById('infraActionCost').textContent = fmtMoney(costs.listenerCost + costs.queueCost + costs.storageCost + costs.actionCost);
+      document.getElementById('totalMonthly').textContent = fmtMoney(costs.totalMonthly);
+      document.getElementById('costPerEvent').textContent = fmtMoney4(costPerEvent);
+      document.getElementById('costPer1k').textContent = fmtMoney4(costPer1k);
+      document.getElementById('retryCost').textContent = fmtMoney(costs.retryCost);
+      document.getElementById('reviewCost').textContent = fmtMoney(costs.reviewCost);
+      document.getElementById('setupCost').textContent = fmtMoney(setupCost);
+      document.getElementById('periodCost').textContent = fmtMoney0(periodCost);
+
+      const totalMonthly = costs.totalMonthly;
+      const updateRow = (cellId, shareId, val) => {
+        document.getElementById(cellId).textContent = fmtMoney(val);
+        document.getElementById(shareId).textContent = totalMonthly > 0 ? (val / totalMonthly * 100).toFixed(1) + '%' : '0%';
+      };
+      updateRow('llmCell', 'llmShare', costs.llmCost);
+      updateRow('listenerCell', 'listenerShare', costs.listenerCost);
+      updateRow('queueCell', 'queueShare', costs.queueCost);
+      updateRow('storageCell', 'storageShare', costs.storageCost);
+      updateRow('retryCell', 'retryShare', costs.retryCost);
+      updateRow('actionCell', 'actionShare', costs.actionCost);
+      updateRow('reviewCell', 'reviewShare', costs.reviewCost);
+      updateRow('maintenanceCell', 'maintenanceShare', costs.maintenanceCost);
+      document.getElementById('totalCell').textContent = fmtMoney(totalMonthly);
+      document.getElementById('totalShareCell').textContent = '100%';
+
+      // Provider comparison
+      const tbody = document.getElementById('providerBody');
+      tbody.innerHTML = '';
+      const rows = providerList.map(p => {
+        const c = computeForProvider(p, inps, listener, queue, storage, action);
+        return { ...p, ...c };
+      }).sort((a, b) => a.totalMonthly - b.totalMonthly);
+      rows.forEach((r, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-neutral-800/50' + (idx === 0 ? ' bg-brand-gold/10' : '');
+        tr.innerHTML = `<td class="py-3 pr-4 font-medium">${r.name}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney(r.llmCost)}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney(r.totalMonthly)}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      let verdict = '';
+      if (totalMonthly === 0) {
+        verdict = "Set event volume and at least one LLM invocation or downstream action to see a cost estimate.";
+      } else if (costPer1k < 0.5 && inps.eventsPerMonth > 1000) {
+        verdict = `Very cheap event pipeline: ${fmtMoney4(costPerEvent)} per event (${fmtMoney4(costPer1k)} per 1k). Good for high-volume filtering and routing, but watch listener/queue bills as volume scales.`;
+      } else if (totalMonthly < 500) {
+        verdict = `Lean event-driven agent: ${fmtMoney(totalMonthly)}/mo. Cost per 1k events is ${fmtMoney4(costPer1k)}. The biggest levers are LLM model choice and downstream action cost.`;
+      } else if (totalMonthly < 3000) {
+        const biggest = costs.llmCost >= costs.actionCost && costs.llmCost >= costs.listenerCost && costs.llmCost >= costs.queueCost && costs.llmCost >= costs.storageCost && costs.llmCost >= costs.reviewCost ? 'LLM invocations' : (costs.actionCost >= costs.listenerCost && costs.actionCost >= costs.queueCost && costs.actionCost >= costs.storageCost && costs.actionCost >= costs.reviewCost ? 'downstream actions' : (costs.listenerCost >= costs.queueCost && costs.listenerCost >= costs.storageCost && costs.listenerCost >= costs.reviewCost ? 'webhook listener' : (costs.queueCost >= costs.storageCost && costs.queueCost >= costs.reviewCost ? 'queue / event bus' : (costs.storageCost >= costs.reviewCost ? 'idempotency storage' : 'human review'))));
+        verdict = `Mid-size event agent: ${fmtMoney(totalMonthly)}/mo. The biggest driver is ${biggest}. Pre-filter events and cache repeated context to cut spend.`;
+      } else {
+        verdict = `Heavy event-driven workload: ${fmtMoney(totalMonthly)}/mo (${fmtMoney0(periodCost)} over ${inps.projectionMonths} mo). Consider event filtering, batching, cheaper routing models, and reviewing high-cost downstream actions like browser or sandbox steps.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      const ids = ['eventsPerMonth','llmInvocations','provider','inputTokens','outputTokens','cachedInputPct','listenerPreset','queuePreset','storagePreset','idempotencyRate','retryRate','retryMultiplier','actionPreset','humanReviewRate','humanReviewMinutes','reviewerHourly','setupHours','setupHourlyRate','maintenanceHours','maintenanceHourlyRate','projectionMonths'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.addEventListener('input', compute); el.addEventListener('change', compute); }
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
