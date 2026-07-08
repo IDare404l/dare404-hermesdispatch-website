@@ -551,6 +551,14 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Audience: AI agent builders budgeting MCP server integrations for retrieval, browser, code, and SaaS actions
 |- Cross-links: Agent Tool Call Cost Calculator, Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Output Value Calculator
 
+## AI Hardware Resale Value Estimator
+- URL: https://hermesdispatch.dev/tools/hardware-resale-estimator/
+- Description: Estimate current resale value, net proceeds after fees/shipping, and recovery percentage for GPUs, mini PCs, CPUs, RAM, and storage used in AI builds.
+- Inputs: item, condition, original purchase price, age (months), seller fee percentage, shipping cost, target recovery percentage
+- Outputs: estimated resale value, net proceeds, loss vs purchase, recovery percentage, target list price, 6/12/18/24/36-month depreciation table
+- Audience: AI hardware owners selling or downsizing GPUs, mini PCs, and AI build parts
+- Cross-links: AI Hardware Deal Tracker, Miner Pivot Calculator, AI PC Build Configurator
+
 ## Open Source LLM Selector for Agents
 ||- URL: https://hermesdispatch.dev/tools/open-source-llm-selector/
 ||- Description: Pick the best open-weight LLM for an AI agent use case by comparing Llama, Qwen, Mistral, DeepSeek, Gemma, Phi, and others.

@@ -1,0 +1,315 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/hardware_resale_estimator.json';
+
+const title = "AI Hardware Resale Value Estimator";
+const description = "Estimate current resale value, net proceeds, and target recovery percentage for GPUs, mini PCs, CPUs, RAM, and storage used in AI builds.";
+
+const itemEntries = Object.entries(data.items);
+const conditions = Object.entries(data.conditions);
+const scenarios = Object.entries(data.scenarios);
+const categories = Object.values(data.categories);
+
+const faqs = [
+  { q: "How much is my used RTX 4090 worth?", a: "A used RTX 4090 in excellent condition is typically 70-85% of its current market price, minus platform fees and shipping. Mining history or missing accessories cut the price sharply." },
+  { q: "Do mini PCs hold value better than GPUs?", a: "Yes. Mini PCs depreciate more slowly because they bundle CPU, RAM, and storage into a complete system, whereas GPUs face constant launch cycles and mining stigma." },
+  { q: "Which fees should I subtract from resale price?", a: "Common marketplace fees are ~13.5% for eBay, ~10% for Mercari, and 0% for local or Reddit sales. Always add shipping, insurance, and payment processing." },
+  { q: "What is a realistic recovery percentage after one year?", a: "Most AI hardware recovers 60-80% of purchase price after 12 months if kept in good condition. GPUs can recover less if a newer generation launches." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Hardware Resale Value Estimator" description={description} url="https://hermesdispatch.dev/tools/hardware-resale-estimator/" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">💵</div>
+        <h1 class="display-heading mb-4">AI Hardware Resale Value Estimator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate what your GPU, mini PC, CPU, RAM, or SSD is worth today and how much you'd actually net after fees and shipping.
+        </p>
+      </div>
+
+      <!-- Scenario presets -->
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20 mb-8">
+        <h2 class="text-lg font-bold mb-4 text-brand-gold">Quick scenario</h2>
+        <div class="flex flex-wrap gap-3">
+          {scenarios.map(([slug, s]) => (
+            <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-sm" data-scenario={slug}>{s.label}</button>
+          ))}
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <!-- Inputs -->
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Hardware details</h2>
+          <div class="space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Item</label>
+                <select id="itemSelect" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {itemEntries.map(([k, item]) => (
+                    <option value={k}>{item.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Condition</label>
+                <select id="conditionSelect" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {conditions.map(([k, c]) => (
+                    <option value={k}>{c.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Original purchase price ($)</label>
+                <input id="purchasePrice" type="number" min="0" step="1" value={data.defaults.target_recovery_pct * data.items[data.defaults.item_key].msrp / 100} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Age (months)</label>
+                <input id="ageMonths" type="number" min="0" step="1" value={data.defaults.age_months} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Seller fee (%)</label>
+                <input id="sellerFee" type="number" min="0" max="50" step="0.5" value={data.defaults.seller_fees_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Shipping cost ($)</label>
+                <input id="shippingCost" type="number" min="0" step="1" value={data.defaults.shipping_cost} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Target recovery (%)</label>
+                <input id="targetRecovery" type="number" min="0" max="100" step="1" value={data.defaults.target_recovery_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10">
+              <p class="text-sm text-neutral-400 mb-1">Category depreciation rate</p>
+              <p id="categoryNote" class="text-sm text-neutral-300">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="space-y-4">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Estimated resale value</p>
+            <p id="resaleValue" class="text-3xl font-bold text-brand-gold">—</p>
+            <p id="conditionNote" class="text-xs text-neutral-500 mt-1">—</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Net proceeds</p>
+              <p id="netProceeds" class="text-2xl font-bold text-emerald-400">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center border border-red-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Loss vs purchase</p>
+              <p id="totalLoss" class="text-2xl font-bold text-red-400">—</p>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Recovery of purchase price</p>
+            <p id="recoveryPct" class="text-3xl font-bold">—</p>
+            <p id="targetVerdict" class="text-xs mt-1">—</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">To hit your target recovery, list at</p>
+            <p id="targetListPrice" class="text-2xl font-bold text-brand-gold">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Depreciation curve -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Estimated value over time</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Age</th>
+                <th class="text-right py-2">Resale value</th>
+                <th class="text-right py-2">Net proceeds</th>
+                <th class="text-right py-2">Recovery</th>
+              </tr>
+            </thead>
+            <tbody id="curveTable" class="divide-y divide-neutral-800">
+              <!-- JS fills -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Explanation -->
+      <div class="grid md:grid-cols-2 gap-6 mb-10">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
+          <ul class="space-y-2 text-sm text-neutral-300">
+            <li><strong class="text-white">Base value</strong> starts from the current typical low street price, not MSRP, because market prices often differ.</li>
+            <li><strong class="text-white">Condition</strong> applies a multiplier: new = 100%, excellent ~82%, mined-on ~45%.</li>
+            <li><strong class="text-white">Age</strong> applies category-specific depreciation to model launch cycles and demand shifts.</li>
+            <li><strong class="text-white">Net proceeds</strong> subtract seller fees and shipping from the gross resale value.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Resale tips</h2>
+          <ul class="space-y-2 text-sm text-neutral-300">
+            <li>• Sell locally to avoid marketplace fees and shipping risk.</li>
+            <li>• Include original boxes and accessories; buyers pay more for complete kits.</li>
+            <li>• Time GPU sales away from major NVIDIA/AMD launches when possible.</li>
+            <li>• Disclose mining history honestly; it affects price but builds trust.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faqs.map(f => (
+            <details class="group">
+              <summary class="font-semibold cursor-pointer text-white">{f.q}</summary>
+              <p class="text-neutral-400 text-sm mt-2">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/ai-hardware-deal-tracker/" class="btn-primary text-sm">AI Hardware Deal Tracker →</a>
+        <a href="/tools/miner-pivot-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Miner Pivot Calculator →</a>
+        <a href="/tools/ai-pc-build-configurator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI PC Build Configurator →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ data: JSON.stringify(data) }}>
+    const payload = JSON.parse(data);
+    const items = payload.items;
+    const conditions = payload.conditions;
+    const categories = payload.categories;
+    const scenarios = payload.scenarios;
+
+    const el = {
+      itemSelect: document.getElementById('itemSelect'),
+      conditionSelect: document.getElementById('conditionSelect'),
+      purchasePrice: document.getElementById('purchasePrice'),
+      ageMonths: document.getElementById('ageMonths'),
+      sellerFee: document.getElementById('sellerFee'),
+      shippingCost: document.getElementById('shippingCost'),
+      targetRecovery: document.getElementById('targetRecovery'),
+      categoryNote: document.getElementById('categoryNote'),
+      resaleValue: document.getElementById('resaleValue'),
+      conditionNote: document.getElementById('conditionNote'),
+      netProceeds: document.getElementById('netProceeds'),
+      totalLoss: document.getElementById('totalLoss'),
+      recoveryPct: document.getElementById('recoveryPct'),
+      targetVerdict: document.getElementById('targetVerdict'),
+      targetListPrice: document.getElementById('targetListPrice'),
+      curveTable: document.getElementById('curveTable')
+    };
+
+    const fmtMoney = n => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+
+    function getItem() {
+      return items[el.itemSelect.value];
+    }
+
+    function getCondition() {
+      return conditions[el.conditionSelect.value];
+    }
+
+    function compute(itemKey, conditionKey, purchase, age, feePct, shipping, target) {
+      const item = items[itemKey];
+      const condition = conditions[conditionKey];
+      const category = categories[item.category];
+      const street = item.typical_low || item.msrp;
+      const floor = item.used_floor || street * 0.4;
+      const ageFactor = Math.max(0.2, 1 - category.annual_depreciation * (age / 12));
+      const gross = Math.max(floor, street * condition.multiplier * ageFactor);
+      const feeAmount = gross * (feePct / 100);
+      const net = Math.max(0, gross - feeAmount - shipping);
+      const loss = Math.max(0, purchase - net);
+      const recovery = purchase > 0 ? (net / purchase) * 100 : 0;
+      const targetList = (purchase * (target / 100) + shipping) / (1 - feePct / 100);
+      return { gross, net, loss, recovery, targetList, condition, category };
+    }
+
+    function render() {
+      const item = getItem();
+      const condition = getCondition();
+      const purchase = parseFloat(el.purchasePrice.value) || item.msrp;
+      const age = parseInt(el.ageMonths.value, 10) || 0;
+      const fee = parseFloat(el.sellerFee.value) || 0;
+      const shipping = parseFloat(el.shippingCost.value) || 0;
+      const target = parseFloat(el.targetRecovery.value) || 0;
+
+      const r = compute(el.itemSelect.value, el.conditionSelect.value, purchase, age, fee, shipping, target);
+
+      el.categoryNote.textContent = `${r.category.name}: ~${(r.category.annual_depreciation * 100).toFixed(0)}% per year. ${r.category.depreciation_note}`;
+      el.resaleValue.textContent = fmtMoney(r.gross);
+      el.conditionNote.textContent = `${condition.label} — ${(condition.multiplier * 100).toFixed(0)}% of street value`;
+      el.netProceeds.textContent = fmtMoney(r.net);
+      el.totalLoss.textContent = fmtMoney(r.loss);
+      el.recoveryPct.textContent = `${r.recovery.toFixed(1)}%`;
+      el.recoveryPct.className = `text-3xl font-bold ${r.recovery >= target ? 'text-emerald-400' : 'text-yellow-400'}`;
+      el.targetVerdict.textContent = r.recovery >= target ? 'At or above target recovery ✅' : 'Below target recovery ⚠️';
+      el.targetVerdict.className = `text-xs mt-1 ${r.recovery >= target ? 'text-emerald-400' : 'text-yellow-400'}`;
+      el.targetListPrice.textContent = fmtMoney(Math.max(r.gross, r.targetList));
+
+      // Curve
+      const curve = [0, 6, 12, 18, 24, 36].map(months => {
+        const cr = compute(el.itemSelect.value, el.conditionSelect.value, purchase, months, fee, shipping, target);
+        return { months, ...cr };
+      });
+      el.curveTable.innerHTML = curve.map(c => `
+        <tr class="${c.months === age ? 'bg-brand-gold/10' : ''}">
+          <td class="py-3">${c.months} mo</td>
+          <td class="py-3 text-right font-mono">${fmtMoney(c.gross)}</td>
+          <td class="py-3 text-right font-mono">${fmtMoney(c.net)}</td>
+          <td class="py-3 text-right font-mono">${c.recovery.toFixed(1)}%</td>
+        </tr>
+      `).join('');
+    }
+
+    function applyScenario(slug) {
+      const s = scenarios[slug];
+      if (!s) return;
+      el.itemSelect.value = s.item_key;
+      el.conditionSelect.value = s.condition;
+      el.ageMonths.value = s.age_months;
+      el.sellerFee.value = s.seller_fees_pct;
+      el.shippingCost.value = s.shipping_cost;
+      el.targetRecovery.value = s.target_recovery_pct;
+      el.purchasePrice.value = items[s.item_key].msrp;
+      render();
+    }
+
+    [el.itemSelect, el.conditionSelect, el.purchasePrice, el.ageMonths, el.sellerFee, el.shippingCost, el.targetRecovery].forEach(input => {
+      input.addEventListener('input', render);
+    });
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyScenario(btn.dataset.scenario));
+    });
+
+    // Default scenario
+    applyScenario('gpu-quick-flip');
+  </script>
+</Layout>

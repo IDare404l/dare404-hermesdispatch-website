@@ -1,0 +1,93 @@
+{
+  "categories": {
+    "GPU": {
+      "slug": "GPU",
+      "name": "GPU",
+      "annual_depreciation": 0.28,
+      "depreciation_note": "GPUs lose value fastest at launch, then stabilize around the used-market floor after 2-3 years."
+    },
+    "Mini PC / Workstation": {
+      "slug": "Mini PC / Workstation",
+      "name": "Mini PC / Workstation",
+      "annual_depreciation": 0.22,
+      "depreciation_note": "Compact AI boxes depreciate slower than GPUs because they bundle CPU, RAM, and storage, but still drop with new SoC launches."
+    },
+    "CPU": {
+      "slug": "CPU",
+      "name": "CPU",
+      "annual_depreciation": 0.20,
+      "depreciation_note": "CPUs depreciate steadily; generational jumps (new socket, more cores, better efficiency) drive older prices down."
+    },
+    "RAM": {
+      "slug": "RAM",
+      "name": "RAM",
+      "annual_depreciation": 0.15,
+      "depreciation_note": "DRAM prices are volatile but older DDR4/early DDR5 modules hold some value as long as the standard is still current."
+    },
+    "Storage": {
+      "slug": "Storage",
+      "name": "Storage",
+      "annual_depreciation": 0.25,
+      "depreciation_note": "SSDs depreciate faster than RAM because NAND price per GB falls rapidly and used drives carry wear/health uncertainty."
+    },
+    "Mining Rig / Other": {
+      "slug": "Mining Rig / Other",
+      "name": "Mining Rig / Other",
+      "annual_depreciation": 0.35,
+      "depreciation_note": "Used mining rigs trade at a stigma discount. Factor in uncertain card health and no warranty support."
+    }
+  },
+  "conditions": {
+    "new": { "label": "New / sealed", "multiplier": 1.0, "note": "Unopened with full warranty support." },
+    "open-box": { "label": "Open box / like new", "multiplier": 0.92, "note": "Minimal use, original packaging, full accessories." },
+    "excellent": { "label": "Used — excellent", "multiplier": 0.82, "note": "Light use, clean, all accessories included." },
+    "good": { "label": "Used — good", "multiplier": 0.70, "note": "Visible wear but fully functional." },
+    "fair": { "label": "Used — fair", "multiplier": 0.55, "note": "Cosmetic damage or older box; still working." },
+    "mining": { "label": "Used — mined on", "multiplier": 0.45, "note": "Deep discount because VRAM and fans may be degraded." }
+  },
+  "items": {
+    "nvidia-rtx-4090": { "name": "NVIDIA GeForce RTX 4090", "category": "GPU", "msrp": 1599, "typical_low": 1700, "used_floor": 1100 },
+    "nvidia-rtx-5090": { "name": "NVIDIA GeForce RTX 5090", "category": "GPU", "msrp": 1999, "typical_low": 2200, "used_floor": 1500 },
+    "nvidia-rtx-3090": { "name": "NVIDIA GeForce RTX 3090", "category": "GPU", "msrp": 1499, "typical_low": 700, "used_floor": 550 },
+    "nvidia-rtx-3090-ti": { "name": "NVIDIA GeForce RTX 3090 Ti", "category": "GPU", "msrp": 1999, "typical_low": 800, "used_floor": 650 },
+    "nvidia-rtx-4080": { "name": "NVIDIA GeForce RTX 4080", "category": "GPU", "msrp": 1199, "typical_low": 900, "used_floor": 650 },
+    "nvidia-rtx-4070-ti": { "name": "NVIDIA GeForce RTX 4070 Ti", "category": "GPU", "msrp": 799, "typical_low": 600, "used_floor": 450 },
+    "amd-rx-7900-xtx": { "name": "AMD Radeon RX 7900 XTX", "category": "GPU", "msrp": 999, "typical_low": 850, "used_floor": 600 },
+    "apple-mac-studio-m4-max-64gb": { "name": "Apple Mac Studio M4 Max 64GB", "category": "Mini PC / Workstation", "msrp": 3299, "typical_low": 3299, "used_floor": 2400 },
+    "apple-mac-studio-m3-max-128gb": { "name": "Apple Mac Studio M3 Max 128GB", "category": "Mini PC / Workstation", "msrp": 4999, "typical_low": 4999, "used_floor": 3600 },
+    "apple-mac-mini-m4-32gb": { "name": "Apple Mac mini M4 32GB", "category": "Mini PC / Workstation", "msrp": 1199, "typical_low": 1199, "used_floor": 850 },
+    "beelink-gtr9-pro": { "name": "Beelink GTR9 Pro", "category": "Mini PC / Workstation", "msrp": 899, "typical_low": 799, "used_floor": 550 },
+    "gmktec-evo-x2": { "name": "GMKtec EVO-X2", "category": "Mini PC / Workstation", "msrp": 1299, "typical_low": 1199, "used_floor": 800 },
+    "geekom-a8": { "name": "GEEKOM A8", "category": "Mini PC / Workstation", "msrp": 699, "typical_low": 599, "used_floor": 400 },
+    "minisforum-ai-x1-pro": { "name": "Minisforum AI X1 Pro", "category": "Mini PC / Workstation", "msrp": 1399, "typical_low": 1299, "used_floor": 850 },
+    "amd-ryzen-9-7950x3d": { "name": "AMD Ryzen 9 7950X3D", "category": "CPU", "msrp": 699, "typical_low": 599, "used_floor": 400 },
+    "amd-ryzen-9-9950x": { "name": "AMD Ryzen 9 9950X", "category": "CPU", "msrp": 649, "typical_low": 599, "used_floor": 420 },
+    "intel-core-i9-14900k": { "name": "Intel Core i9-14900K", "category": "CPU", "msrp": 589, "typical_low": 530, "used_floor": 360 },
+    "ddr5-64gb-kit": { "name": "64GB DDR5-6000 RAM Kit", "category": "RAM", "msrp": 220, "typical_low": 180, "used_floor": 100 },
+    "ddr5-128gb-kit": { "name": "128GB DDR5-6000 RAM Kit", "category": "RAM", "msrp": 420, "typical_low": 360, "used_floor": 220 },
+    "samsung-990-pro-2tb": { "name": "Samsung 990 Pro 2TB NVMe SSD", "category": "Storage", "msrp": 229, "typical_low": 169, "used_floor": 90 },
+    "samsung-990-pro-4tb": { "name": "Samsung 990 Pro 4TB NVMe SSD", "category": "Storage", "msrp": 449, "typical_low": 340, "used_floor": 190 }
+  },
+  "defaults": {
+    "item_key": "nvidia-rtx-4090",
+    "condition": "excellent",
+    "age_months": 12,
+    "seller_fees_pct": 13,
+    "shipping_cost": 35,
+    "target_recovery_pct": 70
+  },
+  "seller_fees": {
+    "ebay": 0.135,
+    "mercari": 0.10,
+    "facebook": 0.0,
+    "reddit": 0.0,
+    "local": 0.0,
+    "auction": 0.15
+  },
+  "scenarios": {
+    "gpu-quick-flip": { "item_key": "nvidia-rtx-4090", "condition": "open-box", "age_months": 3, "seller_fees_pct": 13.5, "shipping_cost": 45, "target_recovery_pct": 85, "label": "GPU quick flip (open-box, low fees)" },
+    "mini-pc-downsize": { "item_key": "apple-mac-studio-m4-max-64gb", "condition": "excellent", "age_months": 12, "seller_fees_pct": 13.5, "shipping_cost": 55, "target_recovery_pct": 75, "label": "Mini PC downsize (excellent condition)" },
+    "mining-gpu-fire-sale": { "item_key": "nvidia-rtx-3090", "condition": "mining", "age_months": 30, "seller_fees_pct": 0, "shipping_cost": 35, "target_recovery_pct": 45, "label": "Mining GPU fire sale (local cash)" },
+    "ai-build-part-out": { "item_key": "ddr5-128gb-kit", "condition": "good", "age_months": 18, "seller_fees_pct": 13.5, "shipping_cost": 12, "target_recovery_pct": 60, "label": "AI build part-out (RAM, used-good)" }
+  }
+}
