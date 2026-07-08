@@ -551,6 +551,14 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Audience: AI agent builders budgeting MCP server integrations for retrieval, browser, code, and SaaS actions
 |- Cross-links: Agent Tool Call Cost Calculator, Agent Workflow Cost Calculator, Agent API Pricing Comparator, Agent Output Value Calculator
 
+## Open Source LLM Selector for Agents
+|- URL: https://hermesdispatch.dev/tools/open-source-llm-selector/
+|- Description: Pick the best open-weight LLM for an AI agent use case by comparing Llama, Qwen, Mistral, DeepSeek, Gemma, Phi, and others.
+|- Inputs: primary use case, max available VRAM (GB), minimum context length (k tokens), deployment preference (local/API/either), native vision required
+|- Outputs: ranked model recommendations, use-case fit score, VRAM fit badge, context and parameter comparison, Ollama and Hugging Face links
+|- Audience: AI agent builders choosing an open-source model for local or API deployment
+|- Cross-links: VRAM Calculator, Local LLM Inference Engine Selector, Agent API Pricing Comparator, Agent Benchmark Selector
+
 ## AI Agent Observability Cost Calculator
 |- URL: https://hermesdispatch.dev/tools/agent-observability-cost-calculator/
 |- Description: Estimate monthly spend for LLM observability, error tracking, infrastructure APM, and uptime monitoring across Langfuse, Sentry, Datadog, New Relic, Grafana Cloud, Honeycomb, and Axiom.
