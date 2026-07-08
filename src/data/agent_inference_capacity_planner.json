@@ -1,0 +1,229 @@
+{
+  "last_updated": "2026-07-08",
+  "note": "Throughput, latency, and price estimates are directional. Real performance depends on model implementation, batching, quantization, network overhead, and workload burstiness. Confirm provider benchmarks before buying capacity.",
+  "defaults": {
+    "requests_per_minute": 100,
+    "input_tokens_per_request": 2000,
+    "output_tokens_per_request": 500,
+    "target_p95_latency_ms": 2000,
+    "concurrency_buffer": 1.5,
+    "utilization_target": 0.7,
+    "cache_hit_rate": 0.0,
+    "cloud_provider": "runpod",
+    "gpu_model": "rtx-4090",
+    "local_gpu_count": 1
+  },
+  "cloud_providers": [
+    {
+      "slug": "runpod",
+      "name": "RunPod GPU Cloud",
+      "gpu_slugs": ["rtx-4090", "rtx-3090", "a100-80gb", "h100-80gb"],
+      "hourly_overhead_pct": 0,
+      "notes": "Serverless and dedicated GPU pods. Prices vary by region and availability."
+    },
+    {
+      "slug": "vastai",
+      "name": "Vast.ai Marketplace",
+      "gpu_slugs": ["rtx-4090", "rtx-3090", "a100-80gb", "h100-80gb"],
+      "hourly_overhead_pct": 0,
+      "notes": "Marketplace pricing; spot instances can be interrupted."
+    },
+    {
+      "slug": "lambdalabs",
+      "name": "Lambda Labs",
+      "gpu_slugs": ["rtx-4090", "a100-80gb", "h100-80gb"],
+      "hourly_overhead_pct": 0,
+      "notes": "Reserved instances with predictable pricing."
+    },
+    {
+      "slug": "coreweave",
+      "name": "CoreWeave",
+      "gpu_slugs": ["a100-80gb", "h100-80gb"],
+      "hourly_overhead_pct": 0,
+      "notes": "Enterprise GPU cloud optimized for inference."
+    },
+    {
+      "slug": "together",
+      "name": "Together AI API",
+      "gpu_slugs": ["llama-api"],
+      "hourly_overhead_pct": 0,
+      "notes": "Managed API for open-weight models. Per-token pricing."
+    },
+    {
+      "slug": "openai",
+      "name": "OpenAI API",
+      "gpu_slugs": ["managed-api"],
+      "hourly_overhead_pct": 0,
+      "notes": "Managed API; no GPU sizing needed. Use token-cost mode."
+    },
+    {
+      "slug": "anthropic",
+      "name": "Anthropic API",
+      "gpu_slugs": ["managed-api"],
+      "hourly_overhead_pct": 0,
+      "notes": "Managed API; no GPU sizing needed. Use token-cost mode."
+    }
+  ],
+  "gpu_models": [
+    {
+      "slug": "rtx-4090",
+      "name": "NVIDIA RTX 4090",
+      "vram_gb": 24,
+      "typical_tok_s": 80,
+      "typical_tok_s_note": "Llama 3 70B Q4 or Mixtral 8x7B Q4 on single GPU via llama.cpp / Ollama",
+      "hourly_rental_min": 0.39,
+      "hourly_rental_typical": 0.69,
+      "hourly_rental_max": 1.20,
+      "purchase_price": 1850,
+      "power_w": 450,
+      "model_fit": "Up to ~70B Q4 or ~30B FP16",
+      "concurrency_per_gpu": 2
+    },
+    {
+      "slug": "rtx-3090",
+      "name": "NVIDIA RTX 3090",
+      "vram_gb": 24,
+      "typical_tok_s": 55,
+      "typical_tok_s_note": "Llama 3 70B Q4 on single GPU",
+      "hourly_rental_min": 0.25,
+      "hourly_rental_typical": 0.44,
+      "hourly_rental_max": 0.80,
+      "purchase_price": 1100,
+      "power_w": 350,
+      "model_fit": "Up to ~70B Q4 or ~30B FP16",
+      "concurrency_per_gpu": 2
+    },
+    {
+      "slug": "a100-80gb",
+      "name": "NVIDIA A100 80GB",
+      "vram_gb": 80,
+      "typical_tok_s": 120,
+      "typical_tok_s_note": "Llama 3 70B FP16 or 405B Q4 multi-GPU",
+      "hourly_rental_min": 1.50,
+      "hourly_rental_typical": 2.50,
+      "hourly_rental_max": 4.50,
+      "purchase_price": 15000,
+      "power_w": 400,
+      "model_fit": "Up to ~405B Q4 or ~70B FP16",
+      "concurrency_per_gpu": 4
+    },
+    {
+      "slug": "h100-80gb",
+      "name": "NVIDIA H100 80GB",
+      "vram_gb": 80,
+      "typical_tok_s": 220,
+      "typical_tok_s_note": "Llama 3 70B FP16 or 405B Q4 multi-GPU",
+      "hourly_rental_min": 2.80,
+      "hourly_rental_typical": 4.00,
+      "hourly_rental_max": 6.50,
+      "purchase_price": 30000,
+      "power_w": 700,
+      "model_fit": "Up to ~405B Q4 or ~70B FP16",
+      "concurrency_per_gpu": 6
+    },
+    {
+      "slug": "llama-api",
+      "name": "Together AI / Open-weights API",
+      "vram_gb": 0,
+      "typical_tok_s": 0,
+      "typical_tok_s_note": "Managed API throughput depends on tier and rate limits",
+      "hourly_rental_min": 0,
+      "hourly_rental_typical": 0,
+      "hourly_rental_max": 0,
+      "purchase_price": 0,
+      "power_w": 0,
+      "model_fit": "Managed API",
+      "concurrency_per_gpu": 0
+    },
+    {
+      "slug": "managed-api",
+      "name": "Managed LLM API",
+      "vram_gb": 0,
+      "typical_tok_s": 0,
+      "typical_tok_s_note": "Closed-source API; pricing per token, no GPU sizing needed",
+      "hourly_rental_min": 0,
+      "hourly_rental_typical": 0,
+      "hourly_rental_max": 0,
+      "purchase_price": 0,
+      "power_w": 0,
+      "model_fit": "Managed API",
+      "concurrency_per_gpu": 0
+    }
+  ],
+  "api_pricing": {
+    "openai": {
+      "gpt-4o": { "input_per_1m": 2.50, "output_per_1m": 10.00, "name": "OpenAI GPT-4o" },
+      "gpt-4o-mini": { "input_per_1m": 0.15, "output_per_1m": 0.60, "name": "OpenAI GPT-4o mini" }
+    },
+    "anthropic": {
+      "claude-3-5-sonnet": { "input_per_1m": 3.00, "output_per_1m": 15.00, "name": "Anthropic Claude 3.5 Sonnet" },
+      "claude-3-haiku": { "input_per_1m": 0.25, "output_per_1m": 1.25, "name": "Anthropic Claude 3 Haiku" }
+    },
+    "together": {
+      "llama-3-1-70b": { "input_per_1m": 0.88, "output_per_1m": 0.88, "name": "Together AI Llama 3.1 70B" },
+      "llama-3-1-8b": { "input_per_1m": 0.18, "output_per_1m": 0.18, "name": "Together AI Llama 3.1 8B" }
+    }
+  },
+  "presets": [
+    {
+      "slug": "support-bot",
+      "name": "Customer support deflection bot",
+      "emoji": "🎧",
+      "requests_per_minute": 120,
+      "input_tokens_per_request": 3500,
+      "output_tokens_per_request": 450,
+      "target_p95_latency_ms": 2500,
+      "concurrency_buffer": 1.5,
+      "utilization_target": 0.7,
+      "cache_hit_rate": 0.3,
+      "cloud_provider": "runpod",
+      "gpu_model": "rtx-4090",
+      "local_gpu_count": 1
+    },
+    {
+      "slug": "coding-agent",
+      "name": "Internal coding agent",
+      "emoji": "💻",
+      "requests_per_minute": 30,
+      "input_tokens_per_request": 8000,
+      "output_tokens_per_request": 1500,
+      "target_p95_latency_ms": 8000,
+      "concurrency_buffer": 1.5,
+      "utilization_target": 0.6,
+      "cache_hit_rate": 0.1,
+      "cloud_provider": "runpod",
+      "gpu_model": "rtx-4090",
+      "local_gpu_count": 2
+    },
+    {
+      "slug": "research-agent",
+      "name": "Research report agent",
+      "emoji": "🔬",
+      "requests_per_minute": 10,
+      "input_tokens_per_request": 15000,
+      "output_tokens_per_request": 3000,
+      "target_p95_latency_ms": 20000,
+      "concurrency_buffer": 1.5,
+      "utilization_target": 0.65,
+      "cache_hit_rate": 0.2,
+      "cloud_provider": "lambdalabs",
+      "gpu_model": "a100-80gb",
+      "local_gpu_count": 1
+    },
+    {
+      "slug": "voice-agent",
+      "name": "AI voice agent backend",
+      "emoji": "📞",
+      "requests_per_minute": 60,
+      "input_tokens_per_request": 1200,
+      "output_tokens_per_request": 300,
+      "target_p95_latency_ms": 1200,
+      "concurrency_buffer": 2.0,
+      "utilization_target": 0.75,
+      "cache_hit_rate": 0.1,
+      "cloud_provider": "runpod",
+      "gpu_model": "rtx-4090",
+      "local_gpu_count": 1
+    }
+  ]
+}

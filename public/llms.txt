@@ -590,3 +590,11 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Outputs: effective CPM, clicks per issue, cost per click, cost per conversion, publisher revenue per issue/month, sponsor conversions, sponsor monthly profit, advertiser ROI, suggested package price, price vs benchmark verdict
 - Audience: newsletter publishers pricing sponsorships and advertisers evaluating newsletter ad placements
 - Cross-links: Newsletter Revenue Calculator, Affiliate Revenue Estimator, Newsletter Topic Finder, Advertise page
+
+## AI Agent Inference Capacity Planner
+|- URL: https://hermesdispatch.dev/tools/agent-inference-capacity-planner/
+|- Description: Size GPU or API capacity for an AI agent workload by requests per minute, tokens per request, target latency, and concurrency buffer.
+|- Inputs: requests per minute, input tokens per request, output tokens per request, target p95 latency (ms), concurrency buffer, GPU utilization target, cache hit rate, cloud provider, GPU model, local GPUs owned
+|- Outputs: minimum GPUs needed, estimated time per request, monthly cloud rental cost, self-hosted cost, managed API costs (OpenAI, Anthropic, Together), cheapest option, latency verdict
+|- Audience: AI agent builders sizing inference infrastructure for production workloads
+|- Cross-links: GPU Cloud vs Buy Calculator, Agent Hosting Cost Comparator, Agent API Pricing Comparator, Agent Latency Budget Calculator, VRAM Calculator

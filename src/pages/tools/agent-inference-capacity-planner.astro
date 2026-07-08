@@ -1,0 +1,297 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_inference_capacity_planner.json';
+
+const title = "AI Agent Inference Capacity Planner | Hermes Dispatch";
+const description = "Estimate how many GPUs, cloud instances, or API throughput units you need to serve an AI agent workload at your target requests/minute and latency.";
+const providers = data.cloud_providers;
+const gpus = data.gpu_models;
+const presets = data.presets;
+const defaults = data.defaults;
+const apiPricing = data.api_pricing;
+
+const faqs = [
+  { q: "How do I convert requests per minute into required GPU capacity?", a: "First estimate the tokens per request and the model's throughput in tok/s. Each request needs (input + output) tokens. Divide by tok/s to get the minimum wall-clock time per request, then add concurrency and utilization buffers so the GPU is not pegged at 100%." },
+  { q: "What is a safe utilization target?", a: "70-75% is typical for steady-state production. Lower if your traffic is bursty or if you need headroom for failovers. Higher is fine for batch or offline workloads." },
+  { q: "Should I count input tokens or only output tokens?", a: "Both. The model must process the full prompt (input) before generating output. Input tokens often dominate cost and latency, especially with long system prompts and RAG context." },
+  { q: "When is a managed API cheaper than renting GPUs?", a: "Managed APIs win at low or intermittent volume because you pay only for tokens used. Renting GPUs wins when utilization is high and you can keep the machine busy. This calculator compares both so you can find the crossover." },
+  { q: "Does this account for batching?", a: "The GPU tok/s estimates assume a single request stream. In practice, dynamic batching and continuous batching can raise effective throughput, but latency also increases. Use the concurrency buffer and utilization target to approximate real-world headroom." }
+];
+
+function fmt(n, digits=0) {
+  return n.toLocaleString('en-US', { maximumFractionDigits: digits });
+}
+
+function fmtCur(n, digits=2) {
+  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: digits });
+}
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Inference Capacity Planner" description={description} url="https://hermesdispatch.dev/tools/agent-inference-capacity-planner/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚡</div>
+      <h1 class="display-heading mb-4">AI Agent Inference Capacity Planner</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Size GPU or API capacity for an AI agent workload. Target requests/minute, latency, and cost across cloud rental, managed APIs, and self-hosted stacks.</p>
+    </div>
+
+    <!-- Presets -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      {presets.map(p => (
+        <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-preset={p.slug}>
+          <div class="text-2xl mb-2">{p.emoji}</div>
+          <h3 class="font-semibold text-sm">{p.name}</h3>
+          <p class="text-xs text-neutral-400 mt-1">{p.requests_per_minute} req/min • {fmt(p.input_tokens_per_request + p.output_tokens_per_request)} tokens</p>
+        </button>
+      ))}
+    </div>
+
+    <!-- Workload inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests / minute</span>
+          <input id="rpm" type="number" min="1" step="10" value={defaults.requests_per_minute} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" step="100" value={defaults.input_tokens_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" step="100" value={defaults.output_tokens_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Target p95 latency (ms)</span>
+          <input id="targetLatency" type="number" min="100" step="100" value={defaults.target_p95_latency_ms} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Concurrency buffer</span>
+          <input id="concurrencyBuffer" type="number" min="1" step="0.1" value={defaults.concurrency_buffer} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-xs text-neutral-500">Multiplier for burst / failover headroom</span>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">GPU utilization target</span>
+          <input id="utilization" type="number" min="0.1" max="1" step="0.05" value={defaults.utilization_target} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-xs text-neutral-500">0.1–1.0 (e.g., 0.7 = 70%)</span>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cache hit rate</span>
+          <input id="cacheHit" type="number" min="0" max="1" step="0.05" value={defaults.cache_hit_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-xs text-neutral-500">0.0–1.0; reduces effective tokens</span>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cloud provider</span>
+          <select id="cloudProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.cloud_provider}>{p.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">GPU / model for sizing</span>
+          <select id="gpuModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {gpus.filter(g => g.slug !== 'managed-api' && g.slug !== 'llama-api').map(g => (
+              <option value={g.slug} selected={g.slug === defaults.gpu_model}>{g.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Local GPUs owned</span>
+          <input id="localGpuCount" type="number" min="0" step="1" value={defaults.local_gpu_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-xs text-neutral-500">For self-host cost comparison</span>
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-4">Estimates are directional in USD. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary -->
+    <section id="summary" class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/30 text-center">
+      <p class="text-xs text-neutral-500 uppercase mb-1">Required capacity</p>
+      <p id="capacityLine" class="text-2xl font-bold text-brand-gold">—</p>
+      <p id="latencyLine" class="text-sm text-neutral-400 mt-1">—</p>
+      <p id="costLine" class="text-sm text-neutral-400 mt-1">—</p>
+    </section>
+
+    <!-- Results -->
+    <section class="grid md:grid-cols-2 gap-6 mb-12">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">GPU / cloud sizing</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span class="text-neutral-400">Tokens per request</span><span id="tokensPerRequest" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Effective tokens (cache adjusted)</span><span id="effectiveTokens" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Required throughput</span><span id="requiredThroughput" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">GPU tok/s (single stream)</span><span id="gpuTokS" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Time per request</span><span id="timePerRequest" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Concurrent requests at target</span><span id="concurrentReq" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">With buffer</span><span id="bufferedReq" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Min GPUs needed</span><span id="minGpus" class="font-mono text-brand-gold">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">GPU fit</span><span id="gpuFit" class="font-mono text-white">—</span></div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost comparison</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span class="text-neutral-400">Cloud rental ({providers.find(p => p.slug === defaults.cloud_provider)?.name})</span><span id="cloudCost" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Self-hosted GPUs ({gpus.find(g => g.slug === defaults.gpu_model)?.name})</span><span id="selfCost" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Managed API — OpenAI GPT-4o</span><span id="openaiCost" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Managed API — Claude 3.5 Sonnet</span><span id="anthropicCost" class="font-mono text-white">—</span></div>
+          <div class="flex justify-between"><span class="text-neutral-400">Managed API — Together Llama 3.1 70B</span><span id="togetherCost" class="font-mono text-white">—</span></div>
+        </div>
+        <div id="verdictBox" class="mt-6 p-4 rounded-lg bg-neutral-900 border border-neutral-700">
+          <p class="text-sm text-neutral-300"><span class="font-semibold text-brand-gold">Verdict:</span> <span id="verdictText">—</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/gpu-cloud-vs-buy-calculator/" class="btn-primary text-sm">GPU Cloud vs Buy Calc →</a>
+      <a href="/tools/agent-hosting-cost-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Hosting Cost Comparator →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-latency-budget-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Latency Budget Calc →</a>
+      <a href="/tools/vram-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">VRAM Calculator →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ gpusJson: JSON.stringify(gpus), providersJson: JSON.stringify(providers), presetsJson: JSON.stringify(presets), apiPricingJson: JSON.stringify(apiPricing) }}>
+    const gpus = JSON.parse(gpusJson);
+    const providers = JSON.parse(providersJson);
+    const presets = JSON.parse(presetsJson);
+    const apiPricing = JSON.parse(apiPricingJson);
+
+    const fmt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const fmt1 = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtCur = (n, d=0) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: d });
+
+    function getInputs() {
+      return {
+        rpm: Math.max(1, parseFloat(document.getElementById('rpm').value) || 1),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        targetLatencyMs: Math.max(1, parseFloat(document.getElementById('targetLatency').value) || 1000),
+        buffer: Math.max(1, parseFloat(document.getElementById('concurrencyBuffer').value) || 1),
+        utilization: Math.max(0.1, Math.min(1, parseFloat(document.getElementById('utilization').value) || 0.7)),
+        cacheHit: Math.max(0, Math.min(1, parseFloat(document.getElementById('cacheHit').value) || 0)),
+        providerSlug: document.getElementById('cloudProvider').value,
+        gpuSlug: document.getElementById('gpuModel').value,
+        localGpuCount: Math.max(0, parseFloat(document.getElementById('localGpuCount').value) || 0)
+      };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const gpu = gpus.find(g => g.slug === inps.gpuSlug) || gpus[0];
+      const provider = providers.find(p => p.slug === inps.providerSlug) || providers[0];
+
+      const tokensPerRequest = inps.inputTokens + inps.outputTokens;
+      const effectiveTokens = tokensPerRequest * (1 - inps.cacheHit);
+      const requestsPerSecond = inps.rpm / 60;
+      const requiredTokS = requestsPerSecond * effectiveTokens;
+
+      const gpuTokS = gpu.typical_tok_s || 1;
+      const timePerRequestMs = effectiveTokens / gpuTokS * 1000;
+      const concurrentAtTarget = Math.max(1, Math.ceil((timePerRequestMs / inps.targetLatencyMs) * requestsPerSecond * inps.buffer));
+      const effectiveConcurrencyPerGpu = Math.max(1, Math.floor(gpu.concurrency_per_gpu * inps.utilization));
+      const minGpus = Math.max(1, Math.ceil(concurrentAtTarget / effectiveConcurrencyPerGpu));
+
+      const hoursPerMonth = 730;
+      const cloudCost = gpu.hourly_rental_typical * minGpus * hoursPerMonth;
+      const electricityCost = (gpu.power_w * inps.localGpuCount / 1000) * 0.12 * hoursPerMonth;
+      const amortizedHardwareCost = inps.localGpuCount > 0 ? (gpu.purchase_price * inps.localGpuCount / 24) : 0; // 24 months amortization
+      const selfCost = electricityCost + amortizedHardwareCost;
+
+      const monthlyRequests = inps.rpm * 60 * 24 * 30;
+      const openaiCost = monthlyRequests * ((inps.inputTokens / 1e6) * apiPricing.openai['gpt-4o'].input_per_1m + (inps.outputTokens / 1e6) * apiPricing.openai['gpt-4o'].output_per_1m);
+      const anthropicCost = monthlyRequests * ((inps.inputTokens / 1e6) * apiPricing.anthropic['claude-3-5-sonnet'].input_per_1m + (inps.outputTokens / 1e6) * apiPricing.anthropic['claude-3-5-sonnet'].output_per_1m);
+      const togetherCost = monthlyRequests * ((inps.inputTokens / 1e6) * apiPricing.together['llama-3-1-70b'].input_per_1m + (inps.outputTokens / 1e6) * apiPricing.together['llama-3-1-70b'].output_per_1m);
+
+      document.getElementById('tokensPerRequest').textContent = fmt(tokensPerRequest);
+      document.getElementById('effectiveTokens').textContent = fmt(effectiveTokens);
+      document.getElementById('requiredThroughput').textContent = fmt1(requiredTokS) + ' tok/s';
+      document.getElementById('gpuTokS').textContent = fmt(gpuTokS) + ' tok/s';
+      document.getElementById('timePerRequest').textContent = fmt1(timePerRequestMs) + ' ms';
+      document.getElementById('concurrentReq').textContent = fmt(concurrentAtTarget);
+      document.getElementById('bufferedReq').textContent = fmt(Math.ceil(concurrentAtTarget * inps.buffer));
+      document.getElementById('minGpus').textContent = fmt(minGpus);
+      document.getElementById('gpuFit').textContent = gpu.model_fit;
+
+      document.getElementById('cloudCost').textContent = fmtCur(cloudCost);
+      document.getElementById('selfCost').textContent = fmtCur(selfCost);
+      document.getElementById('openaiCost').textContent = fmtCur(openaiCost);
+      document.getElementById('anthropicCost').textContent = fmtCur(anthropicCost);
+      document.getElementById('togetherCost').textContent = fmtCur(togetherCost);
+
+      document.getElementById('capacityLine').textContent = minGpus + ' × ' + gpu.name + ' needed';
+      document.getElementById('latencyLine').textContent = 'Estimated ' + fmt1(timePerRequestMs) + ' ms/request at ' + fmt(gpuTokS) + ' tok/s';
+      document.getElementById('costLine').textContent = 'Cloud rental ≈ ' + fmtCur(cloudCost) + '/mo; self-host ≈ ' + fmtCur(selfCost) + '/mo';
+
+      const costs = [
+        { name: 'cloud rental', value: cloudCost },
+        { name: 'self-hosted GPUs', value: selfCost },
+        { name: 'OpenAI GPT-4o API', value: openaiCost },
+        { name: 'Anthropic Claude 3.5 Sonnet API', value: anthropicCost },
+        { name: 'Together AI Llama 3.1 70B API', value: togetherCost }
+      ];
+      const cheapest = costs.reduce((a, b) => a.value < b.value ? a : b);
+      let verdict = 'Cheapest: ' + cheapest.name + ' at ' + fmtCur(cheapest.value) + '/mo.';
+      if (timePerRequestMs > inps.targetLatencyMs) {
+        verdict += ' Warning: single-stream latency exceeds target; add concurrency/GPUs or pick a faster GPU.';
+      }
+      if (inps.localGpuCount >= minGpus) {
+        verdict += ' You already own enough GPUs for self-hosting.';
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    function applyPreset(slug) {
+      const p = presets.find(x => x.slug === slug);
+      if (!p) return;
+      document.getElementById('rpm').value = p.requests_per_minute;
+      document.getElementById('inputTokens').value = p.input_tokens_per_request;
+      document.getElementById('outputTokens').value = p.output_tokens_per_request;
+      document.getElementById('targetLatency').value = p.target_p95_latency_ms;
+      document.getElementById('concurrencyBuffer').value = p.concurrency_buffer;
+      document.getElementById('utilization').value = p.utilization_target;
+      document.getElementById('cacheHit').value = p.cache_hit_rate;
+      document.getElementById('cloudProvider').value = p.cloud_provider;
+      document.getElementById('gpuModel').value = p.gpu_model;
+      document.getElementById('localGpuCount').value = p.local_gpu_count;
+      compute();
+    }
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
+
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
+
+    compute();
+  </script>
+</Layout>
