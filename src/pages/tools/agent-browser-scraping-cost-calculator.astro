@@ -1,0 +1,330 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_browser_scraping_cost.json';
+
+const title = "AI Agent Browser / Web Scraping Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost for AI agents that browse, scrape, and extract structured data from the web. Compare Browserbase, Steel.dev, ScrapeGraphAI, Firecrawl, ScrapingBee, Zyte, Bright Data, and self-hosted Playwright stacks.";
+const providers = data.providers;
+const extractors = data.llm_extractors;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the all-in monthly cost of web browsing and scraping for AI agents: browser/scraping provider fees, LLM extraction tokens, proxy/Captcha overhead, failed-page retries, human review labor, and self-hosting infrastructure if applicable." },
+  { q: "How are pages vs steps counted?", a: "A 'page' is one target URL. 'Steps per page' captures multi-step navigation (login, pagination, form fill) where each step may consume a browser action or extra page credit. We multiply page count by steps as a rough usage multiplier." },
+  { q: "Why do some providers bundle LLM extraction while others don't?", a: "ScrapeGraphAI and some managed scrapers include LLM extraction in their per-page price. For providers that only return raw HTML or markdown, the calculator adds a separate LLM extraction cost. Toggle the extractor to match your stack." },
+  { q: "What is the proxy / CAPTCHA adder?", a: "It's an optional extra cost per page for cases where the provider's base success rate isn't enough and you need premium proxy, residential IP, or CAPTCHA solving. Set the percentage of pages that need this and the per-page cost." },
+  { q: "When is self-hosted Playwright cheaper?", a: "Self-hosting usually wins at very high volume or when you already own proxies and anti-bot infrastructure. At low volume, managed providers are cheaper because they bundle proxy rotation, session management, and reliability." },
+  { q: "Are these prices exact?", a: "No. Providers change credit pricing and offer volume tiers. Use the editable per-page costs to match your quotes." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Browser / Web Scraping Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-browser-scraping-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🌐</div>
+      <h1 class="display-heading mb-4">AI Agent Browser / Web Scraping Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly cost for AI agents that browse, scrape, and extract structured data from the web. Compare managed browser APIs and self-hosted Playwright stacks.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Scraping workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Pages / month</span>
+          <input id="pagesPerMonth" type="number" min="0" step="100" value={defaults.pages_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Avg steps per page</span>
+          <input id="stepsPerPage" type="number" min="1" step="1" value={defaults.avg_steps_per_page} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Extractor / LLM</span>
+          <select id="extractor" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {extractors.map(e => <option value={JSON.stringify(e)} selected={e.slug === defaults.extractor}>{e.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Extraction input tokens / page</span>
+          <input id="extractInput" type="number" min="0" step="100" value={defaults.extract_input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Extraction output tokens / page</span>
+          <input id="extractOutput" type="number" min="0" step="50" value={defaults.extract_output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Base success rate (%)</span>
+          <input id="successRate" type="number" min="1" max="100" step="1" value={defaults.success_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Pages needing proxy/CAPTCHA (%)</span>
+          <input id="proxyCaptchaPct" type="number" min="0" max="100" step="1" value={defaults.proxy_captcha_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Proxy/CAPTCHA cost / page ($)</span>
+          <input id="proxyCaptchaCost" type="number" min="0" step="0.005" value={defaults.proxy_captcha_cost_per_page} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="1" value={defaults.review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review minutes / page</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.25" value={defaults.review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly cost ($)</span>
+          <input id="reviewerHourly" type="number" min="0" step="5" value={defaults.reviewer_hourly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block flex items-center gap-3 mt-6">
+          <input id="selfHosted" type="checkbox" class="w-5 h-5 rounded border-neutral-700 bg-neutral-900 text-brand-gold" />
+          <span class="text-neutral-300 text-sm">Use self-hosted infrastructure</span>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Self-hosting monthly cost ($)</span>
+          <input id="selfHostingMonthly" type="number" min="0" step="25" value={defaults.self_hosting_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest provider</p>
+        <p id="cheapestName" class="text-xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest monthly</p>
+        <p id="cheapestMonthly" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1k pages</p>
+        <p id="costPer1k" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20 overflow-x-auto">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison</h2>
+      <table class="w-full text-left border-collapse text-sm">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4">Model</th>
+            <th class="py-3 pr-4 text-right">Page cost ($)</th>
+            <th class="py-3 pr-4 text-right">Monthly scrape</th>
+            <th class="py-3 pr-4 text-right">Extraction</th>
+            <th class="py-3 pr-4 text-right">Proxy/CAPTCHA</th>
+            <th class="py-3 pr-4 text-right">Review</th>
+            <th class="py-3 pr-4 text-right">Self-host</th>
+            <th class="py-3 pr-4 text-right">Total monthly</th>
+          </tr>
+        </thead>
+        <tbody id="providerBody" class="text-neutral-200">
+          <tr><td colspan="9" class="py-4 text-neutral-500">Enter inputs to see comparison.</td></tr>
+        </tbody>
+      </table>
+      <p class="text-xs text-neutral-500 mt-4">Page costs are editable estimates. Managed providers bundle proxy/CAPTCHA in base rate where noted. Self-hosted stack adds your infra estimate.</p>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-tool-call-cost-calculator/" class="btn-primary text-sm">AI Agent Tool Call Cost Calculator →</a>
+      <a href="/tools/agent-workflow-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Workflow Cost Calculator →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value Calculator →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), extractors: JSON.stringify(extractors), scenarios: JSON.stringify(scenarios) }}>
+    const inputs = {
+      pagesPerMonth: document.getElementById('pagesPerMonth'),
+      stepsPerPage: document.getElementById('stepsPerPage'),
+      extractor: document.getElementById('extractor'),
+      extractInput: document.getElementById('extractInput'),
+      extractOutput: document.getElementById('extractOutput'),
+      successRate: document.getElementById('successRate'),
+      proxyCaptchaPct: document.getElementById('proxyCaptchaPct'),
+      proxyCaptchaCost: document.getElementById('proxyCaptchaCost'),
+      reviewRate: document.getElementById('reviewRate'),
+      reviewMinutes: document.getElementById('reviewMinutes'),
+      reviewerHourly: document.getElementById('reviewerHourly'),
+      selfHosted: document.getElementById('selfHosted'),
+      selfHostingMonthly: document.getElementById('selfHostingMonthly'),
+      projectionMonths: document.getElementById('projectionMonths'),
+    };
+
+    const outputs = {
+      cheapestName: document.getElementById('cheapestName'),
+      cheapestMonthly: document.getElementById('cheapestMonthly'),
+      costPer1k: document.getElementById('costPer1k'),
+      periodCost: document.getElementById('periodCost'),
+      providerBody: document.getElementById('providerBody'),
+      verdictText: document.getElementById('verdictText'),
+    };
+
+    function fmtMoney(n) { return '$' + n.toLocaleString(undefined, { maximumFractionDigits: 0 }); }
+    function fmtMoney2(n) { return '$' + n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function getVal(id) {
+      const el = inputs[id];
+      if (!el) return 0;
+      if (el.type === 'checkbox') return el.checked;
+      return parseFloat(el.value) || 0;
+    }
+
+    function getExtractor() {
+      try { return JSON.parse(inputs.extractor.value); } catch(e) { return extractors[0]; }
+    }
+
+    function setScenario(s) {
+      inputs.pagesPerMonth.value = s.pages_per_month;
+      inputs.stepsPerPage.value = s.avg_steps_per_page;
+      inputs.extractor.value = JSON.stringify(extractors.find(e => e.slug === s.extractor) || extractors[0]);
+      inputs.extractInput.value = s.extract_input_tokens;
+      inputs.extractOutput.value = s.extract_output_tokens;
+      inputs.successRate.value = s.success_rate_pct;
+      inputs.proxyCaptchaPct.value = s.proxy_captcha_pct;
+      inputs.proxyCaptchaCost.value = s.proxy_captcha_cost_per_page;
+      inputs.reviewRate.value = s.review_rate_pct;
+      inputs.reviewMinutes.value = s.review_minutes;
+      inputs.reviewerHourly.value = s.reviewer_hourly;
+      inputs.selfHosted.checked = s.self_hosted;
+      inputs.projectionMonths.value = s.projection_months;
+      calculate();
+    }
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => setScenario(JSON.parse(btn.dataset.scenario)));
+    });
+
+    function calculate() {
+      const pages = Math.max(0, getVal('pagesPerMonth'));
+      const steps = Math.max(1, getVal('stepsPerPage'));
+      const extractor = getExtractor();
+      const extIn = Math.max(0, getVal('extractInput'));
+      const extOut = Math.max(0, getVal('extractOutput'));
+      const successRate = Math.max(1, Math.min(100, getVal('successRate'))) / 100;
+      const proxyPct = Math.max(0, Math.min(100, getVal('proxyCaptchaPct'))) / 100;
+      const proxyCost = Math.max(0, getVal('proxyCaptchaCost'));
+      const reviewPct = Math.max(0, Math.min(100, getVal('reviewRate'))) / 100;
+      const reviewMin = Math.max(0, getVal('reviewMinutes'));
+      const reviewHourly = Math.max(0, getVal('reviewerHourly'));
+      const selfHosted = inputs.selfHosted.checked;
+      const selfHosting = selfHosted ? Math.max(0, getVal('selfHostingMonthly')) : 0;
+      const months = Math.max(1, Math.min(60, getVal('projectionMonths')));
+
+      const attemptsNeeded = pages / successRate;
+      const extractionCostPerPage = ((extIn / 1000) * extractor.input_per_1k + (extOut / 1000) * extractor.output_per_1k);
+      const reviewCostPerPage = reviewPct * (reviewMin / 60) * reviewHourly;
+      const proxyCostPerPage = proxyPct * proxyCost;
+
+      const rows = providers.map(p => {
+        const isSelfHosted = p.slug === 'self-hosted-playwright';
+        const pageCost = p.page_cost * steps;
+        const scrapeMonthly = attemptsNeeded * pageCost;
+        const extractionMonthly = pages * extractionCostPerPage;
+        const proxyMonthly = pages * proxyCostPerPage;
+        const reviewMonthly = pages * reviewCostPerPage;
+        const hostingMonthly = (isSelfHosted && selfHosted) ? selfHosting : 0;
+        // For managed providers that bundle extraction, we still show the LLM line as $0 by default unless user toggles extractor. We leave extraction visible so users see the split.
+        const totalMonthly = scrapeMonthly + extractionMonthly + proxyMonthly + reviewMonthly + hostingMonthly;
+        return { ...p, pageCost, scrapeMonthly, extractionMonthly, proxyMonthly, reviewMonthly, hostingMonthly, totalMonthly };
+      });
+
+      rows.sort((a, b) => a.totalMonthly - b.totalMonthly);
+      const cheapest = rows[0];
+      const avgMonthly = cheapest.totalMonthly;
+
+      outputs.cheapestName.textContent = cheapest.name;
+      outputs.cheapestMonthly.textContent = fmtMoney(avgMonthly);
+      outputs.costPer1k.textContent = fmtMoney2((avgMonthly / Math.max(1, pages)) * 1000);
+      outputs.periodCost.textContent = fmtMoney(avgMonthly * months);
+
+      outputs.providerBody.innerHTML = rows.map((p, i) => `
+        <tr class="border-b border-neutral-800/50 ${i === 0 ? 'bg-brand-gold/10' : ''}">
+          <td class="py-3 pr-4 font-medium">${p.name} ${i === 0 ? '<span class="text-brand-gold text-xs ml-1">★ cheapest</span>' : ''}</td>
+          <td class="py-3 pr-4 text-neutral-400">${p.model}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney2(p.pageCost)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(p.scrapeMonthly)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(p.extractionMonthly)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(p.proxyMonthly)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(p.reviewMonthly)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(p.hostingMonthly)}</td>
+          <td class="py-3 pr-4 text-right font-mono text-brand-gold font-semibold">${fmtMoney(p.totalMonthly)}</td>
+        </tr>
+      `).join('');
+
+      let verdict = '';
+      if (pages === 0) {
+        verdict = 'Set your monthly page volume to see which provider is cheapest and how extraction, proxy, and review costs split.';
+      } else if (cheapest.slug === 'self-hosted-playwright') {
+        verdict = `At ${pages.toLocaleString()} pages/month, self-hosted Playwright is cheapest on variable cost, but only if you already own proxy/CAPTCHA infrastructure and can keep success rate high. Add the true cost of proxies, retries, and engineering time before committing.`;
+      } else if (['browserbase', 'steel-dev', 'firecrawl', 'scrapingbee', 'zyte-api'].includes(cheapest.slug)) {
+        verdict = `At ${pages.toLocaleString()} pages/month, ${cheapest.name} is the lowest-cost managed option. Compare actual success rate against your target sites; a cheaper per-page rate can cost more if retries and proxy adders climb.`;
+      } else if (['brightdata'].includes(cheapest.slug)) {
+        verdict = `${cheapest.name} is cheapest at this volume, likely because its bundled proxy success rate reduces retries. Confirm your actual per-credit or committed-volume pricing before finalizing.`;
+      } else if (['scrapegraphai-cloud'].includes(cheapest.slug)) {
+        verdict = `${cheapest.name} is cheapest when natural-language extraction is required. If you only need raw HTML/markdown, a cheaper scraper plus a separate cheap LLM extractor may beat it.`;
+      } else {
+        verdict = `${cheapest.name} is the cheapest option at your settings. Validate with a small paid test and adjust the per-page rates to match your vendor quotes.`;
+      }
+      outputs.verdictText.textContent = verdict;
+    }
+
+    Object.values(inputs).forEach(el => { if (el) el.addEventListener('input', calculate); });
+    calculate();
+  </script>
+</Layout>
