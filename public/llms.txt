@@ -418,12 +418,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Audience: AI agent builders and security teams budgeting red-team programs
 
 ## AI Agent Multi-Step Workflow Cost Calculator
-||- URL: https://hermesdispatch.dev/tools/agent-workflow-cost-calculator/
-||- Description: Estimate per-run and monthly cost for multi-step AI agent workflows across model providers.
-||- Inputs: runs per month, per-step model/input/output tokens, calls per run, retrieval cost per run, tool-call cost per run, review hours per 1k runs, reviewer hourly rate
-||- Outputs: per-run cost, monthly cost, cost breakdown by step, total projection cost
-||- Audience: AI agent builders designing multi-step workflows
-||
+|||- URL: https://hermesdispatch.dev/tools/agent-workflow-cost-calculator/
+|||- Description: Estimate per-run and monthly cost for multi-step AI agent workflows across model providers.
+|||- Inputs: runs per month, per-step model/input/output tokens, calls per run, retrieval cost per run, tool-call cost per run, review hours per 1k runs, reviewer hourly rate
+|||- Outputs: per-run cost, monthly cost, cost breakdown by step, total projection cost
+|||- Audience: AI agent builders designing multi-step workflows
+|||
+## AI Agent Concurrency & Queue Cost Calculator
+- URL: https://hermesdispatch.dev/tools/agent-concurrency-cost-calculator/
+- Description: Estimate monthly cost and queue behavior for AI agents as concurrency, rate limits, retries, and container capacity scale.
+- Inputs: monthly requests, peak concurrency, requests per session, LLM provider, input/output tokens per request, cached input %, reasoning multiplier, queue depth target, provider rate limit, timeout, retry rate, retry multiplier, container size, extra infra monthly, projection months
+- Outputs: required containers, estimated queue wait, monthly LLM cost, monthly infra cost, peak RPM, utilization, cost per 1k requests, total monthly cost, concurrency sensitivity table, verdict
+- Audience: AI agent builders scaling production workloads
+
 ## AI Agent Prompt Injection & Security Risk Scanner
 |- URL: https://hermesdispatch.dev/tools/agent-prompt-injection-scanner/
 |- Description: Score an AI agent's system prompt and tool setup for prompt injection, jailbreak, data exfiltration, tool hijacking, and indirect injection risks.

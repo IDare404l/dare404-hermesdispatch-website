@@ -1,0 +1,485 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_concurrency_cost.json';
+
+const title = "AI Agent Concurrency & Queue Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost and queue behavior for AI agents as concurrency, rate limits, retries, and container capacity scale. Compare provider limits and infrastructure sizing.";
+const providers = data.providers;
+const containers = data.container_sizes;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does concurrency mean for an AI agent?", a: "Concurrency is the number of user sessions or requests in flight at the same time. Higher concurrency means more active workers, more API calls per second, and longer queues if capacity can't keep up." },
+  { q: "How is queue wait time estimated?", a: "The calculator uses a simple M/M/c approximation: average wait rises as arrival rate approaches total service capacity (workers × requests per worker per second). It ignores network jitter and bursty arrival patterns, so treat it as directional." },
+  { q: "Why does retry rate matter?", a: "Retries add hidden traffic. A 5% retry rate on 1M requests means 50,000 extra API calls, plus the engineering and user-experience cost of timeouts. The multiplier models retries that hit slower fallback providers." },
+  { q: "What's the difference between provider RPM and my container capacity?", a: "Provider RPM is the API-side throttle. Container capacity is how many simultaneous requests your app servers can hold without degrading. You need both: a high provider limit doesn't help if your containers are saturated, and extra containers waste money if the API caps you." },
+  { q: "How do I reduce concurrency cost without adding latency?", a: "Increase cache hit rate, batch requests, use a faster/cheaper model for simple turns, keep timeouts tight, and add connection pooling so each container handles more concurrent requests." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Concurrency & Queue Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-concurrency-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🚦</div>
+      <h1 class="display-heading mb-4">AI Agent Concurrency & Queue Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly cost and queue behavior for AI agents as concurrency, rate limits, retries, and container capacity scale. Compare provider limits and infrastructure sizing.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload & concurrency</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly requests</span>
+          <input id="monthlyRequests" type="number" min="0" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Peak concurrency (sessions)</span>
+          <input id="peakConcurrency" type="number" min="1" step="1" value={defaults.peak_concurrency} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests per session</span>
+          <input id="requestsPerSession" type="number" min="1" step="1" value={defaults.requests_per_session} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="providerSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" step="50" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" step="50" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reasoning / output multiplier</span>
+          <input id="reasoningMultiplier" type="number" min="1" step="0.1" value={defaults.reasoning_multiplier} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Queue depth target (max waiting)</span>
+          <input id="queueTarget" type="number" min="1" step="1" value={defaults.queue_depth_target} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Provider rate limit (RPM)</span>
+          <input id="rateLimitRpm" type="number" min="1" step="100" value={defaults.rate_limit_rpm} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Timeout (seconds)</span>
+          <input id="timeoutS" type="number" min="1" step="1" value={defaults.timeout_s} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retry rate (%)</span>
+          <input id="retryRate" type="number" min="0" max="100" step="1" value={defaults.retry_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retry cost multiplier</span>
+          <input id="retryMultiplier" type="number" min="1" step="0.1" value={defaults.retry_multiplier} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Container size</span>
+          <select id="containerSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {containers.map(c => <option value={JSON.stringify(c)} selected={c.slug === defaults.container_size}>{c.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Extra infra monthly ($)</span>
+          <input id="extraInfra" type="number" min="0" step="10" value={defaults.extra_infra_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Required containers</p>
+        <p id="requiredContainers" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Est. queue wait</p>
+        <p id="queueWait" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly LLM cost</p>
+        <p id="llmCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly infra cost</p>
+        <p id="infraCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Peak requests / min</p>
+        <p id="peakRpm" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Container capacity</p>
+        <p id="containerCapacity" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Utilization at peak</p>
+        <p id="utilization" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1k requests</p>
+        <p id="costPer1k" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="totalMonthly" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost line</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Input tokens</td>
+            <td id="inputCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="inputShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Output tokens</td>
+            <td id="outputCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="outputShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Retry calls</td>
+            <td id="retryCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="retryShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Container hosting</td>
+            <td id="hostingCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="hostingShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+          <tr class="border-b border-neutral-800/50">
+            <td class="py-3 pr-4">Extra infra</td>
+            <td id="extraCost" class="py-3 pr-4 text-right font-mono">—</td>
+            <td id="extraShare" class="py-3 pr-4 text-right font-mono">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Concurrency sensitivity -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Concurrency sensitivity</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Concurrency</th>
+            <th class="py-3 pr-4 text-right">Containers needed</th>
+            <th class="py-3 pr-4 text-right">Queue wait</th>
+            <th class="py-3 pr-4 text-right">Monthly infra</th>
+            <th class="py-3 pr-4 text-right">Status</th>
+          </tr>
+        </thead>
+        <tbody id="sensitivityBody" class="text-neutral-200">
+          <tr><td colspan="5" class="py-4 text-neutral-500">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-inference-capacity-planner/" class="btn-primary text-sm">Inference Capacity Planner →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-latency-budget-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Latency Budget Calc →</a>
+      <a href="/tools/agent-model-router-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Model Router Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providersJson: JSON.stringify(providers), containersJson: JSON.stringify(containers) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getProvider() {
+      return JSON.parse(document.getElementById('providerSelect').value);
+    }
+    function getContainer() {
+      return JSON.parse(document.getElementById('containerSelect').value);
+    }
+
+    function getInputs() {
+      return {
+        monthlyRequests: Math.max(0, parseFloat(document.getElementById('monthlyRequests').value) || 0),
+        peakConcurrency: Math.max(1, parseFloat(document.getElementById('peakConcurrency').value) || 1),
+        requestsPerSession: Math.max(1, parseFloat(document.getElementById('requestsPerSession').value) || 1),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        cachedInputPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('cachedInputPct').value) || 0)),
+        reasoningMultiplier: Math.max(1, parseFloat(document.getElementById('reasoningMultiplier').value) || 1),
+        queueTarget: Math.max(1, parseFloat(document.getElementById('queueTarget').value) || 1),
+        rateLimitRpm: Math.max(1, parseFloat(document.getElementById('rateLimitRpm').value) || 1),
+        timeoutS: Math.max(1, parseFloat(document.getElementById('timeoutS').value) || 1),
+        retryRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('retryRate').value) || 0)),
+        retryMultiplier: Math.max(1, parseFloat(document.getElementById('retryMultiplier').value) || 1),
+        extraInfra: Math.max(0, parseFloat(document.getElementById('extraInfra').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_requests !== undefined) document.getElementById('monthlyRequests').value = obj.monthly_requests;
+      if (obj.peak_concurrency !== undefined) document.getElementById('peakConcurrency').value = obj.peak_concurrency;
+      if (obj.requests_per_session !== undefined) document.getElementById('requestsPerSession').value = obj.requests_per_session;
+      if (obj.provider !== undefined) {
+        const opts = document.getElementById('providerSelect').options;
+        for (let i = 0; i < opts.length; i++) {
+          const p = JSON.parse(opts[i].value);
+          if (p.slug === obj.provider) { opts[i].selected = true; break; }
+        }
+      }
+      if (obj.input_tokens !== undefined) document.getElementById('inputTokens').value = obj.input_tokens;
+      if (obj.output_tokens !== undefined) document.getElementById('outputTokens').value = obj.output_tokens;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cachedInputPct').value = obj.cached_input_pct;
+      if (obj.reasoning_multiplier !== undefined) document.getElementById('reasoningMultiplier').value = obj.reasoning_multiplier;
+      if (obj.queue_depth_target !== undefined) document.getElementById('queueTarget').value = obj.queue_depth_target;
+      if (obj.rate_limit_rpm !== undefined) document.getElementById('rateLimitRpm').value = obj.rate_limit_rpm;
+      if (obj.timeout_s !== undefined) document.getElementById('timeoutS').value = obj.timeout_s;
+      if (obj.retry_rate !== undefined) document.getElementById('retryRate').value = obj.retry_rate;
+      if (obj.retry_multiplier !== undefined) document.getElementById('retryMultiplier').value = obj.retry_multiplier;
+      if (obj.container_size !== undefined) {
+        const opts = document.getElementById('containerSelect').options;
+        for (let i = 0; i < opts.length; i++) {
+          const c = JSON.parse(opts[i].value);
+          if (c.slug === obj.container_size) { opts[i].selected = true; break; }
+        }
+      }
+      if (obj.extra_infra_monthly !== undefined) document.getElementById('extraInfra').value = obj.extra_infra_monthly;
+    }
+
+    function erlangC(offeredLoad, agents) {
+      // M/M/c probability of waiting (Erlang C)
+      if (agents <= offeredLoad) return 1;
+      const rho = offeredLoad / agents;
+      const invDenom = agents * (1 - rho);
+      let sum = 0;
+      for (let k = 0; k < agents; k++) {
+        sum += Math.pow(offeredLoad, k) / factorial(k);
+      }
+      const term = (Math.pow(offeredLoad, agents) / factorial(agents)) * (1 / (1 - rho));
+      return term / (sum + term);
+    }
+
+    function factorial(n) {
+      let result = 1;
+      for (let i = 2; i <= n; i++) result *= i;
+      return result;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const provider = getProvider();
+      const container = getContainer();
+
+      const effectiveInput = inps.inputTokens;
+      const effectiveOutput = inps.outputTokens * inps.reasoningMultiplier;
+      const cachedFraction = inps.cachedInputPct / 100;
+      const uncachedFraction = 1 - cachedFraction;
+
+      const requestsWithRetry = inps.monthlyRequests * (1 + inps.retryRate / 100 * (inps.retryMultiplier - 1));
+      const baseCalls = inps.monthlyRequests;
+      const retryCalls = baseCalls * (inps.retryRate / 100);
+
+      const inputCost = baseCalls * (effectiveInput / 1e6) * (cachedFraction * provider.cached_input_per_1m + uncachedFraction * provider.input_per_1m);
+      const outputCost = baseCalls * (effectiveOutput / 1e6) * provider.output_per_1m;
+      const retryCost = retryCalls * ((effectiveInput + effectiveOutput) / 1e6) * Math.max(provider.input_per_1m, provider.output_per_1m) * inps.retryMultiplier;
+      const llmCost = inputCost + outputCost + retryCost;
+
+      const avgServiceTime = Math.max(provider.avg_latency_s, inps.timeoutS * 0.3);
+      const peakRpm = (inps.peakConcurrency * inps.requestsPerSession);
+      const peakRps = peakRpm / 60;
+      const containerCapacity = Math.floor(container.concurrency_capacity);
+      const requiredForCapacity = Math.max(1, Math.ceil(inps.peakConcurrency / containerCapacity));
+      const offeredLoad = peakRps * avgServiceTime;
+      let requiredForQueue = requiredForCapacity;
+      for (let c = requiredForCapacity; c <= requiredForCapacity + 200; c++) {
+        if (c > offeredLoad) {
+          const waitProb = erlangC(offeredLoad, c);
+          const avgWait = waitProb * avgServiceTime / (c - offeredLoad);
+          const expectedQueueDepth = peakRps * avgWait;
+          if (expectedQueueDepth <= inps.queueTarget) { requiredForQueue = c; break; }
+        }
+      }
+      const requiredContainers = Math.max(requiredForCapacity, requiredForQueue);
+
+      const hostingCost = requiredContainers * container.hourly_cost * 24 * 30;
+      const infraCost = hostingCost + inps.extraInfra;
+      const totalMonthly = llmCost + infraCost;
+      const periodCost = totalMonthly * inps.projectionMonths;
+      const costPer1k = inps.monthlyRequests > 0 ? (totalMonthly / inps.monthlyRequests) * 1000 : 0;
+
+      const waitProbFinal = requiredContainers > offeredLoad ? erlangC(offeredLoad, requiredContainers) : 1;
+      const avgWaitFinal = requiredContainers > offeredLoad ? waitProbFinal * avgServiceTime / (requiredContainers - offeredLoad) : 999;
+      const utilization = Math.min(100, (offeredLoad / requiredContainers) * 100);
+
+      document.getElementById('requiredContainers').textContent = fmtInt(requiredContainers);
+      document.getElementById('queueWait').textContent = avgWaitFinal > 60 ? fmtNum(avgWaitFinal / 60) + ' min' : fmtNum(avgWaitFinal) + ' s';
+      document.getElementById('llmCost').textContent = fmtMoney0(llmCost);
+      document.getElementById('infraCost').textContent = fmtMoney0(infraCost);
+      document.getElementById('peakRpm').textContent = fmtInt(peakRpm);
+      document.getElementById('containerCapacity').textContent = fmtInt(containerCapacity);
+      document.getElementById('utilization').textContent = fmtNum(utilization) + '%';
+      document.getElementById('costPer1k').textContent = fmtMoney(costPer1k);
+      document.getElementById('totalMonthly').textContent = fmtMoney0(totalMonthly);
+      document.getElementById('periodCost').textContent = fmtMoney0(periodCost);
+
+      const setShare = (id, cost) => {
+        document.getElementById(id).textContent = totalMonthly > 0 ? (cost / totalMonthly * 100).toFixed(1) + '%' : '0%';
+      };
+      document.getElementById('inputCost').textContent = fmtMoney(inputCost);
+      setShare('inputShare', inputCost);
+      document.getElementById('outputCost').textContent = fmtMoney(outputCost);
+      setShare('outputShare', outputCost);
+      document.getElementById('retryCost').textContent = fmtMoney(retryCost);
+      setShare('retryShare', retryCost);
+      document.getElementById('hostingCost').textContent = fmtMoney(hostingCost);
+      setShare('hostingShare', hostingCost);
+      document.getElementById('extraCost').textContent = fmtMoney(inps.extraInfra);
+      setShare('extraShare', inps.extraInfra);
+
+      // Sensitivity table
+      const sensitivities = [0.25, 0.5, 0.75, 1, 1.5, 2, 3].map(m => {
+        const con = Math.max(1, Math.round(inps.peakConcurrency * m));
+        const rpm = con * inps.requestsPerSession;
+        const rps = rpm / 60;
+        const reqCap = Math.max(1, Math.ceil(con / containerCapacity));
+        const load = rps * avgServiceTime;
+        let reqQueue = reqCap;
+        for (let c = reqCap; c <= reqCap + 200; c++) {
+          if (c > load) {
+            const wp = erlangC(load, c);
+            const aw = wp * avgServiceTime / (c - load);
+            const depth = rps * aw;
+            if (depth <= inps.queueTarget) { reqQueue = c; break; }
+          }
+        }
+        const needed = Math.max(reqCap, reqQueue);
+        const waitFinal = needed > load ? erlangC(load, needed) * avgServiceTime / (needed - load) : 999;
+        const monthlyInfra = needed * container.hourly_cost * 24 * 30 + inps.extraInfra;
+        const status = needed * containerCapacity >= con && waitFinal < 5 ? 'OK' : (waitFinal < 15 ? 'Tight' : 'Overloaded');
+        return { con, needed, wait: waitFinal, monthlyInfra, status };
+      });
+
+      const tbody = document.getElementById('sensitivityBody');
+      tbody.innerHTML = sensitivities.map(s => {
+        const statusClass = s.status === 'OK' ? 'text-green-400' : (s.status === 'Tight' ? 'text-yellow-400' : 'text-red-400');
+        return `<tr class="border-b border-neutral-800/50">
+          <td class="py-3 pr-4">${fmtInt(s.con)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtInt(s.needed)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${s.wait > 60 ? fmtNum(s.wait / 60) + ' min' : fmtNum(s.wait) + ' s'}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(s.monthlyInfra)}</td>
+          <td class="py-3 pr-4 text-right font-mono ${statusClass}">${s.status}</td>
+        </tr>`;
+      }).join('');
+
+      let verdict = '';
+      if (peakRpm > provider.rpm) {
+        verdict = `⚠️ Peak load (${fmtInt(peakRpm)} RPM) exceeds the provider rate limit (${fmtInt(provider.rpm)} RPM). You will need request shaping, multiple provider keys, or a model router. `;
+      } else {
+        verdict = `Provider rate limit looks OK: peak ${fmtInt(peakRpm)} RPM vs limit ${fmtInt(provider.rpm)} RPM. `;
+      }
+      if (avgWaitFinal < 2) {
+        verdict += `Queueing is healthy (${avgWaitFinal < 0.1 ? 'near-zero' : fmtNum(avgWaitFinal) + ' s'} wait). ${fmtInt(requiredContainers)} ${container.name.split('(')[0].trim()} containers handle the load at ${fmtNum(utilization)}% utilization.`;
+      } else if (avgWaitFinal < 10) {
+        verdict += `Queueing is acceptable (~${fmtNum(avgWaitFinal)} s wait), but monitor closely. Adding one container or switching to a larger size would cut wait time.`;
+      } else {
+        verdict += `Queueing is risky (~${fmtNum(avgWaitFinal)} s wait). Increase container size, add workers, or reduce latency/calls-per-session. Infra is ${(infraCost / totalMonthly * 100).toFixed(1)}% of total monthly cost.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['monthlyRequests','peakConcurrency','requestsPerSession','inputTokens','outputTokens','cachedInputPct','reasoningMultiplier','queueTarget','rateLimitRpm','timeoutS','retryRate','retryMultiplier','extraInfra','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+      document.getElementById('providerSelect').addEventListener('change', compute);
+      document.getElementById('containerSelect').addEventListener('change', compute);
+
+      compute();
+    });
+  </script>
+</Layout>
