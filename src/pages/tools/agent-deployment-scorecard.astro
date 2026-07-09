@@ -2,28 +2,21 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_deployment_scorecard.json';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "AI Agent Deployment Readiness Scorecard | Hermes Dispatch";
 const description = "Score your AI agent's production readiness across architecture, model, privacy, security, reliability, observability, cost, and go-live plan.";
-const launchTypes = data.launch_types;
-const regions = data.regions;
-const sensitivity = data.data_sensitivity;
-const dimensions = data.dimensions;
-const maturity = data.maturity_levels;
-const riskLevels = data.risk_levels;
-const defaults = data.defaults;
 
 const faqs = [
-  { q: "What does the readiness score measure?", a: "It measures how prepared an AI agent is for its target launch type across eight dimensions: architecture, model/provider, data privacy, security, reliability, observability, cost, and go-live planning." },
-  { q: "Is a score of 100 required to launch?", a: "No. Most production launches are safe in the 80-94 'Production ready' band. Scores below 60 should stay internal-only until the top blockers are fixed." },
-  { q: "How is the risk level calculated?", a: "Risk combines your launch type, data sensitivity, expected traffic, SLA target, and latency target. Higher-stakes launches with sensitive data and aggressive SLAs raise the risk floor." },
-  { q: "What if my agent only uses public web data?", a: "Choose 'Public web / no PII' for data sensitivity. The scorecard still checks security, reliability, and cost controls, but the privacy bar is lower." },
-  { q: "How do I share this scorecard with my team?", a: "Save or screenshot the results. Each checked item and the final maturity level give you a common language for go/no-go decisions." }
+  { q: "What score is considered production-ready?", a: "A score of 90+ with zero open P0 items is our Production ready threshold. 75–89 means Launch candidate, 60–74 Needs hardening, and below 60 is High risk or Not ready." },
+  { q: "What is a P0 item?", a: "P0 items are blocking gaps that can cause safety, compliance, or outage issues. The scorecard counts how many P0 checklist items are still unchecked and surfaces them as open P0s." },
+  { q: "Does this replace a security or compliance audit?", a: "No. This scorecard is a directional self-assessment. Regulated or high-risk deployments still need legal, security, and compliance review before launch." },
+  { q: "Which dimensions matter most?", a: "Architecture, model fit, privacy/security, reliability, and cost are usually the highest-leverage dimensions. Observability and go-live planning become critical once you move beyond internal prototypes." },
+  { q: "How do I improve a low score quickly?", a: "Start by closing every open P0, then harden the dimension with the lowest progress. Use the cross-linked cost and security calculators to budget the work." }
 ];
 
-const maxScore = dimensions.reduce((sum, d) => sum + d.weight, 0);
-const totalQuestions = dimensions.reduce((sum, d) => sum + d.questions.length, 0);
+const dimensions = data.dimensions;
+const scenarios = data.scenarios;
+const levels = data.levels;
 ---
 
 <Layout title={title} description={description}>
@@ -39,100 +32,105 @@ const totalQuestions = dimensions.reduce((sum, d) => sum + d.questions.length, 0
     <div class="text-center mb-12">
       <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">✅</div>
       <h1 class="display-heading mb-4">AI Agent Deployment Readiness Scorecard</h1>
-      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Score your AI agent's production readiness across architecture, model, privacy, security, reliability, observability, cost, and go-live plan.</p>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Score production readiness across 8 dimensions and get a launch verdict with open P0 tracking.</p>
     </div>
 
-    <!-- Context inputs -->
-    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
-      <h2 class="text-xl font-bold mb-6 text-brand-gold">Launch context</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Launch type</span>
-          <select id="launchType" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
-            {launchTypes.map(l => <option value={l.slug} selected={l.slug === defaults.launch_type}>{l.name}</option>)}
-          </select>
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Primary region</span>
-          <select id="region" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
-            {regions.map(r => <option value={r.slug} selected={r.slug === defaults.region}>{r.name}</option>)}
-          </select>
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Data sensitivity</span>
-          <select id="dataSensitivity" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
-            {sensitivity.map(s => <option value={s.slug} selected={s.slug === defaults.data_sensitivity}>{s.name}</option>)}
-          </select>
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Expected requests / month</span>
-          <input id="monthlyRequests" type="number" min="0" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Target SLA (%)</span>
-          <input id="slaTarget" type="number" min="90" max="99.9999" step="0.01" value={defaults.sla_target} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Target P95 latency (ms)</span>
-          <input id="latencyTarget" type="number" min="10" step="10" value={defaults.latency_p95_ms} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
-        </label>
-      </div>
-      <p class="text-neutral-500 text-sm mt-4">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
-    </section>
-
-    <!-- Summary -->
-    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center md:col-span-2">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Readiness score</p>
-        <p id="scoreDisplay" class="text-4xl font-bold text-brand-gold">—</p>
-        <p id="maturityDisplay" class="text-lg font-medium text-white mt-1">—</p>
-      </div>
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Risk level</p>
-        <p id="riskDisplay" class="text-2xl font-bold text-brand-gold">—</p>
-      </div>
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Blockers</p>
-        <p id="blockerDisplay" class="text-2xl font-bold text-brand-gold">—</p>
-      </div>
-    </section>
-
-    <!-- Dimension breakdown -->
-    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
-      <h2 class="text-xl font-bold mb-6 text-brand-gold">Readiness checklist</h2>
-      <div class="space-y-8">
-        {dimensions.map(d => (
-          <div data-dimension={d.slug} data-weight={d.weight}>
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="font-semibold text-white">{d.name}</h3>
-              <span class="text-xs text-neutral-500 uppercase">Weight {d.weight}% • <span class="dim-score">0</span>/{d.weight}</span>
-            </div>
-            <div class="grid sm:grid-cols-2 gap-3">
-              {d.questions.map(q => (
-                <label class="flex items-start gap-3 p-3 rounded-lg border border-neutral-800 hover:border-neutral-600 cursor-pointer transition-colors">
-                  <input type="checkbox" data-points={q.points} data-id={q.id} class="mt-1 h-4 w-4 accent-brand-gold rounded" />
-                  <span class="text-sm text-neutral-300 leading-relaxed">{q.text}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Start from a scenario</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors text-left" data-scenario={JSON.stringify(s)}>
+            <span class="font-medium">{s.name}</span>
+            <span class="block text-xs text-neutral-500 font-normal">{s.description}</span>
+          </button>
         ))}
       </div>
     </section>
 
-    <!-- Action plan -->
+    <!-- Score summary -->
+    <section id="scoreSummary" class="glass-card rounded-2xl p-8 mb-10 border-2 border-brand-gold/40 glow-gold">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div class="text-center md:text-left">
+          <p class="text-sm text-neutral-500 uppercase tracking-wide mb-1">Readiness score</p>
+          <div class="flex items-end justify-center md:justify-start gap-2">
+            <span id="scoreValue" class="text-6xl font-extrabold text-brand-gold">0</span>
+            <span class="text-2xl text-neutral-400">/ 100</span>
+          </div>
+        </div>
+        <div class="text-center">
+          <p class="text-sm text-neutral-500 uppercase tracking-wide mb-2">Maturity</p>
+          <span id="maturityBadge" class="status-badge bg-red-500/15 text-red-400 border-red-500/30">Not ready</span>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-sm text-neutral-500 uppercase tracking-wide mb-2">Open P0s</p>
+          <span id="p0Count" class="text-3xl font-bold text-white">0</span>
+        </div>
+      </div>
+      <div class="mt-6">
+        <div class="w-full bg-neutral-800 rounded-full h-3 overflow-hidden">
+          <div id="scoreBar" class="h-full bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500 transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <p id="verdictText" class="text-lg text-neutral-200 mt-4">Check the items below to see your readiness score.</p>
+      </div>
+    </section>
+
+    <!-- Dimension checklists -->
     <section class="grid md:grid-cols-2 gap-6 mb-12">
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-        <h2 class="text-xl font-bold mb-4 text-brand-gold">Top blockers</h2>
-        <ul id="blockerList" class="space-y-2 text-sm text-neutral-300">
-          <li class="text-neutral-500">Check readiness items above to see prioritized blockers.</li>
-        </ul>
-      </div>
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-        <h2 class="text-xl font-bold mb-4 text-brand-gold">Launch verdict</h2>
-        <p id="verdictText" class="text-neutral-300">—</p>
-        <div id="frameworkTags" class="flex flex-wrap gap-2 mt-4"></div>
-      </div>
+      {dimensions.map(dim => (
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20" data-dimension={dim.id}>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-2xl">{dim.icon}</span>
+            <div>
+              <h2 class="text-lg font-bold text-white">{dim.name}</h2>
+              <p class="text-xs text-neutral-500 dim-progress">0 / {dim.items.length} checks</p>
+            </div>
+            <span class="ml-auto text-sm font-bold dim-score text-brand-gold">0%</span>
+          </div>
+          <div class="space-y-3">
+            {dim.items.map(item => (
+              <label class="flex items-start gap-3 p-3 rounded-lg bg-neutral-900/60 border border-neutral-800 hover:border-neutral-700 cursor-pointer transition-colors">
+                <input type="checkbox" class="check-item mt-1 w-4 h-4 rounded border-neutral-600 bg-neutral-800 text-brand-gold focus:ring-brand-gold" data-id={item.id} data-weight={item.weight} data-p0={item.p0 ? '1' : '0'} data-dimension={dim.id} />
+                <div class="flex-1">
+                  <p class="text-sm text-neutral-200 leading-snug">{item.text}</p>
+                  {item.p0 && <span class="inline-block mt-1 text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">P0</span>}
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <!-- Per-dimension summary table -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Dimension breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Dimension</th>
+            <th class="py-3 pr-4">Progress</th>
+            <th class="py-3 pr-4">Score</th>
+            <th class="py-3 pr-4">Open P0s</th>
+            <th class="py-3 pr-4">Status</th>
+          </tr>
+        </thead>
+        <tbody id="dimensionTableBody" class="text-neutral-200">
+          {dimensions.map(dim => (
+            <tr class="border-b border-neutral-800/50" data-dim-row={dim.id}>
+              <td class="py-3 pr-4 font-medium text-white">{dim.icon} {dim.name}</td>
+              <td class="py-3 pr-4">
+                <div class="w-24 bg-neutral-800 rounded-full h-2">
+                  <div class="dim-row-bar h-2 rounded-full bg-brand-gold transition-all" style="width: 0%"></div>
+                </div>
+              </td>
+              <td class="py-3 pr-4 dim-row-score">0%</td>
+              <td class="py-3 pr-4 dim-row-p0">0</td>
+              <td class="py-3 pr-4"><span class="dim-row-status status-badge bg-red-500/15 text-red-400 border-red-500/30">Not ready</span></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </section>
 
     <!-- FAQ -->
@@ -151,169 +149,116 @@ const totalQuestions = dimensions.reduce((sum, d) => sum + d.questions.length, 0
     <!-- Cross-links -->
     <div class="flex flex-wrap gap-3 mb-8">
       <a href="/tools/ai-agent-compliance-checker/" class="btn-primary text-sm">Compliance Checker →</a>
-      <a href="/tools/agent-sla-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">SLA / Uptime Calc →</a>
-      <a href="/tools/agent-latency-budget-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Latency Budget Calc →</a>
+      <a href="/tools/agent-redteam-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Red Team Cost Calc →</a>
       <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost Calc →</a>
-      <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+      <a href="/tools/agent-outage-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Outage Cost Calc →</a>
     </div>
 
     <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
   </main>
 
-  <script is:inline define:vars={{ dims: JSON.stringify(dimensions), maturity: JSON.stringify(maturity), riskLevels: JSON.stringify(riskLevels), launchTypes: JSON.stringify(launchTypes), regions: JSON.stringify(regions), sensitivity: JSON.stringify(sensitivity), maxScore: maxScore }}>
-    const dimensionData = JSON.parse(dims);
-    const maturityData = JSON.parse(maturity);
-    const riskData = JSON.parse(riskLevels);
-    const launchTypeData = JSON.parse(launchTypes);
-    const regionData = JSON.parse(regions);
-    const sensitivityData = JSON.parse(sensitivity);
-    const totalMax = maxScore;
+  <script is:inline define:vars={{ dimensionsJson: JSON.stringify(dimensions), levelsJson: JSON.stringify(levels) }}>
+    const dimensions = JSON.parse(dimensionsJson);
+    const levels = JSON.parse(levelsJson);
 
-    function getContext() {
+    function getLevel(score) {
+      return levels.slice().sort((a, b) => b.min - a.min).find(l => score >= l.min) || levels[levels.length - 1];
+    }
+
+    function colorClass(color) {
       return {
-        launchType: document.getElementById('launchType').value,
-        region: document.getElementById('region').value,
-        dataSensitivity: document.getElementById('dataSensitivity').value,
-        monthlyRequests: Math.max(0, parseFloat(document.getElementById('monthlyRequests').value) || 0),
-        slaTarget: Math.min(99.9999, Math.max(90, parseFloat(document.getElementById('slaTarget').value) || 99.9)),
-        latencyP95: Math.max(10, parseFloat(document.getElementById('latencyTarget').value) || 2000)
-      };
+        emerald: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+        amber: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+        orange: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
+        red: 'bg-red-500/15 text-red-400 border-red-500/30'
+      }[color] || 'bg-neutral-800 text-neutral-300 border-neutral-700';
     }
 
-    function checkedQuestions() {
-      const inputs = Array.from(document.querySelectorAll('input[type="checkbox"][data-points]'));
-      return inputs.filter(i => i.checked).map(i => ({
-        id: i.dataset.id,
-        points: parseFloat(i.dataset.points),
-        text: i.nextElementSibling.textContent.trim()
-      }));
-    }
+    function compute() {
+      let totalWeight = 0;
+      let checkedWeight = 0;
+      let openP0 = 0;
 
-    function computeDimensionScores() {
-      const scores = {};
-      dimensionData.forEach(d => {
-        const checked = Array.from(document.querySelectorAll(`[data-dimension="${d.slug}"] input[data-points]:checked`));
-        const earned = checked.reduce((sum, el) => sum + parseFloat(el.dataset.points), 0);
-        const max = d.questions.reduce((sum, q) => sum + q.points, 0);
-        const weight = d.weight;
-        const weighted = max > 0 ? (earned / max) * weight : 0;
-        scores[d.slug] = { earned, max, weight, weighted };
-      });
-      return scores;
-    }
-
-    function computeRisk(ctx) {
-      let risk = 0;
-      const lt = launchTypeData.find(l => l.slug === ctx.launchType);
-      if (lt) {
-        if (lt.slug === 'production') risk += 4;
-        else if (lt.slug === 'beta') risk += 2;
-        else risk += 1;
-      }
-      const sens = sensitivityData.find(s => s.slug === ctx.dataSensitivity);
-      risk += (sens ? sens.risk : 2);
-      if (ctx.monthlyRequests > 1000000) risk += 3;
-      else if (ctx.monthlyRequests > 100000) risk += 2;
-      else if (ctx.monthlyRequests > 10000) risk += 1;
-      if (ctx.slaTarget >= 99.99) risk += 3;
-      else if (ctx.slaTarget >= 99.9) risk += 1;
-      if (ctx.latencyP95 < 500) risk += 2;
-      else if (ctx.latencyP95 < 1500) risk += 1;
-      return risk;
-    }
-
-    function update() {
-      const ctx = getContext();
-      const scores = computeDimensionScores();
-      const totalWeighted = Object.values(scores).reduce((sum, s) => sum + s.weighted, 0);
-      const percentage = Math.round((totalWeighted / totalMax) * 100);
-      const maturityLevel = maturityData.find(m => percentage >= m.min && percentage <= m.max) || maturityData[0];
-      const riskScore = computeRisk(ctx);
-      const riskLevel = riskData.find(r => riskScore <= r.max) || riskData[riskData.length - 1];
-
-      document.getElementById('scoreDisplay').textContent = percentage + '%';
-      document.getElementById('maturityDisplay').textContent = maturityLevel.name;
-      document.getElementById('riskDisplay').textContent = riskLevel.name;
-
-      const colorClass = { red: 'text-red-400', orange: 'text-orange-400', yellow: 'text-yellow-400', green: 'text-green-400', cyan: 'text-cyan-400' }[maturityLevel.color] || 'text-brand-gold';
-      document.getElementById('maturityDisplay').className = 'text-lg font-medium mt-1 ' + colorClass;
-
-      // Update per-dimension scores
-      Object.entries(scores).forEach(([slug, s]) => {
-        const el = document.querySelector(`[data-dimension="${slug}"] .dim-score`);
-        if (el) el.textContent = Math.round(s.weighted);
+      const dimStats = {};
+      dimensions.forEach(dim => {
+        dimStats[dim.id] = { total: dim.items.reduce((s, i) => s + i.weight, 0), checked: 0, p0: 0, items: dim.items.length, checkedItems: 0 };
       });
 
-      // Blockers: unchecked questions sorted by dimension weight descending
-      const unchecked = Array.from(document.querySelectorAll('input[type="checkbox"][data-points]:not(:checked)'));
-      const sortedUnchecked = unchecked.map(el => {
-        const dimSlug = el.closest('[data-dimension]').dataset.dimension;
-        const dim = dimensionData.find(d => d.slug === dimSlug);
-        return { el, dim, points: parseFloat(el.dataset.points) };
-      }).sort((a, b) => {
-        if (b.dim.weight !== a.dim.weight) return b.dim.weight - a.dim.weight;
-        return b.points - a.points;
+      document.querySelectorAll('.check-item').forEach(cb => {
+        const id = cb.dataset.id;
+        const weight = parseInt(cb.dataset.weight, 10) || 1;
+        const isP0 = cb.dataset.p0 === '1';
+        const dimId = cb.dataset.dimension;
+        totalWeight += weight;
+        if (cb.checked) {
+          checkedWeight += weight;
+          dimStats[dimId].checked += weight;
+          dimStats[dimId].checkedItems += 1;
+        } else if (isP0) {
+          openP0 += 1;
+          dimStats[dimId].p0 += 1;
+        }
       });
 
-      const topBlockers = sortedUnchecked.slice(0, 5);
-      const blockerList = document.getElementById('blockerList');
-      blockerList.innerHTML = '';
-      if (topBlockers.length === 0) {
-        blockerList.innerHTML = '<li class="text-green-400">No major blockers — all readiness checks are complete.</li>';
+      const score = totalWeight ? Math.round((checkedWeight / totalWeight) * 100) : 0;
+      const level = getLevel(score);
+
+      // Update summary
+      document.getElementById('scoreValue').textContent = score;
+      document.getElementById('scoreBar').style.width = score + '%';
+      const maturityBadge = document.getElementById('maturityBadge');
+      maturityBadge.textContent = level.label;
+      maturityBadge.className = 'status-badge ' + colorClass(level.color);
+      document.getElementById('p0Count').textContent = openP0;
+      const verdictText = document.getElementById('verdictText');
+      if (openP0 > 0) {
+        verdictText.textContent = `${level.summary} You have ${openP0} open P0 item${openP0 === 1 ? '' : 's'} to close before launch.`;
       } else {
-        topBlockers.forEach(b => {
-          const li = document.createElement('li');
-          li.innerHTML = `<span class="text-neutral-500">[${b.dim.name}]</span> ${b.el.nextElementSibling.textContent.trim()}`;
-          blockerList.appendChild(li);
+        verdictText.textContent = level.summary;
+      }
+
+      // Update dimension cards
+      dimensions.forEach(dim => {
+        const stats = dimStats[dim.id];
+        const dimScore = stats.total ? Math.round((stats.checked / stats.total) * 100) : 0;
+        const card = document.querySelector(`[data-dimension="${dim.id}"]`);
+        if (card) {
+          card.querySelector('.dim-score').textContent = dimScore + '%';
+          card.querySelector('.dim-progress').textContent = `${stats.checkedItems} / ${stats.items} checks`;
+        }
+        const row = document.querySelector(`tr[data-dim-row="${dim.id}"]`);
+        if (row) {
+          row.querySelector('.dim-row-bar').style.width = dimScore + '%';
+          row.querySelector('.dim-row-score').textContent = dimScore + '%';
+          row.querySelector('.dim-row-p0').textContent = stats.p0;
+          const rowStatus = row.querySelector('.dim-row-status');
+          const rowLevel = getLevel(dimScore);
+          rowStatus.textContent = rowLevel.label;
+          rowStatus.className = 'dim-row-status status-badge ' + colorClass(rowLevel.color);
+        }
+      });
+    }
+
+    function setScenario(checks) {
+      document.querySelectorAll('.check-item').forEach(cb => {
+        cb.checked = checks.includes(cb.dataset.id);
+      });
+      compute();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setScenario(s.checks || []);
         });
-      }
-      document.getElementById('blockerDisplay').textContent = topBlockers.length;
-
-      // Verdict
-      let verdict = '';
-      if (maturityLevel.name === 'Enterprise ready') {
-        verdict = 'Strong launch posture. Continue monitoring and schedule regular readiness reviews.';
-      } else if (maturityLevel.name === 'Production ready') {
-        verdict = 'Ready for public or paid launch with normal operational oversight.';
-      } else if (maturityLevel.name === 'Closed beta ready') {
-        verdict = 'Safe for a limited beta. Resolve the listed blockers before expanding.';
-      } else if (maturityLevel.name === 'Internal prototype') {
-        verdict = 'Keep this internal-only until the top blockers are fixed.';
-      } else {
-        verdict = 'Not launch-ready. Treat as an experiment and rebuild the core plan before any real users or data.';
-      }
-      if (riskLevel.name === 'High' || riskLevel.name === 'Critical') {
-        verdict += ' <strong class="text-red-400">Elevated risk level — add legal/security review before launch.</strong>';
-      }
-      document.getElementById('verdictText').innerHTML = verdict;
-
-      // Framework tags
-      const region = regionData.find(r => r.slug === ctx.region);
-      const tags = document.getElementById('frameworkTags');
-      tags.innerHTML = '';
-      (region ? region.frameworks : []).forEach(fw => {
-        const span = document.createElement('span');
-        span.className = 'text-xs bg-neutral-800 text-neutral-300 px-2 py-1 rounded';
-        span.textContent = fw;
-        tags.appendChild(span);
       });
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('input, select').forEach(el => el.addEventListener('change', update));
-      update();
+      document.querySelectorAll('.check-item').forEach(cb => {
+        cb.addEventListener('change', compute);
+      });
+
+      compute();
     });
   </script>
-
-  
-
-  
-
-  <AgentCodeBlock
-    toolName="Agent Deployment Scorecard"
-    toolPath="/tools/agent-deployment-scorecard/"
-    description="Copy-paste Hermes Agent script for agent deployment scorecard."
-    scriptPath="/hermes-tools/agent_deployment_scorecard.py"
-    locked={false}
-  />
 </Layout>

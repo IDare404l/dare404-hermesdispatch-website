@@ -794,4 +794,12 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Audience: AI agent builders, marketers, and e-commerce operators budgeting generative image pipelines, product-shot workflows, and creative-variant factories.
 ||- Cross-links: AI Agent Multi-Modal Cost Calculator, AI Agent Video Generation Cost Calculator, Multi-Step Workflow Cost Calculator.
 
+## AI Agent Deployment Readiness Scorecard
+- URL: https://hermesdispatch.dev/tools/agent-deployment-scorecard/
+- Description: Score an AI agent's production readiness across architecture, model, privacy, security, reliability, observability, cost, and go-live plan.
+- Inputs: checklist items across 8 readiness dimensions, scenario preset (MVP prototype, internal tool, customer-facing agent, regulated industry).
+- Outputs: readiness score (0-100), maturity label, open P0 count, per-dimension progress, launch verdict.
+- Audience: AI agent builders, product teams, and operators preparing an agent for production launch.
+- Cross-links: AI Agent Compliance Checker, Red Team Cost Calculator, Observability Cost Calculator, Outage Cost Calculator.
+
 ## Hub Pages
