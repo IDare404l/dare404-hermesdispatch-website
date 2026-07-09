@@ -1,0 +1,301 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_reasoning_cost.json';
+
+const title = "AI Agent Reasoning & Chain-of-Thought Cost Calculator | Hermes Dispatch";
+const description = "Estimate the hidden cost of reasoning models and chain-of-thought tokens for AI agents. Compare OpenAI o1/o3-mini, DeepSeek-R1, Gemini 2.5 Flash Thinking, and Claude 3.7 Sonnet Extended Thinking.";
+const providers = data.providers;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What are hidden reasoning or chain-of-thought tokens?", a: "Reasoning models like OpenAI o1, o3-mini, DeepSeek-R1, and Claude 3.7 Sonnet Extended Thinking generate internal scratchpad tokens before returning the final answer. Providers usually bill these hidden tokens as output, so the cost of a 200-token final answer can be 10–50x higher than it looks." },
+  { q: "How does the reasoning multiplier work?", a: "The reasoning multiplier converts your expected visible output into estimated hidden CoT output. If you set 1,000 output tokens and a 5x multiplier, the calculator bills 5,000 reasoning tokens at the model's output rate plus 1,000 final-output tokens. You can also enter an explicit reasoning token count to override the multiplier." },
+  { q: "When is a reasoning model worth the premium?", a: "Reasoning models pay off when accuracy, code correctness, or multi-step logic directly impacts revenue or risk. For simple classification, summarization, or retrieval tasks, a standard LLM is usually cheaper and faster. The calculator shows the premium versus a standard baseline so you can decide." },
+  { q: "Does this include cached input discounts?", a: "Yes. Enter your cache-hit percentage and the calculator applies each provider's cached-input rate to that portion. Reasoning models from OpenAI and DeepSeek currently offer steep cached-input discounts." },
+  { q: "How accurate are these estimates?", a: "They are directional. Reasoning token counts vary by prompt, by problem difficulty, and by model temperature/settings. Use the explicit reasoning-token input once you have production traces. Last updated: " + data.last_updated + "." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Reasoning & Chain-of-Thought Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-reasoning-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧠</div>
+      <h1 class="display-heading mb-4">AI Agent Reasoning & Chain-of-Thought Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the hidden cost of reasoning models and chain-of-thought tokens. Compare OpenAI o1/o3-mini, DeepSeek-R1, Gemini 2.5 Flash Thinking, and Claude 3.7 Sonnet Extended Thinking.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests / month</span>
+          <input id="monthlyRequests" type="number" min="0" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Final output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reasoning multiplier</span>
+          <input id="reasoningMultiplier" type="number" min="0" step="0.1" value={providers.find(p => p.slug === defaults.provider)?.reasoning_multiplier || 5} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Or explicit reasoning tokens / request</span>
+          <input id="reasoningTokens" type="number" min="0" value={defaults.reasoning_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input %</span>
+          <input id="cacheHit" type="number" min="0" max="100" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block lg:col-span-3">
+          <span class="text-neutral-400 text-sm">Primary provider</span>
+          <select id="providerSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.filter(p => p.type === 'reasoning').map(p => <option value={p.slug} selected={p.slug === defaults.provider}>{p.name} — ${p.input_per_1m.toFixed(2)} / ${p.output_per_1m.toFixed(2)} per 1M tokens</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Reasoning-token counts are hidden; use the explicit field once you have traces. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly reasoning cost</p>
+        <p id="reasoningCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="totalCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Premium vs standard</p>
+        <p id="premiumPct" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected {defaults.projection_months}-month cost</p>
+        <p id="periodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison for this workload</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider / Model</th>
+            <th class="py-3 pr-4">Type</th>
+            <th class="py-3 pr-4 text-right">Monthly cost</th>
+            <th class="py-3 pr-4 text-right">Cost per 1k requests</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {providers.map(p => (
+            <tr class="border-b border-neutral-800/50" data-provider={p.slug}>
+              <td class="py-3 pr-4">
+                <div class="font-medium text-white">{p.name}</div>
+                <div class="text-xs text-neutral-500">{p.model}</div>
+              </td>
+              <td class="py-3 pr-4">
+                <span class={`text-xs px-2 py-0.5 rounded border ${p.type === 'reasoning' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>{p.type === 'reasoning' ? 'Reasoning' : 'Standard'}</span>
+              </td>
+              <td class="py-3 pr-4 text-right font-mono cost-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono per-1k-cell">—</td>
+              <td class="py-3 pr-4 text-sm text-neutral-400">{p.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Cheapest option -->
+    <section id="cheapest" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+      <h2 class="text-lg font-semibold text-cyan-400 mb-2">Cheapest reasoning option</h2>
+      <p id="cheapestLine" class="text-white text-xl font-medium">Enter a workload to see the cheapest reasoning provider.</p>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/context-window-budgeter/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Context Window Budgeter →</a>
+      <a href="/tools/prompt-cache-savings-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Prompt Cache Savings →</a>
+      <a href="/tools/agent-workflow-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Workflow Cost Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), scenarios: JSON.stringify(scenarios) }}>
+    const data = JSON.parse(providers);
+    const scenarioData = JSON.parse(scenarios);
+    const providerMap = Object.fromEntries(data.map(p => [p.slug, p]));
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmt2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    function getInputs() {
+      return {
+        monthlyRequests: Math.max(0, parseFloat(document.getElementById('monthlyRequests').value) || 0),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        reasoningMultiplier: Math.max(0, parseFloat(document.getElementById('reasoningMultiplier').value) || 0),
+        reasoningTokens: Math.max(0, parseFloat(document.getElementById('reasoningTokens').value) || 0),
+        cacheHit: Math.min(100, Math.max(0, parseFloat(document.getElementById('cacheHit').value) || 0)) / 100,
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1),
+        provider: document.getElementById('providerSelect').value
+      };
+    }
+
+    function costForProvider(p, inps) {
+      const requests = inps.monthlyRequests;
+      const inputCost = (requests * inps.inputTokens / 1_000_000) * ((1 - inps.cacheHit) * p.input_per_1m + inps.cacheHit * (p.cached_input_per_1m || p.input_per_1m));
+      const outputCost = (requests * inps.outputTokens / 1_000_000) * p.output_per_1m;
+      const reasoningTok = inps.reasoningTokens > 0 ? inps.reasoningTokens : (inps.outputTokens * p.reasoning_multiplier);
+      const reasoningCost = (requests * reasoningTok / 1_000_000) * p.output_per_1m;
+      return {
+        input: inputCost,
+        output: outputCost,
+        reasoning: reasoningCost,
+        total: inputCost + outputCost + reasoningCost + (requests * (p.request_fee || 0))
+      };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const rows = [];
+      data.forEach(p => {
+        const c = costForProvider(p, inps);
+        rows.push({ slug: p.slug, name: p.name, type: p.type, best_for: p.best_for, total: c.total, per1k: inps.monthlyRequests > 0 ? c.total / (inps.monthlyRequests / 1000) : 0 });
+      });
+      rows.sort((a, b) => a.total - b.total);
+
+      const primary = providerMap[inps.provider];
+      const primaryCost = costForProvider(primary, inps);
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const slug = tr.dataset.provider;
+        const row = rows.find(r => r.slug === slug);
+        const costCell = tr.querySelector('.cost-cell');
+        const per1kCell = tr.querySelector('.per-1k-cell');
+        if (costCell && row) costCell.textContent = fmt(row.total);
+        if (per1kCell && row) per1kCell.textContent = fmt2(row.per1k);
+        if (row && rows[0].slug === slug && row.type === 'reasoning') {
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      const reasoningRows = rows.filter(r => r.type === 'reasoning');
+      const cheapestReasoning = reasoningRows.length ? reasoningRows[0] : null;
+      const cheapestStandard = rows.find(r => r.type === 'standard');
+
+      document.getElementById('reasoningCost').textContent = fmt(primaryCost.reasoning);
+      document.getElementById('totalCost').textContent = fmt(primaryCost.total);
+      const premium = cheapestStandard && cheapestStandard.total > 0 ? ((primaryCost.total - cheapestStandard.total) / cheapestStandard.total) * 100 : 0;
+      document.getElementById('premiumPct').textContent = fmtNum(premium) + '%';
+      document.getElementById('periodCost').textContent = fmt(primaryCost.total * inps.projectionMonths);
+
+      document.getElementById('cheapestLine').textContent = cheapestReasoning
+        ? `${cheapestReasoning.name} — ${fmt(cheapestReasoning.total)} / month (${cheapestReasoning.best_for}).`
+        : 'No reasoning provider selected.';
+
+      let verdict = '';
+      if (cheapestStandard && primaryCost.total > cheapestStandard.total * 1.5) {
+        verdict = `The selected reasoning model costs ${fmtNum(premium)}% more than a standard LLM for this workload. Make sure the accuracy or problem-solving uplift justifies the premium — for example, fewer bug escapes, higher conversion, or reduced human review. If the task is mostly retrieval or summarization, consider a standard model or a smaller reasoning model like o3-mini or Gemini 2.5 Flash Thinking.`;
+      } else if (cheapestStandard && primaryCost.total <= cheapestStandard.total * 1.2) {
+        verdict = `The reasoning premium is modest (${fmtNum(premium)}%) for this workload. If the task benefits from structured thinking, coding, or math, the extra cost is likely justified.`;
+      } else {
+        verdict = `Reasoning cost is comparable to or lower than standard models for this workload, usually due to cached input discounts or a high hidden-token multiplier on the standard comparison. Double-check your reasoning-token estimates with real traces.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_requests !== undefined) document.getElementById('monthlyRequests').value = obj.monthly_requests;
+      if (obj.input_tokens !== undefined) document.getElementById('inputTokens').value = obj.input_tokens;
+      if (obj.output_tokens !== undefined) document.getElementById('outputTokens').value = obj.output_tokens;
+      if (obj.reasoning_tokens !== undefined) document.getElementById('reasoningTokens').value = obj.reasoning_tokens;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cacheHit').value = obj.cached_input_pct;
+      if (obj.provider) {
+        document.getElementById('providerSelect').value = obj.provider;
+        const p = providerMap[obj.provider];
+        if (p) document.getElementById('reasoningMultiplier').value = p.reasoning_multiplier;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      document.getElementById('providerSelect').addEventListener('change', e => {
+        const p = providerMap[e.target.value];
+        if (p) document.getElementById('reasoningMultiplier').value = p.reasoning_multiplier;
+        compute();
+      });
+
+      ['monthlyRequests','inputTokens','outputTokens','reasoningMultiplier','reasoningTokens','cacheHit','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

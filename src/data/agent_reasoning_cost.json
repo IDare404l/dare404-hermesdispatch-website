@@ -1,0 +1,174 @@
+{
+  "last_updated": "2026-07-08",
+  "note": "Reasoning-model prices and token ratios are directional estimates based on published provider pricing and community benchmarks. Hidden chain-of-thought (CoT) token counts vary widely by problem difficulty. Replace assumptions with your own traces for precise forecasts.",
+  "providers": [
+    {
+      "slug": "openai-o1",
+      "name": "OpenAI o1",
+      "model": "o1",
+      "type": "reasoning",
+      "input_per_1m": 15.0,
+      "output_per_1m": 60.0,
+      "cached_input_per_1m": 7.5,
+      "reasoning_multiplier": 8.0,
+      "request_fee": 0.0,
+      "context_window": 200000,
+      "best_for": "Hard STEM, coding, long reasoning",
+      "url": "https://openai.com/api/pricing/"
+    },
+    {
+      "slug": "openai-o3-mini",
+      "name": "OpenAI o3-mini",
+      "model": "o3-mini",
+      "type": "reasoning",
+      "input_per_1m": 1.1,
+      "output_per_1m": 4.4,
+      "cached_input_per_1m": 0.55,
+      "reasoning_multiplier": 6.0,
+      "request_fee": 0.0,
+      "context_window": 200000,
+      "best_for": "Cheap reasoning for coding and math",
+      "url": "https://openai.com/api/pricing/"
+    },
+    {
+      "slug": "deepseek-r1",
+      "name": "DeepSeek-R1",
+      "model": "deepseek-reasoner",
+      "type": "reasoning",
+      "input_per_1m": 0.55,
+      "output_per_1m": 2.19,
+      "cached_input_per_1m": 0.14,
+      "reasoning_multiplier": 7.0,
+      "request_fee": 0.0,
+      "context_window": 64000,
+      "best_for": "Open-weight reasoning at low cost",
+      "url": "https://api-docs.deepseek.com/quick_start/pricing/"
+    },
+    {
+      "slug": "gemini-25-flash-thinking",
+      "name": "Gemini 2.5 Flash Thinking",
+      "model": "gemini-2.5-flash-thinking",
+      "type": "reasoning",
+      "input_per_1m": 0.15,
+      "output_per_1m": 0.6,
+      "cached_input_per_1m": 0.0,
+      "reasoning_multiplier": 5.0,
+      "request_fee": 0.0,
+      "context_window": 1000000,
+      "best_for": "Fast, cheap multimodal reasoning",
+      "url": "https://ai.google.dev/pricing"
+    },
+    {
+      "slug": "claude-37-sonnet-extended",
+      "name": "Claude 3.7 Sonnet Extended Thinking",
+      "model": "claude-3-7-sonnet-20250219",
+      "type": "reasoning",
+      "input_per_1m": 3.0,
+      "output_per_1m": 15.0,
+      "cached_input_per_1m": 3.75,
+      "reasoning_multiplier": 4.0,
+      "request_fee": 0.0,
+      "context_window": 200000,
+      "best_for": "Balanced reasoning with long context",
+      "url": "https://www.anthropic.com/pricing"
+    },
+    {
+      "slug": "gpt-4o",
+      "name": "GPT-4o (standard)",
+      "model": "gpt-4o",
+      "type": "standard",
+      "input_per_1m": 2.5,
+      "output_per_1m": 10.0,
+      "cached_input_per_1m": 1.25,
+      "reasoning_multiplier": 1.0,
+      "request_fee": 0.0,
+      "context_window": 128000,
+      "best_for": "Baseline non-reasoning comparison",
+      "url": "https://openai.com/api/pricing/"
+    },
+    {
+      "slug": "claude-35-sonnet",
+      "name": "Claude 3.5 Sonnet (standard)",
+      "model": "claude-3-5-sonnet-20240620",
+      "type": "standard",
+      "input_per_1m": 3.0,
+      "output_per_1m": 15.0,
+      "cached_input_per_1m": 3.75,
+      "reasoning_multiplier": 1.0,
+      "request_fee": 0.0,
+      "context_window": 200000,
+      "best_for": "Baseline non-reasoning comparison",
+      "url": "https://www.anthropic.com/pricing"
+    },
+    {
+      "slug": "gemini-15-pro",
+      "name": "Gemini 1.5 Pro (standard)",
+      "model": "gemini-1.5-pro",
+      "type": "standard",
+      "input_per_1m": 3.5,
+      "output_per_1m": 10.5,
+      "cached_input_per_1m": 0.0,
+      "reasoning_multiplier": 1.0,
+      "request_fee": 0.0,
+      "context_window": 2000000,
+      "best_for": "Baseline non-reasoning comparison",
+      "url": "https://ai.google.dev/pricing"
+    }
+  ],
+  "defaults": {
+    "monthly_requests": 10000,
+    "input_tokens": 1500,
+    "output_tokens": 800,
+    "reasoning_tokens": 6000,
+    "cached_input_pct": 0,
+    "provider": "openai-o3-mini",
+    "projection_months": 12
+  },
+  "scenarios": [
+    {
+      "name": "Coding agent (SWE-bench style)",
+      "monthly_requests": 5000,
+      "input_tokens": 3000,
+      "output_tokens": 1200,
+      "reasoning_tokens": 15000,
+      "cached_input_pct": 20,
+      "provider": "openai-o3-mini"
+    },
+    {
+      "name": "Math / science tutor",
+      "monthly_requests": 25000,
+      "input_tokens": 800,
+      "output_tokens": 600,
+      "reasoning_tokens": 4000,
+      "cached_input_pct": 10,
+      "provider": "deepseek-r1"
+    },
+    {
+      "name": "Strategic planning assistant",
+      "monthly_requests": 3000,
+      "input_tokens": 2500,
+      "output_tokens": 1500,
+      "reasoning_tokens": 8000,
+      "cached_input_pct": 15,
+      "provider": "claude-37-sonnet-extended"
+    },
+    {
+      "name": "Research synthesis agent",
+      "monthly_requests": 8000,
+      "input_tokens": 4000,
+      "output_tokens": 1000,
+      "reasoning_tokens": 6000,
+      "cached_input_pct": 25,
+      "provider": "gemini-25-flash-thinking"
+    },
+    {
+      "name": "Support escalation triage",
+      "monthly_requests": 20000,
+      "input_tokens": 1200,
+      "output_tokens": 400,
+      "reasoning_tokens": 1500,
+      "cached_input_pct": 30,
+      "provider": "openai-o3-mini"
+    }
+  ]
+}

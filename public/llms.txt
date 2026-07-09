@@ -756,11 +756,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Cross-links: Miner Pivot Calculator, Local LLM Hosting Revenue Estimator, GPU Cloud vs Buy Calculator, Hashrate → Inference Converter.
 
 ## AI Agent Prompt Compression / Token Optimization Cost Calculator
-||- URL: https://hermesdispatch.dev/tools/prompt-compression-cost-calculator/
-||- Description: Estimate how much LLM API spend you can save by compressing prompts with summarization, RAG retrieval, caching, truncation, or prompt rewriting.
-||- Inputs: LLM provider, compression strategy, monthly requests, input/output tokens per request, cached input %, compression ratio, human review rate/cost/minutes, setup hours/rate, projection months.
-||- Outputs: uncompressed monthly cost, compressed monthly cost, monthly savings, savings percentage, compressor cost, review cost, infra cost, setup cost, period net savings, break-even months, cost breakdown table, verdict.
-||- Audience: AI agent builders and operators looking to cut LLM API spend by reducing input tokens.
-||- Cross-links: Prompt Cache Savings Calculator, Context Window Budgeter, API Pricing Comparator, Workflow Cost Calculator.
+||||- URL: https://hermesdispatch.dev/tools/prompt-compression-cost-calculator/
+||||- Description: Estimate how much LLM API spend you can save by compressing prompts with summarization, RAG retrieval, caching, truncation, or prompt rewriting.
+||||- Inputs: LLM provider, compression strategy, monthly requests, input/output tokens per request, cached input %, compression ratio, human review rate/cost/minutes, setup hours/rate, projection months.
+||||- Outputs: uncompressed monthly cost, compressed monthly cost, monthly savings, savings percentage, compressor cost, review cost, infra cost, setup cost, period net savings, break-even months, cost breakdown table, verdict.
+||||- Audience: AI agent builders and operators looking to cut LLM API spend by reducing input tokens.
+||||- Cross-links: Prompt Cache Savings Calculator, Context Window Budgeter, API Pricing Comparator, Workflow Cost Calculator.
+
+## AI Agent Reasoning / Chain-of-Thought Cost Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-reasoning-cost-calculator/
+||- Description: Estimate the hidden cost of reasoning models and chain-of-thought tokens for AI agents. Compare OpenAI o1/o3-mini, DeepSeek-R1, Gemini 2.5 Flash Thinking, and Claude 3.7 Sonnet Extended Thinking.
+||- Inputs: monthly requests, input tokens per request, final output tokens per request, reasoning multiplier or explicit reasoning tokens per request, cached input %, primary provider, projection months.
+||- Outputs: monthly reasoning cost, total monthly cost, premium versus a standard LLM, projected period cost, provider comparison table, cheapest reasoning provider, verdict.
+||- Audience: AI agent builders choosing between reasoning models and standard LLMs for coding, math, planning, research, and support tasks.
+||- Cross-links: Agent API Pricing Comparator, Context Window Budgeter, Prompt Cache Savings Calculator, Workflow Cost Calculator, Agent Output Value Calculator.
 
 ## Hub Pages
