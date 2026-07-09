@@ -740,11 +740,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||||- Cross-links: Human Escalation Cost Calculator, Retention & Churn Cost Calculator, Output Value Calculator, Red Team Cost Calculator.
 
 ## AI Agent E-commerce / Shopping Cost Calculator
-||||- URL: https://hermesdispatch.dev/tools/agent-ecommerce-cost-calculator/
-||||- Description: Estimate monthly cost for AI shopping and e-commerce agents, including product search, recommendations, cart/checkout, fraud checks, returns support, live chat, human review, and setup/maintenance labor.
-||||- Inputs: monthly sessions, messages per session, searches/recommendations/cart attempts/transactions per session, return rate (%), input/output tokens per message, cached input (%), LLM provider, search backend, recommendation engine, cart/checkout integration, fraud/payment tool, returns support provider, live chat platform, human review rate/minutes/hourly cost, setup/maintenance hours and rates, projection months.
-||||- Outputs: cost per session, monthly LLM cost, total monthly cost, projected period cost, cost breakdown by component, LLM provider comparison table, verdict.
-||||- Audience: e-commerce operators and AI agent builders budgeting shopping assistants, concierge bots, and marketplace agents.
-||||- Cross-links: Agent vs Human Hire Calculator, Agent API Pricing Comparator, Agent Memory / RAG Cost Calculator, Agent Output Value Calculator.
+|||||- URL: https://hermesdispatch.dev/tools/agent-ecommerce-cost-calculator/
+|||||- Description: Estimate monthly cost for AI shopping and e-commerce agents, including product search, recommendations, cart/checkout, fraud checks, returns support, live chat, human review, and setup/maintenance labor.
+|||||- Inputs: monthly sessions, messages per session, searches/recommendations/cart attempts/transactions per session, return rate (%), input/output tokens per message, cached input (%), LLM provider, search backend, recommendation engine, cart/checkout integration, fraud/payment tool, returns support provider, live chat platform, human review rate/minutes/hourly cost, setup/maintenance hours and rates, projection months.
+|||||- Outputs: cost per session, monthly LLM cost, total monthly cost, projected period cost, cost breakdown by component, LLM provider comparison table, verdict.
+|||||- Audience: e-commerce operators and AI agent builders budgeting shopping assistants, concierge bots, and marketplace agents.
+|||||- Cross-links: Agent vs Human Hire Calculator, Agent API Pricing Comparator, Agent Memory / RAG Cost Calculator, Agent Output Value Calculator.
+
+## Crypto Staking vs AI Inference Yield Calculator
+|- URL: https://hermesdispatch.dev/tools/crypto-staking-vs-inference-yield/
+|- Description: Compare passive crypto staking APY against active GPU AI inference rental yield for the same capital.
+|- Inputs: capital, staking asset, custom APY, tax rate, GPU model/count, hourly rental rate, hours online per day, utilization %, electricity rate, rental marketplace, maintenance per month, hardware depreciation months, resale value %, projection months.
+|- Outputs: staking net annual yield, inference net annual yield, monthly winner margin, break-even utilization, side-by-side comparison, GPU inference cost breakdown, verdict.
+|- Audience: crypto holders, miners pivoting to AI, and AI hardware owners comparing passive vs active yield.
+|- Cross-links: Miner Pivot Calculator, Local LLM Hosting Revenue Estimator, GPU Cloud vs Buy Calculator, Hashrate → Inference Converter.
 
 ## Hub Pages

@@ -1,0 +1,408 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/crypto_staking_vs_inference_yield.json';
+
+const title = "Crypto Staking vs AI Inference Yield Calculator | Hermes Dispatch";
+const description = "Compare passive crypto staking yield against active GPU AI inference rental yield for the same capital.";
+const stakingAssets = data.staking_assets;
+const gpus = data.gpus;
+const platforms = data.platforms;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does this calculator compare?", a: "It compares two ways to earn from the same starting capital: (1) passive crypto staking rewards, and (2) buying a GPU and renting it out for AI inference on marketplaces like Vast.ai or RunPod." },
+  { q: "Is staking really passive?", a: "Most liquid staking and delegated staking options are close to passive after setup. Solo staking requires validator hardware and monitoring. APYs still fluctuate with network conditions and validator performance." },
+  { q: "What is GPU inference yield?", a: "It is the net annual return from renting GPU compute to AI inference customers after subtracting marketplace fees, electricity, maintenance, hardware depreciation, and taxes." },
+  { q: "How is hardware depreciation handled?", a: "The calculator writes the GPU purchase price down straight-line over the depreciation months and subtracts that monthly cost. Resale value at the end of the period is added back as a recovery credit." },
+  { q: "Which usually wins?", a: "Staking is simpler and more predictable; GPU inference can pay more but depends on utilization, rental rate, and electricity cost. High utilization (>60%) on a 24 GB card often beats staking. Low utilization or expensive power usually favors staking." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Crypto Staking vs AI Inference Yield Calculator" description={description} url="https://hermesdispatch.dev/tools/crypto-staking-vs-inference-yield/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚖️</div>
+      <h1 class="display-heading mb-4">Crypto Staking vs AI Inference Yield Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Compare passive staking rewards against active GPU AI inference rental yield for the same capital.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Capital and assumptions</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Capital to deploy ($)</span>
+          <input id="capital" type="number" min="0" step="100" value={defaults.capital} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Staking asset</span>
+          <select id="stakingAsset" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {stakingAssets.map(a => <option value={a.slug} selected={a.slug === defaults.staking_asset_slug}>{a.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Custom APY (%)</span>
+          <input id="customApy" type="number" min="0" max="100" step="0.1" value={defaults.custom_apy_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tax rate (%)</span>
+          <input id="taxRate" type="number" min="0" max="100" step="1" value={defaults.tax_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">GPU model</span>
+          <select id="gpu" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {gpus.map(g => <option value={g.slug} selected={g.slug === defaults.gpu_slug}>{g.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">GPU count</span>
+          <input id="gpuCount" type="number" min="1" max="64" step="1" value={defaults.gpu_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Hourly rental rate ($)</span>
+          <input id="hourlyRate" type="number" min="0" step="0.05" value={defaults.hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Hours online / day</span>
+          <input id="hoursPerDay" type="number" min="0" max="24" step="0.5" value={defaults.hours_per_day} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Days / month</span>
+          <input id="daysPerMonth" type="number" min="1" max="31" step="1" value={defaults.days_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Utilization (%)</span>
+          <input id="utilization" type="number" min="0" max="100" step="1" value={defaults.utilization_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Electricity rate ($/kWh)</span>
+          <input id="electricityRate" type="number" min="0" step="0.01" value={defaults.electricity_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Rental marketplace</span>
+          <select id="platform" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {platforms.map(p => <option value={p.slug} selected={p.slug === defaults.platform_slug}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance / month ($)</span>
+          <input id="maintenance" type="number" min="0" step="5" value={defaults.maintenance_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Hardware depreciation (months)</span>
+          <input id="depreciationMonths" type="number" min="1" max="120" step="1" value={defaults.hardware_depreciation_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Resale value (% of purchase)</span>
+          <input id="resalePct" type="number" min="0" max="100" step="1" value={defaults.resale_value_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Staking net annual yield</p>
+        <p id="stakingYield" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Inference net annual yield</p>
+        <p id="inferenceYield" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly winner margin</p>
+        <p id="monthlyMargin" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Break-even utilization</p>
+        <p id="breakEvenUtil" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Comparison table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Side-by-side comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[600px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Metric</th>
+              <th class="py-3 pr-4 text-right">Crypto staking</th>
+              <th class="py-3 pr-4 text-right">GPU inference</th>
+            </tr>
+          </thead>
+          <tbody class="text-neutral-200">
+            <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Gross annual return</td><td id="stakingGrossAnnual" class="py-3 pr-4 text-right font-mono">—</td><td id="inferenceGrossAnnual" class="py-3 pr-4 text-right font-mono">—</td></tr>
+            <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Annual costs</td><td id="stakingCosts" class="py-3 pr-4 text-right font-mono">—</td><td id="inferenceCosts" class="py-3 pr-4 text-right font-mono">—</td></tr>
+            <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">After-tax annual net</td><td id="stakingNetAnnual" class="py-3 pr-4 text-right font-mono">—</td><td id="inferenceNetAnnual" class="py-3 pr-4 text-right font-mono">—</td></tr>
+            <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Monthly net income</td><td id="stakingMonthly" class="py-3 pr-4 text-right font-mono">—</td><td id="inferenceMonthly" class="py-3 pr-4 text-right font-mono">—</td></tr>
+            <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Period net (incl. resale)</td><td id="stakingPeriod" class="py-3 pr-4 text-right font-mono">—</td><td id="inferencePeriod" class="py-3 pr-4 text-right font-mono">—</td></tr>
+            <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Net annual yield on capital</td><td id="stakingYieldPct" class="py-3 pr-4 text-right font-mono">—</td><td id="inferenceYieldPct" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Inference cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">GPU inference cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost / credit</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Period</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Gross rental revenue</td><td id="revenueRow" class="py-3 pr-4 text-right font-mono">—</td><td id="revenuePeriodRow" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Marketplace fees</td><td id="feeRow" class="py-3 pr-4 text-right font-mono">—</td><td id="feePeriodRow" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Electricity</td><td id="powerRow" class="py-3 pr-4 text-right font-mono">—</td><td id="powerPeriodRow" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Maintenance</td><td id="maintRow" class="py-3 pr-4 text-right font-mono">—</td><td id="maintPeriodRow" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Hardware depreciation</td><td id="deprecRow" class="py-3 pr-4 text-right font-mono">—</td><td id="deprecPeriodRow" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Resale recovery (end of period)</td><td class="py-3 pr-4 text-right font-mono text-neutral-500">—</td><td id="resaleRow" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Pre-tax net</td><td id="preTaxRow" class="py-3 pr-4 text-right font-mono">—</td><td id="preTaxPeriodRow" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Tax</td><td id="taxRow" class="py-3 pr-4 text-right font-mono">—</td><td id="taxPeriodRow" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr><td class="py-3 pr-4 font-semibold text-brand-gold">After-tax net</td><td id="netRow" class="py-3 pr-4 text-right font-mono font-semibold text-brand-gold">—</td><td id="netPeriodRow" class="py-3 pr-4 text-right font-mono font-semibold text-brand-gold">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/miner-pivot-calculator/" class="btn-primary text-sm">Miner Pivot Calc →</a>
+      <a href="/tools/local-llm-hosting-revenue-estimator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Local LLM Hosting Revenue →</a>
+      <a href="/tools/gpu-cloud-vs-buy-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">GPU Cloud vs Buy →</a>
+      <a href="/tools/hashrate-to-inference-converter/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Hashrate → Inference →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ dataJson: JSON.stringify({ stakingAssets, gpus, platforms, scenarios }) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtPct = n => n.toLocaleString('en-US', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    const { stakingAssets, gpus, platforms, scenarios } = JSON.parse(dataJson);
+
+    function find(arr, key) { return arr.find(x => x.slug === key) || {}; }
+
+    function getInputs() {
+      return {
+        capital: Math.max(0, parseFloat(document.getElementById('capital').value) || 0),
+        stakingAssetSlug: document.getElementById('stakingAsset').value,
+        customApy: Math.max(0, parseFloat(document.getElementById('customApy').value) || 0),
+        taxRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('taxRate').value) || 0)),
+        gpuSlug: document.getElementById('gpu').value,
+        gpuCount: Math.max(1, parseInt(document.getElementById('gpuCount').value) || 1),
+        hourlyRate: Math.max(0, parseFloat(document.getElementById('hourlyRate').value) || 0),
+        hoursPerDay: Math.min(24, Math.max(0, parseFloat(document.getElementById('hoursPerDay').value) || 0)),
+        daysPerMonth: Math.min(31, Math.max(1, parseInt(document.getElementById('daysPerMonth').value) || 30)),
+        utilization: Math.min(100, Math.max(0, parseFloat(document.getElementById('utilization').value) || 0)),
+        electricityRate: Math.max(0, parseFloat(document.getElementById('electricityRate').value) || 0),
+        platformSlug: document.getElementById('platform').value,
+        maintenance: Math.max(0, parseFloat(document.getElementById('maintenance').value) || 0),
+        depreciationMonths: Math.max(1, parseInt(document.getElementById('depreciationMonths').value) || 36),
+        resalePct: Math.min(100, Math.max(0, parseFloat(document.getElementById('resalePct').value) || 0)),
+        projectionMonths: Math.max(1, parseInt(document.getElementById('projectionMonths').value) || 12)
+      };
+    }
+
+    function setInputs(obj) {
+      const ids = {
+        capital: obj.capital,
+        stakingAsset: obj.staking_asset_slug,
+        customApy: obj.custom_apy_pct,
+        taxRate: obj.tax_rate_pct,
+        gpu: obj.gpu_slug,
+        gpuCount: obj.gpu_count,
+        hourlyRate: obj.hourly_rate,
+        hoursPerDay: obj.hours_per_day,
+        daysPerMonth: obj.days_per_month,
+        utilization: obj.utilization_pct,
+        electricityRate: obj.electricity_rate,
+        platform: obj.platform_slug,
+        maintenance: obj.maintenance_per_month,
+        depreciationMonths: obj.hardware_depreciation_months,
+        resalePct: obj.resale_value_pct,
+        projectionMonths: obj.projection_months
+      };
+      for (const [id, val] of Object.entries(ids)) {
+        if (val === undefined) continue;
+        document.getElementById(id).value = val;
+      }
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const asset = find(stakingAssets, inps.stakingAssetSlug);
+      const gpu = find(gpus, inps.gpuSlug);
+      const platform = find(platforms, inps.platformSlug);
+
+      const apy = inps.customApy;
+      const stakingGrossAnnual = inps.capital * (apy / 100);
+      const stakingTax = stakingGrossAnnual * (inps.taxRate / 100);
+      const stakingNetAnnual = stakingGrossAnnual - stakingTax;
+      const stakingNetMonthly = stakingNetAnnual / 12;
+      const stakingPeriod = stakingNetMonthly * inps.projectionMonths;
+
+      const gpuCapital = (gpu.hardware_cost || 0) * inps.gpuCount;
+      const effectiveCapital = inps.capital;
+      // If selected GPU count costs more than capital, clamp display to avoid misleading yield on borrowed money
+      const capitalDisplay = gpuCapital > effectiveCapital ? gpuCapital : effectiveCapital;
+
+      const availableHours = inps.hoursPerDay * inps.daysPerMonth;
+      const rentedHours = availableHours * (inps.utilization / 100) * inps.gpuCount;
+      const grossRevenueMonthly = rentedHours * inps.hourlyRate;
+      const feeMonthly = grossRevenueMonthly * ((platform.fee_pct || 0) / 100);
+      const powerMonthly = (gpu.power_w || 0) * inps.gpuCount * inps.hoursPerDay * inps.daysPerMonth * (inps.electricityRate / 1000);
+      const maintenanceMonthly = inps.maintenance;
+      const depreciationMonthly = gpuCapital / Math.max(1, inps.depreciationMonths);
+      const resaleRecovery = gpuCapital * (inps.resalePct / 100);
+      const preTaxMonthly = grossRevenueMonthly - feeMonthly - powerMonthly - maintenanceMonthly - depreciationMonthly;
+      const taxMonthly = Math.max(0, preTaxMonthly) * (inps.taxRate / 100);
+      const netMonthly = preTaxMonthly - taxMonthly;
+      const periodPreTax = preTaxMonthly * inps.projectionMonths;
+      const periodTax = taxMonthly * inps.projectionMonths;
+      const periodNet = netMonthly * inps.projectionMonths + resaleRecovery;
+      const inferenceNetAnnual = netMonthly * 12;
+      const inferenceGrossAnnual = grossRevenueMonthly * 12;
+      const inferenceCostsAnnual = (feeMonthly + powerMonthly + maintenanceMonthly + depreciationMonthly) * 12;
+
+      const stakingYield = capitalDisplay > 0 ? stakingNetAnnual / capitalDisplay : 0;
+      const inferenceYield = capitalDisplay > 0 ? inferenceNetAnnual / capitalDisplay : 0;
+      const margin = netMonthly - stakingNetMonthly;
+
+      // Break-even utilization: solve for utilization where netMonthly == stakingNetMonthly
+      // netMonthly = (availableHours * u * gpuCount * rate * (1 - fee)) - power - maintenance - depreciation) * (1 - tax)
+      const afterFeeRate = inps.hourlyRate * (1 - (platform.fee_pct || 0) / 100);
+      const fixedCosts = powerMonthly + maintenanceMonthly + depreciationMonthly;
+      const targetPreTax = stakingNetMonthly / (1 - inps.taxRate / 100);
+      const neededRevenue = targetPreTax + fixedCosts;
+      const breakEvenUtil = (afterFeeRate * availableHours * inps.gpuCount) > 0
+        ? Math.max(0, Math.min(100, (neededRevenue / (afterFeeRate * availableHours * inps.gpuCount) * 100)))
+        : 0;
+
+      // Update summary
+      document.getElementById('stakingYield').textContent = fmtPct(stakingYield);
+      document.getElementById('inferenceYield').textContent = fmtPct(inferenceYield);
+      document.getElementById('monthlyMargin').textContent = (margin >= 0 ? '+' : '') + fmtMoney(margin) + '/mo';
+      document.getElementById('breakEvenUtil').textContent = fmtNum(breakEvenUtil) + '%';
+
+      // Comparison table
+      document.getElementById('stakingGrossAnnual').textContent = fmtMoney(stakingGrossAnnual);
+      document.getElementById('inferenceGrossAnnual').textContent = fmtMoney(inferenceGrossAnnual);
+      document.getElementById('stakingCosts').textContent = fmtMoney(stakingTax); // staking only has tax here
+      document.getElementById('inferenceCosts').textContent = fmtMoney(inferenceCostsAnnual);
+      document.getElementById('stakingNetAnnual').textContent = fmtMoney(stakingNetAnnual);
+      document.getElementById('inferenceNetAnnual').textContent = fmtMoney(inferenceNetAnnual);
+      document.getElementById('stakingMonthly').textContent = fmtMoney(stakingNetMonthly);
+      document.getElementById('inferenceMonthly').textContent = fmtMoney(netMonthly);
+      document.getElementById('stakingPeriod').textContent = fmtMoney(stakingPeriod);
+      document.getElementById('inferencePeriod').textContent = fmtMoney(periodNet);
+      document.getElementById('stakingYieldPct').textContent = fmtPct(stakingYield);
+      document.getElementById('inferenceYieldPct').textContent = fmtPct(inferenceYield);
+
+      // Inference breakdown
+      document.getElementById('revenueRow').textContent = fmtMoney(grossRevenueMonthly);
+      document.getElementById('revenuePeriodRow').textContent = fmtMoney(grossRevenueMonthly * inps.projectionMonths);
+      document.getElementById('feeRow').textContent = '-' + fmtMoney(feeMonthly);
+      document.getElementById('feePeriodRow').textContent = '-' + fmtMoney(feeMonthly * inps.projectionMonths);
+      document.getElementById('powerRow').textContent = '-' + fmtMoney(powerMonthly);
+      document.getElementById('powerPeriodRow').textContent = '-' + fmtMoney(powerMonthly * inps.projectionMonths);
+      document.getElementById('maintRow').textContent = '-' + fmtMoney(maintenanceMonthly);
+      document.getElementById('maintPeriodRow').textContent = '-' + fmtMoney(maintenanceMonthly * inps.projectionMonths);
+      document.getElementById('deprecRow').textContent = '-' + fmtMoney(depreciationMonthly);
+      document.getElementById('deprecPeriodRow').textContent = '-' + fmtMoney(depreciationMonthly * inps.projectionMonths);
+      document.getElementById('resaleRow').textContent = '+' + fmtMoney(resaleRecovery);
+      document.getElementById('preTaxRow').textContent = fmtMoney(preTaxMonthly);
+      document.getElementById('preTaxPeriodRow').textContent = fmtMoney(periodPreTax);
+      document.getElementById('taxRow').textContent = '-' + fmtMoney(taxMonthly);
+      document.getElementById('taxPeriodRow').textContent = '-' + fmtMoney(periodTax);
+      document.getElementById('netRow').textContent = fmtMoney(netMonthly);
+      document.getElementById('netPeriodRow').textContent = fmtMoney(periodNet);
+
+      // Verdict
+      let verdict = '';
+      if (inferenceNetAnnual > stakingNetAnnual * 1.1) {
+        verdict = `✅ GPU inference wins. Net annual yield is ${fmtPct(inferenceYield)} vs ${fmtPct(stakingYield)} staking. You need ${fmtNum(breakEvenUtil)}% utilization to match staking; current ${fmtNum(inps.utilization)}% utilization earns ${fmtMoney(netMonthly)}/mo after costs and tax.`;
+      } else if (stakingNetAnnual > inferenceNetAnnual * 1.1) {
+        verdict = `⚡ Staking wins. Net annual yield is ${fmtPct(stakingYield)} vs ${fmtPct(inferenceYield)} for inference. GPU inference would need ${fmtNum(breakEvenUtil)}% utilization just to tie staking, factoring in electricity, fees, depreciation, and tax.`;
+      } else {
+        verdict = `⚖️ Close call. Net annual yields are ${fmtPct(stakingYield)} (staking) and ${fmtPct(inferenceYield)} (inference). The better choice depends on your risk tolerance, electricity cost, and whether you can reliably rent the GPU above ${fmtNum(breakEvenUtil)}% utilization.`;
+      }
+      if (gpuCapital > effectiveCapital) {
+        verdict += ` Note: selected GPUs cost ${fmtMoney(gpuCapital)}, more than the entered capital ${fmtMoney(effectiveCapital)}; yields are shown on the GPU capital basis.`;
+      }
+      if (inps.utilization < breakEvenUtil) {
+        verdict += ` Current utilization is below the staking break-even — raise rental rate or utilization to make inference competitive.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['capital','stakingAsset','customApy','taxRate','gpu','gpuCount','hourlyRate','hoursPerDay','daysPerMonth','utilization','electricityRate','platform','maintenance','depreciationMonths','resalePct','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
