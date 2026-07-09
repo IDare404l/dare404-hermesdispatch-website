@@ -771,12 +771,20 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Audience: AI agent builders choosing between reasoning models and standard LLMs for coding, math, planning, research, and support tasks.
 ||- Cross-links: Agent API Pricing Comparator, Context Window Budgeter, Prompt Cache Savings Calculator, Workflow Cost Calculator, Agent Output Value Calculator.
 
-### AI Agent Video Generation Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-video-generation-cost-calculator/
-|- Description: Estimate monthly cost for AI agents that generate, edit, and deliver video across Runway, Pika, Kling, Luma, Haiper, OpenAI Sora, HeyGen, and local GPU stacks.
-|- Inputs: videos per month, average seconds per video, resolution, generation type (text-to-video, image-to-video, avatar), complexity tier, edits per video, 4K upscale percentage, LLM scripting provider and tokens, scripting requests per video, human review rate/minutes/hourly cost, maintenance hours per month, projection months.
-|- Outputs: cheapest provider, monthly video generation cost, monthly scripting cost, total monthly cost, cost per video, cost per 1,000 videos, provider comparison table, projected period cost, verdict.
-|- Audience: AI agent builders and marketers budgeting generative video pipelines, avatar explainers, and social short-form factories.
-|- Cross-links: AI Agent Multi-Modal Cost Calculator, AI Voice Agent Cost Calculator, Multi-Step Workflow Cost Calculator.
+## AI Agent Video Generation Cost Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-video-generation-cost-calculator/
+||- Description: Estimate monthly cost for AI agents that generate, edit, and deliver video across Runway, Pika, Kling, Luma, Haiper, OpenAI Sora, HeyGen, and local GPU stacks.
+||- Inputs: videos per month, average seconds per video, resolution, generation type, complexity tier, edits per video, 4K upscale percentage, LLM scripting provider and tokens per request, scripting requests per video, human review rate/minutes/hourly cost, maintenance hours per month, projection months.
+||- Outputs: cheapest provider, monthly video generation cost, monthly scripting cost, total monthly cost, cost per video, cost per 1,000 videos, projected period cost, provider comparison table, verdict.
+||- Audience: AI agent builders and marketers budgeting generative video pipelines, avatar explainers, and social short-form factories.
+||- Cross-links: AI Agent Multi-Modal Cost Calculator, AI Voice Agent Cost Calculator, Multi-Step Workflow Cost Calculator.
+
+## AI Agent Image Generation Cost Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-image-generation-cost-calculator/
+||- Description: Estimate monthly cost for AI agents that generate, edit, and deliver images across DALL·E 3, Midjourney, Stable Diffusion API, Leonardo.Ai, Ideogram, Recraft, Adobe Firefly, and self-hosted FLUX.1 / SDXL stacks.
+||- Inputs: final images per month, images per API batch, image size, generation mode, complexity tier, batches per final image, upscale percentage, LLM prompt provider and tokens per request, prompt requests per image, human review rate/minutes/hourly cost, maintenance hours per month, projection months.
+||- Outputs: cheapest provider, monthly image generation cost, monthly prompt cost, total monthly cost, cost per final image, cost per 1,000 final images, projected period cost, provider comparison table, verdict.
+||- Audience: AI agent builders, marketers, and e-commerce operators budgeting generative image pipelines, product-shot workflows, and creative-variant factories.
+||- Cross-links: AI Agent Multi-Modal Cost Calculator, AI Agent Video Generation Cost Calculator, Multi-Step Workflow Cost Calculator.
 
 ## Hub Pages

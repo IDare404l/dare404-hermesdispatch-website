@@ -1,0 +1,368 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_image_generation_cost.json';
+
+const title = "AI Agent Image Generation Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost for AI agents that generate, edit, and deliver images across DALL·E 3, Midjourney, Stable Diffusion API, Leonardo.Ai, Ideogram, Recraft, Adobe Firefly, and local GPU stacks.";
+const providers = data.providers;
+const scenarios = data.scenarios;
+const imageSizes = data.image_sizes;
+const complexityTiers = data.complexity_tiers;
+const genModes = data.generation_modes;
+const llmProviders = data.llm_prompt_providers;
+const faqs = [
+  { q: "Which provider is cheapest for high-volume AI image generation?", a: "Stability AI Stable Image, Leonardo.Ai, Ideogram, and Recraft are usually the cheapest per 1024×1024 image. Midjourney and Adobe Firefly cost more but excel at high-aesthetic or enterprise-safe creative work. Use the editable rates to match current pricing." },
+  { q: "How should I price image batches and retries?", a: "Set 'batches per final image' above 1.0 to model re-rolls, style iterations, and A/B variants. Multiply by 'images per batch' if each API call returns multiple images (e.g., DALL·E 3 returns one, but SDXL can return four)." },
+  { q: "Can I model a local GPU route?", a: "Yes. The Self-hosted FLUX.1 / SDXL option estimates GPU-hours per 1,000 generated images and multiplies by your GPU hourly cost (cloud rental or owned-hardware amortization)." },
+  { q: "What is not included?", a: "Storage, CDN delivery, captioning, A/B testing, downstream tool calls, model fine-tuning, and human creative direction are not included. Pair this with the Agent Multi-Modal Cost Calculator and Agent Workflow Cost Calculator for full TCO." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Image Generation Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-image-generation-cost-calculator/" applicationCategory="FinanceApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl font-bold text-white mb-4">AI Agent Image Generation Cost Calculator</h1>
+      <p class="text-slate-300 text-lg max-w-2xl mx-auto">Estimate monthly spend for AI-generated image agents across DALL·E 3, Midjourney, Stable Diffusion API, Leonardo, Ideogram, Recraft, Firefly, and local GPU stacks. Edit rates to match current pricing.</p>
+    </div>
+
+    <section class="glass-card bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-10">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h2 class="text-xl font-semibold text-white">Workload</h2>
+        <select id="scenarioSelect" class="bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm">
+          <option value="">— Load a scenario preset —</option>
+          {scenarios.map((s, i) => <option value={i}>{s.name}</option>)}
+        </select>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        <label class="block">
+          <span class="text-slate-300 text-sm">Final images / month</span>
+          <input id="images" type="number" min="0" value={data.inputs.images_per_month} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Images per API batch</span>
+          <input id="imagesPerBatch" type="number" min="1" value={data.inputs.average_images_per_batch} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Image size</span>
+          <select id="imageSize" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            {Object.entries(imageSizes).map(([key, r]) => <option value={key}>{r.label}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Generation mode</span>
+          <select id="genMode" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            {Object.entries(genModes).map(([key, g]) => <option value={key}>{g.label}</option>)}
+          </select>
+        </label>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        <label class="block">
+          <span class="text-slate-300 text-sm">Complexity</span>
+          <select id="complexity" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            {Object.entries(complexityTiers).map(([key, c]) => <option value={key}>{c.label}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Batches per final image</span>
+          <input id="batches" type="number" min="1" step="0.05" value={data.inputs.batches_per_image} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Upscaled %</span>
+          <input id="upscalePct" type="number" min="0" max="100" value={data.inputs.upscale_percent} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">LLM prompt provider</span>
+          <select id="llmProvider" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1">
+            {llmProviders.map(p => <option value={p.name}>{p.name}</option>)}
+          </select>
+        </label>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        <label class="block">
+          <span class="text-slate-300 text-sm">Prompt input tokens</span>
+          <input id="promptInput" type="number" min="0" value={data.inputs.prompt_input_tokens} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Prompt output tokens</span>
+          <input id="promptOutput" type="number" min="0" value={data.inputs.prompt_output_tokens} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Prompt requests / image</span>
+          <input id="promptReqs" type="number" min="0" value={data.inputs.prompt_requests_per_image} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Projection months</span>
+          <input id="projectionMonths" type="number" min="1" value={data.inputs.projection_months} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-slate-300 text-sm">Review rate %</span>
+          <input id="reviewRate" type="number" min="0" max="100" value={data.inputs.review_rate_percent} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Review min / image</span>
+          <input id="reviewMin" type="number" min="0" value={data.inputs.review_minutes_per_image} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Reviewer $ / hr</span>
+          <input id="reviewRateHourly" type="number" min="0" value={data.inputs.reviewer_hourly_cost} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-slate-300 text-sm">Maintenance hrs / mo</span>
+          <input id="maintHours" type="number" min="0" value={data.inputs.maintenance_hours_per_month} class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-slate-400 text-sm mt-4">Rates are per 1024×1024 generated image unless noted. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <section class="overflow-x-auto mb-10">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-600 text-slate-300 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider / Model</th>
+            <th class="py-3 pr-4 text-right">1024×1024 / img</th>
+            <th class="py-3 pr-4 text-right">Upscale / img</th>
+            <th class="py-3 pr-4 text-right">GPU hr / 1k img</th>
+            <th class="py-3 pr-4 text-right">Image cost / mo</th>
+            <th class="py-3 pr-4 text-right">Total / mo</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-slate-200">
+          {providers.map((p, idx) => (
+            <tr class="border-b border-slate-700/50" data-idx={idx}>
+              <td class="py-3 pr-4">
+                <div class="font-medium text-white">{p.name}</div>
+                <div class="text-xs text-slate-400">{p.model}</div>
+              </td>
+              <td class="py-3 pr-4 text-right"><input type="number" min="0" step="0.0001" data-field="perImg" value={p.per_image_1024.toFixed(4)} class="rate-input w-24 bg-slate-950 border border-slate-600 rounded px-2 py-1 text-right text-sm" /></td>
+              <td class="py-3 pr-4 text-right"><input type="number" min="0" step="0.0001" data-field="upscaleImg" value={(p.upscale_per_image ?? 0).toFixed(4)} class="rate-input w-24 bg-slate-950 border border-slate-600 rounded px-2 py-1 text-right text-sm" /></td>
+              <td class="py-3 pr-4 text-right"><input type="number" min="0" step="0.01" data-field="gpuHours" value={(p.gpu_hours_per_1000_images ?? 0).toFixed(2)} class="rate-input w-20 bg-slate-950 border border-slate-600 rounded px-2 py-1 text-right text-sm" /></td>
+              <td class="py-3 pr-4 text-right font-mono image-cost-cell font-semibold">—</td>
+              <td class="py-3 pr-4 text-right font-mono total-cost-cell font-semibold">—</td>
+              <td class="py-3 pr-4 text-sm">{p.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section id="summary" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+      <h2 class="text-lg font-semibold text-cyan-400 mb-2">Cheapest option</h2>
+      <p id="cheapestLine" class="text-white text-xl font-medium">Enter a workload to see the cheapest provider.</p>
+      <p id="verdictLine" class="text-slate-400 text-sm mt-2">Image generation and review costs dominate. Compare the per-image breakdown below.</p>
+    </section>
+
+    <section class="grid md:grid-cols-3 gap-6 mb-12">
+      <div class="glass-card bg-slate-900/50 border border-slate-700 rounded-xl p-6">
+        <h3 class="text-slate-300 text-sm uppercase tracking-wide">Monthly image cost</h3>
+        <p id="monthlyImageCost" class="text-2xl font-semibold text-white mt-1">—</p>
+      </div>
+      <div class="glass-card bg-slate-900/50 border border-slate-700 rounded-xl p-6">
+        <h3 class="text-slate-300 text-sm uppercase tracking-wide">Monthly prompt cost</h3>
+        <p id="monthlyPromptCost" class="text-2xl font-semibold text-white mt-1">—</p>
+      </div>
+      <div class="glass-card bg-slate-900/50 border border-slate-700 rounded-xl p-6">
+        <h3 class="text-slate-300 text-sm uppercase tracking-wide">Cost per final image</h3>
+        <p id="costPerImage" class="text-2xl font-semibold text-white mt-1">—</p>
+      </div>
+    </section>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Cost breakdown per 1,000 final images</h2>
+      <div id="breakdown" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <p class="text-slate-400 text-sm">Enter a workload to see the breakdown.</p>
+      </div>
+    </section>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-slate-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="bg-slate-900/50 border border-slate-700 rounded-xl p-6 mb-12">
+      <h2 class="text-xl font-semibold text-white mb-4">Related calculators</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <a href="/tools/agent-multimodal-cost-calculator/" class="block p-4 rounded-lg bg-slate-950 border border-slate-700 hover:border-cyan-400 transition">
+          <h3 class="font-medium text-white">AI Agent Multi-Modal Cost Calculator</h3>
+          <p class="text-slate-400 text-sm mt-1">Image, audio, and video API cost comparison.</p>
+        </a>
+        <a href="/tools/agent-video-generation-cost-calculator/" class="block p-4 rounded-lg bg-slate-950 border border-slate-700 hover:border-cyan-400 transition">
+          <h3 class="font-medium text-white">AI Agent Video Generation Cost Calculator</h3>
+          <p class="text-slate-400 text-sm mt-1">Per-second video generation pricing.</p>
+        </a>
+        <a href="/tools/agent-workflow-cost-calculator/" class="block p-4 rounded-lg bg-slate-950 border border-slate-700 hover:border-cyan-400 transition">
+          <h3 class="font-medium text-white">Multi-Step Workflow Cost Calculator</h3>
+          <p class="text-slate-400 text-sm mt-1">End-to-end agent workflow pricing.</p>
+        </a>
+      </div>
+    </section>
+
+    <p id="note" class="text-slate-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ jsonData: JSON.stringify({ providers, scenarios, imageSizes, complexityTiers, genModes, llmProviders, defaultImageSize: data.inputs.image_size, defaultGenMode: data.inputs.generation_mode, defaultComplexity: data.inputs.complexity, defaultLLM: data.inputs.llm_prompt_provider }) }}>
+    const DATA = JSON.parse(jsonData);
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 });
+    const fmt2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+
+    function getRatesFromRow(tr) {
+      const rates = {};
+      tr.querySelectorAll('.rate-input').forEach(input => {
+        rates[input.dataset.field] = parseFloat(input.value) || 0;
+      });
+      return rates;
+    }
+
+    function getLLMRate(name) {
+      return DATA.llmProviders.find(x => x.name === name) || DATA.llmProviders[0];
+    }
+
+    function compute() {
+      const images = parseFloat(document.getElementById('images').value) || 0;
+      const imagesPerBatch = Math.max(1, parseFloat(document.getElementById('imagesPerBatch').value) || 1);
+      const imageSize = document.getElementById('imageSize').value;
+      const genMode = document.getElementById('genMode').value;
+      const complexity = document.getElementById('complexity').value;
+      const batches = Math.max(1, parseFloat(document.getElementById('batches').value) || 1);
+      const upscalePct = Math.min(100, Math.max(0, parseFloat(document.getElementById('upscalePct').value) || 0)) / 100;
+      const llmName = document.getElementById('llmProvider').value;
+      const promptInput = parseFloat(document.getElementById('promptInput').value) || 0;
+      const promptOutput = parseFloat(document.getElementById('promptOutput').value) || 0;
+      const promptReqs = parseFloat(document.getElementById('promptReqs').value) || 0;
+      const projectionMonths = Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1);
+      const reviewRate = Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewRate').value) || 0)) / 100;
+      const reviewMin = parseFloat(document.getElementById('reviewMin').value) || 0;
+      const reviewHourly = parseFloat(document.getElementById('reviewRateHourly').value) || 0;
+      const maintHours = parseFloat(document.getElementById('maintHours').value) || 0;
+
+      const sizeMul = DATA.imageSizes[imageSize]?.multiplier ?? 1;
+      const modeMul = DATA.genModes[genMode]?.multiplier ?? 1;
+      const compMul = DATA.complexityTiers[complexity]?.multiplier ?? 1;
+      const apiCallsPerFinal = (batches * imagesPerBatch) / imagesPerBatch; // batches = number of API calls per final image
+      // Actually: each API call returns imagesPerBatch images. We need `batches` API calls per final image to pick one winner.
+      const callsPerFinalImage = batches;
+
+      const llm = getLLMRate(llmName);
+      const promptCostPerImage = promptReqs * ((promptInput / 1_000_000 * llm.input_per_1m) + (promptOutput / 1_000_000 * llm.output_per_1m));
+      const monthlyPromptCost = images * promptCostPerImage;
+      const monthlyReviewCost = images * reviewRate * reviewMin / 60 * reviewHourly;
+      const monthlyMaintCost = maintHours * reviewHourly; // reuse reviewer rate as maintenance rate placeholder
+
+      const rows = [];
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const idx = parseInt(tr.dataset.idx, 10);
+        const p = DATA.providers[idx];
+        const rates = getRatesFromRow(tr);
+        let imageCost = 0;
+        if (rates.gpuHours > 0 && p.gpu_hourly_cost) {
+          imageCost = (images / 1000) * rates.gpuHours * p.gpu_hourly_cost;
+        } else {
+          const baseCostPerCall = rates.perImg * sizeMul * modeMul * compMul;
+          const upscaleCostPerCall = rates.upscaleImg * sizeMul * modeMul * compMul;
+          const costPerFinalImage = callsPerFinalImage * (baseCostPerCall + (upscalePct * upscaleCostPerCall));
+          imageCost = images * costPerFinalImage;
+        }
+        const total = imageCost + monthlyPromptCost + monthlyReviewCost + monthlyMaintCost;
+        rows.push({ idx, name: p.name, total, imageCost, promptCost: monthlyPromptCost, reviewCost: monthlyReviewCost, maintCost: monthlyMaintCost, best_for: p.best_for });
+      });
+
+      rows.sort((a, b) => a.total - b.total);
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const row = rows.find(r => r.idx === parseInt(tr.dataset.idx, 10));
+        const iCell = tr.querySelector('.image-cost-cell');
+        const tCell = tr.querySelector('.total-cost-cell');
+        if (row) {
+          if (iCell) iCell.textContent = fmt(row.imageCost);
+          if (tCell) tCell.textContent = fmt(row.total);
+        }
+        tr.classList.toggle('bg-cyan-400/10', rows.length > 0 && rows[0].idx === parseInt(tr.dataset.idx, 10));
+      });
+
+      document.getElementById('cheapestLine').textContent = rows.length
+        ? `${rows[0].name} — ${fmt(rows[0].total)} / month (${rows[0].best_for}).`
+        : 'Enter a workload to see the cheapest provider.';
+
+      const perImage = images > 0 ? rows[0].total / images : 0;
+      document.getElementById('monthlyImageCost').textContent = rows.length ? fmt(rows[0].imageCost) : '—';
+      document.getElementById('monthlyPromptCost').textContent = rows.length ? fmt(rows[0].promptCost) : '—';
+      document.getElementById('costPerImage').textContent = rows.length ? fmt(perImage) : '—';
+
+      const top = rows.slice(0, 3);
+      const div = document.getElementById('breakdown');
+      if (top.length === 0 || images === 0) {
+        div.innerHTML = '<p class="text-slate-400 text-sm">Enter a workload to see the breakdown.</p>';
+      } else {
+        div.innerHTML = top.map(r => {
+          const scale = 1000 / images;
+          return `
+            <div class="p-4 rounded-lg bg-slate-950 border ${r.idx === top[0].idx ? 'border-cyan-400' : 'border-slate-700'}">
+              <h3 class="font-semibold text-white mb-2">${r.name}</h3>
+              <p class="text-sm text-slate-300">Total per 1k final images: <span class="font-mono text-white">${fmt(r.total * scale)}</span></p>
+              <ul class="text-xs text-slate-400 mt-2 space-y-1">
+                <li>Image generation: ${fmt(r.imageCost * scale)}</li>
+                <li>Prompting (LLM): ${fmt(r.promptCost * scale)}</li>
+                <li>Human review: ${fmt(r.reviewCost * scale)}</li>
+                <li>Maintenance: ${fmt(r.maintCost * scale)}</li>
+              </ul>
+              <p class="text-xs text-slate-500 mt-2">${projectionMonths}-month total: <span class="font-mono">${fmt(r.total * projectionMonths)}</span></p>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function setScenario(i) {
+      const s = DATA.scenarios[i];
+      if (!s) return;
+      document.getElementById('images').value = s.images_per_month;
+      document.getElementById('imagesPerBatch').value = s.average_images_per_batch;
+      document.getElementById('imageSize').value = s.image_size;
+      document.getElementById('genMode').value = s.generation_mode;
+      document.getElementById('complexity').value = s.complexity;
+      document.getElementById('batches').value = s.batches_per_image;
+      document.getElementById('upscalePct').value = s.upscale_percent;
+      document.getElementById('llmProvider').value = s.llm_prompt_provider;
+      document.getElementById('promptInput').value = s.prompt_input_tokens;
+      document.getElementById('promptOutput').value = s.prompt_output_tokens;
+      document.getElementById('promptReqs').value = s.prompt_requests_per_image;
+      document.getElementById('reviewRate').value = s.review_rate_percent;
+      document.getElementById('reviewMin').value = s.review_minutes_per_image;
+      document.getElementById('reviewRateHourly').value = s.reviewer_hourly_cost;
+      document.getElementById('maintHours').value = s.maintenance_hours_per_month;
+      document.getElementById('projectionMonths').value = s.projection_months;
+      compute();
+    }
+
+    document.getElementById('scenarioSelect').addEventListener('change', e => setScenario(parseInt(e.target.value, 10)));
+
+    ['images','imagesPerBatch','imageSize','genMode','complexity','batches','upscalePct','llmProvider','promptInput','promptOutput','promptReqs','projectionMonths','reviewRate','reviewMin','reviewRateHourly','maintHours'].forEach(id => {
+      document.getElementById(id).addEventListener('input', compute);
+    });
+    document.querySelectorAll('.rate-input').forEach(input => input.addEventListener('input', compute));
+
+    document.getElementById('imageSize').value = DATA.defaultImageSize;
+    document.getElementById('genMode').value = DATA.defaultGenMode;
+    document.getElementById('complexity').value = DATA.defaultComplexity;
+    document.getElementById('llmProvider').value = DATA.defaultLLM;
+    compute();
+  </script>
+</Layout>
