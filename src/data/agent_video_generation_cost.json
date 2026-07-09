@@ -1,0 +1,201 @@
+{
+  "last_updated": "2026-07-09",
+  "note": "Video-generation pricing is approximate and providers bill by credits, generations, or seconds. Edit rates to match current public pricing. Local/self-hosted cost assumes cloud GPU rental or owned hardware amortized.",
+  "inputs": {
+    "videos_per_month": 500,
+    "average_seconds": 5,
+    "resolution": "720p",
+    "generation_type": "text_to_video",
+    "complexity": "medium",
+    "edits_per_video": 1.2,
+    "upscale_4k_percent": 0,
+    "llm_scripting_provider": "OpenAI GPT-4o-mini",
+    "scripting_input_tokens": 800,
+    "scripting_output_tokens": 200,
+    "scripting_requests_per_video": 1,
+    "review_rate_percent": 10,
+    "review_minutes_per_video": 5,
+    "reviewer_hourly_cost": 40,
+    "setup_hours": 8,
+    "setup_hourly_rate": 75,
+    "maintenance_hours_per_month": 4,
+    "maintenance_hourly_rate": 75,
+    "projection_months": 12
+  },
+  "resolutions": {
+    "480p": { "label": "480p / portrait short", "multiplier": 0.7 },
+    "720p": { "label": "720p / standard landscape", "multiplier": 1.0 },
+    "1080p": { "label": "1080p / HD", "multiplier": 1.6 },
+    "4k": { "label": "4K / ultra", "multiplier": 3.5 }
+  },
+  "complexity_tiers": {
+    "low": { "label": "Low (simple motion, 1 subject)", "multiplier": 0.7 },
+    "medium": { "label": "Medium (camera moves, 2-3 subjects)", "multiplier": 1.0 },
+    "high": { "label": "High (complex scenes, effects)", "multiplier": 1.6 }
+  },
+  "generation_types": {
+    "text_to_video": { "label": "Text-to-video", "multiplier": 1.0 },
+    "image_to_video": { "label": "Image-to-video", "multiplier": 0.85 },
+    "avatar_talking_head": { "label": "Avatar / talking-head", "multiplier": 1.3 }
+  },
+  "providers": [
+    {
+      "name": "Runway Gen-3 Alpha",
+      "model": "Text/Image-to-video",
+      "per_second_720p": 0.016,
+      "upscale_4k_per_second": 0.008,
+      "best_for": "Cinematic motion and editor-friendly generations"
+    },
+    {
+      "name": "Pika 1.5",
+      "model": "Text/Image-to-video",
+      "per_second_720p": 0.014,
+      "upscale_4k_per_second": 0.007,
+      "best_for": "Fast social shorts and meme-style edits"
+    },
+    {
+      "name": "Kling AI",
+      "model": "Text/Image-to-video",
+      "per_second_720p": 0.012,
+      "upscale_4k_per_second": 0.006,
+      "best_for": "Realistic motion and long consistency"
+    },
+    {
+      "name": "Luma Dream Machine",
+      "model": "Text/Image-to-video",
+      "per_second_720p": 0.010,
+      "upscale_4k_per_second": 0.005,
+      "best_for": "Quick prototyping and free-tier scale"
+    },
+    {
+      "name": "Haiper",
+      "model": "Text/Image-to-video",
+      "per_second_720p": 0.009,
+      "upscale_4k_per_second": 0.005,
+      "best_for": "Low-cost experimentation and image animation"
+    },
+    {
+      "name": "OpenAI Sora",
+      "model": "Text-to-video",
+      "per_second_720p": 0.025,
+      "upscale_4k_per_second": 0.012,
+      "best_for": "Premium photorealistic video generation"
+    },
+    {
+      "name": "HeyGen (avatar)",
+      "model": "Avatar / talking-head",
+      "per_second_720p": 0.045,
+      "upscale_4k_per_second": 0.015,
+      "best_for": "Personalized avatar explainer and sales videos"
+    },
+    {
+      "name": "Stable Video Diffusion (local)",
+      "model": "Local GPU (RTX 4090 class)",
+      "per_second_720p": 0.0,
+      "gpu_hours_per_minute": 0.18,
+      "gpu_hourly_cost": 1.50,
+      "upscale_4k_per_second": 0.0,
+      "best_for": "Privacy-first, high-volume, or no API limits"
+    }
+  ],
+  "llm_scripting_providers": [
+    { "name": "OpenAI GPT-4o-mini", "input_per_1m": 0.15, "output_per_1m": 0.60 },
+    { "name": "OpenAI GPT-4o", "input_per_1m": 2.50, "output_per_1m": 10.00 },
+    { "name": "Anthropic Claude 3 Haiku", "input_per_1m": 0.25, "output_per_1m": 1.25 },
+    { "name": "Anthropic Claude 3.5 Sonnet", "input_per_1m": 3.00, "output_per_1m": 15.00 },
+    { "name": "Google Gemini 1.5 Flash", "input_per_1m": 0.075, "output_per_1m": 0.30 },
+    { "name": "Google Gemini 1.5 Pro", "input_per_1m": 1.25, "output_per_1m": 5.00 },
+    { "name": "DeepSeek-V3", "input_per_1m": 0.07, "output_per_1m": 1.10 },
+    { "name": "Local Llama 3.1 70B", "input_per_1m": 0.15, "output_per_1m": 0.60 }
+  ],
+  "scenarios": [
+    {
+      "name": "Marketing clip factory",
+      "videos_per_month": 2000,
+      "average_seconds": 5,
+      "resolution": "720p",
+      "generation_type": "text_to_video",
+      "complexity": "medium",
+      "edits_per_video": 1.2,
+      "upscale_4k_percent": 0,
+      "llm_scripting_provider": "OpenAI GPT-4o-mini",
+      "scripting_input_tokens": 500,
+      "scripting_output_tokens": 150,
+      "scripting_requests_per_video": 1,
+      "review_rate_percent": 5,
+      "review_minutes_per_video": 3,
+      "reviewer_hourly_cost": 40,
+      "setup_hours": 8,
+      "setup_hourly_rate": 75,
+      "maintenance_hours_per_month": 4,
+      "maintenance_hourly_rate": 75,
+      "projection_months": 12
+    },
+    {
+      "name": "Avatar explainer batch",
+      "videos_per_month": 500,
+      "average_seconds": 60,
+      "resolution": "1080p",
+      "generation_type": "avatar_talking_head",
+      "complexity": "low",
+      "edits_per_video": 1.05,
+      "upscale_4k_percent": 0,
+      "llm_scripting_provider": "Anthropic Claude 3 Haiku",
+      "scripting_input_tokens": 1200,
+      "scripting_output_tokens": 400,
+      "scripting_requests_per_video": 1,
+      "review_rate_percent": 15,
+      "review_minutes_per_video": 8,
+      "reviewer_hourly_cost": 50,
+      "setup_hours": 12,
+      "setup_hourly_rate": 75,
+      "maintenance_hours_per_month": 6,
+      "maintenance_hourly_rate": 75,
+      "projection_months": 12
+    },
+    {
+      "name": "Social short-form pipeline",
+      "videos_per_month": 3000,
+      "average_seconds": 3,
+      "resolution": "480p",
+      "generation_type": "image_to_video",
+      "complexity": "low",
+      "edits_per_video": 1.1,
+      "upscale_4k_percent": 0,
+      "llm_scripting_provider": "Google Gemini 1.5 Flash",
+      "scripting_input_tokens": 300,
+      "scripting_output_tokens": 80,
+      "scripting_requests_per_video": 1,
+      "review_rate_percent": 0,
+      "review_minutes_per_video": 0,
+      "reviewer_hourly_cost": 40,
+      "setup_hours": 6,
+      "setup_hourly_rate": 75,
+      "maintenance_hours_per_month": 3,
+      "maintenance_hourly_rate": 75,
+      "projection_months": 12
+    },
+    {
+      "name": "Premium 4K campaign",
+      "videos_per_month": 200,
+      "average_seconds": 10,
+      "resolution": "4k",
+      "generation_type": "text_to_video",
+      "complexity": "high",
+      "edits_per_video": 2.0,
+      "upscale_4k_percent": 100,
+      "llm_scripting_provider": "OpenAI GPT-4o",
+      "scripting_input_tokens": 1500,
+      "scripting_output_tokens": 400,
+      "scripting_requests_per_video": 2,
+      "review_rate_percent": 50,
+      "review_minutes_per_video": 20,
+      "reviewer_hourly_cost": 75,
+      "setup_hours": 20,
+      "setup_hourly_rate": 100,
+      "maintenance_hours_per_month": 10,
+      "maintenance_hourly_rate": 100,
+      "projection_months": 12
+    }
+  ]
+}

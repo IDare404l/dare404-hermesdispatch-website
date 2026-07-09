@@ -366,6 +366,22 @@
       "category": "Agent Operations"
     },
     {
+      "name": "AI Agent Reasoning / Chain-of-Thought Cost Calculator",
+      "page_url": "https://hermesdispatch.dev/tools/agent-reasoning-cost-calculator/",
+      "script_url": "https://hermesdispatch.dev/hermes-tools/agent_reasoning_cost_calculator.py",
+      "toolset": "agents",
+      "file": "agent_reasoning_cost_calculator.py",
+      "category": "Agent Operations"
+    },
+    {
+      "name": "AI Agent Video Generation Cost Calculator",
+      "page_url": "https://hermesdispatch.dev/tools/agent-video-generation-cost-calculator/",
+      "script_url": "https://hermesdispatch.dev/hermes-tools/agent_video_generation_cost_calculator.py",
+      "toolset": "agents",
+      "file": "agent_video_generation_cost_calculator.py",
+      "category": "Agent Operations"
+    },
+    {
       "name": "Startup Runway Calculator",
       "page_url": "https://hermesdispatch.dev/tools/startup-runway-calculator/",
       "script_url": "https://hermesdispatch.dev/hermes-tools/startup_runway_calculator.py",
