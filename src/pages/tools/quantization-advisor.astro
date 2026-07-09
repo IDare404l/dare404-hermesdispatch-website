@@ -1,0 +1,349 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/quantization_advisor.json';
+
+const title = "Local LLM Quantization Advisor | Hermes Dispatch";
+const description = "Pick the right quantization level and format for a local LLM based on your GPU VRAM, quality tolerance, context length, and inference backend.";
+
+const faqs = [
+  { q: "How much VRAM does a quantized model need?", a: "As a rule of thumb, model load VRAM ≈ parameters (billions) × bits-per-parameter ÷ 8. A 7B model at FP16 needs ~14 GB; at Q4_K_M (~4.7 bits) it needs ~4 GB for weights plus context/KV-cache overhead." },
+  { q: "Which quantization gives the best quality?", a: "FP16/BF16 is lossless for inference. Q8_0 and INT8/FP8 are nearly indistinguishable for most tasks. Q4_K_M is the default sweet spot for local chat and RAG. Q3 and Q2 are emergency-only because quality drops noticeably." },
+  { q: "Does context length affect VRAM?", a: "Yes. Longer contexts need more KV-cache memory. The calculator adds a per-1K-token overhead based on the quantization level. Very long contexts (32k–128k) can exceed weight memory on tight GPUs." },
+  { q: "What is the best format for llama.cpp / Ollama?", a: "GGUF. Q4_K_M is the community default, Q5_K_M if you want a bit more quality, Q8_0 if you have the VRAM. Q6_K is a strong middle ground." },
+  { q: "What is the best format for vLLM or TensorRT-LLM serving?", a: "INT8/FP8 for speed with near-FP16 quality, AWQ or GPTQ for 4-bit serving when VRAM is tight. FP8 needs newer NVIDIA/AMD GPUs with FP8 tensor cores." }
+];
+
+const levels = data.quantization_levels;
+const engines = data.engines;
+const priorities = data.priorities;
+const modelSizes = data.model_sizes;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Local LLM Quantization Advisor" description={description} url="https://hermesdispatch.dev/tools/quantization-advisor/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🗜️</div>
+      <h1 class="display-heading mb-4">Local LLM Quantization Advisor</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Pick the right quantization level and format for your model, GPU VRAM, context length, and backend.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Hardware presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Your setup</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Model size (parameters in billions)</span>
+          <select id="paramsSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {modelSizes.map(m => <option value={m.params_b} selected={m.params_b === defaults.params_b}>{m.label}</option>)}
+            <option value="custom">Custom size</option>
+          </select>
+          <input id="customParams" type="number" min="0" step="0.1" value={defaults.params_b} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-2" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Available VRAM (GB)</span>
+          <input id="vramInput" type="number" min="1" step="1" value={defaults.vram_gb} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Typical context length (tokens)</span>
+          <input id="contextInput" type="number" min="1" step="1" value={defaults.context} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Priority</span>
+          <select id="prioritySelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {priorities.map(p => <option value={p.id} selected={p.id === defaults.priority}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block lg:col-span-2">
+          <span class="text-neutral-400 text-sm">Inference backend (optional)</span>
+          <select id="engineSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {engines.map(e => <option value={e.id} selected={e.id === defaults.engine}>{e.name}</option>)}
+          </select>
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Top recommendation -->
+    <section id="topRecommendation" class="hidden mb-10">
+      <div class="glass-card rounded-2xl p-8 border-2 border-brand-gold/40 glow-gold">
+        <div class="flex flex-col md:flex-row md:items-start gap-6">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber flex items-center justify-center text-3xl flex-shrink-0">🏆</div>
+          <div class="flex-1">
+            <h2 class="text-2xl font-bold text-brand-gold mb-2">Top recommendation: <span id="recName"></span></h2>
+            <p id="recBestFor" class="text-neutral-300 mb-4"></p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Weight VRAM</p>
+                <p id="recWeightVram" class="text-xl font-bold text-white">—</p>
+              </div>
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">With context overhead</p>
+                <p id="recTotalVram" class="text-xl font-bold text-white">—</p>
+              </div>
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Quality</p>
+                <p id="recQuality" class="text-xl font-bold text-white">—</p>
+              </div>
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Fit status</p>
+                <p id="recFit" class="text-xl font-bold text-white">—</p>
+              </div>
+            </div>
+            <p id="recWarning" class="text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg p-3 hidden"></p>
+            <p class="text-sm text-neutral-400 mt-3">Compatible backends: <span id="recEngines" class="text-neutral-200"></span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Full comparison table -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">All quantization options</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Format</th>
+            <th class="py-3 pr-4">Bits / param</th>
+            <th class="py-3 pr-4">Quality</th>
+            <th class="py-3 pr-4">Weight VRAM</th>
+            <th class="py-3 pr-4">Total VRAM</th>
+            <th class="py-3 pr-4">Fit</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {levels.map(l => (
+            <tr class="border-b border-neutral-800/50" data-level={l.id}>
+              <td class="py-3 pr-4 font-medium text-white">{l.name}</td>
+              <td class="py-3 pr-4">{l.bits.toFixed(1)}</td>
+              <td class="py-3 pr-4">
+                <span class="text-xs px-2 py-0.5 rounded border bg-neutral-800 text-neutral-300 border-neutral-700 quality-cell">{l.quality_label}</span>
+              </td>
+              <td class="py-3 pr-4 font-mono weight-cell">—</td>
+              <td class="py-3 pr-4 font-mono total-cell">—</td>
+              <td class="py-3 pr-4 fit-cell">—</td>
+              <td class="py-3 pr-4 text-sm text-neutral-400">{l.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">Enter your model size and VRAM to see a recommendation.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/vram-calculator/" class="btn-primary text-sm">VRAM Calculator →</a>
+      <a href="/tools/inference-engine-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Inference Engine Selector →</a>
+      <a href="/tools/open-source-llm-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Open-Source LLM Selector →</a>
+      <a href="/compare/gpus/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">GPU Comparison →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ levelsJson: JSON.stringify(levels), enginesJson: JSON.stringify(engines), prioritiesJson: JSON.stringify(priorities) }}>
+    const levels = JSON.parse(levelsJson);
+    const engines = JSON.parse(enginesJson);
+    const priorities = JSON.parse(prioritiesJson);
+    const engineMap = Object.fromEntries(engines.map(e => [e.id, e]));
+
+    const fmt1 = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    function getInputs() {
+      const paramsSelect = document.getElementById('paramsSelect');
+      let params = parseFloat(paramsSelect.value);
+      if (isNaN(params) || paramsSelect.value === 'custom') {
+        params = Math.max(0, parseFloat(document.getElementById('customParams').value) || 0);
+      }
+      return {
+        params_b: params,
+        vram_gb: Math.max(1, parseFloat(document.getElementById('vramInput').value) || 1),
+        context: Math.max(1, parseFloat(document.getElementById('contextInput').value) || 1),
+        priority: document.getElementById('prioritySelect').value,
+        engine: document.getElementById('engineSelect').value
+      };
+    }
+
+    function computeLevel(l, inps) {
+      const weightVram = inps.params_b * l.bits / 8;
+      const contextOverhead = (inps.context / 1000) * l.kv_overhead_per_1k_tokens_gb;
+      const totalVram = weightVram + contextOverhead;
+      const headroomLimit = inps.vram_gb * 0.92;
+      const fits = totalVram <= headroomLimit;
+      const tight = fits && totalVram > inps.vram_gb * 0.85;
+      return { weightVram, contextOverhead, totalVram, fits, tight };
+    }
+
+    function scoreLevel(l, inps, calc) {
+      const supported = inps.engine === 'any' || engineMap[inps.engine]?.supported.includes(l.id);
+      if (!supported || !calc.fits) return -Infinity;
+      if (inps.priority === 'quality') return l.quality_score * 10 + l.speed_score;
+      if (inps.priority === 'speed') return l.speed_score * 10 + l.quality_score;
+      if (inps.priority === 'compression') return (20 - l.bits) * 10 + l.quality_score;
+      // balanced
+      return l.quality_score * 6 + l.speed_score * 4 - Math.max(0, l.bits - 5);
+    }
+
+    function badgeClass(status) {
+      if (status === 'Fits') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+      if (status === 'Tight') return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+      return 'bg-red-500/15 text-red-400 border-red-500/30';
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const calcs = levels.map(l => ({ ...l, ...computeLevel(l, inps) }));
+      const supportedCalcs = calcs.filter(l => inps.engine === 'any' || engineMap[inps.engine]?.supported.includes(l.id));
+
+      // Update table
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const levelId = tr.dataset.level;
+        const l = calcs.find(x => x.id === levelId);
+        const weightCell = tr.querySelector('.weight-cell');
+        const totalCell = tr.querySelector('.total-cell');
+        const fitCell = tr.querySelector('.fit-cell');
+        const qualityCell = tr.querySelector('.quality-cell');
+        if (!l) return;
+        weightCell.textContent = fmt1(l.weightVram) + ' GB';
+        totalCell.textContent = fmt1(l.totalVram) + ' GB';
+        let status = 'Fits';
+        if (!l.fits) status = 'No fit';
+        else if (l.tight) status = 'Tight';
+        const supported = inps.engine === 'any' || engineMap[inps.engine]?.supported.includes(l.id);
+        if (!supported) status = 'Unsupported';
+        fitCell.innerHTML = `<span class="status-badge border ${badgeClass(status)}">${status}</span>`;
+        if (qualityCell) qualityCell.textContent = l.quality_label;
+
+        // Highlight top recommendation row
+        tr.classList.remove('bg-cyan-400/10');
+      });
+
+      // Choose top recommendation
+      const scored = supportedCalcs.map(l => ({ ...l, score: scoreLevel(l, inps, l) })).sort((a, b) => b.score - a.score);
+      const top = scored[0];
+      const topSection = document.getElementById('topRecommendation');
+      const verdictText = document.getElementById('verdictText');
+
+      if (top && top.score > -Infinity) {
+        topSection.classList.remove('hidden');
+        document.getElementById('recName').textContent = top.name;
+        document.getElementById('recBestFor').textContent = top.best_for;
+        document.getElementById('recWeightVram').textContent = fmt1(top.weightVram) + ' GB';
+        document.getElementById('recTotalVram').textContent = fmt1(top.totalVram) + ' GB';
+        document.getElementById('recQuality').textContent = top.quality_label;
+        document.getElementById('recEngines').textContent = top.engines.join(', ');
+
+        const headroomLimit = inps.vram_gb * 0.92;
+        const fits = top.totalVram <= headroomLimit;
+        const tight = fits && top.totalVram > inps.vram_gb * 0.85;
+        const fitEl = document.getElementById('recFit');
+        if (!fits) {
+          fitEl.textContent = 'Does not fit';
+          fitEl.className = 'text-xl font-bold text-red-400';
+        } else if (tight) {
+          fitEl.textContent = 'Tight fit';
+          fitEl.className = 'text-xl font-bold text-amber-400';
+        } else {
+          fitEl.textContent = 'Comfortable fit';
+          fitEl.className = 'text-xl font-bold text-emerald-400';
+        }
+
+        const warnEl = document.getElementById('recWarning');
+        if (top.warning) {
+          warnEl.textContent = top.warning;
+          warnEl.classList.remove('hidden');
+        } else {
+          warnEl.classList.add('hidden');
+        }
+
+        // Highlight row
+        const topRow = document.querySelector(`tr[data-level="${top.id}"]`);
+        if (topRow) topRow.classList.add('bg-cyan-400/10');
+
+        if (!fits) {
+          verdictText.textContent = `${top.name} is the closest supported option, but it still needs ${fmt1(top.totalVram)} GB and your GPU has ${fmt1(inps.vram_gb)} GB. Try a smaller model, a more aggressive quantization (Q3/Q2), or a GPU with more VRAM.`;
+        } else if (tight) {
+          verdictText.textContent = `${top.name} will load but leaves little headroom. Leave batch size at 1 and keep context short to avoid out-of-memory errors.`;
+        } else {
+          verdictText.textContent = `${top.name} is the best ${priorities.find(p => p.id === inps.priority)?.name.toLowerCase()} option for this setup. It uses ~${fmt1(top.totalVram)} GB of your ${fmt1(inps.vram_gb)} GB VRAM, leaving headroom for context growth.`;
+        }
+      } else {
+        topSection.classList.add('hidden');
+        verdictText.textContent = 'No supported quantization fits this setup. Try a smaller model, a different backend, or more VRAM.';
+      }
+    }
+
+    function setInputs(obj) {
+      if (obj.params_b !== undefined) {
+        const paramsSelect = document.getElementById('paramsSelect');
+        const opt = Array.from(paramsSelect.options).find(o => parseFloat(o.value) === obj.params_b);
+        if (opt) { paramsSelect.value = obj.params_b; }
+        else { paramsSelect.value = 'custom'; }
+        document.getElementById('customParams').value = obj.params_b;
+      }
+      if (obj.vram_gb !== undefined) document.getElementById('vramInput').value = obj.vram_gb;
+      if (obj.context !== undefined) document.getElementById('contextInput').value = obj.context;
+      if (obj.priority !== undefined) document.getElementById('prioritySelect').value = obj.priority;
+      if (obj.engine !== undefined) document.getElementById('engineSelect').value = obj.engine;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      document.getElementById('paramsSelect').addEventListener('change', compute);
+      ['vramInput','contextInput','prioritySelect','engineSelect'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+      document.getElementById('customParams').addEventListener('input', compute);
+
+      compute();
+    });
+  </script>
+</Layout>

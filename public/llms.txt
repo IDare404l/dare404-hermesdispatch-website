@@ -210,6 +210,13 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: ranked list of inference engines, setup links, complexity badges, throughput/latency notes
 - Audience: AI builders choosing between Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, and other local inference engines
 
+### Local LLM Quantization Advisor
+- URL: https://hermesdispatch.dev/tools/quantization-advisor/
+- Description: Pick the right quantization level and format for a local LLM based on your GPU VRAM, quality tolerance, context length, and backend.
+- Inputs: model size (parameters in billions), available VRAM (GB), typical context length (tokens), priority (quality/balanced/speed/max compression), inference backend
+- Outputs: recommended quantization level, weight VRAM estimate, total VRAM with context overhead, fit status, quality label, compatible backends, verdict
+- Audience: AI builders choosing between FP16, Q8_0, Q5_K_M, Q4_K_M, Q3_K_M, Q2_K, INT8/FP8, AWQ, GPTQ, and EXL2 for local inference
+
 ### AI Agent Shadow / A-B Test Cost Calculator
 - URL: https://hermesdispatch.dev/tools/agent-shadow-ab-test-cost-calculator/
 - Description: Estimate the cost to run an AI agent in shadow mode or A/B test against an existing system, including duplicated inference, human review, decision logging, and outcome tracking.
