@@ -2,25 +2,24 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_deployment_scorecard.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
-const title = "AI Agent Deployment Readiness Scorecard | Hermes Dispatch";
-const description = "Score your AI agent's production readiness across architecture, model, privacy, security, reliability, observability, cost, and go-live plan.";
+const title = "AI Agent Deployment Readiness Scorecard";
+const description = "Score your AI agent's production readiness across architecture, model, privacy/security, reliability, observability, cost, and go-live plan.";
+const scenarios = data.scenarios;
+const dimensions = data.dimensions;
+const levels = data.levels;
 
 const faqs = [
-  { q: "What score is considered production-ready?", a: "A score of 90+ with zero open P0 items is our Production ready threshold. 75–89 means Launch candidate, 60–74 Needs hardening, and below 60 is High risk or Not ready." },
-  { q: "What is a P0 item?", a: "P0 items are blocking gaps that can cause safety, compliance, or outage issues. The scorecard counts how many P0 checklist items are still unchecked and surfaces them as open P0s." },
-  { q: "Does this replace a security or compliance audit?", a: "No. This scorecard is a directional self-assessment. Regulated or high-risk deployments still need legal, security, and compliance review before launch." },
-  { q: "Which dimensions matter most?", a: "Architecture, model fit, privacy/security, reliability, and cost are usually the highest-leverage dimensions. Observability and go-live planning become critical once you move beyond internal prototypes." },
-  { q: "How do I improve a low score quickly?", a: "Start by closing every open P0, then harden the dimension with the lowest progress. Use the cross-linked cost and security calculators to budget the work." }
+  { q: "What score is considered production-ready?", a: "A score of 90% or higher with zero open P0 items is treated as production ready. Between 75% and 89% is a launch candidate with a feature-flag or limited rollout. Below 75% the tool recommends closing gaps before exposing the agent to real traffic." },
+  { q: "Which dimensions matter most for customer-facing agents?", a: "Architecture, privacy/security, reliability, and observability carry the most weight. Model choice and fallback, error handling, rate-limit backoff, structured logging, and a clear rollback plan are treated as P0 items." },
+  { q: "How is this different from a security audit?", a: "This scorecard is a self-service readiness screen, not a replacement for a legal, compliance, or penetration test. Use it to identify gaps before scheduling deeper reviews." },
+  { q: "Can I use this for internal-only agents?", a: "Yes. The scenario selector scales the checklist to match blast radius. Internal tools and MVP prototypes skip many customer-facing and regulated-industry items." }
 ];
-
-const dimensions = data.dimensions;
-const scenarios = data.scenarios;
-const levels = data.levels;
 ---
 
 <Layout title={title} description={description}>
-  <ToolSchema name="AI Agent Deployment Readiness Scorecard" description={description} url="https://hermesdispatch.dev/tools/agent-deployment-scorecard/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+  <ToolSchema name="AI Agent Deployment Readiness Scorecard" description={description} url="https://hermesdispatch.dev/tools/agent-deployment-scorecard/" />
 
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
@@ -28,237 +27,252 @@ const levels = data.levels;
     "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
   })} />
 
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <div class="text-center mb-12">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">✅</div>
-      <h1 class="display-heading mb-4">AI Agent Deployment Readiness Scorecard</h1>
-      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Score production readiness across 8 dimensions and get a launch verdict with open P0 tracking.</p>
-    </div>
-
-    <!-- Scenario presets -->
-    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
-      <h2 class="text-lg font-bold mb-4 text-brand-gold">Start from a scenario</h2>
-      <div class="flex flex-wrap gap-3">
-        {scenarios.map(s => (
-          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors text-left" data-scenario={JSON.stringify(s)}>
-            <span class="font-medium">{s.name}</span>
-            <span class="block text-xs text-neutral-500 font-normal">{s.description}</span>
-          </button>
-        ))}
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🚀</div>
+        <h1 class="display-heading mb-4">AI Agent Deployment Readiness Scorecard</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Score production readiness across 8 dimensions. Pick a scenario, check the items you have in place, and get a verdict plus open P0 list.
+        </p>
       </div>
-    </section>
 
-    <!-- Score summary -->
-    <section id="scoreSummary" class="glass-card rounded-2xl p-8 mb-10 border-2 border-brand-gold/40 glow-gold">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-        <div class="text-center md:text-left">
-          <p class="text-sm text-neutral-500 uppercase tracking-wide mb-1">Readiness score</p>
-          <div class="flex items-end justify-center md:justify-start gap-2">
-            <span id="scoreValue" class="text-6xl font-extrabold text-brand-gold">0</span>
-            <span class="text-2xl text-neutral-400">/ 100</span>
-          </div>
-        </div>
-        <div class="text-center">
-          <p class="text-sm text-neutral-500 uppercase tracking-wide mb-2">Maturity</p>
-          <span id="maturityBadge" class="status-badge bg-red-500/15 text-red-400 border-red-500/30">Not ready</span>
-        </div>
-        <div class="text-center md:text-right">
-          <p class="text-sm text-neutral-500 uppercase tracking-wide mb-2">Open P0s</p>
-          <span id="p0Count" class="text-3xl font-bold text-white">0</span>
-        </div>
-      </div>
-      <div class="mt-6">
-        <div class="w-full bg-neutral-800 rounded-full h-3 overflow-hidden">
-          <div id="scoreBar" class="h-full bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500 transition-all duration-500" style="width: 0%"></div>
-        </div>
-        <p id="verdictText" class="text-lg text-neutral-200 mt-4">Check the items below to see your readiness score.</p>
-      </div>
-    </section>
-
-    <!-- Dimension checklists -->
-    <section class="grid md:grid-cols-2 gap-6 mb-12">
-      {dimensions.map(dim => (
-        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20" data-dimension={dim.id}>
-          <div class="flex items-center gap-3 mb-4">
-            <span class="text-2xl">{dim.icon}</span>
-            <div>
-              <h2 class="text-lg font-bold text-white">{dim.name}</h2>
-              <p class="text-xs text-neutral-500 dim-progress">0 / {dim.items.length} checks</p>
-            </div>
-            <span class="ml-auto text-sm font-bold dim-score text-brand-gold">0%</span>
-          </div>
-          <div class="space-y-3">
-            {dim.items.map(item => (
-              <label class="flex items-start gap-3 p-3 rounded-lg bg-neutral-900/60 border border-neutral-800 hover:border-neutral-700 cursor-pointer transition-colors">
-                <input type="checkbox" class="check-item mt-1 w-4 h-4 rounded border-neutral-600 bg-neutral-800 text-brand-gold focus:ring-brand-gold" data-id={item.id} data-weight={item.weight} data-p0={item.p0 ? '1' : '0'} data-dimension={dim.id} />
-                <div class="flex-1">
-                  <p class="text-sm text-neutral-200 leading-snug">{item.text}</p>
-                  {item.p0 && <span class="inline-block mt-1 text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">P0</span>}
-                </div>
-              </label>
-            ))}
-          </div>
-        </div>
-      ))}
-    </section>
-
-    <!-- Per-dimension summary table -->
-    <section class="overflow-x-auto mb-12">
-      <h2 class="text-xl font-bold mb-4 text-brand-gold">Dimension breakdown</h2>
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
-            <th class="py-3 pr-4">Dimension</th>
-            <th class="py-3 pr-4">Progress</th>
-            <th class="py-3 pr-4">Score</th>
-            <th class="py-3 pr-4">Open P0s</th>
-            <th class="py-3 pr-4">Status</th>
-          </tr>
-        </thead>
-        <tbody id="dimensionTableBody" class="text-neutral-200">
-          {dimensions.map(dim => (
-            <tr class="border-b border-neutral-800/50" data-dim-row={dim.id}>
-              <td class="py-3 pr-4 font-medium text-white">{dim.icon} {dim.name}</td>
-              <td class="py-3 pr-4">
-                <div class="w-24 bg-neutral-800 rounded-full h-2">
-                  <div class="dim-row-bar h-2 rounded-full bg-brand-gold transition-all" style="width: 0%"></div>
-                </div>
-              </td>
-              <td class="py-3 pr-4 dim-row-score">0%</td>
-              <td class="py-3 pr-4 dim-row-p0">0</td>
-              <td class="py-3 pr-4"><span class="dim-row-status status-badge bg-red-500/15 text-red-400 border-red-500/30">Not ready</span></td>
-            </tr>
+      <!-- Scenario selector -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">1. Pick a deployment scenario</h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {scenarios.map((s, i) => (
+            <button type="button" data-scenario={i} class="scenario-card glass-card rounded-xl p-5 text-left hover:border-brand-gold/50 transition-all">
+              <h3 class="font-semibold text-white mb-1">{s.name}</h3>
+              <p class="text-sm text-neutral-400">{s.description}</p>
+            </button>
           ))}
-        </tbody>
-      </table>
-    </section>
-
-    <!-- FAQ -->
-    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
-      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
-      <div class="space-y-4">
-        {faqs.map(f => (
-          <div>
-            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
-            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
-          </div>
-        ))}
+        </div>
+        <p class="text-sm text-neutral-400">{data.note}</p>
       </div>
-    </section>
 
-    <!-- Cross-links -->
-    <div class="flex flex-wrap gap-3 mb-8">
-      <a href="/tools/ai-agent-compliance-checker/" class="btn-primary text-sm">Compliance Checker →</a>
-      <a href="/tools/agent-redteam-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Red Team Cost Calc →</a>
-      <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost Calc →</a>
-      <a href="/tools/agent-outage-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Outage Cost Calc →</a>
+      <!-- Checklist -->
+      <div id="scorecard" class="hidden mb-10">
+        <div class="grid lg:grid-cols-3 gap-6 mb-8">
+          <div class="lg:col-span-2">
+            <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Readiness checklist</h2>
+                <button id="uncheckAll" type="button" class="text-xs px-3 py-1.5 rounded-lg border border-neutral-700 hover:bg-neutral-800 transition-colors">Uncheck all</button>
+              </div>
+              <p class="text-sm text-neutral-400 mb-4">Check each item your team has already implemented. P0 items must be closed before a confident launch.</p>
+              <div id="checklistContainer" class="space-y-6 max-h-[720px] overflow-y-auto pr-2"></div>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="glass-card rounded-2xl p-6 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Readiness score</p>
+              <p id="scoreValue" class="text-5xl font-bold text-brand-gold">0%</p>
+              <p id="scoreLabel" class="text-lg font-medium mt-2">—</p>
+              <p id="scoreSummary" class="text-sm text-neutral-400 mt-2">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-red-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Open P0 items</p>
+              <p id="openP0" class="text-3xl font-bold text-red-400">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-emerald-500/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Applicable checks</p>
+              <p id="totalItems" class="text-3xl font-bold text-emerald-400">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5 border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Top gap dimension</p>
+              <p id="topGap" class="text-lg font-bold text-brand-gold">—</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guidance -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the score is calculated</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Scenario</strong> filters the checklist to the checks that matter for your blast radius.</li>
+            <li><strong class="text-white">P0 items</strong> are weighted 3×. P1 items are weighted 2×. Other items are weighted 1×.</li>
+            <li><strong class="text-white">Open P0s</strong> are shown explicitly because they are launch blockers.</li>
+            <li><strong class="text-white">Top gap</strong> is the dimension with the lowest completion rate.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Next steps</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• Export the open P0s into a pre-launch task tracker.</li>
+            <li>• Pair this with the <a href="/tools/agent-stack-builder/" class="text-brand-gold hover:underline">Agent Stack Builder</a> to pick secure, observable vendors.</li>
+            <li>• Run the <a href="/tools/ai-agent-compliance-checker/" class="text-brand-gold hover:underline">Compliance Checker</a> for region and data-type requirements.</li>
+            <li>• Use the <a href="/tools/agent-redteam-cost-calculator/" class="text-brand-gold hover:underline">Red Team Cost Calculator</a> to budget adversarial testing.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/agent-stack-builder/" class="btn-primary text-sm">Agent Stack Builder →</a>
+        <a href="/tools/ai-agent-compliance-checker/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compliance Checker →</a>
+        <a href="/tools/agent-benchmark-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Benchmark Selector →</a>
+      </div>
+
+      <!-- FAQ -->
+      <div class="glass-card rounded-2xl p-6 mt-10 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faqs.map(f => (
+            <details class="group">
+              <summary class="font-semibold cursor-pointer text-white">{f.q}</summary>
+              <p class="text-neutral-400 text-sm mt-2">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
     </div>
+  </section>
 
-    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
-  </main>
+  <script define:vars={{ scenarios: JSON.stringify(scenarios), dimensions: JSON.stringify(dimensions), levels: JSON.stringify(levels) }}>
+    const scenarioData = JSON.parse(scenarios);
+    const dimensionData = JSON.parse(dimensions);
+    const levelData = JSON.parse(levels);
 
-  <script is:inline define:vars={{ dimensionsJson: JSON.stringify(dimensions), levelsJson: JSON.stringify(levels) }}>
-    const dimensions = JSON.parse(dimensionsJson);
-    const levels = JSON.parse(levelsJson);
+    const scenarioCards = document.querySelectorAll('.scenario-card');
+    const scorecard = document.getElementById('scorecard');
+    const checklistContainer = document.getElementById('checklistContainer');
+    const scoreValue = document.getElementById('scoreValue');
+    const scoreLabel = document.getElementById('scoreLabel');
+    const scoreSummary = document.getElementById('scoreSummary');
+    const openP0 = document.getElementById('openP0');
+    const totalItems = document.getElementById('totalItems');
+    const topGap = document.getElementById('topGap');
+    const uncheckAll = document.getElementById('uncheckAll');
 
-    function getLevel(score) {
-      return levels.slice().sort((a, b) => b.min - a.min).find(l => score >= l.min) || levels[levels.length - 1];
+    let activeScenario = null;
+
+    function applicableIds() {
+      if (activeScenario === null) return [];
+      return scenarioData[activeScenario].checks;
     }
 
-    function colorClass(color) {
-      return {
-        emerald: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-        amber: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-        orange: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
-        red: 'bg-red-500/15 text-red-400 border-red-500/30'
-      }[color] || 'bg-neutral-800 text-neutral-300 border-neutral-700';
-    }
-
-    function compute() {
-      let totalWeight = 0;
-      let checkedWeight = 0;
-      let openP0 = 0;
-
-      const dimStats = {};
-      dimensions.forEach(dim => {
-        dimStats[dim.id] = { total: dim.items.reduce((s, i) => s + i.weight, 0), checked: 0, p0: 0, items: dim.items.length, checkedItems: 0 };
-      });
-
-      document.querySelectorAll('.check-item').forEach(cb => {
-        const id = cb.dataset.id;
-        const weight = parseInt(cb.dataset.weight, 10) || 1;
-        const isP0 = cb.dataset.p0 === '1';
-        const dimId = cb.dataset.dimension;
-        totalWeight += weight;
-        if (cb.checked) {
-          checkedWeight += weight;
-          dimStats[dimId].checked += weight;
-          dimStats[dimId].checkedItems += 1;
-        } else if (isP0) {
-          openP0 += 1;
-          dimStats[dimId].p0 += 1;
-        }
-      });
-
-      const score = totalWeight ? Math.round((checkedWeight / totalWeight) * 100) : 0;
-      const level = getLevel(score);
-
-      // Update summary
-      document.getElementById('scoreValue').textContent = score;
-      document.getElementById('scoreBar').style.width = score + '%';
-      const maturityBadge = document.getElementById('maturityBadge');
-      maturityBadge.textContent = level.label;
-      maturityBadge.className = 'status-badge ' + colorClass(level.color);
-      document.getElementById('p0Count').textContent = openP0;
-      const verdictText = document.getElementById('verdictText');
-      if (openP0 > 0) {
-        verdictText.textContent = `${level.summary} You have ${openP0} open P0 item${openP0 === 1 ? '' : 's'} to close before launch.`;
-      } else {
-        verdictText.textContent = level.summary;
-      }
-
-      // Update dimension cards
-      dimensions.forEach(dim => {
-        const stats = dimStats[dim.id];
-        const dimScore = stats.total ? Math.round((stats.checked / stats.total) * 100) : 0;
-        const card = document.querySelector(`[data-dimension="${dim.id}"]`);
-        if (card) {
-          card.querySelector('.dim-score').textContent = dimScore + '%';
-          card.querySelector('.dim-progress').textContent = `${stats.checkedItems} / ${stats.items} checks`;
-        }
-        const row = document.querySelector(`tr[data-dim-row="${dim.id}"]`);
-        if (row) {
-          row.querySelector('.dim-row-bar').style.width = dimScore + '%';
-          row.querySelector('.dim-row-score').textContent = dimScore + '%';
-          row.querySelector('.dim-row-p0').textContent = stats.p0;
-          const rowStatus = row.querySelector('.dim-row-status');
-          const rowLevel = getLevel(dimScore);
-          rowStatus.textContent = rowLevel.label;
-          rowStatus.className = 'dim-row-status status-badge ' + colorClass(rowLevel.color);
-        }
-      });
-    }
-
-    function setScenario(checks) {
-      document.querySelectorAll('.check-item').forEach(cb => {
-        cb.checked = checks.includes(cb.dataset.id);
-      });
-      compute();
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.scenario-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const s = JSON.parse(btn.dataset.scenario);
-          setScenario(s.checks || []);
+    function flatItems() {
+      const ids = applicableIds();
+      const out = [];
+      dimensionData.forEach(dim => {
+        dim.items.forEach(item => {
+          if (ids.includes(item.id)) {
+            out.push({ ...item, dimension: dim.name, icon: dim.icon });
+          }
         });
       });
+      return out;
+    }
 
-      document.querySelectorAll('.check-item').forEach(cb => {
-        cb.addEventListener('change', compute);
+    function priorityClass(p0) {
+      return p0 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+    }
+
+    function renderChecklist() {
+      const items = flatItems();
+      const byDimension = {};
+      items.forEach(it => {
+        byDimension[it.dimension] = byDimension[it.dimension] || [];
+        byDimension[it.dimension].push(it);
       });
 
-      compute();
+      checklistContainer.innerHTML = Object.entries(byDimension).map(([dimName, dimItems]) => `
+        <div>
+          <h3 class="text-lg font-bold text-brand-gold mb-3 flex items-center gap-2">
+            <span>${dimItems[0].icon}</span> ${dimName}
+          </h3>
+          <div class="space-y-2">
+            ${dimItems.map((it, idx) => `
+              <label class="flex items-start gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 hover:border-brand-gold/30 transition-colors cursor-pointer">
+                <input type="checkbox" class="check-item mt-1 w-4 h-4 accent-brand-gold" data-id="${it.id}" data-weight="${it.weight}" data-p0="${it.p0 ? 1 : 0}">
+                <div class="flex-1">
+                  <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <span class="text-xs px-2 py-0.5 rounded border ${priorityClass(it.p0)}">${it.p0 ? 'P0' : 'P' + it.weight}</span>
+                  </div>
+                  <p class="text-sm text-neutral-200">${it.text}</p>
+                </div>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      totalItems.textContent = items.length;
+      updateScore();
+    }
+
+    function updateScore() {
+      const items = flatItems();
+      const checked = new Set([...document.querySelectorAll('.check-item:checked')].map(cb => cb.dataset.id));
+      const totalWeight = items.reduce((sum, it) => sum + (it.p0 ? 3 : it.weight), 0);
+      const checkedWeight = items.reduce((sum, it) => sum + (checked.has(it.id) ? (it.p0 ? 3 : it.weight) : 0), 0);
+      const score = totalWeight > 0 ? Math.round((checkedWeight / totalWeight) * 100) : 0;
+      scoreValue.textContent = `${score}%`;
+
+      const level = levelData.find(l => score >= l.min) || levelData[levelData.length - 1];
+      scoreLabel.textContent = level.label;
+      scoreSummary.textContent = level.summary;
+      scoreValue.className = `text-5xl font-bold text-${level.color}-400`;
+      scoreLabel.className = `text-lg font-medium mt-2 text-${level.color}-400`;
+
+      const open = items.filter(it => it.p0 && !checked.has(it.id)).length;
+      openP0.textContent = open;
+
+      const dimScores = {};
+      const dimTotals = {};
+      items.forEach(it => {
+        const w = it.p0 ? 3 : it.weight;
+        dimTotals[it.dimension] = (dimTotals[it.dimension] || 0) + w;
+        dimScores[it.dimension] = (dimScores[it.dimension] || 0) + (checked.has(it.id) ? w : 0);
+      });
+      let worst = null;
+      let worstRate = 2;
+      Object.entries(dimTotals).forEach(([dim, total]) => {
+        const rate = total > 0 ? (dimScores[dim] || 0) / total : 1;
+        if (rate < worstRate) {
+          worstRate = rate;
+          worst = dim;
+        }
+      });
+      topGap.textContent = worst ? `${worst} (${Math.round((1 - worstRate) * 100)}% gap)` : 'None';
+    }
+
+    function selectScenario(index) {
+      activeScenario = index;
+      scenarioCards.forEach((c, i) => {
+        if (i === index) c.classList.add('border-brand-gold');
+        else c.classList.remove('border-brand-gold');
+      });
+      scorecard.classList.remove('hidden');
+      renderChecklist();
+      scorecard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    scenarioCards.forEach((card, i) => {
+      card.addEventListener('click', () => selectScenario(i));
     });
+
+    checklistContainer.addEventListener('change', updateScore);
+
+    uncheckAll.addEventListener('click', () => {
+      document.querySelectorAll('.check-item').forEach(cb => cb.checked = false);
+      updateScore();
+    });
+
+    // Default selection
+    if (scenarioCards.length) selectScenario(0);
   </script>
+
+  <AgentCodeBlock
+    toolName="AI Agent Deployment Readiness Scorecard"
+    toolPath="/tools/agent-deployment-scorecard/"
+    description="Copy-paste Hermes Agent script for the deployment readiness scorecard."
+    scriptPath="/hermes-tools/agent_deployment_scorecard.py"
+    locked={false}
+  />
 </Layout>

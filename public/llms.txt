@@ -500,14 +500,22 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||||- Outputs: monthly gross value, monthly total cost, monthly net value, value per dollar of cost, setup cost, payback period, projected ROI, cost breakdown
 ||||- Audience: AI agent builders building a business case for automation
 ||||
-||||## AI Agent Task Fit Selector
-||||- URL: https://hermesdispatch.dev/tools/agent-task-fit-selector/
-||||- Description: Pick the right agent architecture (RAG, coding agent, multi-agent, workflow, voice, browser, data extraction) for a specific business task.
-||||- Inputs: business domain / task
-||||- Outputs: recommended architecture, suggested stack, benchmark/KPI, common gotchas
-||||- Audience: AI agent builders scoping projects
-||||
-|||||## No-Code AI Agent Builder Selector
+|||||## AI Agent Task Fit Selector
+|||||- URL: https://hermesdispatch.dev/tools/agent-task-fit-selector/
+|||||- Description: Pick the right agent architecture (RAG, coding agent, multi-agent, workflow, voice, browser, data extraction) for a specific business task.
+|||||- Inputs: business domain / task
+|||||- Outputs: recommended architecture, suggested stack, benchmark/KPI, common gotchas
+|||||- Audience: AI agent builders scoping projects
+|||||
+||||||## AI Agent Deployment Readiness Scorecard
+||||||- URL: https://hermesdispatch.dev/tools/agent-deployment-scorecard/
+||||||- Description: Score your AI agent's production readiness across architecture, model, privacy/security, reliability, observability, cost, and go-live plan.
+||||||- Inputs: deployment scenario (MVP prototype, internal tool, customer-facing agent, regulated industry), checklist of implemented readiness items
+||||||- Outputs: readiness score, launch verdict, open P0 count, top gap dimension, dimension breakdown
+||||||- Audience: AI agent operators preparing to launch or audit an agent
+||||||- Cross-links: Agent Stack Builder, Compliance Checker, Red Team Cost Calculator, Benchmark Selector
+||||||
+|||||||## No-Code AI Agent Builder Selector
 |||||- URL: https://hermesdispatch.dev/tools/no-code-agent-builder-selector/
 |||||- Description: Pick the best no-code or low-code AI agent builder for your use case, budget, hosting preference, and team skill level.
 |||||- Inputs: use case, max monthly budget, hosting preference, priority (balanced/cheap/easy/powerful)
