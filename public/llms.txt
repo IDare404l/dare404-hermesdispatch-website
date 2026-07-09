@@ -732,11 +732,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||- Cross-links: Newsletter Revenue Calculator, Outreach Campaign Cost Calculator, Sponsorship ROI Calculator, Newsletter Production Cost Calculator.
 
 ## AI Agent Cost Per Failure / Resolution Cost Calculator
-|||- URL: https://hermesdispatch.dev/tools/agent-cost-per-failure-calculator/
-|||- Description: Estimate the all-in cost of each failed or escalated AI agent task, including retries, human review, incident response, reputation impact, churn, and lost opportunity.
-|||- Inputs: monthly tasks, failure rate (%), input/output tokens per task, cached input percentage, LLM provider, failure severity, resolution channel, human review minutes, reviewer hourly rate, incident response hourly rate, MRR per customer, customers at risk (%), LTV per customer, opportunity cost per failure, projection months.
-|||- Outputs: cost per failed task, cost per resolved failure, monthly failure cost, projected period cost, cost breakdown, provider comparison table, verdict.
-|||- Audience: AI agent operators and product teams justifying reliability, guardrail, and human-in-the-loop investments.
-|||- Cross-links: Human Escalation Cost Calculator, Retention & Churn Cost Calculator, Output Value Calculator, Red Team Cost Calculator.
+||||- URL: https://hermesdispatch.dev/tools/agent-cost-per-failure-calculator/
+||||- Description: Estimate the all-in cost of each failed or escalated AI agent task, including retries, human review, incident response, reputation impact, churn, and lost opportunity.
+||||- Inputs: monthly tasks, failure rate (%), input/output tokens per task, cached input percentage, LLM provider, failure severity, resolution channel, human review minutes, reviewer hourly rate, incident response hourly rate, MRR per customer, customers at risk (%), LTV per customer, opportunity cost per failure, projection months.
+||||- Outputs: cost per failed task, cost per resolved failure, monthly failure cost, projected period cost, cost breakdown, provider comparison table, verdict.
+||||- Audience: AI agent operators and product teams justifying reliability, guardrail, and human-in-the-loop investments.
+||||- Cross-links: Human Escalation Cost Calculator, Retention & Churn Cost Calculator, Output Value Calculator, Red Team Cost Calculator.
+
+## AI Agent E-commerce / Shopping Cost Calculator
+||||- URL: https://hermesdispatch.dev/tools/agent-ecommerce-cost-calculator/
+||||- Description: Estimate monthly cost for AI shopping and e-commerce agents, including product search, recommendations, cart/checkout, fraud checks, returns support, live chat, human review, and setup/maintenance labor.
+||||- Inputs: monthly sessions, messages per session, searches/recommendations/cart attempts/transactions per session, return rate (%), input/output tokens per message, cached input (%), LLM provider, search backend, recommendation engine, cart/checkout integration, fraud/payment tool, returns support provider, live chat platform, human review rate/minutes/hourly cost, setup/maintenance hours and rates, projection months.
+||||- Outputs: cost per session, monthly LLM cost, total monthly cost, projected period cost, cost breakdown by component, LLM provider comparison table, verdict.
+||||- Audience: e-commerce operators and AI agent builders budgeting shopping assistants, concierge bots, and marketplace agents.
+||||- Cross-links: Agent vs Human Hire Calculator, Agent API Pricing Comparator, Agent Memory / RAG Cost Calculator, Agent Output Value Calculator.
 
 ## Hub Pages

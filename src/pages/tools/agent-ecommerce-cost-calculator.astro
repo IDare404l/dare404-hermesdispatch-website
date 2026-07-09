@@ -1,0 +1,471 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_ecommerce_cost.json';
+
+const title = "AI Agent E-commerce / Shopping Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost for AI shopping and e-commerce agents: search, recommendations, cart/checkout, fraud, returns support, and live chat.";
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+const providers = data.llm_providers;
+const searchBackends = data.search_backends;
+const recommendationEngines = data.recommendation_engines;
+const cartCheckouts = data.cart_checkout_integrations;
+const fraudPayments = data.fraud_and_payments;
+const returnsSupport = data.returns_support;
+const liveChats = data.live_chat_providers;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the monthly operating cost of an AI shopping or e-commerce agent, including LLM messages, product search, recommendations, cart/checkout integrations, fraud checks, returns support, live chat tooling, human review, and setup/maintenance labor." },
+  { q: "What counts as a session?", a: "A single shopper conversation or journey in which the agent answers questions, searches products, gives recommendations, or helps complete a purchase. Sessions may include multiple messages and actions." },
+  { q: "How is human review cost modeled?", a: "A percentage of sessions are flagged for human review based on the review rate and average minutes per reviewed session, multiplied by the fully-loaded hourly reviewer rate." },
+  { q: "Can I compare LLM providers?", a: "Yes. The provider comparison table shows the LLM inference portion of the monthly cost for each provider, using the same message volume and token counts." },
+  { q: "What's the difference between messages and actions?", a: "Messages are LLM chat turns. Actions are operations like product search, recommendation calls, cart/checkout attempts, and fraud checks. Each action can carry its own backend cost." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent E-commerce / Shopping Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-ecommerce-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🛒</div>
+      <h1 class="display-heading mb-4">AI Agent E-commerce / Shopping Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly cost for AI shopping agents: product search, recommendations, cart/checkout, fraud, returns, live chat, and human review.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Shopping agent workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly sessions</span>
+          <input id="monthlySessions" type="number" min="0" step="100" value={defaults.monthly_sessions} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Messages per session</span>
+          <input id="messagesPerSession" type="number" min="0" step="0.1" value={defaults.messages_per_session} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Product searches per session</span>
+          <input id="searchPerSession" type="number" min="0" step="0.1" value={defaults.search_per_session} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Recommendations per session</span>
+          <input id="recsPerSession" type="number" min="0" step="0.1" value={defaults.recommendations_per_session} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cart/checkout attempts per session</span>
+          <input id="cartPerSession" type="number" min="0" step="0.05" value={defaults.cart_checkout_per_session} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Completed transactions per session</span>
+          <input id="txPerSession" type="number" min="0" step="0.05" value={defaults.transactions_per_session} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Return rate (%)</span>
+          <input id="returnsRate" type="number" min="0" max="100" step="0.5" value={defaults.returns_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens per message</span>
+          <input id="inputsPerMessage" type="number" min="0" step="10" value={defaults.inputs_per_message} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens per message</span>
+          <input id="outputsPerMessage" type="number" min="0" step="10" value={defaults.outputs_per_message} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={p.name} selected={p.name === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Product search backend</span>
+          <select id="searchBackend" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {searchBackends.map(b => <option value={b.name} selected={b.name === defaults.search_backend}>{b.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Recommendation engine</span>
+          <select id="recEngine" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {recommendationEngines.map(e => <option value={e.name} selected={e.name === defaults.recommendation_engine}>{e.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cart/checkout integration</span>
+          <select id="cartCheckout" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {cartCheckouts.map(c => <option value={c.name} selected={c.name === defaults.cart_checkout}>{c.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fraud / payment risk tool</span>
+          <select id="fraudTool" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {fraudPayments.map(f => <option value={f.name} selected={f.name === defaults.fraud_and_payments}>{f.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Returns support</span>
+          <select id="returnsSupport" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {returnsSupport.map(r => <option value={r.name} selected={r.name === defaults.returns_support}>{r.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Live chat platform</span>
+          <select id="liveChat" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {liveChats.map(l => <option value={l.name} selected={l.name === defaults.live_chat}>{l.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="1" value={defaults.human_review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review minutes / session</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.human_review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly rate ($)</span>
+          <input id="reviewerRate" type="number" min="0" step="5" value={defaults.reviewer_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="5" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupRate" type="number" min="0" step="10" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintHours" type="number" min="0" step="1" value={defaults.maintenance_hours_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintRate" type="number" min="0" step="10" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per session</p>
+        <p id="costPerSession" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly LLM cost</p>
+        <p id="monthlyLlmCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="monthlyTotal" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Cost component</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Share</th>
+          </tr>
+        </thead>
+        <tbody class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">LLM chat inference</td><td id="llmRow" class="py-3 pr-4 text-right font-mono">—</td><td id="llmShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Product search backend</td><td id="searchRow" class="py-3 pr-4 text-right font-mono">—</td><td id="searchShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Recommendations engine</td><td id="recRow" class="py-3 pr-4 text-right font-mono">—</td><td id="recShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Cart/checkout integration</td><td id="cartRow" class="py-3 pr-4 text-right font-mono">—</td><td id="cartShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Fraud / payment risk</td><td id="fraudRow" class="py-3 pr-4 text-right font-mono">—</td><td id="fraudShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Returns support</td><td id="returnsRow" class="py-3 pr-4 text-right font-mono">—</td><td id="returnsShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Live chat platform</td><td id="chatRow" class="py-3 pr-4 text-right font-mono">—</td><td id="chatShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Human review</td><td id="reviewRow" class="py-3 pr-4 text-right font-mono">—</td><td id="reviewShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Maintenance labor</td><td id="maintRow" class="py-3 pr-4 text-right font-mono">—</td><td id="maintShare" class="py-3 pr-4 text-right font-mono">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">LLM provider comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">Monthly LLM cost</th>
+              <th class="py-3 pr-4 text-right">Cost per 1k messages</th>
+            </tr>
+          </thead>
+          <tbody id="providerComparisonBody" class="text-neutral-200">
+            <tr><td colspan="3" class="py-4 text-neutral-500">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-vs-hire-calculator/" class="btn-primary text-sm">Agent vs Human Hire Calc →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Memory / RAG Cost Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Output Value Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ dataJson: JSON.stringify({ providers, searchBackends, recommendationEngines, cartCheckouts, fraudPayments, returnsSupport, liveChats, scenarios }) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    const { providers, searchBackends, recommendationEngines, cartCheckouts, fraudPayments, returnsSupport, liveChats, scenarios } = JSON.parse(dataJson);
+
+    function find(arr, name) { return arr.find(x => x.name === name) || {}; }
+
+    function getInputs() {
+      return {
+        monthlySessions: Math.max(0, parseFloat(document.getElementById('monthlySessions').value) || 0),
+        messagesPerSession: Math.max(0, parseFloat(document.getElementById('messagesPerSession').value) || 0),
+        searchPerSession: Math.max(0, parseFloat(document.getElementById('searchPerSession').value) || 0),
+        recsPerSession: Math.max(0, parseFloat(document.getElementById('recsPerSession').value) || 0),
+        cartPerSession: Math.max(0, parseFloat(document.getElementById('cartPerSession').value) || 0),
+        txPerSession: Math.max(0, parseFloat(document.getElementById('txPerSession').value) || 0),
+        returnsRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('returnsRate').value) || 0)),
+        inputsPerMessage: Math.max(0, parseFloat(document.getElementById('inputsPerMessage').value) || 0),
+        outputsPerMessage: Math.max(0, parseFloat(document.getElementById('outputsPerMessage').value) || 0),
+        cachedInputPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('cachedInputPct').value) || 0)),
+        provider: document.getElementById('provider').value,
+        searchBackend: document.getElementById('searchBackend').value,
+        recEngine: document.getElementById('recEngine').value,
+        cartCheckout: document.getElementById('cartCheckout').value,
+        fraudTool: document.getElementById('fraudTool').value,
+        returnsSupport: document.getElementById('returnsSupport').value,
+        liveChat: document.getElementById('liveChat').value,
+        reviewRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewRate').value) || 0)),
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        reviewerRate: Math.max(0, parseFloat(document.getElementById('reviewerRate').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupRate: Math.max(0, parseFloat(document.getElementById('setupRate').value) || 0),
+        maintHours: Math.max(0, parseFloat(document.getElementById('maintHours').value) || 0),
+        maintRate: Math.max(0, parseFloat(document.getElementById('maintRate').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      const ids = {
+        monthlySessions: obj.monthly_sessions,
+        messagesPerSession: obj.messages_per_session,
+        searchPerSession: obj.search_per_session,
+        recsPerSession: obj.recommendations_per_session,
+        cartPerSession: obj.cart_checkout_per_session,
+        txPerSession: obj.transactions_per_session,
+        returnsRate: obj.returns_rate_pct,
+        inputsPerMessage: obj.inputs_per_message,
+        outputsPerMessage: obj.outputs_per_message,
+        cachedInputPct: obj.cached_input_pct,
+        provider: obj.provider,
+        searchBackend: obj.search_backend,
+        recEngine: obj.recommendation_engine,
+        cartCheckout: obj.cart_checkout,
+        fraudTool: obj.fraud_and_payments,
+        returnsSupport: obj.returns_support,
+        liveChat: obj.live_chat,
+        reviewRate: obj.human_review_rate_pct,
+        reviewMinutes: obj.human_review_minutes,
+        reviewerRate: obj.reviewer_hourly_rate,
+        setupHours: obj.setup_hours,
+        setupRate: obj.setup_hourly_rate,
+        maintHours: obj.maintenance_hours_monthly,
+        maintRate: obj.maintenance_hourly_rate,
+        projectionMonths: obj.projection_months
+      };
+      for (const [id, val] of Object.entries(ids)) {
+        if (val === undefined) continue;
+        document.getElementById(id).value = val;
+      }
+    }
+
+    function inferenceCost(provider, inputs, outputs, cachedPct) {
+      const cached = inputs * (cachedPct / 100);
+      const uncached = inputs - cached;
+      return (uncached / 1000) * (provider.input_per_1k || 0) + (cached / 1000) * (provider.cached_input_per_1k || 0) + (outputs / 1000) * (provider.output_per_1k || 0);
+    }
+
+    function computeCore(inps) {
+      const p = find(providers, inps.provider);
+      const search = find(searchBackends, inps.searchBackend);
+      const rec = find(recommendationEngines, inps.recEngine);
+      const cart = find(cartCheckouts, inps.cartCheckout);
+      const fraud = find(fraudPayments, inps.fraudTool);
+      const returns = find(returnsSupport, inps.returnsSupport);
+      const chat = find(liveChats, inps.liveChat);
+
+      const monthlyMessages = inps.monthlySessions * inps.messagesPerSession;
+      const monthlySearches = inps.monthlySessions * inps.searchPerSession;
+      const monthlyRecs = inps.monthlySessions * inps.recsPerSession;
+      const monthlyCartAttempts = inps.monthlySessions * inps.cartPerSession;
+      const monthlyTx = inps.monthlySessions * inps.txPerSession;
+      const monthlyReturns = monthlyTx * (inps.returnsRate / 100);
+
+      const costPerMessage = inferenceCost(p, inps.inputsPerMessage, inps.outputsPerMessage, inps.cachedInputPct);
+      const llmMonthly = costPerMessage * monthlyMessages;
+
+      const searchMonthly = (search.monthly_base || 0) + (monthlySearches / 1000) * (search.cost_per_1k_searches || 0);
+      const recMonthly = (rec.monthly_base || 0) + (monthlyRecs / 1000) * (rec.cost_per_1k_recommendations || 0);
+      const cartMonthly = (cart.monthly_base || 0) + (monthlyCartAttempts / 1000) * (cart.cost_per_1k_transactions || 0);
+      const fraudMonthly = (fraud.monthly_base || 0) + (monthlyTx / 1000) * (fraud.cost_per_1k_transactions || 0);
+      const returnsMonthly = monthlyReturns * (returns.cost_per_return || 0);
+      const chatMonthly = (chat.monthly_base || 0) + (monthlyMessages / 1000) * (chat.cost_per_1k_messages || 0);
+
+      const reviewedSessions = inps.monthlySessions * (inps.reviewRate / 100);
+      const reviewMonthly = reviewedSessions * (inps.reviewMinutes / 60) * inps.reviewerRate;
+
+      const maintMonthly = inps.maintHours * inps.maintRate;
+      const setupCost = inps.setupHours * inps.setupRate;
+
+      const monthlyTotal = llmMonthly + searchMonthly + recMonthly + cartMonthly + fraudMonthly + returnsMonthly + chatMonthly + reviewMonthly + maintMonthly;
+      const periodCost = monthlyTotal * inps.projectionMonths + setupCost;
+      const costPerSession = inps.monthlySessions > 0 ? monthlyTotal / inps.monthlySessions : 0;
+
+      return {
+        p, search, rec, cart, fraud, returns, chat,
+        monthlyMessages, monthlySearches, monthlyRecs, monthlyCartAttempts, monthlyTx, monthlyReturns,
+        llmMonthly, searchMonthly, recMonthly, cartMonthly, fraudMonthly, returnsMonthly, chatMonthly, reviewMonthly, maintMonthly,
+        monthlyTotal, periodCost, costPerSession, setupCost, reviewedSessions
+      };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const r = computeCore(inps);
+
+      document.getElementById('costPerSession').textContent = fmtMoney(r.costPerSession);
+      document.getElementById('monthlyLlmCost').textContent = fmtMoney0(r.llmMonthly);
+      document.getElementById('monthlyTotal').textContent = fmtMoney0(r.monthlyTotal);
+      document.getElementById('periodCost').textContent = fmtMoney0(r.periodCost);
+
+      const total = r.monthlyTotal;
+      const setRow = (costId, shareId, cost) => {
+        document.getElementById(costId).textContent = fmtMoney(cost);
+        document.getElementById(shareId).textContent = total > 0 ? (cost / total * 100).toFixed(1) + '%' : '0%';
+      };
+      setRow('llmRow', 'llmShare', r.llmMonthly);
+      setRow('searchRow', 'searchShare', r.searchMonthly);
+      setRow('recRow', 'recShare', r.recMonthly);
+      setRow('cartRow', 'cartShare', r.cartMonthly);
+      setRow('fraudRow', 'fraudShare', r.fraudMonthly);
+      setRow('returnsRow', 'returnsShare', r.returnsMonthly);
+      setRow('chatRow', 'chatShare', r.chatMonthly);
+      setRow('reviewRow', 'reviewShare', r.reviewMonthly);
+      setRow('maintRow', 'maintShare', r.maintMonthly);
+
+      // Provider comparison
+      const tbody = document.getElementById('providerComparisonBody');
+      const rows = providers.map(provider => {
+        const costPerMessage = inferenceCost(provider, inps.inputsPerMessage, inps.outputsPerMessage, inps.cachedInputPct);
+        const monthly = costPerMessage * r.monthlyMessages;
+        const per1k = r.monthlyMessages > 0 ? (monthly / r.monthlyMessages) * 1000 : 0;
+        const isCurrent = provider.name === inps.provider;
+        return `<tr class="border-b border-neutral-800/50 ${isCurrent ? 'text-brand-gold' : ''}">
+          <td class="py-3 pr-4">${provider.name} ${isCurrent ? '(selected)' : ''}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(monthly)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(per1k)}</td>
+        </tr>`;
+      }).join('');
+      tbody.innerHTML = rows;
+
+      // Verdict
+      let verdict = '';
+      if (r.costPerSession < 0.10) {
+        verdict = `✅ Low cost per session (${fmtMoney(r.costPerSession)}). At ${fmtNum(inps.monthlySessions)} sessions/month, total monthly cost is ${fmtMoney0(r.monthlyTotal)}. Great for high-volume, low-margin shopping flows.`;
+      } else if (r.costPerSession < 0.50) {
+        verdict = `⚡ Moderate cost per session (${fmtMoney(r.costPerSession)}). The biggest driver is usually ${r.llmMonthly > r.searchMonthly ? 'LLM inference' : 'backend services'}; tune token usage and review rate to improve margin.`;
+      } else {
+        verdict = `⚠️ High cost per session (${fmtMoney(r.costPerSession)}). Consider a cheaper LLM, fewer search/recommendation calls, lower human review rate, or a more efficient checkout integration before scaling.`;
+      }
+      if (r.reviewMonthly / r.monthlyTotal > 0.25) {
+        verdict += ` Human review is >25% of spend — add guardrails to reduce escalation.`;
+      }
+      if (r.searchMonthly + r.recMonthly + r.cartMonthly + r.fraudMonthly + r.returnsMonthly + r.chatMonthly > r.llmMonthly * 1.5) {
+        verdict += ` Backend integrations dominate LLM cost; audit vendor pricing and self-hosted alternatives.`;
+      }
+      if (inps.txPerSession > 0 && r.monthlyTx > 0) {
+        verdict += ` With ${fmtNum(r.monthlyTx)} transactions/month, payment/fraud and returns tools scale with GMV, not just chat volume.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['monthlySessions','messagesPerSession','searchPerSession','recsPerSession','cartPerSession','txPerSession','returnsRate','inputsPerMessage','outputsPerMessage','cachedInputPct','provider','searchBackend','recEngine','cartCheckout','fraudTool','returnsSupport','liveChat','reviewRate','reviewMinutes','reviewerRate','setupHours','setupRate','maintHours','maintRate','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
