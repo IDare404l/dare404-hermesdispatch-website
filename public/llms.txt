@@ -236,9 +236,9 @@ Each tool below is a web page with structured data and a clear input/output cont
 |- URL: https://hermesdispatch.dev/tools/agent-translation-localization-cost-calculator/
 |- Description: Estimate monthly cost to translate or localize AI agent outputs across NMT and LLM providers, language complexity, human review tiers, glossaries, and content types.
 |- Inputs: units per month, content type, target languages, provider, language complexity, human review tier, review percentage, glossary/style-guide level, characters per word, setup hours/rate, maintenance hours/rate, projection months.
-|- Outputs: cost per language/month, cost per unit translated, cost per 1,000 words, total monthly cost, translation/LLM cost, human review cost, glossary & maintenance cost, total words/month, review hours/month, period cost, provider comparison table, verdict.
-|- Audience: AI agent builders and prompt engineers creating consistent, deployable system prompts.
-|- Cross-links: Agent Benchmark Selector, Agent Stack Builder, LLM Cost Calculator, Prompt Testing Budget Calculator.
+||- Outputs: cost per language/month, cost per unit translated, cost per 1,000 words, total monthly cost, translation/LLM cost, human review cost, glossary & maintenance cost, total words/month, review hours/month, period cost, provider comparison table, verdict.
+||- Audience: AI agent builders localizing agent outputs, support content, and marketing copy.
+||- Cross-links: Agent API Pricing Comparator, Per-User Cost Calculator, Agent Output Value Calculator, Multi-Modal Cost Calculator.
 
 ## AI Agent Vector Database Selector
 |- URL: https://hermesdispatch.dev/tools/vector-db-selector/
@@ -252,7 +252,7 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Description: Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.
 - Inputs: page URL
 - Outputs: citation status, test links
-
+- Audience: AEO/content marketers
 - Notes: copy-paste Python/JS/cURL/Hermes snippet available via Agent Toolkit
 
 ### Prompt Reliability Checker
