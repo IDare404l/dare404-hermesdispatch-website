@@ -1,0 +1,131 @@
+{
+  "last_updated": "2026-07-10",
+  "note": "Rates are approximate list prices and change frequently. Use this calculator for planning, not for financial or tax advice.",
+  "metering_providers": [
+    { "slug": "segment", "name": "Segment", "cost_per_1k_events": 0.10, "base_monthly": 0, "free_1k_monthly": 1000, "overage_per_1k": 0.10, "note": "Twilio Segment MTU/event-based pricing" },
+    { "slug": "posthog", "name": "PostHog", "cost_per_1k_events": 0.025, "base_monthly": 0, "free_1k_monthly": 1000, "overage_per_1k": 0.025, "note": "Product analytics + event pipeline" },
+    { "slug": "amplitude", "name": "Amplitude", "cost_per_1k_events": 0.05, "base_monthly": 0, "free_1k_monthly": 10000, "overage_per_1k": 0.05, "note": "Event-based analytics" },
+    { "slug": "mixpanel", "name": "Mixpanel", "cost_per_1k_events": 0.05, "base_monthly": 0, "free_1k_monthly": 1000, "overage_per_1k": 0.05, "note": "Event-based analytics" },
+    { "slug": "rudderstack", "name": "Rudderstack", "cost_per_1k_events": 0.02, "base_monthly": 500, "free_1k_monthly": 0, "overage_per_1k": 0.02, "note": "Warehouse-native CDP with base platform fee" },
+    { "slug": "snowplow", "name": "Snowplow", "cost_per_1k_events": 0.015, "base_monthly": 800, "free_1k_monthly": 0, "overage_per_1k": 0.015, "note": "Self-managed or BDP cloud" },
+    { "slug": "kinesis_self", "name": "AWS Kinesis + Lambda", "cost_per_1k_events": 0.008, "base_monthly": 0, "free_1k_monthly": 0, "overage_per_1k": 0.008, "note": "Managed stream; excludes Lambda invocations" },
+    { "slug": "kafka_self", "name": "Self-hosted Kafka/ClickHouse", "cost_per_1k_events": 0.003, "base_monthly": 600, "free_1k_monthly": 0, "overage_per_1k": 0.003, "note": "Low per-event cost, higher infra labor" }
+  ],
+  "billing_providers": [
+    { "slug": "stripe_billing", "name": "Stripe Billing", "rev_pct": 0.005, "per_invoice": 0.25, "base_monthly": 0, "note": "0.5% of recurring revenue" },
+    { "slug": "stripe_payment", "name": "Stripe Payments", "rev_pct": 0.029, "per_transaction": 0.30, "base_monthly": 0, "note": "2.9% + 30¢ per successful charge" },
+    { "slug": "paddle", "name": "Paddle", "rev_pct": 0.05, "per_transaction": 0, "base_monthly": 0, "note": "~5% revenue share incl. tax + payments" },
+    { "slug": "chargebee", "name": "Chargebee", "rev_pct": 0.005, "per_invoice": 0.10, "base_monthly": 599, "note": "Platform fee plus 0.5% rev" },
+    { "slug": "lemonsqueezy", "name": "Lemon Squeezy", "rev_pct": 0.05, "per_transaction": 0.30, "base_monthly": 0, "note": "5% + 30¢ per transaction" },
+    { "slug": "self_billing", "name": "Self-hosted billing", "rev_pct": 0.001, "per_invoice": 0, "base_monthly": 800, "note": "Minimal direct fees, engineering cost in maintenance" }
+  ],
+  "payment_providers": [
+    { "slug": "stripe", "name": "Stripe", "rev_pct": 0.029, "per_transaction": 0.30 },
+    { "slug": "paypal", "name": "PayPal", "rev_pct": 0.0349, "per_transaction": 0.49 },
+    { "slug": "adyen", "name": "Adyen", "rev_pct": 0.015, "per_transaction": 0.11 },
+    { "slug": "square", "name": "Square", "rev_pct": 0.029, "per_transaction": 0.30 },
+    { "slug": "none", "name": "Included in billing provider", "rev_pct": 0, "per_transaction": 0 }
+  ],
+  "tax_providers": [
+    { "slug": "stripe_tax", "name": "Stripe Tax", "per_transaction": 0.50, "base_monthly": 0, "rev_pct": 0 },
+    { "slug": "taxjar", "name": "TaxJar", "base_monthly": 99, "per_transaction": 0, "rev_pct": 0 },
+    { "slug": "avalara", "name": "Avalara", "base_monthly": 99, "per_transaction": 0, "rev_pct": 0 },
+    { "slug": "self_tax", "name": "Self-managed", "base_monthly": 0, "per_transaction": 0, "rev_pct": 0 },
+    { "slug": "none", "name": "None / not needed", "base_monthly": 0, "per_transaction": 0, "rev_pct": 0 }
+  ],
+  "dunning_providers": [
+    { "slug": "baremetrics", "name": "Baremetrics", "base_monthly": 108, "per_recovered_rev_pct": 0.0 },
+    { "slug": "recover_payments", "name": "Recover Payments / Churnkey", "base_monthly": 200, "per_recovered_rev_pct": 0.10 },
+    { "slug": "stripe_dunning", "name": "Stripe Smart Retries", "base_monthly": 0, "per_recovered_rev_pct": 0.0 },
+    { "slug": "self_dunning", "name": "Self-built dunning", "base_monthly": 100, "per_recovered_rev_pct": 0.0 },
+    { "slug": "none", "name": "None", "base_monthly": 0, "per_recovered_rev_pct": 0.0 }
+  ],
+  "revrec_providers": [
+    { "slug": "stripe_rev", "name": "Stripe Revenue Recognition", "base_monthly": 0, "per_revenue_pct": 0.0025 },
+    { "slug": "maxio", "name": "Maxio (SaaSOptics)", "base_monthly": 500, "per_revenue_pct": 0 },
+    { "slug": "saasoptics", "name": "SaaSOptics", "base_monthly": 600, "per_revenue_pct": 0 },
+    { "slug": "self_revrec", "name": "Spreadsheet / self", "base_monthly": 0, "per_revenue_pct": 0 },
+    { "slug": "none", "name": "None", "base_monthly": 0, "per_revenue_pct": 0 }
+  ],
+  "scenarios": [
+    {
+      "name": "AI agent SaaS (seat pricing)",
+      "monthly_users": 500,
+      "monthly_events": 500000,
+      "avg_invoice_value": 49,
+      "invoice_frequency": "monthly",
+      "metering_provider": "posthog",
+      "billing_provider": "stripe_billing",
+      "payment_provider": "stripe",
+      "tax_provider": "stripe_tax",
+      "dunning_provider": "stripe_dunning",
+      "revrec_provider": "stripe_rev",
+      "finance_hours_month": 8,
+      "finance_hourly_rate": 85,
+      "setup_hours": 20,
+      "setup_hourly_rate": 150,
+      "maintenance_hours_month": 6,
+      "maintenance_hourly_rate": 150,
+      "projection_months": 12
+    },
+    {
+      "name": "Usage-based API product",
+      "monthly_users": 2000,
+      "monthly_events": 2000000,
+      "avg_invoice_value": 12,
+      "invoice_frequency": "monthly",
+      "metering_provider": "rudderstack",
+      "billing_provider": "stripe_billing",
+      "payment_provider": "stripe",
+      "tax_provider": "taxjar",
+      "dunning_provider": "recover_payments",
+      "revrec_provider": "stripe_rev",
+      "finance_hours_month": 16,
+      "finance_hourly_rate": 90,
+      "setup_hours": 40,
+      "setup_hourly_rate": 175,
+      "maintenance_hours_month": 10,
+      "maintenance_hourly_rate": 175,
+      "projection_months": 12
+    },
+    {
+      "name": "Enterprise pilot",
+      "monthly_users": 50,
+      "monthly_events": 100000,
+      "avg_invoice_value": 2500,
+      "invoice_frequency": "monthly",
+      "metering_provider": "segment",
+      "billing_provider": "chargebee",
+      "payment_provider": "stripe",
+      "tax_provider": "avalara",
+      "dunning_provider": "baremetrics",
+      "revrec_provider": "maxio",
+      "finance_hours_month": 12,
+      "finance_hourly_rate": 120,
+      "setup_hours": 60,
+      "setup_hourly_rate": 200,
+      "maintenance_hours_month": 8,
+      "maintenance_hourly_rate": 200,
+      "projection_months": 6
+    }
+  ],
+  "defaults": {
+    "monthly_users": 500,
+    "monthly_events": 500000,
+    "avg_invoice_value": 49,
+    "invoice_frequency": "monthly",
+    "metering_provider": "posthog",
+    "billing_provider": "stripe_billing",
+    "payment_provider": "stripe",
+    "tax_provider": "stripe_tax",
+    "dunning_provider": "stripe_dunning",
+    "revrec_provider": "stripe_rev",
+    "finance_hours_month": 8,
+    "finance_hourly_rate": 85,
+    "setup_hours": 20,
+    "setup_hourly_rate": 150,
+    "maintenance_hours_month": 6,
+    "maintenance_hourly_rate": 150,
+    "projection_months": 12
+  }
+}

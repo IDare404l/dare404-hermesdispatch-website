@@ -1,0 +1,516 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_billing_metering_cost.json';
+
+const title = "AI Agent Billing & Usage Metering Cost Calculator | Hermes Dispatch";
+const description = "Estimate the monthly cost to meter, bill, and collect payment for AI agent usage: events, invoices, payment processing, tax, dunning, revenue recognition, and operations.";
+const meteringProviders = data.metering_providers;
+const billingProviders = data.billing_providers;
+const paymentProviders = data.payment_providers;
+const taxProviders = data.tax_providers;
+const dunningProviders = data.dunning_providers;
+const revrecProviders = data.revrec_providers;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does AI agent usage metering cost include?", a: "It includes ingesting and storing events (Segment, PostHog, Rudderstack, Kinesis, etc.), billing-subscription platform fees, payment processing, tax calculation, failed-payment recovery (dunning), revenue-recognition tooling, and the finance/ops labor to reconcile and audit the stack." },
+  { q: "How does usage-based pricing change the estimate?", a: "Usage-based products generate more events per dollar of revenue and usually more invoices/payment methods. The calculator scales event-ingestion cost by monthly events and transaction fees by the number of invoices, so a low APU (average revenue per user) product can have high billing overhead as a percent of revenue." },
+  { q: "When is self-hosted metering cheaper?", a: "Self-hosted Kafka/ClickHouse or Kinesis + Lambda typically has the lowest per-event cost at scale but adds fixed engineering time. The calculator shows cost per 1M events and operations labor, so you can compare managed vs self-hosted including maintenance." },
+  { q: "What is revenue-at-risk from failed payments?", a: "The dunning section estimates how much revenue fails each month and the cost to recover it. Providers like Churnkey charge a percentage of recovered revenue; Stripe Smart Retries is free but less aggressive." },
+  { q: "Can I compare payment processors?", a: "Yes. The payment comparison table recalculates transaction fees using your invoice count and average invoice value, then shows the cheapest option. Stripe, PayPal, Adyen, and Square rates are editable defaults." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Billing & Usage Metering Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-billing-metering-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">💰</div>
+      <h1 class="display-heading text-4xl md:text-5xl mb-4">AI Agent Billing & Usage Metering Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the monthly cost to meter, bill, and collect payment for AI agent usage: events, invoices, payment processing, tax, dunning, revenue recognition, and operations.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Usage & revenue</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly paying users</span>
+          <input id="monthlyUsers" type="number" min="0" value={defaults.monthly_users} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly events to meter</span>
+          <input id="monthlyEvents" type="number" min="0" value={defaults.monthly_events} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Average invoice value ($)</span>
+          <input id="avgInvoiceValue" type="number" min="0" step="0.01" value={defaults.avg_invoice_value} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Invoice frequency</span>
+          <select id="invoiceFrequency" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            <option value="monthly" selected={defaults.invoice_frequency === 'monthly'}>Monthly</option>
+            <option value="quarterly" selected={defaults.invoice_frequency === 'quarterly'}>Quarterly</option>
+            <option value="annual" selected={defaults.invoice_frequency === 'annual'}>Annual</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Metering / event provider</span>
+          <select id="meteringProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {meteringProviders.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.metering_provider}>{p.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Billing platform</span>
+          <select id="billingProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {billingProviders.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.billing_provider}>{p.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Payment processor</span>
+          <select id="paymentProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {paymentProviders.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.payment_provider}>{p.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tax engine</span>
+          <select id="taxProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {taxProviders.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.tax_provider}>{p.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Dunning / failed-payment recovery</span>
+          <select id="dunningProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {dunningProviders.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.dunning_provider}>{p.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Revenue recognition tool</span>
+          <select id="revrecProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {revrecProviders.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.revrec_provider}>{p.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Failed payment rate %</span>
+          <input id="failureRate" type="number" min="0" max="100" step="0.1" value={8} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Recovery rate on failed payments %</span>
+          <input id="recoveryRate" type="number" min="0" max="100" step="0.1" value={35} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+
+      <h2 class="text-xl font-bold mb-6 mt-10 text-brand-gold">Operations labor</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Finance/ops hours / month</span>
+          <input id="financeHours" type="number" min="0" value={defaults.finance_hours_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Finance hourly rate ($)</span>
+          <input id="financeRate" type="number" min="0" value={defaults.finance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupRate" type="number" min="0" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" value={defaults.maintenance_hours_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintenanceRate" type="number" min="0" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Costs are estimates. Provider rates last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly recurring revenue</p>
+        <p id="mrr" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Billing stack / month</p>
+        <p id="stackCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Operations labor / month</p>
+        <p id="opsCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total billing cost / month</p>
+        <p id="totalCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparisons -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Metering provider comparison</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Per 1M events</th>
+            <th class="py-3 pr-4">Verdict</th>
+          </tr>
+        </thead>
+        <tbody id="meteringBody" class="text-neutral-200">
+          {meteringProviders.map(p => (
+            <tr class="border-b border-neutral-800/50" data-provider={p.slug}>
+              <td class="py-3 pr-4 font-medium text-white">{p.name}</td>
+              <td class="py-3 pr-4 text-right font-mono monthly-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono per-cell">—</td>
+              <td class="py-3 pr-4 text-sm verdict-cell text-neutral-400">—</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Payment processor comparison</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Processor</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Per transaction</th>
+            <th class="py-3 pr-4">Verdict</th>
+          </tr>
+        </thead>
+        <tbody id="paymentBody" class="text-neutral-200">
+          {paymentProviders.filter(p => p.slug !== 'none').map(p => (
+            <tr class="border-b border-neutral-800/50" data-provider={p.slug}>
+              <td class="py-3 pr-4 font-medium text-white">{p.name}</td>
+              <td class="py-3 pr-4 text-right font-mono monthly-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono per-cell">—</td>
+              <td class="py-3 pr-4 text-sm verdict-cell text-neutral-400">—</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Category</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">% of MRR</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownBody" class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Event metering</td><td class="py-3 pr-4 text-right font-mono" id="meteringCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="meteringPctCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Billing platform</td><td class="py-3 pr-4 text-right font-mono" id="billingCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="billingPctCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Payment processing</td><td class="py-3 pr-4 text-right font-mono" id="paymentCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="paymentPctCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Tax engine</td><td class="py-3 pr-4 text-right font-mono" id="taxCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="taxPctCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Dunning / recovery</td><td class="py-3 pr-4 text-right font-mono" id="dunningCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="dunningPctCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Revenue recognition</td><td class="py-3 pr-4 text-right font-mono" id="revrecCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="revrecPctCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Finance/ops labor</td><td class="py-3 pr-4 text-right font-mono" id="financeCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="financePctCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Maintenance labor</td><td class="py-3 pr-4 text-right font-mono" id="maintenanceCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="maintenancePctCell">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Best option -->
+    <section id="best" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+      <h2 class="text-lg font-semibold text-cyan-400 mb-2">Billing cost estimate</h2>
+      <p id="bestLine" class="text-white text-xl font-medium">Enter a workload to see the cost of metering and billing.</p>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-per-user-cost-calculator/" class="btn-primary text-sm">Per-User Cost →</a>
+      <a href="/tools/agent-multi-tenant-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Multi-Tenant SaaS Cost →</a>
+      <a href="/tools/agent-api-commitment-roi/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Commitment ROI →</a>
+      <a href="/tools/startup-runway-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Runway →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{
+    meteringProviders: JSON.stringify(meteringProviders),
+    billingProviders: JSON.stringify(billingProviders),
+    paymentProviders: JSON.stringify(paymentProviders),
+    taxProviders: JSON.stringify(taxProviders),
+    dunningProviders: JSON.stringify(dunningProviders),
+    revrecProviders: JSON.stringify(revrecProviders),
+    scenarios: JSON.stringify(scenarios)
+  }}>
+    const meteringData = JSON.parse(meteringProviders);
+    const billingData = JSON.parse(billingProviders);
+    const paymentData = JSON.parse(paymentProviders);
+    const taxData = JSON.parse(taxProviders);
+    const dunningData = JSON.parse(dunningProviders);
+    const revrecData = JSON.parse(revrecProviders);
+    const scenarioData = JSON.parse(scenarios);
+
+    const meteringMap = Object.fromEntries(meteringData.map(p => [p.slug, p]));
+    const billingMap = Object.fromEntries(billingData.map(p => [p.slug, p]));
+    const paymentMap = Object.fromEntries(paymentData.map(p => [p.slug, p]));
+    const taxMap = Object.fromEntries(taxData.map(p => [p.slug, p]));
+    const dunningMap = Object.fromEntries(dunningData.map(p => [p.slug, p]));
+    const revrecMap = Object.fromEntries(revrecData.map(p => [p.slug, p]));
+
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmt2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtNum = (n, digits = 1) => n.toLocaleString('en-US', { maximumFractionDigits: digits });
+    const fmtPct = n => fmtNum(n) + '%';
+
+    function frequencyMultiplier(freq) {
+      if (freq === 'quarterly') return 1 / 3;
+      if (freq === 'annual') return 1 / 12;
+      return 1;
+    }
+
+    function getInputs() {
+      return {
+        monthlyUsers: Math.max(0, parseFloat(document.getElementById('monthlyUsers').value) || 0),
+        monthlyEvents: Math.max(0, parseFloat(document.getElementById('monthlyEvents').value) || 0),
+        avgInvoiceValue: Math.max(0, parseFloat(document.getElementById('avgInvoiceValue').value) || 0),
+        invoiceFrequency: document.getElementById('invoiceFrequency').value,
+        meteringProvider: document.getElementById('meteringProvider').value,
+        billingProvider: document.getElementById('billingProvider').value,
+        paymentProvider: document.getElementById('paymentProvider').value,
+        taxProvider: document.getElementById('taxProvider').value,
+        dunningProvider: document.getElementById('dunningProvider').value,
+        revrecProvider: document.getElementById('revrecProvider').value,
+        failureRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('failureRate').value) || 0)) / 100,
+        recoveryRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('recoveryRate').value) || 0)) / 100,
+        financeHours: Math.max(0, parseFloat(document.getElementById('financeHours').value) || 0),
+        financeRate: Math.max(0, parseFloat(document.getElementById('financeRate').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupRate: Math.max(0, parseFloat(document.getElementById('setupRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        maintenanceRate: Math.max(0, parseFloat(document.getElementById('maintenanceRate').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function meteringCost(p, events) {
+      const eventsInK = events / 1000;
+      const free = (p.free_1k_monthly || 0);
+      const chargeable = Math.max(0, eventsInK - free);
+      return (p.base_monthly || 0) + chargeable * (p.overage_per_1k || p.cost_per_1k_events || 0);
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const m = meteringMap[inps.meteringProvider];
+      const b = billingMap[inps.billingProvider];
+      const pay = paymentMap[inps.paymentProvider];
+      const t = taxMap[inps.taxProvider];
+      const d = dunningMap[inps.dunningProvider];
+      const r = revrecMap[inps.revrecProvider];
+
+      const mrr = inps.monthlyUsers * inps.avgInvoiceValue * frequencyMultiplier(inps.invoiceFrequency);
+      const monthlyInvoices = mrr / Math.max(0.01, inps.avgInvoiceValue);
+      const transactions = monthlyInvoices;
+      const failedRevenue = mrr * inps.failureRate;
+      const recoveredRevenue = failedRevenue * inps.recoveryRate;
+
+      const metering = meteringCost(m, inps.monthlyEvents);
+      const billing = (b.base_monthly || 0) + (mrr * (b.rev_pct || 0)) + (monthlyInvoices * (b.per_invoice || 0));
+      const payment = (pay.base_monthly || 0) + (mrr * (pay.rev_pct || 0)) + (transactions * (pay.per_transaction || 0));
+      const tax = (t.base_monthly || 0) + (transactions * (t.per_transaction || 0)) + (mrr * (t.rev_pct || 0));
+      const dunning = (d.base_monthly || 0) + (recoveredRevenue * (d.per_recovered_rev_pct || 0));
+      const revrec = (r.base_monthly || 0) + (mrr * (r.per_revenue_pct || 0));
+      const finance = inps.financeHours * inps.financeRate;
+      const maintenance = inps.maintenanceHours * inps.maintenanceRate;
+      const setup = inps.setupHours * inps.setupRate;
+
+      const stackCost = metering + billing + payment + tax + dunning + revrec;
+      const opsCost = finance + maintenance;
+      const monthlyTotal = stackCost + opsCost;
+      const periodCost = monthlyTotal * inps.projectionMonths + setup;
+      const pct = mrr > 0 ? (monthlyTotal / mrr) * 100 : 0;
+
+      // metering comparison table
+      const meteringRows = meteringData.map(p => ({ slug: p.slug, name: p.name, cost: meteringCost(p, inps.monthlyEvents), per1m: meteringCost(p, 1_000_000) })).sort((a, b) => a.cost - b.cost);
+      const cheapestMetering = meteringRows[0];
+      document.querySelectorAll('#meteringBody tr').forEach(tr => {
+        const slug = tr.dataset.provider;
+        const row = meteringRows.find(r => r.slug === slug);
+        if (!row) return;
+        tr.querySelector('.monthly-cell').textContent = fmt(row.cost);
+        tr.querySelector('.per-cell').textContent = fmt(row.per1m);
+        const vCell = tr.querySelector('.verdict-cell');
+        if (row.slug === cheapestMetering.slug) {
+          vCell.textContent = 'Cheapest';
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-emerald-400';
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          vCell.textContent = `${fmtPct((row.cost - cheapestMetering.cost) / cheapestMetering.cost * 100)} more`;
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-neutral-400';
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      // payment comparison table
+      const paymentRows = paymentData.filter(p => p.slug !== 'none').map(p => {
+        const cost = (p.base_monthly || 0) + (mrr * (p.rev_pct || 0)) + (transactions * (p.per_transaction || 0));
+        const perTx = transactions > 0 ? cost / transactions : 0;
+        return { slug: p.slug, name: p.name, cost, perTx };
+      }).sort((a, b) => a.cost - b.cost);
+      const cheapestPayment = paymentRows[0];
+      document.querySelectorAll('#paymentBody tr').forEach(tr => {
+        const slug = tr.dataset.provider;
+        const row = paymentRows.find(r => r.slug === slug);
+        if (!row) return;
+        tr.querySelector('.monthly-cell').textContent = fmt(row.cost);
+        tr.querySelector('.per-cell').textContent = fmt2(row.perTx);
+        const vCell = tr.querySelector('.verdict-cell');
+        if (row.slug === cheapestPayment.slug) {
+          vCell.textContent = 'Cheapest';
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-emerald-400';
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          vCell.textContent = `${fmtPct((row.cost - cheapestPayment.cost) / cheapestPayment.cost * 100)} more`;
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-neutral-400';
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      function setCell(id, monthly) {
+        document.getElementById(id + 'CostCell').textContent = fmt(monthly);
+        document.getElementById(id + 'PctCell').textContent = mrr > 0 ? fmtPct(monthly / mrr * 100) : '—';
+      }
+
+      setCell('metering', metering);
+      setCell('billing', billing);
+      setCell('payment', payment);
+      setCell('tax', tax);
+      setCell('dunning', dunning);
+      setCell('revrec', revrec);
+      setCell('finance', finance);
+      setCell('maintenance', maintenance);
+
+      document.getElementById('mrr').textContent = fmt(mrr);
+      document.getElementById('stackCost').textContent = fmt(stackCost);
+      document.getElementById('opsCost').textContent = fmt(opsCost);
+      document.getElementById('totalCost').textContent = fmt(monthlyTotal);
+
+      document.getElementById('bestLine').textContent = `With ${fmtNum(inps.monthlyUsers)} paying users and ${fmtNum(inps.monthlyEvents / 1_000_000, 2)}M events, the billing and metering stack costs ${fmt(monthlyTotal)}/month (${fmt(pct)}% of MRR, ${fmt(periodCost)} over ${inps.projectionMonths} months including setup).`;
+
+      let verdict = '';
+      if (mrr === 0) {
+        verdict = 'With no revenue, focus only on metering cost and setup labor. Most providers offer a generous free tier; start with the cheapest managed option and migrate when event volume or invoice complexity forces it.';
+      } else if (pct < 3) {
+        verdict = `Billing overhead is ${fmtPct(pct)} of MRR, which is healthy. Payment processing is likely the largest line item. Make sure failed-payment recovery is active; a small recovery lift can pay for the rest of the stack.`;
+      } else if (pct < 8) {
+        verdict = `Billing overhead is ${fmtPct(pct)} of MRR. Look at whether event metering or billing-platform fees are driving the cost. For usage-based products, a warehouse-native CDP or self-hosted stream often beats per-event analytics pricing.`;
+      } else {
+        verdict = `Billing overhead is ${fmtPct(pct)} of MRR, which is high. Consider self-hosted metering, switching billing platforms, or bundling subscriptions to reduce invoice count. For small ARPU products, billing costs can eat margins fast.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_users !== undefined) document.getElementById('monthlyUsers').value = obj.monthly_users;
+      if (obj.monthly_events !== undefined) document.getElementById('monthlyEvents').value = obj.monthly_events;
+      if (obj.avg_invoice_value !== undefined) document.getElementById('avgInvoiceValue').value = obj.avg_invoice_value;
+      if (obj.invoice_frequency !== undefined) document.getElementById('invoiceFrequency').value = obj.invoice_frequency;
+      if (obj.metering_provider !== undefined) document.getElementById('meteringProvider').value = obj.metering_provider;
+      if (obj.billing_provider !== undefined) document.getElementById('billingProvider').value = obj.billing_provider;
+      if (obj.payment_provider !== undefined) document.getElementById('paymentProvider').value = obj.payment_provider;
+      if (obj.tax_provider !== undefined) document.getElementById('taxProvider').value = obj.tax_provider;
+      if (obj.dunning_provider !== undefined) document.getElementById('dunningProvider').value = obj.dunning_provider;
+      if (obj.revrec_provider !== undefined) document.getElementById('revrecProvider').value = obj.revrec_provider;
+      if (obj.finance_hours_month !== undefined) document.getElementById('financeHours').value = obj.finance_hours_month;
+      if (obj.finance_hourly_rate !== undefined) document.getElementById('financeRate').value = obj.finance_hourly_rate;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_month;
+      if (obj.maintenance_hourly_rate !== undefined) document.getElementById('maintenanceRate').value = obj.maintenance_hourly_rate;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['monthlyUsers','monthlyEvents','avgInvoiceValue','invoiceFrequency','meteringProvider','billingProvider','paymentProvider','taxProvider','dunningProvider','revrecProvider','failureRate','recoveryRate','financeHours','financeRate','setupHours','setupRate','maintenanceHours','maintenanceRate','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', compute);
+          el.addEventListener('change', compute);
+        }
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
