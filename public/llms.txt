@@ -241,15 +241,23 @@ Each tool below is a web page with structured data and a clear input/output cont
 |- Cross-links: Agent API Pricing Comparator, Per-User Cost Calculator, Agent Output Value Calculator, Multi-Modal Cost Calculator.
 
 ## AI Agent Vector Database Selector
-|- URL: https://hermesdispatch.dev/tools/vector-db-selector/
-|- Description: Pick the right vector database for an AI agent's memory, RAG, or semantic search workload based on deployment model, scale, latency priority, and features.
-|- Inputs: deployment model (managed cloud, hybrid, self-hosted), priority (latency, cost, scale, ease, features), scale tier, embedding dimensions.
-|- Outputs: ranked vector DB recommendation, estimated monthly cost, latency/scale/deployment summary, pros/cons, and feature fit.
-|- Audience: AI agent builders choosing a vector database for memory or RAG.
-|- Cross-links: Agent Memory / RAG Cost Calculator, Agent Stack Builder, LLM Cost Calculator.
+||- URL: https://hermesdispatch.dev/tools/vector-db-selector/
+||- Description: Pick the right vector database for an AI agent or RAG workload based on scale, budget, deployment model, latency, and feature needs.
+||- Inputs: deployment model (managed cloud, hybrid, self-hosted), priority (latency, cost, scale, ease, features), scale tier, embedding dimensions.
+||- Outputs: ranked recommendation, estimated monthly cost, latency/scale/deployment summary, feature-fit highlights, top alternatives.
+||- Audience: AI agent builders choosing a vector DB.
+||- Cross-links: Agent Memory / RAG Cost Calculator, Agent Stack Builder, LLM Cost Calculator.
+
+## AI Agent Dependency / Third-Party API Cost Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-dependency-cost-calculator/
+||- Description: Estimate the monthly cost of all third-party APIs an AI agent calls: search, maps, CRM, payment, weather, email, SMS, storage, and custom integrations.
+||- Inputs: monthly tasks, distinct APIs per task, calls per API, cost per API call, failure rate, retry rate, retry multiplier, human review rate/minutes/hourly cost, setup/maintenance hours and rates, projection months.
+||- Outputs: monthly API calls, monthly API cost, all-in monthly cost, cost per task, cost per 1k tasks, retry/failure/review/maintenance breakdown, projected period cost, verdict.
+||- Audience: AI agent builders budgeting the external SaaS/API surface around an agent.
+||- Cross-links: Tool Call Cost Calculator, MCP Cost Calculator, API Pricing Comparator, Agent Output Value Calculator.
 
 ## Hub Pages
-- Description: Track whether Perplexity, ChatGPT, Gemini, and Copilot cite your pages.
+
 - Inputs: page URL
 - Outputs: citation status, test links
 - Audience: AEO/content marketers

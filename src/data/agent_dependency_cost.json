@@ -1,0 +1,173 @@
+{
+  "last_updated": "2026-07-10",
+  "note": "Third-party API costs are based on typical public SaaS/API pricing and tiered rates. Replace defaults with your actual provider rates and negotiated discounts.",
+  "defaults": {
+    "monthly_tasks": 5000,
+    "apis_per_task": 3,
+    "cost_per_api_call": 0.015,
+    "calls_per_api": 1,
+    "failure_rate": 3,
+    "retry_rate": 50,
+    "retry_multiplier": 1.4,
+    "human_review_pct": 5,
+    "review_minutes": 2,
+    "review_hourly_cost": 50,
+    "setup_hours": 8,
+    "setup_hourly_rate": 100,
+    "maintenance_hours_per_month": 4,
+    "projection_months": 12
+  },
+  "api_categories": [
+    {
+      "slug": "web_search",
+      "name": "Web search (Brave / SerpAPI / Tavily / Perplexity)",
+      "cost_per_call": 0.02,
+      "failure_rate_default": 4,
+      "retry_rate_default": 50,
+      "retry_multiplier_default": 1.3,
+      "notes": "Per-query search API cost. Caching and query deduplication can cut spend 30-70%."
+    },
+    {
+      "slug": "maps_geo",
+      "name": "Maps / geocoding (Google Maps / Mapbox / OpenStreetMap)",
+      "cost_per_call": 0.006,
+      "failure_rate_default": 2,
+      "retry_rate_default": 30,
+      "retry_multiplier_default": 1.2,
+      "notes": "Geocoding, routing, places, and distance-matrix lookups. Often volume-tiered."
+    },
+    {
+      "slug": "weather",
+      "name": "Weather / market data (OpenWeather / Finnhub / Polygon)",
+      "cost_per_call": 0.004,
+      "failure_rate_default": 2,
+      "retry_rate_default": 25,
+      "retry_multiplier_default": 1.2,
+      "notes": "Per-call data feeds; real-time websocket or tick data can be significantly more expensive."
+    },
+    {
+      "slug": "crm",
+      "name": "CRM / helpdesk action (Salesforce / HubSpot / Zendesk)",
+      "cost_per_call": 0.01,
+      "failure_rate_default": 3,
+      "retry_rate_default": 40,
+      "retry_multiplier_default": 1.3,
+      "notes": "API operations per record: read, create, update, or search. Rate-limit retries add cost."
+    },
+    {
+      "slug": "payment",
+      "name": "Payment / billing (Stripe / PayPal / Paddle)",
+      "cost_per_call": 0.015,
+      "failure_rate_default": 2,
+      "retry_rate_default": 35,
+      "retry_multiplier_default": 1.3,
+      "notes": "Idempotent retries are essential. Cost includes transaction fees on some platforms; enter blended per-call cost."
+    },
+    {
+      "slug": "email",
+      "name": "Email send / deliverability (Resend / Postmark / Mailgun)",
+      "cost_per_call": 0.001,
+      "failure_rate_default": 3,
+      "retry_rate_default": 30,
+      "retry_multiplier_default": 1.2,
+      "notes": "Per-message send cost. Bounces and retries still consume quota."
+    },
+    {
+      "slug": "sms_chat",
+      "name": "SMS / chat (Twilio / MessageBird / WhatsApp Business)",
+      "cost_per_call": 0.02,
+      "failure_rate_default": 3,
+      "retry_rate_default": 30,
+      "retry_multiplier_default": 1.2,
+      "notes": "Per-outbound-message cost; international and WhatsApp template rates vary widely."
+    },
+    {
+      "slug": "storage",
+      "name": "Object / blob storage (S3 / R2 / Cloudflare Images)",
+      "cost_per_call": 0.0005,
+      "failure_rate_default": 1,
+      "retry_rate_default": 20,
+      "retry_multiplier_default": 1.1,
+      "notes": "Per-operation cost for read/write/list. Large transfers dominate at scale."
+    },
+    {
+      "slug": "custom",
+      "name": "Custom internal / partner API",
+      "cost_per_call": 0.015,
+      "failure_rate_default": 4,
+      "retry_rate_default": 45,
+      "retry_multiplier_default": 1.4,
+      "notes": "Average custom API with mixed internal and external dependencies."
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Travel / concierge agent",
+      "monthly_tasks": 3000,
+      "apis_per_task": 5,
+      "cost_per_api_call": 0.012,
+      "calls_per_api": 1,
+      "failure_rate": 4,
+      "retry_rate": 50,
+      "retry_multiplier": 1.3,
+      "human_review_pct": 8,
+      "review_minutes": 3,
+      "review_hourly_cost": 55,
+      "setup_hours": 10,
+      "setup_hourly_rate": 110,
+      "maintenance_hours_per_month": 5,
+      "projection_months": 12
+    },
+    {
+      "name": "Sales / CRM agent",
+      "monthly_tasks": 8000,
+      "apis_per_task": 4,
+      "cost_per_api_call": 0.008,
+      "calls_per_api": 1.2,
+      "failure_rate": 3,
+      "retry_rate": 45,
+      "retry_multiplier": 1.3,
+      "human_review_pct": 4,
+      "review_minutes": 1.5,
+      "review_hourly_cost": 60,
+      "setup_hours": 12,
+      "setup_hourly_rate": 120,
+      "maintenance_hours_per_month": 6,
+      "projection_months": 12
+    },
+    {
+      "name": "Finance / trading assistant",
+      "monthly_tasks": 5000,
+      "apis_per_task": 6,
+      "cost_per_api_call": 0.018,
+      "calls_per_api": 1,
+      "failure_rate": 2,
+      "retry_rate": 40,
+      "retry_multiplier": 1.4,
+      "human_review_pct": 6,
+      "review_minutes": 2,
+      "review_hourly_cost": 75,
+      "setup_hours": 14,
+      "setup_hourly_rate": 130,
+      "maintenance_hours_per_month": 7,
+      "projection_months": 12
+    },
+    {
+      "name": "Operations / data agent",
+      "monthly_tasks": 10000,
+      "apis_per_task": 3,
+      "cost_per_api_call": 0.005,
+      "calls_per_api": 1,
+      "failure_rate": 3,
+      "retry_rate": 35,
+      "retry_multiplier": 1.3,
+      "human_review_pct": 5,
+      "review_minutes": 1.5,
+      "review_hourly_cost": 45,
+      "setup_hours": 8,
+      "setup_hourly_rate": 95,
+      "maintenance_hours_per_month": 4,
+      "projection_months": 12
+    }
+  ]
+}
