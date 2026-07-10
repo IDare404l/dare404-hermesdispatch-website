@@ -1,0 +1,390 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_multi_tenant_cost.json';
+
+const title = "AI Agent Multi-Tenant SaaS Cost Calculator | Hermes Dispatch";
+const description = "Estimate per-tenant and total monthly cost for a multi-tenant AI agent SaaS across LLM tokens, vector memory, storage, compute, auth, observability, support, and shared infrastructure.";
+const providers = data.providers;
+const vectorDbs = data.vector_dbs;
+const objectStores = data.object_stores;
+const authProviders = data.auth_providers;
+const observabilityTools = data.observability_tools;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "Why calculate cost per tenant instead of per user?", a: "B2B SaaS usually prices per tenant (team, workspace, or company). Per-tenant economics show whether a fixed subscription price covers variable AI infrastructure and support costs." },
+  { q: "What is included in the monthly per-tenant cost?", a: "LLM API tokens, vector DB storage and queries, object storage, compute/containers, authentication, observability, support labor, and a share of fixed infrastructure." },
+  { q: "How is gross margin calculated?", a: "Gross margin = (monthly revenue - total monthly cost) / monthly revenue. It excludes one-time setup, sales, and marketing." },
+  { q: "What does tenant break-even mean?", a: "At the current price and cost structure, it is the number of active tenants needed for revenue to cover total monthly cost." },
+  { q: "Does this include local GPU cost?", a: "Compute infrastructure is entered as a monthly amount. For detailed GPU/local-vs-cloud sizing, pair this with the Inference Capacity Planner or GPU Cloud vs Buy Calculator." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Multi-Tenant SaaS Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-multi-tenant-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🏢</div>
+      <h1 class="display-heading mb-4">AI Agent Multi-Tenant SaaS Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate per-tenant and total monthly cost for a multi-tenant AI agent SaaS across LLM tokens, vector memory, storage, compute, auth, observability, support, and shared infrastructure.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Tenant & usage profile</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Total tenants</span>
+          <input id="tenants" type="number" min="1" step="10" value={defaults.tenants} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Active tenant %</span>
+          <input id="activeTenantPct" type="number" min="0" max="100" step="5" value={defaults.active_tenant_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests per active tenant / day</span>
+          <input id="requestsPerTenantDay" type="number" min="0" step="1" value={defaults.requests_per_tenant_day} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" step="100" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" step="50" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Price per tenant / month ($)</span>
+          <input id="pricePerTenant" type="number" min="0" step="1" value={defaults.price_per_tenant_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection months</span>
+          <input id="projectionMonths" type="number" min="1" max="60" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+
+      <h2 class="text-xl font-bold mb-6 mt-10 text-brand-gold">Memory, storage & infrastructure</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Vectors per tenant</span>
+          <input id="vectorsPerTenant" type="number" min="0" step="1000" value={defaults.vectors_per_tenant} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Vector DB</span>
+          <select id="vectorDb" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {vectorDbs.map(v => <option value={JSON.stringify(v)} selected={v.slug === defaults.vector_db}>{v.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Vector updates / tenant / month</span>
+          <input id="vectorUpdates" type="number" min="0" step="100" value={defaults.vector_updates_per_tenant_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Vector queries / tenant / month</span>
+          <input id="vectorQueries" type="number" min="0" step="100" value={defaults.queries_per_tenant_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage per tenant (GB)</span>
+          <input id="storageGb" type="number" min="0" step="0.1" value={defaults.storage_gb_per_tenant} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Object store</span>
+          <select id="objectStore" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {objectStores.map(o => <option value={JSON.stringify(o)} selected={o.slug === defaults.object_store}>{o.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage reads / tenant / month</span>
+          <input id="storageReads" type="number" min="0" step="100" value={defaults.storage_reads_per_tenant_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage writes / tenant / month</span>
+          <input id="storageWrites" type="number" min="0" step="100" value={defaults.storage_writes_per_tenant_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Compute / containers monthly ($)</span>
+          <input id="computeInfra" type="number" min="0" step="10" value={defaults.compute_infra_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Auth provider</span>
+          <select id="authProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {authProviders.map(a => <option value={JSON.stringify(a)} selected={a.slug === defaults.auth_provider}>{a.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Observability tool</span>
+          <select id="observability" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {observabilityTools.map(o => <option value={JSON.stringify(o)} selected={o.slug === defaults.observability}>{o.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Shared infra monthly ($)</span>
+          <input id="sharedInfra" type="number" min="0" step="10" value={defaults.shared_infra_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Support hours / 100 active tenants / month</span>
+          <input id="supportHours" type="number" min="0" step="0.5" value={defaults.support_hours_per_100_tenants} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Support hourly rate ($)</span>
+          <input id="supportRate" type="number" min="0" step="5" value={defaults.support_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-cyan-400/20" id="results">
+      <h2 class="text-xl font-bold mb-6 text-cyan-400">Estimated cost & margin</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+          <p class="text-neutral-400 text-sm">Active tenants</p>
+          <p id="resActiveTenants" class="text-2xl font-bold">-</p>
+        </div>
+        <div class="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+          <p class="text-neutral-400 text-sm">Monthly requests</p>
+          <p id="resMonthlyRequests" class="text-2xl font-bold">-</p>
+        </div>
+        <div class="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+          <p class="text-neutral-400 text-sm">Cost per tenant / month</p>
+          <p id="resCostPerTenant" class="text-2xl font-bold text-brand-gold">-</p>
+        </div>
+        <div class="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+          <p class="text-neutral-400 text-sm">Total monthly cost</p>
+          <p id="resTotalMonthly" class="text-2xl font-bold">-</p>
+        </div>
+        <div class="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+          <p class="text-neutral-400 text-sm">Monthly revenue</p>
+          <p id="resRevenue" class="text-2xl font-bold text-cyan-400">-</p>
+        </div>
+        <div class="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+          <p class="text-neutral-400 text-sm">Gross margin</p>
+          <p id="resMargin" class="text-2xl font-bold">-</p>
+        </div>
+        <div class="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+          <p class="text-neutral-400 text-sm">Tenant break-even</p>
+          <p id="resBreakEven" class="text-2xl font-bold">-</p>
+        </div>
+        <div class="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+          <p class="text-neutral-400 text-sm">Period cost</p>
+          <p id="resPeriodCost" class="text-2xl font-bold">-</p>
+        </div>
+      </div>
+
+      <div class="bg-neutral-900 rounded-xl p-4 border border-neutral-800 mb-6">
+        <h3 class="font-semibold mb-3">Cost breakdown</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="text-neutral-400 border-b border-neutral-700">
+              <tr><th class="py-2">Component</th><th class="py-2 text-right">Monthly</th><th class="py-2 text-right">% of total</th></tr>
+            </thead>
+            <tbody id="breakdownBody" class="divide-y divide-neutral-800">
+              <tr><td colspan="3" class="py-4 text-neutral-500">Enter inputs to see breakdown.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="verdict" class="rounded-xl p-4 bg-neutral-900 border border-neutral-800">
+        <p class="text-neutral-400">Verdict</p>
+        <p class="text-lg font-semibold">-</p>
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <section class="glass-card rounded-2xl p-6 border border-neutral-800">
+      <h2 class="text-lg font-bold mb-4">Related tools</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <a href="/tools/agent-per-user-cost-calculator/" class="text-cyan-400 hover:underline">AI Agent Per-User Cost Calculator</a>
+        <a href="/tools/agent-api-pricing-comparator/" class="text-cyan-400 hover:underline">AI Agent API Pricing Comparator</a>
+        <a href="/tools/agent-hosting-cost-comparator/" class="text-cyan-400 hover:underline">Agent Hosting Cost Comparator</a>
+        <a href="/tools/agent-memory-cost-calculator/" class="text-cyan-400 hover:underline">Agent Memory / RAG Cost Calculator</a>
+        <a href="/tools/agent-observability-cost-calculator/" class="text-cyan-400 hover:underline">Agent Observability Cost Calculator</a>
+        <a href="/tools/startup-runway-calculator/" class="text-cyan-400 hover:underline">Startup Runway Calculator</a>
+      </div>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ providers: data.providers, vectorDbs: data.vector_dbs, objectStores: data.object_stores, authProviders: data.auth_providers, observabilityTools: data.observability_tools, scenarios: data.scenarios }}>
+    function fmt(n) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+    }
+    function fmtNum(n) {
+      return new Intl.NumberFormat('en-US').format(Math.round(n));
+    }
+    function getVal(id) {
+      const el = document.getElementById(id);
+      return el ? el.value : '';
+    }
+    function getNum(id) {
+      return parseFloat(getVal(id)) || 0;
+    }
+    function getJSON(id) {
+      try { return JSON.parse(getVal(id)); } catch { return null; }
+    }
+
+    function calc() {
+      const tenants = getNum('tenants');
+      const activePct = getNum('activeTenantPct') / 100;
+      const activeTenants = Math.max(1, Math.round(tenants * activePct));
+      const reqPerDay = getNum('requestsPerTenantDay');
+      const monthlyRequests = activeTenants * reqPerDay * 30;
+      const inputTokens = getNum('inputTokens');
+      const outputTokens = getNum('outputTokens');
+      const cachedPct = getNum('cachedInputPct') / 100;
+      const provider = getJSON('provider') || providers[0];
+      const price = getNum('pricePerTenant');
+      const months = getNum('projectionMonths');
+
+      const llmInput = monthlyRequests * inputTokens * (1 - cachedPct) * (provider.input_cost_per_1m / 1e6);
+      const llmCached = monthlyRequests * inputTokens * cachedPct * (provider.cached_input_cost_per_1m / 1e6);
+      const llmOutput = monthlyRequests * outputTokens * (provider.output_cost_per_1m / 1e6);
+      const llmCost = llmInput + llmCached + llmOutput;
+
+      const vectorsPerTenant = getNum('vectorsPerTenant');
+      const vectorDb = getJSON('vectorDb') || vectorDbs[0];
+      const vectorUpdates = getNum('vectorUpdates');
+      const vectorQueries = getNum('vectorQueries');
+      const totalVectors = vectorsPerTenant * activeTenants;
+      const vectorStorageCost = (totalVectors / 1e6) * vectorDb.cost_per_1m_vectors_month;
+      const vectorWriteCost = (activeTenants * vectorUpdates / 1e6) * vectorDb.write_cost_per_1m;
+      const vectorQueryCost = (activeTenants * vectorQueries / 1e3) * vectorDb.query_cost_per_1k;
+      const vectorCost = vectorStorageCost + vectorWriteCost + vectorQueryCost;
+
+      const storageGb = getNum('storageGb');
+      const objectStore = getJSON('objectStore') || objectStores[0];
+      const storageReads = getNum('storageReads');
+      const storageWrites = getNum('storageWrites');
+      const totalStorage = storageGb * activeTenants;
+      const storageCost = totalStorage * objectStore.cost_per_gb_month;
+      const storageRequestCost = (activeTenants * storageReads / 1e3) * objectStore.read_cost_per_1k_requests + (activeTenants * storageWrites / 1e3) * objectStore.write_cost_per_1k_requests;
+      const totalStorageCost = storageCost + storageRequestCost;
+
+      const computeInfra = getNum('computeInfra');
+      const authProvider = getJSON('authProvider') || authProviders[0];
+      const authCost = authProvider.base_monthly + (authProvider.cost_per_tenant_month * tenants);
+      const observability = getJSON('observability') || observabilityTools[0];
+      const tracesPerMonth = monthlyRequests; // 1 trace per request estimate
+      const observabilityCost = observability.base_monthly + (tracesPerMonth / 1e3) * observability.cost_per_1k_traces;
+      const sharedInfra = getNum('sharedInfra');
+      const supportHours = getNum('supportHours');
+      const supportRate = getNum('supportRate');
+      const supportCost = (activeTenants / 100) * supportHours * supportRate;
+
+      const totalMonthly = llmCost + vectorCost + totalStorageCost + computeInfra + authCost + observabilityCost + sharedInfra + supportCost;
+      const costPerTenant = totalMonthly / activeTenants;
+      const revenue = price * activeTenants;
+      const margin = revenue > 0 ? (revenue - totalMonthly) / revenue : 0;
+      const breakEvenTenants = price > 0 ? Math.ceil(totalMonthly / price) : 0;
+      const periodCost = totalMonthly * months;
+
+      document.getElementById('resActiveTenants').textContent = fmtNum(activeTenants);
+      document.getElementById('resMonthlyRequests').textContent = fmtNum(monthlyRequests);
+      document.getElementById('resCostPerTenant').textContent = fmt(costPerTenant);
+      document.getElementById('resTotalMonthly').textContent = fmt(totalMonthly);
+      document.getElementById('resRevenue').textContent = fmt(revenue);
+      document.getElementById('resMargin').textContent = (margin * 100).toFixed(1) + '%';
+      document.getElementById('resMargin').className = 'text-2xl font-bold ' + (margin >= 0.5 ? 'text-green-400' : margin >= 0.2 ? 'text-yellow-400' : 'text-red-400');
+      document.getElementById('resBreakEven').textContent = fmtNum(breakEvenTenants);
+      document.getElementById('resPeriodCost').textContent = fmt(periodCost);
+
+      const breakdown = [
+        { name: 'LLM API', value: llmCost },
+        { name: 'Vector DB', value: vectorCost },
+        { name: 'Object storage', value: totalStorageCost },
+        { name: 'Compute / containers', value: computeInfra },
+        { name: 'Auth', value: authCost },
+        { name: 'Observability', value: observabilityCost },
+        { name: 'Shared infrastructure', value: sharedInfra },
+        { name: 'Support', value: supportCost }
+      ];
+      const tbody = document.getElementById('breakdownBody');
+      tbody.innerHTML = breakdown.map(b => `
+        <tr>
+          <td class="py-2">${b.name}</td>
+          <td class="py-2 text-right">${fmt(b.value)}</td>
+          <td class="py-2 text-right">${totalMonthly > 0 ? (b.value / totalMonthly * 100).toFixed(1) : 0}%</td>
+        </tr>
+      `).join('');
+
+      let verdict = '';
+      if (margin >= 0.5) {
+        verdict = `Strong unit economics: ${(margin * 100).toFixed(0)}% gross margin at $${price}/tenant. Cost per tenant is ${fmt(costPerTenant)}. You can support growth with this pricing.`;
+      } else if (margin >= 0.2) {
+        verdict = `Healthy but tight: ${(margin * 100).toFixed(0)}% gross margin. Consider raising price, reducing LLM/provider costs, or increasing active usage to improve margins.`;
+      } else if (margin > 0) {
+        verdict = `Thin margin: ${(margin * 100).toFixed(0)}% gross margin. You need ${fmtNum(breakEvenTenants)} paying tenants just to cover infra cost. Optimize LLM tokens, switch providers, or raise prices.`;
+      } else {
+        verdict = `Negative gross margin at $${price}/tenant. Cost per tenant (${fmt(costPerTenant)}) exceeds price. Raise prices, cut variable costs, or reduce support/infra before scaling.`;
+      }
+      document.getElementById('verdict').innerHTML = `<p class="text-neutral-400">Verdict</p><p class="text-lg font-semibold">${verdict}</p>`;
+    }
+
+    function applyScenario(s) {
+      document.getElementById('tenants').value = s.tenants;
+      document.getElementById('activeTenantPct').value = s.active_tenant_pct;
+      document.getElementById('requestsPerTenantDay').value = s.requests_per_tenant_day;
+      document.getElementById('inputTokens').value = s.input_tokens;
+      document.getElementById('outputTokens').value = s.output_tokens;
+      document.getElementById('cachedInputPct').value = s.cached_input_pct;
+      document.getElementById('provider').value = JSON.stringify(providers.find(p => p.slug === s.provider) || providers[0]);
+      document.getElementById('vectorsPerTenant').value = s.vectors_per_tenant;
+      document.getElementById('vectorDb').value = JSON.stringify(vectorDbs.find(v => v.slug === s.vector_db) || vectorDbs[0]);
+      document.getElementById('vectorUpdates').value = s.vector_updates_per_tenant_month;
+      document.getElementById('vectorQueries').value = s.queries_per_tenant_month;
+      document.getElementById('storageGb').value = s.storage_gb_per_tenant;
+      document.getElementById('objectStore').value = JSON.stringify(objectStores.find(o => o.slug === s.object_store) || objectStores[0]);
+      document.getElementById('storageReads').value = s.storage_reads_per_tenant_month;
+      document.getElementById('storageWrites').value = s.storage_writes_per_tenant_month;
+      document.getElementById('computeInfra').value = s.compute_infra_monthly;
+      document.getElementById('authProvider').value = JSON.stringify(authProviders.find(a => a.slug === s.auth_provider) || authProviders[0]);
+      document.getElementById('observability').value = JSON.stringify(observabilityTools.find(o => o.slug === s.observability) || observabilityTools[0]);
+      document.getElementById('supportHours').value = s.support_hours_per_100_tenants;
+      document.getElementById('supportRate').value = s.support_hourly_rate;
+      document.getElementById('sharedInfra').value = s.shared_infra_monthly;
+      document.getElementById('pricePerTenant').value = s.price_per_tenant_month;
+      document.getElementById('projectionMonths').value = s.projection_months;
+      calc();
+    }
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const s = JSON.parse(btn.dataset.scenario);
+        applyScenario(s);
+      });
+    });
+
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calc));
+    calc();
+  </script>
+</Layout>

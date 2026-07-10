@@ -843,11 +843,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||||- Cross-links: Agent Shadow / A-B Test Cost Calculator, Agent Deployment Readiness Scorecard, Agent API Pricing Comparator, Agent Red Team Cost Calculator.
 
 ## AI Agent Hallucination Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-hallucination-cost-calculator/
-|- Description: Estimate the monthly cost of AI agent hallucinations and bad answers: rework, support, refunds, churn, compliance exposure, and detection overhead.
-|- Inputs: monthly requests, input/output tokens per request, cached input percentage, LLM provider, hallucination / bad-answer rate (%), severity split (minor / moderate / severe), detection method (user reports / automated eval / human audit / hybrid), support hourly rate, rework hourly rate, human review rate, review minutes, reviewer hourly rate, projection months.
-|- Outputs: bad answers per month, base inference cost per month, remediation cost breakdown (rework, support, refunds, churn, compliance), detection overhead, human review cost, total hallucination cost per month, projected period cost, provider comparison table, verdict.
-|- Audience: AI agent builders and operators quantifying the cost of wrong answers and choosing detection/prevention investments.
-|- Cross-links: Cost Per Failure Calculator, Red Team Cost Calculator, Observability Cost Calculator, Memory / RAG Cost Calculator.
+||- URL: https://hermesdispatch.dev/tools/agent-hallucination-cost-calculator/
+||- Description: Estimate the monthly cost of AI agent hallucinations and bad answers: rework, support, refunds, churn, compliance exposure, and detection overhead.
+||- Inputs: monthly requests, input/output tokens per request, cached input percentage, LLM provider, hallucination / bad-answer rate (%), severity split (minor / moderate / severe), detection method (user reports / automated eval / human audit / hybrid), support hourly rate, rework hourly rate, human review rate, review minutes, reviewer hourly rate, projection months.
+||- Outputs: bad answers per month, base inference cost per month, remediation cost breakdown (rework, support, refunds, churn, compliance), detection overhead, human review cost, total hallucination cost per month, projected period cost, provider comparison table, verdict.
+||- Audience: AI agent builders and operators quantifying the cost of wrong answers and choosing detection/prevention investments.
+||- Cross-links: Cost Per Failure Calculator, Red Team Cost Calculator, Observability Cost Calculator, Memory / RAG Cost Calculator.
+
+## AI Agent Multi-Tenant SaaS Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-multi-tenant-cost-calculator/
+|- Description: Estimate per-tenant and total monthly cost for a multi-tenant AI agent SaaS across LLM tokens, vector memory, storage, compute, auth, observability, support, and shared infrastructure.
+|- Inputs: total tenants, active tenant percentage, requests per active tenant per day, input/output tokens per request, cached input percentage, LLM provider, vectors per tenant, vector DB, vector updates/queries per tenant per month, storage per tenant, object store, storage reads/writes per tenant per month, compute/containers monthly cost, auth provider, observability tool, support hours per 100 active tenants, support hourly rate, shared infrastructure monthly cost, price per tenant per month, projection months.
+|- Outputs: active tenants, monthly requests, cost per tenant per month, total monthly cost, monthly revenue, gross margin, tenant break-even, period cost, cost breakdown, verdict.
+|- Audience: AI agent SaaS founders and operators setting B2B pricing and budgeting multi-tenant infrastructure.
+|- Cross-links: Per-User Cost Calculator, API Pricing Comparator, Hosting Cost Comparator, Memory / RAG Cost Calculator, Observability Cost Calculator.
 
 ## Hub Pages
