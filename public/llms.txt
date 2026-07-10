@@ -827,11 +827,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||- Cross-links: AI Agent API Pricing Comparator, AI Agent Latency Budget Calculator, AI Agent SLA / Uptime Calculator, Prompt Cache Savings Calculator.
 
 ## AI Agent Deployment Readiness Scorecard
-|||- URL: https://hermesdispatch.dev/tools/agent-deployment-scorecard/
-- Description: Score an AI agent's production readiness across architecture, model, privacy, security, reliability, observability, cost, and go-live plan.
-- Inputs: checklist items across 8 readiness dimensions, scenario preset (MVP prototype, internal tool, customer-facing agent, regulated industry).
-- Outputs: readiness score (0-100), maturity label, open P0 count, per-dimension progress, launch verdict.
-- Audience: AI agent builders, product teams, and operators preparing an agent for production launch.
-- Cross-links: AI Agent Compliance Checker, Red Team Cost Calculator, Observability Cost Calculator, Outage Cost Calculator.
+||||- URL: https://hermesdispatch.dev/tools/agent-deployment-scorecard/
+|- Description: Score an AI agent's production readiness across architecture, model, privacy, security, reliability, observability, cost, and go-live plan.
+|- Inputs: checklist items across 8 readiness dimensions, scenario preset (MVP prototype, internal tool, customer-facing agent, regulated industry).
+|- Outputs: readiness score (0-100), maturity label, open P0 count, per-dimension progress, launch verdict.
+|- Audience: AI agent builders, product teams, and operators preparing an agent for production launch.
+|- Cross-links: AI Agent Compliance Checker, Red Team Cost Calculator, Observability Cost Calculator, Outage Cost Calculator.
+
+## AI Agent Rollout / Canary Cost Calculator
+||||- URL: https://hermesdispatch.dev/tools/agent-rollout-cost-calculator/
+||||- Description: Estimate the cost of rolling out or canary-testing an AI agent: duplicated inference, traffic split, human review, monitoring, incident response, and setup.
+||||- Inputs: monthly requests, input/output tokens per request, cached input percentage, LLM provider, rollout type (shadow / canary / A/B / full), traffic percentage to agent, incident rate percentage, human review rate percentage, review minutes per case, reviewer hourly rate, incident response hours per month, incident response hourly rate, observability tool, setup hours, setup hourly rate, projection months.
+||||- Outputs: inference cost per month, human review cost per month, monitoring and incident response cost per month, total first-month rollout cost, provider comparison table, period cost, verdict.
+||||- Audience: AI agent builders and operators planning a safe, costed launch from shadow mode to full production.
+||||- Cross-links: Agent Shadow / A-B Test Cost Calculator, Agent Deployment Readiness Scorecard, Agent API Pricing Comparator, Agent Red Team Cost Calculator.
 
 ## Hub Pages

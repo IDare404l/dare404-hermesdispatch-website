@@ -3,24 +3,25 @@ import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_rollout_cost.json';
 
-const title = "AI Agent Rollout & Canary Deployment Cost Calculator | Hermes Dispatch";
-const description = "Estimate the cost of a canary or percentage rollout for an AI agent, including duplicated inference, guardrail checks, monitoring, human review, and expected rollback cost.";
+const title = "AI Agent Rollout / Canary Cost Calculator | Hermes Dispatch";
+const description = "Estimate the cost of rolling out or canary-testing an AI agent: duplicated inference, traffic split, human review, monitoring, incident response, and setup.";
 const providers = data.providers;
+const rolloutTypes = data.rollout_types;
+const observabilityTools = data.observability_tools;
 const scenarios = data.scenarios;
 const defaults = data.defaults;
 
 const faqs = [
-  { q: "What does this calculator estimate?", a: "It estimates the incremental cost of rolling out a new AI agent version using a canary or percentage-based deployment: inference on the canary traffic, guardrail/monitoring checks, human review of edge cases, and the expected cost of a rollback." },
-  { q: "How are canary requests calculated?", a: "We take your monthly production request volume, multiply it by the canary traffic percentage, and scale it to the canary duration in days. A 10% canary over 3 days for 1M monthly requests is roughly 9,856 canary requests." },
-  { q: "What are guardrail checks?", a: "Guardrail checks are safety, policy, quality, or output validation calls run per request during the canary. They can be lightweight classifiers, LLM-as-judge calls, or rule-based validators." },
-  { q: "Why is rollback probability a cost?", a: "A rollback consumes engineering time and may trigger incident response, customer communication, or SLA impact. We multiply the rollback probability by the estimated rollback cost to get an expected value." },
-  { q: "Does this include the base production agent cost?", a: "No. The base production agent keeps running for the 100% minus canary share. This calculator only adds the new canary version's cost plus rollout-specific overhead." },
-  { q: "When is a canary cheaper than a direct full rollout?", a: "Canaries are usually cheaper in expected value because they catch regressions on a small slice of traffic before a full rollout, reducing rollback blast radius. The extra cost is the duplicated inference and monitoring during the canary window." }
+  { q: "What is shadow rollout cost?", a: "In a shadow rollout the new agent processes the same requests as the existing system in parallel, so you pay for duplicated LLM calls. You also log and compare outputs, which adds observability and storage cost, plus a small human review sample." },
+  { q: "When is a canary cheaper than shadow mode?", a: "A canary sends only a small slice of traffic to the agent, so duplication cost is zero and inference cost scales with the canary percentage. The trade-off is tighter monitoring and a larger human review sample per canary request." },
+  { q: "How do incident response costs factor in?", a: "The calculator multiplies the incident rate by the number of canary/agent requests, then applies an average response time and hourly rate for the on-call engineer. During early rollouts the incident rate is usually higher than steady state." },
+  { q: "Does this include the cost of building guardrails?", a: "Guardrail development, eval suites, and safety testing are modeled as one-time setup hours. If your team runs a separate red-team sprint, cross-check with the Agent Red Team Cost Calculator." },
+  { q: "Can I model a staged ramp from 5% to 100% traffic?", a: "Use the traffic percentage input to model any stage. For a multi-stage ramp, run the calculator at a few percentages and sum the costs, or use the average traffic share over the projection window." }
 ];
 ---
 
 <Layout title={title} description={description}>
-  <ToolSchema name="AI Agent Rollout & Canary Deployment Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-rollout-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+  <ToolSchema name="AI Agent Rollout / Canary Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-rollout-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
 
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
@@ -31,8 +32,8 @@ const faqs = [
   <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
     <div class="text-center mb-12">
       <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🚀</div>
-      <h1 class="display-heading mb-4">AI Agent Rollout & Canary Deployment Cost Calculator</h1>
-      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the cost of a canary or percentage rollout for an AI agent, including duplicated inference, guardrail checks, monitoring, human review, and expected rollback cost.</p>
+      <h1 class="display-heading text-4xl md:text-5xl mb-4">AI Agent Rollout / Canary Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the cost of rolling out or canary-testing an AI agent: duplicated inference, traffic split, human review, monitoring, incident response, and setup.</p>
     </div>
 
     <!-- Scenario presets -->
@@ -49,168 +50,141 @@ const faqs = [
 
     <!-- Inputs -->
     <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
-      <h2 class="text-xl font-bold mb-6 text-brand-gold">Rollout assumptions</h2>
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload & rollout</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <label class="block">
-          <span class="text-neutral-400 text-sm">Production requests / month</span>
-          <input id="monthlyRequests" type="number" min="1" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Monthly requests</span>
+          <input id="monthlyRequests" type="number" min="0" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Canary traffic percentage (%)</span>
-          <input id="canaryTrafficPct" type="number" min="0.1" max="100" step="0.1" value={defaults.canary_traffic_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Canary duration (days)</span>
-          <input id="canaryDurationDays" type="number" min="0.1" max="90" step="0.5" value={defaults.canary_duration_days} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Agent tasks per request</span>
-          <input id="tasksPerRequest" type="number" min="1" step="1" value={defaults.tasks_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Input tokens / task</span>
-          <input id="inputTokensPerTask" type="number" min="0" step="10" value={defaults.input_tokens_per_task} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Output tokens / task</span>
-          <input id="outputTokensPerTask" type="number" min="0" step="10" value={defaults.output_tokens_per_task} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Cached input %</span>
+          <input id="cacheHit" type="number" min="0" max="100" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
           <span class="text-neutral-400 text-sm">LLM provider</span>
           <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
-            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+            {providers.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.provider}>{p.name} ({p.model})</option>
+            ))}
           </select>
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Cached input tokens (%)</span>
-          <input id="cachedInputPct" type="number" min="0" max="100" step="1" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Rollout type</span>
+          <select id="rolloutType" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {rolloutTypes.map(t => (
+              <option value={t.slug} selected={t.slug === defaults.rollout_type}>{t.name}</option>
+            ))}
+          </select>
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Guardrail checks / request</span>
-          <input id="guardrailChecks" type="number" min="0" step="0.5" value={defaults.guardrail_checks_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Traffic to agent %</span>
+          <input id="trafficPct" type="number" min="0" max="100" value={defaults.traffic_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Monitoring cost / 1K checks ($)</span>
-          <input id="monitoringCostPer1k" type="number" min="0" step="0.001" value={defaults.monitoring_cost_per_1k_checks} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Incident rate %</span>
+          <input id="incidentRate" type="number" min="0" max="100" value={defaults.incident_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Rollback probability (%)</span>
-          <input id="rollbackProb" type="number" min="0" max="100" step="0.1" value={defaults.rollback_probability_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Human review rate %</span>
+          <input id="reviewRate" type="number" min="0" max="100" value={defaults.human_review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Rollback engineering hours</span>
-          <input id="rollbackHours" type="number" min="0" step="0.5" value={defaults.rollback_engineering_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Review minutes / case</span>
+          <input id="reviewMinutes" type="number" min="0" value={defaults.human_review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Rollback engineer hourly cost ($)</span>
-          <input id="rollbackHourlyCost" type="number" min="0" step="5" value={defaults.rollback_engineer_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Reviewer hourly rate ($)</span>
+          <input id="reviewerRate" type="number" min="0" value={defaults.reviewer_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Incident / communication cost ($)</span>
-          <input id="incidentCost" type="number" min="0" step="50" value={defaults.incident_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Incident response hours / month</span>
+          <input id="incidentHours" type="number" min="0" value={defaults.incident_response_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
-          <input id="reviewRate" type="number" min="0" max="100" step="0.1" value={defaults.human_review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Incident response hourly rate ($)</span>
+          <input id="incidentRateHourly" type="number" min="0" value={defaults.incident_response_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
-          <span class="text-neutral-400 text-sm">Review minutes / decision</span>
-          <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Reviewer hourly cost ($)</span>
-          <input id="reviewerHourlyCost" type="number" min="0" step="5" value={defaults.reviewer_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <span class="text-neutral-400 text-sm">Observability tool</span>
+          <select id="observabilityTool" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {observabilityTools.map(o => (
+              <option value={o.slug} selected={o.slug === defaults.observability_tool}>{o.name} (${o.cost_per_month}/mo)</option>
+            ))}
+          </select>
         </label>
         <label class="block">
           <span class="text-neutral-400 text-sm">Setup hours</span>
-          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <input id="setupHours" type="number" min="0" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
           <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
-          <input id="setupRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
-          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
-        </label>
-        <label class="block">
-          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
-          <input id="maintenanceRate" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <input id="setupRate" type="number" min="0" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
         <label class="block">
           <span class="text-neutral-400 text-sm">Projection (months)</span>
-          <input id="projectionMonths" type="number" min="1" max="120" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
         </label>
       </div>
-      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+      <p class="text-neutral-500 text-sm mt-6">Costs are estimates. Provider rates last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
     </section>
 
     <!-- Summary cards -->
     <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
       <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Canary requests</p>
-        <p id="canaryRequests" class="text-2xl font-bold text-brand-gold">—</p>
+        <p class="text-xs text-neutral-500 uppercase mb-1">Inference / month</p>
+        <p id="inferenceCost" class="text-2xl font-bold text-brand-gold">—</p>
       </div>
       <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Canary inference cost</p>
-        <p id="canaryInferenceCost" class="text-2xl font-bold text-brand-gold">—</p>
+        <p class="text-xs text-neutral-500 uppercase mb-1">Human review / month</p>
+        <p id="reviewCost" class="text-2xl font-bold text-brand-gold">—</p>
       </div>
       <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Expected rollback cost</p>
-        <p id="expectedRollbackCost" class="text-2xl font-bold text-brand-gold">—</p>
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monitoring & incidents / month</p>
+        <p id="opsCost" class="text-2xl font-bold text-brand-gold">—</p>
       </div>
       <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Total project cost</p>
-        <p id="totalProjectCost" class="text-2xl font-bold text-brand-gold">—</p>
-      </div>
-    </section>
-
-    <!-- Secondary metrics -->
-    <section class="grid md:grid-cols-3 gap-5 mb-10">
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Guardrail / monitoring cost</p>
-        <p id="guardrailCost" class="text-xl font-semibold text-white">—</p>
-      </div>
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Human review cost</p>
-        <p id="humanReviewCost" class="text-xl font-semibold text-white">—</p>
-      </div>
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Setup + maintenance</p>
-        <p id="laborCost" class="text-xl font-semibold text-white">—</p>
-      </div>
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per canary request</p>
-        <p id="costPerCanaryRequest" class="text-xl font-semibold text-white">—</p>
-      </div>
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per rollout</p>
-        <p id="costPerRollout" class="text-xl font-semibold text-white">—</p>
-      </div>
-      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per production request</p>
-        <p id="costPerProductionRequest" class="text-xl font-semibold text-white">—</p>
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total first-month rollout cost</p>
+        <p id="totalFirstMonth" class="text-2xl font-bold text-brand-gold">—</p>
       </div>
     </section>
 
     <!-- Provider comparison -->
-    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
-      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison (canary inference only)</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[600px]">
-          <thead>
-            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
-              <th class="py-3 pr-4">Provider</th>
-              <th class="py-3 pr-4 text-right">Canary inference</th>
-              <th class="py-3 pr-4 text-right">Per canary request</th>
-              <th class="py-3 pr-4">Note</th>
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Inference cost by provider at this traffic slice</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4">Model</th>
+            <th class="py-3 pr-4 text-right">Inference / mo</th>
+            <th class="py-3 pr-4">Verdict</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {providers.map(p => (
+            <tr class="border-b border-neutral-800/50" data-provider={p.slug}>
+              <td class="py-3 pr-4 font-medium text-white">{p.name}</td>
+              <td class="py-3 pr-4 text-xs text-neutral-500">{p.model}</td>
+              <td class="py-3 pr-4 text-right font-mono inference-cell">—</td>
+              <td class="py-3 pr-4 text-sm verdict-cell text-neutral-400">—</td>
             </tr>
-          </thead>
-          <tbody id="providerTable" class="text-neutral-200">
-            <!-- populated -->
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Best option -->
+    <section id="best" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+      <h2 class="text-lg font-semibold text-cyan-400 mb-2">Rollout cost estimate</h2>
+      <p id="bestLine" class="text-white text-xl font-medium">Enter a workload to see the rollout cost.</p>
     </section>
 
     <!-- Verdict -->
@@ -234,179 +208,155 @@ const faqs = [
 
     <!-- Cross-links -->
     <div class="flex flex-wrap gap-3 mb-8">
-      <a href="/tools/agent-deployment-scorecard/" class="btn-primary text-sm">Deployment Readiness Scorecard →</a>
-      <a href="/tools/agent-shadow-ab-test-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Shadow / A-B Test Cost →</a>
-      <a href="/tools/agent-outage-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Outage Cost Calc →</a>
-      <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost →</a>
+      <a href="/tools/agent-shadow-ab-test-cost-calculator/" class="btn-primary text-sm">Shadow / A-B Test Cost →</a>
+      <a href="/tools/agent-deployment-scorecard/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Deployment Readiness Scorecard →</a>
+      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/agent-redteam-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Red Team Cost →</a>
     </div>
 
     <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
   </main>
 
-  <script is:inline define:vars={{ providers: JSON.stringify(providers), scenarios: JSON.stringify(scenarios) }}>
-    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
-    const fmtMoney2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), rolloutTypes: JSON.stringify(rolloutTypes), observabilityTools: JSON.stringify(observabilityTools), scenarios: JSON.stringify(scenarios) }}>
+    const providerData = JSON.parse(providers);
+    const rolloutData = JSON.parse(rolloutTypes);
+    const observabilityData = JSON.parse(observabilityTools);
+    const scenarioData = JSON.parse(scenarios);
+    const providerMap = Object.fromEntries(providerData.map(p => [p.slug, p]));
+    const rolloutMap = Object.fromEntries(rolloutData.map(t => [t.slug, t]));
+    const observabilityMap = Object.fromEntries(observabilityData.map(o => [o.slug, o]));
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmt2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
-    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
-    const DAYS_PER_MONTH = 30.44;
-
-    function getProvider() { return JSON.parse(document.getElementById('provider').value); }
+    const fmtPct = n => fmtNum(n) + '%';
 
     function getInputs() {
       return {
-        monthlyRequests: Math.max(1, Number(document.getElementById('monthlyRequests').value) || 1),
-        canaryTrafficPct: Math.min(100, Math.max(0.1, Number(document.getElementById('canaryTrafficPct').value) || 0.1)),
-        canaryDurationDays: Math.min(90, Math.max(0.1, Number(document.getElementById('canaryDurationDays').value) || 0.1)),
-        tasksPerRequest: Math.max(1, Number(document.getElementById('tasksPerRequest').value) || 1),
-        inputTokensPerTask: Math.max(0, Number(document.getElementById('inputTokensPerTask').value) || 0),
-        outputTokensPerTask: Math.max(0, Number(document.getElementById('outputTokensPerTask').value) || 0),
-        cachedInputPct: Math.min(100, Math.max(0, Number(document.getElementById('cachedInputPct').value) || 0)),
-        guardrailChecks: Math.max(0, Number(document.getElementById('guardrailChecks').value) || 0),
-        monitoringCostPer1k: Math.max(0, Number(document.getElementById('monitoringCostPer1k').value) || 0),
-        rollbackProb: Math.min(100, Math.max(0, Number(document.getElementById('rollbackProb').value) || 0)),
-        rollbackHours: Math.max(0, Number(document.getElementById('rollbackHours').value) || 0),
-        rollbackHourlyCost: Math.max(0, Number(document.getElementById('rollbackHourlyCost').value) || 0),
-        incidentCost: Math.max(0, Number(document.getElementById('incidentCost').value) || 0),
-        reviewRate: Math.min(100, Math.max(0, Number(document.getElementById('reviewRate').value) || 0)),
-        reviewMinutes: Math.max(0, Number(document.getElementById('reviewMinutes').value) || 0),
-        reviewerHourlyCost: Math.max(0, Number(document.getElementById('reviewerHourlyCost').value) || 0),
-        setupHours: Math.max(0, Number(document.getElementById('setupHours').value) || 0),
-        setupRate: Math.max(0, Number(document.getElementById('setupRate').value) || 0),
-        maintenanceHours: Math.max(0, Number(document.getElementById('maintenanceHours').value) || 0),
-        maintenanceRate: Math.max(0, Number(document.getElementById('maintenanceRate').value) || 0),
-        projectionMonths: Math.max(1, Number(document.getElementById('projectionMonths').value) || 1)
+        monthlyRequests: Math.max(0, parseFloat(document.getElementById('monthlyRequests').value) || 0),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        cacheHit: Math.min(100, Math.max(0, parseFloat(document.getElementById('cacheHit').value) || 0)) / 100,
+        provider: document.getElementById('provider').value,
+        rolloutType: document.getElementById('rolloutType').value,
+        trafficPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('trafficPct').value) || 0)) / 100,
+        incidentRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('incidentRate').value) || 0)) / 100,
+        reviewRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewRate').value) || 0)) / 100,
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        reviewerRate: Math.max(0, parseFloat(document.getElementById('reviewerRate').value) || 0),
+        incidentHours: Math.max(0, parseFloat(document.getElementById('incidentHours').value) || 0),
+        incidentRateHourly: Math.max(0, parseFloat(document.getElementById('incidentRateHourly').value) || 0),
+        observabilityTool: document.getElementById('observabilityTool').value,
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupRate: Math.max(0, parseFloat(document.getElementById('setupRate').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
       };
+    }
+
+    function inferenceCost(p, inps, trafficMultiplier) {
+      const requests = inps.monthlyRequests * trafficMultiplier;
+      const inputCost = (requests * inps.inputTokens / 1_000_000) * ((1 - inps.cacheHit) * p.input_per_1m + inps.cacheHit * (p.cached_input_per_1m || p.input_per_1m));
+      const outputCost = (requests * inps.outputTokens / 1_000_000) * p.output_per_1m;
+      return inputCost + outputCost;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const p = providerMap[inps.provider];
+      const rollout = rolloutMap[inps.rolloutType];
+      const obs = observabilityMap[inps.observabilityTool];
+
+      // Traffic to agent
+      const agentTraffic = inps.monthlyRequests * inps.trafficPct;
+      const controlTraffic = inps.monthlyRequests - agentTraffic;
+
+      // Inference cost: agent traffic + duplicated control traffic for shadow mode
+      const duplicationTraffic = rollout.slug === 'shadow' ? controlTraffic : 0;
+      const totalInferenceRequests = agentTraffic + duplicationTraffic;
+      const llmCost = inferenceCost(p, { ...inps, monthlyRequests: totalInferenceRequests }, 1);
+
+      // Human review cost
+      const reviewedCases = agentTraffic * inps.reviewRate;
+      const reviewHours = reviewedCases * inps.reviewMinutes / 60;
+      const reviewCost = reviewHours * inps.reviewerRate;
+
+      // Incident response cost
+      const incidentCost = inps.incidentHours * inps.incidentRateHourly;
+
+      // Observability cost scaled by rollout intensity
+      const monitoringCost = obs.cost_per_month * rollout.monitoring_multiplier;
+
+      // Setup cost amortized over projection
+      const setupCost = inps.setupHours * inps.setupRate;
+      const monthlySetupAmortized = setupCost / inps.projectionMonths;
+
+      const monthlyRolloutCost = llmCost + reviewCost + incidentCost + monitoringCost + monthlySetupAmortized;
+      const periodCost = monthlyRolloutCost * inps.projectionMonths;
+
+      // Provider comparison at same traffic slice
+      const rows = providerData.map(pr => {
+        const cost = inferenceCost(pr, { ...inps, monthlyRequests: totalInferenceRequests }, 1);
+        return { slug: pr.slug, name: pr.name, cost };
+      }).sort((a, b) => a.cost - b.cost);
+      const cheapest = rows[0];
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const slug = tr.dataset.provider;
+        const row = rows.find(r => r.slug === slug);
+        if (!row) return;
+        tr.querySelector('.inference-cell').textContent = fmt(row.cost);
+        const vCell = tr.querySelector('.verdict-cell');
+        if (row.slug === cheapest.slug) {
+          vCell.textContent = 'Cheapest';
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-emerald-400';
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          vCell.textContent = `${fmtPct((row.cost - cheapest.cost) / cheapest.cost * 100)} more`;
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-neutral-400';
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      document.getElementById('inferenceCost').textContent = fmt(llmCost);
+      document.getElementById('reviewCost').textContent = fmt(reviewCost);
+      document.getElementById('opsCost').textContent = fmt(incidentCost + monitoringCost);
+      document.getElementById('totalFirstMonth').textContent = fmt(monthlyRolloutCost);
+
+      document.getElementById('bestLine').textContent = `${rollout.name} for ${fmtNum(inps.trafficPct * 100)}% of traffic: ${fmt(monthlyRolloutCost)}/month, ${fmt(periodCost)} over ${inps.projectionMonths} months. Inference is ${fmt(llmCost)}/mo; review ${fmt(reviewCost)}/mo; ops ${fmt(incidentCost + monitoringCost)}/mo. One-time setup ${fmt(setupCost)}.`;
+
+      let verdict = '';
+      if (rollout.slug === 'shadow') {
+        verdict = `Shadow rollout is the safest validation path but also the most expensive because every control request is duplicated. Total inference doubles to ${fmtNum(totalInferenceRequests)} requests/month. Budget ${fmt(monthlyRolloutCost)}/month plus ${fmt(setupCost)} setup. If the agent looks good, switch to a canary to cut inference cost.`;
+      } else if (rollout.slug === 'canary') {
+        verdict = `Canary limits blast radius and cost. At ${fmtNum(inps.trafficPct * 100)}% traffic, inference cost is ${fmt(llmCost)}/month. Keep the human review rate high during early canary, then taper as confidence grows. If incidents stay below ${fmtNum(inps.incidentRate * 100)}%, you can safely expand traffic.`;
+      } else if (rollout.slug === 'ab') {
+        verdict = `A/B rollout is a controlled experiment. Half the traffic gets the agent, so inference cost is ${fmt(llmCost)}/month. Human review and monitoring are higher per request because outcomes must be tracked for both groups. Plan the test duration carefully to avoid running the split longer than needed.`;
+      } else {
+        verdict = `Full launch removes duplication but puts all users on the agent. Inference cost is ${fmt(llmCost)}/month. Make sure guardrails, kill switches, and on-call runbooks are in place before switching from canary to full launch.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
     }
 
     function setInputs(obj) {
       if (obj.monthly_requests !== undefined) document.getElementById('monthlyRequests').value = obj.monthly_requests;
-      if (obj.canary_traffic_pct !== undefined) document.getElementById('canaryTrafficPct').value = obj.canary_traffic_pct;
-      if (obj.canary_duration_days !== undefined) document.getElementById('canaryDurationDays').value = obj.canary_duration_days;
-      if (obj.tasks_per_request !== undefined) document.getElementById('tasksPerRequest').value = obj.tasks_per_request;
-      if (obj.input_tokens_per_task !== undefined) document.getElementById('inputTokensPerTask').value = obj.input_tokens_per_task;
-      if (obj.output_tokens_per_task !== undefined) document.getElementById('outputTokensPerTask').value = obj.output_tokens_per_task;
-      if (obj.cached_input_pct !== undefined) document.getElementById('cachedInputPct').value = obj.cached_input_pct;
-      if (obj.provider !== undefined) {
-        const sel = document.getElementById('provider');
-        for (let i = 0; i < sel.options.length; i++) {
-          const opt = JSON.parse(sel.options[i].value);
-          if (opt.slug === obj.provider) { sel.selectedIndex = i; break; }
-        }
-      }
-      if (obj.guardrail_checks_per_request !== undefined) document.getElementById('guardrailChecks').value = obj.guardrail_checks_per_request;
-      if (obj.monitoring_cost_per_1k_checks !== undefined) document.getElementById('monitoringCostPer1k').value = obj.monitoring_cost_per_1k_checks;
-      if (obj.rollback_probability_pct !== undefined) document.getElementById('rollbackProb').value = obj.rollback_probability_pct;
-      if (obj.rollback_engineering_hours !== undefined) document.getElementById('rollbackHours').value = obj.rollback_engineering_hours;
-      if (obj.rollback_engineer_hourly_cost !== undefined) document.getElementById('rollbackHourlyCost').value = obj.rollback_engineer_hourly_cost;
-      if (obj.incident_cost !== undefined) document.getElementById('incidentCost').value = obj.incident_cost;
+      if (obj.input_tokens !== undefined) document.getElementById('inputTokens').value = obj.input_tokens;
+      if (obj.output_tokens !== undefined) document.getElementById('outputTokens').value = obj.output_tokens;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cacheHit').value = obj.cached_input_pct;
+      if (obj.provider !== undefined) document.getElementById('provider').value = obj.provider;
+      if (obj.rollout_type !== undefined) document.getElementById('rolloutType').value = obj.rollout_type;
+      if (obj.traffic_pct !== undefined) document.getElementById('trafficPct').value = obj.traffic_pct;
+      if (obj.incident_rate_pct !== undefined) document.getElementById('incidentRate').value = obj.incident_rate_pct;
       if (obj.human_review_rate_pct !== undefined) document.getElementById('reviewRate').value = obj.human_review_rate_pct;
-      if (obj.review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.review_minutes;
-      if (obj.reviewer_hourly_cost !== undefined) document.getElementById('reviewerHourlyCost').value = obj.reviewer_hourly_cost;
+      if (obj.human_review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.human_review_minutes;
+      if (obj.reviewer_hourly_rate !== undefined) document.getElementById('reviewerRate').value = obj.reviewer_hourly_rate;
+      if (obj.incident_response_hours !== undefined) document.getElementById('incidentHours').value = obj.incident_response_hours;
+      if (obj.incident_response_hourly_rate !== undefined) document.getElementById('incidentRateHourly').value = obj.incident_response_hourly_rate;
+      if (obj.monitoring_cost_per_month !== undefined) document.getElementById('observabilityTool').value = obj.observability_tool || 'datadog';
       if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
       if (obj.setup_hourly_rate !== undefined) document.getElementById('setupRate').value = obj.setup_hourly_rate;
-      if (obj.maintenance_hours_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_month;
-      if (obj.maintenance_hourly_rate !== undefined) document.getElementById('maintenanceRate').value = obj.maintenance_hourly_rate;
       if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
     }
 
-    function inferenceCost(requests, tasksPerRequest, inputTokens, outputTokens, cachedPct, provider) {
-      const cachedRatio = cachedPct / 100;
-      const uncachedRatio = 1 - cachedRatio;
-      const tasks = requests * tasksPerRequest;
-      const inputCost = tasks * (inputTokens / 1000) * (uncachedRatio * provider.input_cost_per_1k + cachedRatio * provider.cached_input_cost_per_1k);
-      const outputCost = tasks * (outputTokens / 1000) * provider.output_cost_per_1k;
-      return inputCost + outputCost;
-    }
-
-    const fmtMoney3 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 6 });
-
-    function compute() {
-      const inps = getInputs();
-      const provider = getProvider();
-      const providerList = JSON.parse(providers);
-
-      const canaryRequests = inps.monthlyRequests * (inps.canaryTrafficPct / 100) * (inps.canaryDurationDays / DAYS_PER_MONTH);
-      const canaryTasks = canaryRequests * inps.tasksPerRequest;
-      const canaryInference = inferenceCost(canaryRequests, inps.tasksPerRequest, inps.inputTokensPerTask, inps.outputTokensPerTask, inps.cachedInputPct, provider);
-
-      const guardrailCost = canaryRequests * inps.guardrailChecks * (inps.monitoringCostPer1k / 1000);
-
-      const reviewedDecisions = canaryTasks * (inps.reviewRate / 100);
-      const humanReviewCost = reviewedDecisions * (inps.reviewMinutes / 60) * inps.reviewerHourlyCost;
-
-      const rollbackExpectedCost = (inps.rollbackProb / 100) * (inps.rollbackHours * inps.rollbackHourlyCost + inps.incidentCost);
-
-      const setupCost = inps.setupHours * inps.setupRate;
-      const maintenanceCost = inps.maintenanceHours * inps.maintenanceRate;
-      const totalMaintenance = maintenanceCost * inps.projectionMonths;
-      const laborCost = setupCost + totalMaintenance;
-
-      const canaryWindowCost = canaryInference + guardrailCost + humanReviewCost + rollbackExpectedCost;
-      const totalProjectCost = canaryWindowCost + laborCost;
-
-      const costPerCanaryRequest = canaryRequests > 0 ? canaryWindowCost / canaryRequests : 0;
-      const costPerRollout = canaryWindowCost + setupCost;
-      const costPerProductionRequest = (inps.monthlyRequests * inps.projectionMonths) > 0 ? totalProjectCost / (inps.monthlyRequests * inps.projectionMonths) : 0;
-
-      // Provider comparison
-      const providerRows = providerList.map(p => {
-        const inf = inferenceCost(canaryRequests, inps.tasksPerRequest, inps.inputTokensPerTask, inps.outputTokensPerTask, inps.cachedInputPct, p);
-        return { name: p.name, inference: inf, perRequest: canaryRequests > 0 ? inf / canaryRequests : 0 };
-      }).sort((a, b) => a.inference - b.inference);
-
-      // Summary
-      document.getElementById('canaryRequests').textContent = fmtInt(canaryRequests);
-      document.getElementById('canaryInferenceCost').textContent = fmtMoney2(canaryInference);
-      document.getElementById('expectedRollbackCost').textContent = fmtMoney2(rollbackExpectedCost);
-      document.getElementById('totalProjectCost').textContent = fmtMoney0(totalProjectCost);
-
-      // Secondary
-      document.getElementById('guardrailCost').textContent = fmtMoney2(guardrailCost);
-      document.getElementById('humanReviewCost').textContent = fmtMoney2(humanReviewCost);
-      document.getElementById('laborCost').textContent = fmtMoney2(maintenanceCost) + '/mo + ' + fmtMoney2(setupCost) + ' setup';
-      document.getElementById('costPerCanaryRequest').textContent = fmtMoney2(costPerCanaryRequest);
-      document.getElementById('costPerRollout').textContent = fmtMoney2(costPerRollout);
-      document.getElementById('costPerProductionRequest').textContent = fmtMoney2(costPerProductionRequest);
-
-      // Provider table
-      const tbody = document.getElementById('providerTable');
-      tbody.innerHTML = '';
-      providerRows.forEach((row, idx) => {
-        const tr = document.createElement('tr');
-        tr.className = idx === 0 ? 'border-b border-brand-gold/30' : 'border-b border-neutral-800/50';
-        tr.innerHTML = `<td class="py-3 pr-4">${row.name}${idx === 0 ? ' <span class="text-brand-gold text-xs">cheapest</span>' : ''}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney2(row.inference)}</td><td class="py-3 pr-4 text-right font-mono">${fmtMoney3(row.perRequest)}</td><td class="py-3 pr-4 text-sm text-neutral-400">${idx === 0 ? 'Lowest canary inference cost' : ''}</td>`;
-        tbody.appendChild(tr);
-      });
-
-      // Verdict
-      const lines = [
-        { id: 'inference', cost: canaryInference, name: 'canary inference' },
-        { id: 'guardrail', cost: guardrailCost, name: 'guardrail / monitoring' },
-        { id: 'review', cost: humanReviewCost, name: 'human review' },
-        { id: 'rollback', cost: rollbackExpectedCost, name: 'expected rollback' }
-      ];
-      const biggest = lines.reduce((a, b) => a.cost > b.cost ? a : b);
-      let verdict = `This canary will serve about <strong>${fmtInt(canaryRequests)}</strong> requests over <strong>${fmtNum(inps.canaryDurationDays)} days</strong>. The canary window cost is about <strong>${fmtMoney2(canaryWindowCost)}</strong>, and the full project cost (including setup and maintenance) is about <strong>${fmtMoney0(totalProjectCost)}</strong> over ${inps.projectionMonths} months. The largest cost line is ${biggest.name}.`;
-      if (inps.rollbackProb > 10) {
-        verdict += ` With a <strong>${fmtNum(inps.rollbackProb)}%</strong> rollback probability, focus on tightening guardrails and automated tests before widening traffic.`;
-      } else if (inps.canaryTrafficPct > 25) {
-        verdict += ` At <strong>${fmtNum(inps.canaryTrafficPct)}%</strong> traffic, the blast radius is larger; make sure guardrails and automated rollback are in place.`;
-      } else {
-        verdict += ` This is a measured rollout profile. Track error rates, latency, and guardrail rejections before increasing traffic.`;
-      }
-      document.getElementById('verdictText').innerHTML = verdict;
-    }
-
-    const fmtMoney3 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 6 });
-
-    function bind() {
-      const ids = ['monthlyRequests','canaryTrafficPct','canaryDurationDays','tasksPerRequest','inputTokensPerTask','outputTokensPerTask','provider','cachedInputPct','guardrailChecks','monitoringCostPer1k','rollbackProb','rollbackHours','rollbackHourlyCost','incidentCost','reviewRate','reviewMinutes','reviewerHourlyCost','setupHours','setupRate','maintenanceHours','maintenanceRate','projectionMonths'];
-      ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('input', compute);
-      });
-
+    document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.scenario-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const s = JSON.parse(btn.dataset.scenario);
@@ -415,13 +365,12 @@ const faqs = [
         });
       });
 
-      compute();
-    }
+      ['monthlyRequests','inputTokens','outputTokens','cacheHit','provider','rolloutType','trafficPct','incidentRate','reviewRate','reviewMinutes','reviewerRate','incidentHours','incidentRateHourly','observabilityTool','setupHours','setupRate','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+        document.getElementById(id).addEventListener('change', compute);
+      });
 
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', bind);
-    } else {
-      bind();
-    }
+      compute();
+    });
   </script>
 </Layout>
