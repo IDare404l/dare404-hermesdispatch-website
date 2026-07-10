@@ -803,15 +803,23 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||- Cross-links: AI Agent Multi-Modal Cost Calculator, AI Agent Video Generation Cost Calculator, Multi-Step Workflow Cost Calculator.
 
 ## AI Agent Data Integration / ETL Cost Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-data-integration-cost-calculator/
-|- Description: Estimate monthly cost for AI agents that extract, transform, load, and sync data across sources: extractors, loaders, orchestrators, warehouses, API connectors, and LLM enrichment.
-|- Inputs: monthly jobs, sources per job, transform steps per job, destinations per job, LLM calls per job, input/output tokens per LLM call, cached input percentage, LLM provider, extractor, loader, orchestrator, warehouse, API connector, data volume GB, human review rate/minutes/hourly cost, setup/maintenance hours and rates, projection months.
-|- Outputs: cost per job, monthly LLM cost, total monthly cost, projected period cost, cost breakdown by component, LLM provider comparison table, verdict.
-|- Audience: AI agent builders and data engineers budgeting ETL, pipeline, and data-sync agent workloads.
-|- Cross-links: AI Agent Workflow Cost Calculator, AI Agent Memory / RAG Cost Calculator, AI Agent API Pricing Comparator.
+||- URL: https://hermesdispatch.dev/tools/agent-data-integration-cost-calculator/
+||- Description: Estimate monthly cost for AI agents that extract, transform, load, and sync data across sources: extractors, loaders, orchestrators, warehouses, API connectors, and LLM enrichment.
+||- Inputs: monthly jobs, sources per job, transform steps per job, destinations per job, LLM calls per job, input/output tokens per LLM call, cached input percentage, LLM provider, extractor, loader, orchestrator, warehouse, API connector, data volume GB, human review rate/minutes/hourly cost, setup/maintenance hours and rates, projection months.
+||- Outputs: cost per job, monthly LLM cost, total monthly cost, projected period cost, cost breakdown by component, LLM provider comparison table, verdict.
+||- Audience: AI agent builders and data engineers budgeting ETL, pipeline, and data-sync agent workloads.
+||- Cross-links: AI Agent Workflow Cost Calculator, AI Agent Memory / RAG Cost Calculator, AI Agent API Pricing Comparator.
+
+## AI Agent Model Router / Fallback Cost Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-model-router-cost-calculator/
+||- Description: Compare the cost and reliability of routing AI agent requests across multiple LLM providers with fallback logic, cache hits, and retry penalties.
+||- Inputs: routing strategy (cheapest-first, quality-first, balanced, reliability-first, cache-optimized), monthly requests, input/output tokens per request, cached input ratio (%), fallback rate (%), retry rate (%), complex-task split to premium model (%).
+||- Outputs: base monthly cost, fallback premium, retry penalty, total routed cost, provider mix table, single-provider comparison table, verdict.
+||- Audience: AI agent builders deciding whether to route across multiple LLM providers or rely on a single provider.
+||- Cross-links: AI Agent API Pricing Comparator, AI Agent Latency Budget Calculator, AI Agent SLA / Uptime Calculator, Prompt Cache Savings Calculator.
 
 ## AI Agent Deployment Readiness Scorecard
-- URL: https://hermesdispatch.dev/tools/agent-deployment-scorecard/
+
 - Description: Score an AI agent's production readiness across architecture, model, privacy, security, reliability, observability, cost, and go-live plan.
 - Inputs: checklist items across 8 readiness dimensions, scenario preset (MVP prototype, internal tool, customer-facing agent, regulated industry).
 - Outputs: readiness score (0-100), maturity label, open P0 count, per-dimension progress, launch verdict.
