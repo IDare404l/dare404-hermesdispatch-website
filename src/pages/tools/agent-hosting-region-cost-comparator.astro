@@ -1,0 +1,412 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_hosting_region_cost.json';
+
+const title = "AI Agent Hosting Region / Latency Cost Comparator | Hermes Dispatch";
+const description = "Compare cloud GPU and inference API costs across AWS, GCP, Azure, CoreWeave, Lambda, Vast.ai, RunPod, and bare-metal regions; factor in egress, latency, carbon, and spot/reserved pricing.";
+const workloadTypes = data.workload_types;
+const userRegions = data.user_regions;
+const providers = data.providers;
+const apiModels = data.api_models;
+const gpuModels = data.gpu_models;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "Why compare regions for AI agent hosting?", a: "Latency, egress, carbon intensity, and spot/reserved discounts vary widely by provider and region. A region that looks cheap on compute can become expensive once egress and user latency are included." },
+  { q: "How is end-to-end latency estimated?", a: "The calculator adds the selected user-region base latency to the provider region's network bonus. It is a rough RTT proxy; actual latency depends on peering, CDN, and model time-to-first-token." },
+  { q: "What does spot/reserved pricing mean?", a: "Spot instances are interruptible and cheaper; reserved or committed-use instances trade flexibility for a discount. The calculator applies each provider's representative discount." },
+  { q: "Is carbon cost included by default?", a: "No. A carbon price per tonne is optional; when set, it multiplies estimated monthly kWh by the region's grid carbon intensity." },
+  { q: "Should I pick the cheapest region?", a: "Not always. Latency to users, compliance, support, and spot interruption risk matter. The tool ranks by a weighted score balancing cost, latency, and carbon." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Hosting Region / Latency Cost Comparator" description={description} url="https://hermesdispatch.dev/tools/agent-hosting-region-cost-comparator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🌐</div>
+      <h1 class="display-heading mb-4">AI Agent Hosting Region / Latency Cost Comparator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Compare cloud GPU and inference API costs across AWS, GCP, Azure, CoreWeave, Lambda, Vast.ai, RunPod, and bare-metal regions. Factor in egress, latency, carbon, and spot/reserved pricing.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload & region</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Workload type</span>
+          <select id="workloadType" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {workloadTypes.map(w => <option value={JSON.stringify(w)} selected={w.slug === defaults.workload_type}>{w.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">User region</span>
+          <select id="userRegion" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {userRegions.map(r => <option value={JSON.stringify(r)} selected={r.slug === defaults.user_region}>{r.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Commitment / pricing model</span>
+          <select id="commitment" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            <option value="on_demand" selected={defaults.commitment === 'on_demand'}>On-demand</option>
+            <option value="reserved" selected={defaults.commitment === 'reserved'}>Reserved / committed</option>
+            <option value="spot" selected={defaults.commitment === 'spot'}>Spot / interruptible</option>
+          </select>
+        </label>
+        <label class="block" id="monthlyRequestsWrap">
+          <span class="text-neutral-400 text-sm">Monthly requests</span>
+          <input id="monthlyRequests" type="number" min="0" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block" id="inputTokensWrap">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" step="50" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block" id="outputTokensWrap">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" step="50" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block" id="cachedInputPctWrap">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block" id="apiModelWrap">
+          <span class="text-neutral-400 text-sm">LLM API model</span>
+          <select id="apiModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {apiModels.map(m => <option value={JSON.stringify(m)} selected={m.slug === defaults.api_model}>{m.name}</option>)}
+          </select>
+        </label>
+        <label class="block hidden" id="gpuHoursWrap">
+          <span class="text-neutral-400 text-sm">GPU hours / month</span>
+          <input id="gpuHours" type="number" min="0" step="10" value={defaults.gpu_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block hidden" id="gpuModelWrap">
+          <span class="text-neutral-400 text-sm">GPU model</span>
+          <select id="gpuModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {gpuModels.map(g => <option value={JSON.stringify(g)} selected={g.slug === defaults.gpu_model}>{g.name}</option>)}
+          </select>
+        </label>
+        <label class="block hidden" id="serverCountWrap">
+          <span class="text-neutral-400 text-sm">Servers</span>
+          <input id="serverCount" type="number" min="1" step="1" value={defaults.server_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block hidden" id="powerKwWrap">
+          <span class="text-neutral-400 text-sm">Power per server (kW)</span>
+          <input id="powerKw" type="number" min="0" step="0.1" value={defaults.power_kw} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block hidden" id="bandwidthTbWrap">
+          <span class="text-neutral-400 text-sm">Bandwidth / month (TB)</span>
+          <input id="bandwidthTb" type="number" min="0" step="0.5" value={defaults.bandwidth_tb} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Egress / response bandwidth (GB / month)</span>
+          <input id="egressGb" type="number" min="0" step="100" value={defaults.egress_gb} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Carbon price ($ / tonne CO₂)</span>
+          <input id="carbonPrice" type="number" min="0" step="5" value={defaults.carbon_price_per_tonne} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Regional prices, carbon intensities, and latency are representative. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest region</p>
+        <p id="cheapestName" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Lowest monthly cost</p>
+        <p id="cheapestCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Best latency region</p>
+        <p id="latencyName" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Greenest region</p>
+        <p id="greenName" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg">—</p>
+      <p id="verdictSub" class="text-neutral-400 mt-2">—</p>
+    </section>
+
+    <!-- Region comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Region comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider / Region</th>
+              <th class="py-3 pr-4 text-right">Est. latency</th>
+              <th class="py-3 pr-4 text-right">Monthly compute</th>
+              <th class="py-3 pr-4 text-right">Monthly egress</th>
+              <th class="py-3 pr-4 text-right">Carbon cost</th>
+              <th class="py-3 pr-4 text-right">Total monthly</th>
+              <th class="py-3 pr-4 text-right">Score</th>
+              <th class="py-3 pr-4">Status</th>
+            </tr>
+          </thead>
+          <tbody id="regionTable" class="text-neutral-200">
+            <tr><td colspan="8" class="py-4 text-neutral-500">Run a calculation to compare regions.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Related tools</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="/tools/agent-hosting-cost-comparator/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Agent Hosting Cost Comparator</a>
+        <a href="/tools/gpu-cloud-vs-buy-calculator/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">GPU Cloud vs Buy Calc</a>
+        <a href="/tools/agent-inference-capacity-planner/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Inference Capacity Planner</a>
+        <a href="/tools/agent-latency-budget-calculator/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Latency Budget Calculator</a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group border border-neutral-800 rounded-lg">
+            <summary class="px-4 py-3 cursor-pointer font-medium hover:bg-neutral-800/50 transition">{f.q}</summary>
+            <p class="px-4 py-3 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Notes -->
+    <section id="note" class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Methodology notes</h2>
+      <ul class="list-disc pl-5 text-neutral-400 space-y-2">
+        <li>For LLM API workloads, compute cost = (uncached input tokens × input rate + cached input tokens × cached rate + output tokens × output rate) × requests / 1M. Rates come from the selected model.</li>
+        <li>For cloud GPU workloads, compute cost = base GPU hour × (1 + region premium) × (1 - spot or reserved discount) × GPU hours. Electricity is not included; add it separately if running bare metal.</li>
+        <li>For bare-metal colocation, compute cost = server count × base colocation GPU-hour equivalent × hours in month, plus bandwidth × egress rate and a carbon cost from power draw × grid intensity.</li>
+        <li>Egress cost = egress GB × provider/region egress rate. Some providers include a free tier; this calculator does not model free tiers.</li>
+        <li>Latency = user-region base RTT + provider region latency bonus. It is a coarse proxy; actual time-to-first-token depends on model, queue depth, and networking.</li>
+        <li>Score weights: 50% normalized cost, 35% normalized latency, 15% normalized carbon. Lower is better.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ workloadTypes, userRegions, providers, apiModels, gpuModels, scenarios, defaults }}>
+    const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+    const fmt1 = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const fmtCur = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtCur2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function $(id) { return document.getElementById(id); }
+
+    function getWorkload() { return JSON.parse($('workloadType').value); }
+    function getUserRegion() { return JSON.parse($('userRegion').value); }
+    function getApiModel() { return JSON.parse($('apiModel').value); }
+    function getGpuModel() { return JSON.parse($('gpuModel').value); }
+
+    function setVisibility(slug, visible) {
+      const ids = {
+        llm_api: ['monthlyRequestsWrap', 'inputTokensWrap', 'outputTokensWrap', 'cachedInputPctWrap', 'apiModelWrap'],
+        cloud_gpu: ['gpuHoursWrap', 'gpuModelWrap'],
+        colo_bare_metal: ['serverCountWrap', 'powerKwWrap', 'bandwidthTbWrap']
+      };
+      Object.values(ids).flat().forEach(id => $(id).classList.add('hidden'));
+      (ids[slug] || []).forEach(id => $(id).classList.remove('hidden'));
+    }
+
+    function readInputs() {
+      return {
+        workloadType: getWorkload().slug,
+        userRegion: getUserRegion(),
+        commitment: $('commitment').value,
+        monthlyRequests: parseFloat($('monthlyRequests').value) || 0,
+        inputTokens: parseFloat($('inputTokens').value) || 0,
+        outputTokens: parseFloat($('outputTokens').value) || 0,
+        cachedInputPct: parseFloat($('cachedInputPct').value) || 0,
+        gpuHours: parseFloat($('gpuHours').value) || 0,
+        serverCount: parseFloat($('serverCount').value) || 0,
+        powerKw: parseFloat($('powerKw').value) || 0,
+        bandwidthTb: parseFloat($('bandwidthTb').value) || 0,
+        egressGb: parseFloat($('egressGb').value) || 0,
+        carbonPrice: parseFloat($('carbonPrice').value) || 0,
+        projectionMonths: parseFloat($('projectionMonths').value) || 1,
+      };
+    }
+
+    function computeCost(inputs, region, provider) {
+      let compute = 0;
+      let kwh = 0;
+      const model = getApiModel();
+      const gpu = getGpuModel();
+      let latency = inputs.userRegion.latency_base_ms + region.latency_bonus_ms;
+
+      if (inputs.workloadType === 'llm_api') {
+        const cached = inputs.inputTokens * inputs.cachedInputPct / 100;
+        const uncached = inputs.inputTokens - cached;
+        const reqCost = (uncached * model.input_per_1m + cached * model.cached_input_per_1m + inputs.outputTokens * model.output_per_1m) / 1e6;
+        compute = reqCost * inputs.monthlyRequests;
+        latency += model.overhead_ms;
+        // API model no GPU power estimate
+      } else if (inputs.workloadType === 'cloud_gpu') {
+        const baseRate = region.base_gpu_hour * (1 + region.gpu_premium_pct / 100);
+        let discount = 0;
+        if (inputs.commitment === 'spot') discount = region.spot_discount_pct / 100;
+        if (inputs.commitment === 'reserved') discount = region.reserved_discount_pct / 100;
+        compute = baseRate * (1 - discount) * inputs.gpuHours;
+        kwh = gpu.power_w * inputs.gpuHours / 1000;
+      } else if (inputs.workloadType === 'colo_bare_metal') {
+        const hoursPerMonth = 730;
+        compute = inputs.serverCount * region.base_gpu_hour * hoursPerMonth;
+        const tb = inputs.bandwidthTb;
+        compute += tb * 1000 * region.egress_per_gb; // bandwidth priced like egress for colo
+        kwh = inputs.powerKw * inputs.serverCount * hoursPerMonth;
+        latency += 15; // routing overhead
+      }
+
+      const egressCost = inputs.egressGb * region.egress_per_gb;
+      const carbonTons = kwh * region.carbon_gco2_kwh / 1e6;
+      const carbonCost = carbonTons * inputs.carbonPrice;
+      const total = compute + egressCost + carbonCost;
+      return { compute, egress: egressCost, carbonCost, total, latency, carbonTons, kwh };
+    }
+
+    function calculate() {
+      const inputs = readInputs();
+      setVisibility(inputs.workloadType);
+
+      const results = [];
+      providers.forEach(provider => {
+        provider.regions.forEach(region => {
+          const r = computeCost(inputs, region, provider);
+          results.push({
+            provider: provider.name,
+            region: region.name,
+            regionSlug: region.slug,
+            providerSlug: provider.slug,
+            category: provider.category,
+            ...r
+          });
+        });
+      });
+
+      // Normalize for scoring (lower is better)
+      const maxCost = Math.max(...results.map(r => r.total), 1);
+      const maxLatency = Math.max(...results.map(r => r.latency), 1);
+      const maxCarbon = Math.max(...results.map(r => r.carbonTons), 1);
+      results.forEach(r => {
+        r.score = 0.5 * (r.total / maxCost) + 0.35 * (r.latency / maxLatency) + 0.15 * (r.carbonTons / maxCarbon);
+      });
+      results.sort((a, b) => a.score - b.score);
+
+      const cheapest = results.reduce((a, b) => a.total < b.total ? a : b);
+      const latencyBest = results.reduce((a, b) => a.latency < b.latency ? a : b);
+      const greenest = results.reduce((a, b) => a.carbonTons < b.carbonTons ? a : b);
+      const top = results[0];
+
+      $('cheapestName').textContent = cheapest.provider.split(' ')[0] + ' — ' + cheapest.region;
+      $('cheapestCost').textContent = cheapest.total >= 100 ? fmtCur.format(cheapest.total) : fmtCur2.format(cheapest.total);
+      $('latencyName').textContent = latencyBest.provider.split(' ')[0] + ' — ' + latencyBest.region;
+      $('greenName').textContent = greenest.provider.split(' ')[0] + ' — ' + greenest.region;
+
+      const period = top.total * inputs.projectionMonths;
+      $('verdictText').textContent = `Best balance: ${top.provider} — ${top.region}`;
+      $('verdictText').className = 'text-lg font-bold text-emerald-400';
+      $('verdictSub').textContent = `Monthly total ${top.total >= 100 ? fmtCur.format(top.total) : fmtCur2.format(top.total)} (compute ${fmtCur.format(top.compute)}, egress ${fmtCur.format(top.egress)}, carbon ${fmtCur.format(top.carbonCost)}), latency ~${fmt1.format(top.latency)} ms, projected ${inputs.projectionMonths}-month cost ${period >= 100 ? fmtCur.format(period) : fmtCur2.format(period)}.`;
+
+      renderTable(results);
+    }
+
+    function renderTable(results) {
+      const tbody = $('regionTable');
+      tbody.innerHTML = '';
+      results.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-neutral-800/50' + (i === 0 ? ' bg-neutral-800/30' : '');
+        tr.innerHTML = `
+          <td class="py-3 pr-4 font-medium">${r.provider}<br><span class="text-xs text-neutral-400">${r.region}</span></td>
+          <td class="py-3 pr-4 text-right font-mono">${fmt1.format(r.latency)} ms</td>
+          <td class="py-3 pr-4 text-right font-mono">${r.compute >= 100 ? fmtCur.format(r.compute) : fmtCur2.format(r.compute)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtCur.format(r.egress)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtCur.format(r.carbonCost)}</td>
+          <td class="py-3 pr-4 text-right font-mono font-semibold text-brand-gold">${r.total >= 100 ? fmtCur.format(r.total) : fmtCur2.format(r.total)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmt1.format(r.score * 100)}</td>
+          <td class="py-3 pr-4 ${i === 0 ? 'text-emerald-400 font-medium' : 'text-neutral-300'}">${i === 0 ? '🏆 Best balance' : (r.total === Math.min(...results.map(x => x.total)) ? '💰 Cheapest' : (r.latency === Math.min(...results.map(x => x.latency)) ? '⚡ Lowest latency' : (r.carbonTons === Math.min(...results.map(x => x.carbonTons)) ? '🌱 Greenest' : '—')))}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Scenario buttons
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const s = JSON.parse(btn.dataset.scenario);
+        // find workload option by slug
+        for (let i = 0; i < $('workloadType').options.length; i++) {
+          if (JSON.parse($('workloadType').options[i].value).slug === s.workload_type) { $('workloadType').selectedIndex = i; break; }
+        }
+        for (let i = 0; i < $('userRegion').options.length; i++) {
+          if (JSON.parse($('userRegion').options[i].value).slug === s.user_region) { $('userRegion').selectedIndex = i; break; }
+        }
+        $('commitment').value = s.commitment || 'on_demand';
+        if (s.monthly_requests !== undefined) $('monthlyRequests').value = s.monthly_requests;
+        if (s.input_tokens !== undefined) $('inputTokens').value = s.input_tokens;
+        if (s.output_tokens !== undefined) $('outputTokens').value = s.output_tokens;
+        if (s.cached_input_pct !== undefined) $('cachedInputPct').value = s.cached_input_pct;
+        if (s.egress_gb !== undefined) $('egressGb').value = s.egress_gb;
+        if (s.gpu_hours !== undefined) $('gpuHours').value = s.gpu_hours;
+        if (s.gpu_model) {
+          for (let i = 0; i < $('gpuModel').options.length; i++) {
+            if (JSON.parse($('gpuModel').options[i].value).slug === s.gpu_model) { $('gpuModel').selectedIndex = i; break; }
+          }
+        }
+        if (s.api_model) {
+          for (let i = 0; i < $('apiModel').options.length; i++) {
+            if (JSON.parse($('apiModel').options[i].value).slug === s.api_model) { $('apiModel').selectedIndex = i; break; }
+          }
+        }
+        if (s.server_count !== undefined) $('serverCount').value = s.server_count;
+        if (s.power_kw !== undefined) $('powerKw').value = s.power_kw;
+        if (s.bandwidth_tb !== undefined) $('bandwidthTb').value = s.bandwidth_tb;
+        calculate();
+      });
+    });
+
+    const inputIds = ['workloadType', 'userRegion', 'commitment', 'monthlyRequests', 'inputTokens', 'outputTokens', 'cachedInputPct', 'apiModel', 'gpuHours', 'gpuModel', 'serverCount', 'powerKw', 'bandwidthTb', 'egressGb', 'carbonPrice', 'projectionMonths'];
+    inputIds.forEach(id => $(id).addEventListener('input', calculate));
+
+    setVisibility(defaults.workload_type);
+    calculate();
+  </script>
+</Layout>

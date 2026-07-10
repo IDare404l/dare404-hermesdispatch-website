@@ -1,0 +1,182 @@
+{
+  "last_updated": "2026-07-10",
+  "note": "Regional prices, carbon intensities, and latency are representative. Verify current provider rates and renewable energy claims before committing.",
+  "workload_types": [
+    {
+      "slug": "llm_api",
+      "name": "Managed LLM API inference",
+      "unit_label": "requests / month",
+      "has_gpu_hours": false,
+      "has_egress": true,
+      "default_input_tokens": 2000,
+      "default_output_tokens": 500,
+      "default_cached_input_pct": 25
+    },
+    {
+      "slug": "cloud_gpu",
+      "name": "Cloud GPU rental (self-hosted inference)",
+      "unit_label": "GPU hours / month",
+      "has_gpu_hours": true,
+      "has_egress": true,
+      "default_gpu_hours": 720,
+      "default_gpu_model": "rtx4090"
+    },
+    {
+      "slug": "colo_bare_metal",
+      "name": "Bare-metal colocation",
+      "unit_label": "servers / month",
+      "has_gpu_hours": false,
+      "has_egress": true,
+      "default_server_count": 2,
+      "default_power_kw": 1.2,
+      "default_bandwidth_tb": 5
+    }
+  ],
+  "user_regions": [
+    { "slug": "us_west", "name": "US West", "latency_base_ms": 0 },
+    { "slug": "us_east", "name": "US East", "latency_base_ms": 60 },
+    { "slug": "eu_west", "name": "EU West", "latency_base_ms": 140 },
+    { "slug": "eu_central", "name": "EU Central", "latency_base_ms": 160 },
+    { "slug": "asia_pac", "name": "Asia Pacific", "latency_base_ms": 180 },
+    { "slug": "india", "name": "India / South Asia", "latency_base_ms": 220 },
+    { "slug": "latam", "name": "Latin America", "latency_base_ms": 170 }
+  ],
+  "providers": [
+    {
+      "slug": "aws",
+      "name": "AWS (Amazon Web Services)",
+      "category": "hyperscaler",
+      "regions": [
+        { "slug": "us-east-1", "name": "US East (N. Virginia)", "latency_bonus_ms": 10, "gpu_premium_pct": 0, "egress_per_gb": 0.09, "carbon_gco2_kwh": 380, "spot_discount_pct": 60, "reserved_discount_pct": 30, "base_gpu_hour": 1.89 },
+        { "slug": "us-west-2", "name": "US West (Oregon)", "latency_bonus_ms": 0, "gpu_premium_pct": 0, "egress_per_gb": 0.09, "carbon_gco2_kwh": 180, "spot_discount_pct": 60, "reserved_discount_pct": 30, "base_gpu_hour": 1.89 },
+        { "slug": "eu-west-1", "name": "EU West (Ireland)", "latency_bonus_ms": 130, "gpu_premium_pct": 5, "egress_per_gb": 0.09, "carbon_gco2_kwh": 290, "spot_discount_pct": 55, "reserved_discount_pct": 25, "base_gpu_hour": 1.98 },
+        { "slug": "eu-central-1", "name": "EU Central (Frankfurt)", "latency_bonus_ms": 150, "gpu_premium_pct": 8, "egress_per_gb": 0.09, "carbon_gco2_kwh": 340, "spot_discount_pct": 55, "reserved_discount_pct": 25, "base_gpu_hour": 2.04 },
+        { "slug": "ap-southeast-1", "name": "Asia Pacific (Singapore)", "latency_bonus_ms": 175, "gpu_premium_pct": 12, "egress_per_gb": 0.12, "carbon_gco2_kwh": 450, "spot_discount_pct": 50, "reserved_discount_pct": 20, "base_gpu_hour": 2.12 },
+        { "slug": "ap-south-1", "name": "Asia Pacific (Mumbai)", "latency_bonus_ms": 210, "gpu_premium_pct": 10, "egress_per_gb": 0.13, "carbon_gco2_kwh": 600, "spot_discount_pct": 50, "reserved_discount_pct": 20, "base_gpu_hour": 2.08 }
+      ]
+    },
+    {
+      "slug": "gcp",
+      "name": "Google Cloud Platform",
+      "category": "hyperscaler",
+      "regions": [
+        { "slug": "us-central1", "name": "US Central (Iowa)", "latency_bonus_ms": 20, "gpu_premium_pct": 0, "egress_per_gb": 0.11, "carbon_gco2_kwh": 350, "spot_discount_pct": 65, "reserved_discount_pct": 35, "base_gpu_hour": 1.82 },
+        { "slug": "us-west1", "name": "US West (Oregon)", "latency_bonus_ms": 5, "gpu_premium_pct": 0, "egress_per_gb": 0.11, "carbon_gco2_kwh": 120, "spot_discount_pct": 65, "reserved_discount_pct": 35, "base_gpu_hour": 1.82 },
+        { "slug": "europe-west1", "name": "Europe West (Belgium)", "latency_bonus_ms": 125, "gpu_premium_pct": 5, "egress_per_gb": 0.11, "carbon_gco2_kwh": 160, "spot_discount_pct": 60, "reserved_discount_pct": 30, "base_gpu_hour": 1.91 },
+        { "slug": "europe-west4", "name": "Europe West (Netherlands)", "latency_bonus_ms": 140, "gpu_premium_pct": 6, "egress_per_gb": 0.11, "carbon_gco2_kwh": 240, "spot_discount_pct": 60, "reserved_discount_pct": 30, "base_gpu_hour": 1.93 },
+        { "slug": "asia-southeast1", "name": "Asia Southeast (Singapore)", "latency_bonus_ms": 170, "gpu_premium_pct": 12, "egress_per_gb": 0.14, "carbon_gco2_kwh": 420, "spot_discount_pct": 55, "reserved_discount_pct": 22, "base_gpu_hour": 2.04 },
+        { "slug": "asia-south1", "name": "Asia South (Mumbai)", "latency_bonus_ms": 200, "gpu_premium_pct": 10, "egress_per_gb": 0.15, "carbon_gco2_kwh": 580, "spot_discount_pct": 55, "reserved_discount_pct": 22, "base_gpu_hour": 2.00 }
+      ]
+    },
+    {
+      "slug": "azure",
+      "name": "Microsoft Azure",
+      "category": "hyperscaler",
+      "regions": [
+        { "slug": "east-us", "name": "East US", "latency_bonus_ms": 15, "gpu_premium_pct": 0, "egress_per_gb": 0.087, "carbon_gco2_kwh": 360, "spot_discount_pct": 55, "reserved_discount_pct": 28, "base_gpu_hour": 1.95 },
+        { "slug": "west-us-2", "name": "West US 2", "latency_bonus_ms": 5, "gpu_premium_pct": 0, "egress_per_gb": 0.087, "carbon_gco2_kwh": 170, "spot_discount_pct": 55, "reserved_discount_pct": 28, "base_gpu_hour": 1.95 },
+        { "slug": "west-europe", "name": "West Europe", "latency_bonus_ms": 135, "gpu_premium_pct": 6, "egress_per_gb": 0.087, "carbon_gco2_kwh": 280, "spot_discount_pct": 50, "reserved_discount_pct": 24, "base_gpu_hour": 2.07 },
+        { "slug": "germany-west-central", "name": "Germany West Central", "latency_bonus_ms": 155, "gpu_premium_pct": 10, "egress_per_gb": 0.087, "carbon_gco2_kwh": 380, "spot_discount_pct": 50, "reserved_discount_pct": 24, "base_gpu_hour": 2.15 },
+        { "slug": "southeast-asia", "name": "Southeast Asia", "latency_bonus_ms": 175, "gpu_premium_pct": 12, "egress_per_gb": 0.12, "carbon_gco2_kwh": 470, "spot_discount_pct": 48, "reserved_discount_pct": 20, "base_gpu_hour": 2.18 },
+        { "slug": "central-india", "name": "Central India", "latency_bonus_ms": 215, "gpu_premium_pct": 10, "egress_per_gb": 0.13, "carbon_gco2_kwh": 650, "spot_discount_pct": 48, "reserved_discount_pct": 20, "base_gpu_hour": 2.15 }
+      ]
+    },
+    {
+      "slug": "coreweave",
+      "name": "CoreWeave",
+      "category": "gpu_cloud",
+      "regions": [
+        { "slug": "us-east", "name": "US East (NJ / VA)", "latency_bonus_ms": 20, "gpu_premium_pct": 0, "egress_per_gb": 0.05, "carbon_gco2_kwh": 320, "spot_discount_pct": 0, "reserved_discount_pct": 15, "base_gpu_hour": 1.45 },
+        { "slug": "us-west", "name": "US West (NV / WA)", "latency_bonus_ms": 10, "gpu_premium_pct": 0, "egress_per_gb": 0.05, "carbon_gco2_kwh": 160, "spot_discount_pct": 0, "reserved_discount_pct": 15, "base_gpu_hour": 1.45 },
+        { "slug": "eu-west", "name": "EU West (London / Amsterdam)", "latency_bonus_ms": 130, "gpu_premium_pct": 8, "egress_per_gb": 0.06, "carbon_gco2_kwh": 200, "spot_discount_pct": 0, "reserved_discount_pct": 12, "base_gpu_hour": 1.57 }
+      ]
+    },
+    {
+      "slug": "lambda",
+      "name": "Lambda Labs",
+      "category": "gpu_cloud",
+      "regions": [
+        { "slug": "us-west-1", "name": "US West 1 (SF Bay)", "latency_bonus_ms": 15, "gpu_premium_pct": 0, "egress_per_gb": 0.05, "carbon_gco2_kwh": 170, "spot_discount_pct": 0, "reserved_discount_pct": 10, "base_gpu_hour": 1.29 },
+        { "slug": "us-south-1", "name": "US South 1 (TX)", "latency_bonus_ms": 45, "gpu_premium_pct": 0, "egress_per_gb": 0.05, "carbon_gco2_kwh": 340, "spot_discount_pct": 0, "reserved_discount_pct": 10, "base_gpu_hour": 1.29 },
+        { "slug": "us-midwest-1", "name": "US Midwest 1 (IL)", "latency_bonus_ms": 35, "gpu_premium_pct": 0, "egress_per_gb": 0.05, "carbon_gco2_kwh": 430, "spot_discount_pct": 0, "reserved_discount_pct": 10, "base_gpu_hour": 1.29 }
+      ]
+    },
+    {
+      "slug": "vastai",
+      "name": "Vast.ai (peer marketplace)",
+      "category": "marketplace",
+      "regions": [
+        { "slug": "us-east", "name": "US East", "latency_bonus_ms": 25, "gpu_premium_pct": 0, "egress_per_gb": 0.03, "carbon_gco2_kwh": 360, "spot_discount_pct": 0, "reserved_discount_pct": 0, "base_gpu_hour": 0.45 },
+        { "slug": "us-west", "name": "US West", "latency_bonus_ms": 10, "gpu_premium_pct": 0, "egress_per_gb": 0.03, "carbon_gco2_kwh": 180, "spot_discount_pct": 0, "reserved_discount_pct": 0, "base_gpu_hour": 0.45 },
+        { "slug": "eu-west", "name": "EU West", "latency_bonus_ms": 135, "gpu_premium_pct": 5, "egress_per_gb": 0.04, "carbon_gco2_kwh": 280, "spot_discount_pct": 0, "reserved_discount_pct": 0, "base_gpu_hour": 0.47 },
+        { "slug": "asia-pac", "name": "Asia Pacific", "latency_bonus_ms": 185, "gpu_premium_pct": 15, "egress_per_gb": 0.05, "carbon_gco2_kwh": 500, "spot_discount_pct": 0, "reserved_discount_pct": 0, "base_gpu_hour": 0.52 }
+      ]
+    },
+    {
+      "slug": "runpod",
+      "name": "RunPod",
+      "category": "gpu_cloud",
+      "regions": [
+        { "slug": "us-east", "name": "US East", "latency_bonus_ms": 20, "gpu_premium_pct": 0, "egress_per_gb": 0.04, "carbon_gco2_kwh": 340, "spot_discount_pct": 30, "reserved_discount_pct": 0, "base_gpu_hour": 0.52 },
+        { "slug": "us-west", "name": "US West", "latency_bonus_ms": 10, "gpu_premium_pct": 0, "egress_per_gb": 0.04, "carbon_gco2_kwh": 170, "spot_discount_pct": 30, "reserved_discount_pct": 0, "base_gpu_hour": 0.52 },
+        { "slug": "eu-central", "name": "EU Central", "latency_bonus_ms": 145, "gpu_premium_pct": 5, "egress_per_gb": 0.05, "carbon_gco2_kwh": 320, "spot_discount_pct": 25, "reserved_discount_pct": 0, "base_gpu_hour": 0.55 },
+        { "slug": "asia-southeast", "name": "Asia Southeast", "latency_bonus_ms": 180, "gpu_premium_pct": 12, "egress_per_gb": 0.06, "carbon_gco2_kwh": 480, "spot_discount_pct": 25, "reserved_discount_pct": 0, "base_gpu_hour": 0.58 }
+      ]
+    },
+    {
+      "slug": "baremetal",
+      "name": "Bare-metal colocation",
+      "category": "colo",
+      "regions": [
+        { "slug": "us-east", "name": "US East (Ashburn)", "latency_bonus_ms": 15, "gpu_premium_pct": 0, "egress_per_gb": 0.02, "carbon_gco2_kwh": 360, "spot_discount_pct": 0, "reserved_discount_pct": 0, "base_gpu_hour": 0.85 },
+        { "slug": "us-west", "name": "US West (Phoenix)", "latency_bonus_ms": 30, "gpu_premium_pct": 0, "egress_per_gb": 0.02, "carbon_gco2_kwh": 380, "spot_discount_pct": 0, "reserved_discount_pct": 0, "base_gpu_hour": 0.85 },
+        { "slug": "eu-west", "name": "EU West (Amsterdam)", "latency_bonus_ms": 130, "gpu_premium_pct": 5, "egress_per_gb": 0.03, "carbon_gco2_kwh": 260, "spot_discount_pct": 0, "reserved_discount_pct": 0, "base_gpu_hour": 0.92 },
+        { "slug": "eu-north", "name": "EU North (Finland)", "latency_bonus_ms": 155, "gpu_premium_pct": 5, "egress_per_gb": 0.03, "carbon_gco2_kwh": 80, "spot_discount_pct": 0, "reserved_discount_pct": 0, "base_gpu_hour": 0.92 },
+        { "slug": "asia-southeast", "name": "Asia Southeast (Singapore)", "latency_bonus_ms": 175, "gpu_premium_pct": 12, "egress_per_gb": 0.04, "carbon_gco2_kwh": 430, "spot_discount_pct": 0, "reserved_discount_pct": 0, "base_gpu_hour": 1.02 }
+      ]
+    }
+  ],
+  "api_models": [
+    { "slug": "gpt4o", "name": "OpenAI GPT-4o", "input_per_1m": 2.50, "output_per_1m": 10.00, "cached_input_per_1m": 1.25, "overhead_ms": 80 },
+    { "slug": "gpt4o_mini", "name": "OpenAI GPT-4o mini", "input_per_1m": 0.15, "output_per_1m": 0.60, "cached_input_per_1m": 0.075, "overhead_ms": 60 },
+    { "slug": "claude_sonnet", "name": "Anthropic Claude 3.5 Sonnet", "input_per_1m": 3.00, "output_per_1m": 15.00, "cached_input_per_1m": 0.30, "overhead_ms": 120 },
+    { "slug": "claude_haiku", "name": "Anthropic Claude 3.5 Haiku", "input_per_1m": 0.25, "output_per_1m": 1.25, "cached_input_per_1m": 0.03, "overhead_ms": 70 },
+    { "slug": "gemini_pro", "name": "Google Gemini 1.5 Pro", "input_per_1m": 1.25, "output_per_1m": 5.00, "cached_input_per_1m": 0.31, "overhead_ms": 100 },
+    { "slug": "gemini_flash", "name": "Google Gemini 1.5 Flash", "input_per_1m": 0.075, "output_per_1m": 0.30, "cached_input_per_1m": 0.01875, "overhead_ms": 55 },
+    { "slug": "together_llama", "name": "Together AI Llama 3.1 70B", "input_per_1m": 0.90, "output_per_1m": 0.90, "cached_input_per_1m": 0.90, "overhead_ms": 95 },
+    { "slug": "groq_llama", "name": "Groq Llama 3.1 70B", "input_per_1m": 0.59, "output_per_1m": 0.79, "cached_input_per_1m": 0.59, "overhead_ms": 35 }
+  ],
+  "gpu_models": [
+    { "slug": "rtx4090", "name": "NVIDIA RTX 4090", "vram_gb": 24, "power_w": 450, "tok_s_fp16_7b": 85, "tok_s_int4_70b": 12 },
+    { "slug": "rtx3090", "name": "NVIDIA RTX 3090", "vram_gb": 24, "power_w": 350, "tok_s_fp16_7b": 65, "tok_s_int4_70b": 9 },
+    { "slug": "a100_40gb", "name": "NVIDIA A100 40GB", "vram_gb": 40, "power_w": 400, "tok_s_fp16_7b": 110, "tok_s_int4_70b": 18 },
+    { "slug": "a100_80gb", "name": "NVIDIA A100 80GB", "vram_gb": 80, "power_w": 400, "tok_s_fp16_7b": 115, "tok_s_int4_70b": 20 },
+    { "slug": "h100", "name": "NVIDIA H100 80GB", "vram_gb": 80, "power_w": 700, "tok_s_fp16_7b": 210, "tok_s_int4_70b": 38 },
+    { "slug": "mi300x", "name": "AMD MI300X 192GB", "vram_gb": 192, "power_w": 750, "tok_s_fp16_7b": 180, "tok_s_int4_70b": 30 }
+  ],
+  "scenarios": [
+    { "name": "US SaaS app, GPT-4o", "workload_type": "llm_api", "monthly_requests": 5000000, "input_tokens": 2500, "output_tokens": 600, "cached_input_pct": 30, "egress_gb": 2500, "user_region": "us_west", "commitment": "on_demand", "api_model": "gpt4o" },
+    { "name": "EU agent, Claude Haiku", "workload_type": "llm_api", "monthly_requests": 25000000, "input_tokens": 1200, "output_tokens": 300, "cached_input_pct": 20, "egress_gb": 8000, "user_region": "eu_west", "commitment": "on_demand", "api_model": "claude_haiku" },
+    { "name": "Self-hosted RTX 4090 cluster", "workload_type": "cloud_gpu", "gpu_hours": 2160, "gpu_model": "rtx4090", "egress_gb": 10000, "user_region": "us_east", "commitment": "reserved" },
+    { "name": "Bare-metal colo (2 servers)", "workload_type": "colo_bare_metal", "server_count": 2, "power_kw": 1.5, "bandwidth_tb": 10, "user_region": "us_west", "commitment": "on_demand" },
+    { "name": "Asia Pacific marketplace GPU", "workload_type": "cloud_gpu", "gpu_hours": 720, "gpu_model": "rtx4090", "egress_gb": 3000, "user_region": "asia_pac", "commitment": "spot" }
+  ],
+  "defaults": {
+    "workload_type": "llm_api",
+    "monthly_requests": 1000000,
+    "input_tokens": 2000,
+    "output_tokens": 500,
+    "cached_input_pct": 25,
+    "gpu_hours": 720,
+    "gpu_model": "rtx4090",
+    "server_count": 2,
+    "power_kw": 1.2,
+    "bandwidth_tb": 5,
+    "egress_gb": 2000,
+    "user_region": "us_west",
+    "commitment": "on_demand",
+    "api_model": "gpt4o",
+    "carbon_price_per_tonne": 0,
+    "projection_months": 12
+  }
+}
