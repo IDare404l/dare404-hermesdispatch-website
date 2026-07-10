@@ -1,0 +1,132 @@
+{
+  "last_updated": "2026-07-09",
+  "note": "Commitment discounts and minimums are representative of published enterprise/volume programs (e.g., Azure OpenAI reserved capacity, Together AI volume tiers, Fireworks enterprise commits). Replace with your actual contract terms. On-demand rates are approximations; check provider pricing pages before signing.",
+  "providers": [
+    {
+      "slug": "openai",
+      "name": "OpenAI API",
+      "model": "GPT-4o family",
+      "input_per_1m": 2.5,
+      "output_per_1m": 10.0,
+      "cached_input_per_1m": 1.25,
+      "commitment_discount_pct": 0,
+      "min_monthly_commitment": 0,
+      "term_months": 0,
+      "notes": "No standard prepaid commitment discount. Enterprise customers may negotiate separate terms."
+    },
+    {
+      "slug": "anthropic",
+      "name": "Anthropic API",
+      "model": "Claude 3.5 Sonnet family",
+      "input_per_1m": 3.0,
+      "output_per_1m": 15.0,
+      "cached_input_per_1m": 3.75,
+      "commitment_discount_pct": 0,
+      "min_monthly_commitment": 0,
+      "term_months": 0,
+      "notes": "No public commitment tier. Enterprise agreements may include rate cards."
+    },
+    {
+      "slug": "google",
+      "name": "Google Gemini API",
+      "model": "Gemini 1.5 Pro",
+      "input_per_1m": 3.5,
+      "output_per_1m": 10.5,
+      "cached_input_per_1m": 0.0,
+      "commitment_discount_pct": 0,
+      "min_monthly_commitment": 0,
+      "term_months": 0,
+      "notes": "Pay-as-you-go only at API level; enterprise Cloud contracts are separate."
+    },
+    {
+      "slug": "azure-openai",
+      "name": "Azure OpenAI Service",
+      "model": "GPT-4o",
+      "input_per_1m": 5.0,
+      "output_per_1m": 15.0,
+      "cached_input_per_1m": 2.5,
+      "commitment_discount_pct": 20,
+      "min_monthly_commitment": 3000,
+      "term_months": 12,
+      "notes": "Reserved provisioned throughput or MACC commits often include 15–25% discount with 12-month term."
+    },
+    {
+      "slug": "together",
+      "name": "Together AI",
+      "model": "Llama 3.1 70B",
+      "input_per_1m": 0.9,
+      "output_per_1m": 0.9,
+      "cached_input_per_1m": 0.0,
+      "commitment_discount_pct": 12,
+      "min_monthly_commitment": 1000,
+      "term_months": 6,
+      "notes": "Volume commits can reduce per-token pricing for high-throughput workloads."
+    },
+    {
+      "slug": "fireworks",
+      "name": "Fireworks AI",
+      "model": "Llama 3.1 70B",
+      "input_per_1m": 0.9,
+      "output_per_1m": 0.9,
+      "cached_input_per_1m": 0.0,
+      "commitment_discount_pct": 15,
+      "min_monthly_commitment": 1500,
+      "term_months": 12,
+      "notes": "Enterprise commits and reserved capacity can include double-digit discounts."
+    },
+    {
+      "slug": "groq",
+      "name": "Groq",
+      "model": "Llama 3.1 70B",
+      "input_per_1m": 0.59,
+      "output_per_1m": 0.79,
+      "cached_input_per_1m": 0.0,
+      "commitment_discount_pct": 0,
+      "min_monthly_commitment": 0,
+      "term_months": 0,
+      "notes": "No public commitment program. On-demand pricing is already aggressive."
+    }
+  ],
+  "defaults": {
+    "monthly_requests": 50000,
+    "input_tokens": 2000,
+    "output_tokens": 700,
+    "cached_input_pct": 25,
+    "commitment_utilization_pct": 85,
+    "projection_months": 12
+  },
+  "scenarios": [
+    {
+      "name": "High-volume support bot",
+      "monthly_requests": 200000,
+      "input_tokens": 1500,
+      "output_tokens": 400,
+      "cached_input_pct": 40,
+      "commitment_utilization_pct": 90
+    },
+    {
+      "name": "Mid-size content agent",
+      "monthly_requests": 50000,
+      "input_tokens": 3000,
+      "output_tokens": 1200,
+      "cached_input_pct": 20,
+      "commitment_utilization_pct": 80
+    },
+    {
+      "name": "Lean internal research agent",
+      "monthly_requests": 10000,
+      "input_tokens": 4000,
+      "output_tokens": 1000,
+      "cached_input_pct": 30,
+      "commitment_utilization_pct": 70
+    },
+    {
+      "name": "Coding agent with retries",
+      "monthly_requests": 30000,
+      "input_tokens": 2500,
+      "output_tokens": 1500,
+      "cached_input_pct": 15,
+      "commitment_utilization_pct": 85
+    }
+  ]
+}

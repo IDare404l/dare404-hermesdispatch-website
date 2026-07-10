@@ -1,0 +1,300 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_api_commitment_roi.json';
+
+const title = "AI Agent API Commitment & Prepaid Credit ROI Calculator | Hermes Dispatch";
+const description = "Compare on-demand LLM API pricing versus prepaid commitments and volume credits. Estimate break-even utilization, commitment waste, effective rate, and ROI.";
+const providers = data.providers;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "When does a prepaid API commitment actually save money?", a: "A commitment saves money only when your actual usage is high enough to absorb the minimum spend and the discount outweighs any unused portion. If you commit $3,000/month but only use $2,000 worth of tokens, the waste usually wipes out the discount." },
+  { q: "How is break-even utilization calculated?", a: "Break-even utilization is the share of a committed minimum spend you must actually consume before the discounted commitment becomes cheaper than pure on-demand. Below that share, on-demand is cheaper; above it, the commitment wins." },
+  { q: "What counts as commitment waste?", a: "Waste is the gap between the discounted spend you would have incurred at actual usage and the minimum spend you are contractually obligated to pay. Some providers bill overages at on-demand rates; others require a true-up. The calculator treats waste as the excess commitment floor." },
+  { q: "Do all providers offer commitments?", a: "No. OpenAI, Anthropic, Google, and Groq do not publish standard prepaid discounts in their public APIs. Azure OpenAI, Together AI, and Fireworks AI commonly offer committed-use or enterprise discounts. Always verify current contract terms with the provider." },
+  { q: "What if my usage grows during the term?", a: "If you expect growth, model the ramp separately by month or use an average. The calculator uses a flat monthly volume and a utilization percentage of the committed floor; for high-growth workloads, err toward shorter terms or lower commits." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent API Commitment & Prepaid Credit ROI Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-api-commitment-roi/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">💳</div>
+      <h1 class="display-heading text-4xl md:text-5xl mb-4">AI Agent API Commitment & Prepaid Credit ROI Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Compare on-demand LLM API pricing versus prepaid commitments and volume credits. Estimate break-even utilization, commitment waste, effective rate, and ROI.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests / month</span>
+          <input id="monthlyRequests" type="number" min="0" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input %</span>
+          <input id="cacheHit" type="number" min="0" max="100" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Expected commitment utilization %</span>
+          <input id="utilization" type="number" min="0" max="200" value={defaults.commitment_utilization_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Commitment terms are representative. Always confirm actual discounts and minimums with the provider. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">On-demand monthly cost</p>
+        <p id="onDemandCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Best commitment monthly cost</p>
+        <p id="commitCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly savings vs on-demand</p>
+        <p id="monthlySavings" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected ROI over term</p>
+        <p id="periodRoi" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison for this workload</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4">On-demand / mo</th>
+            <th class="py-3 pr-4">Commitment / mo</th>
+            <th class="py-3 pr-4 text-right">Waste / mo</th>
+            <th class="py-3 pr-4 text-right">Break-even util.</th>
+            <th class="py-3 pr-4">Verdict</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {providers.map(p => (
+            <tr class="border-b border-neutral-800/50" data-provider={p.slug}>
+              <td class="py-3 pr-4">
+                <div class="font-medium text-white">{p.name}</div>
+                <div class="text-xs text-neutral-500">{p.model}</div>
+              </td>
+              <td class="py-3 pr-4 font-mono on-demand-cell">—</td>
+              <td class="py-3 pr-4 font-mono commit-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono waste-cell">—</td>
+              <td class="py-3 pr-4 text-right font-mono break-even-cell">—</td>
+              <td class="py-3 pr-4 text-sm verdict-cell text-neutral-400">—</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Best option -->
+    <section id="best" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+      <h2 class="text-lg font-semibold text-cyan-400 mb-2">Best pricing route</h2>
+      <p id="bestLine" class="text-white text-xl font-medium">Enter a workload to see the cheapest route.</p>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/prompt-cache-savings-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Prompt Cache Savings →</a>
+      <a href="/tools/agent-model-router-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Model Router Cost →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), scenarios: JSON.stringify(scenarios) }}>
+    const data = JSON.parse(providers);
+    const scenarioData = JSON.parse(scenarios);
+    const providerMap = Object.fromEntries(data.map(p => [p.slug, p]));
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmt2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtPct = n => fmtNum(n) + '%';
+
+    function getInputs() {
+      return {
+        monthlyRequests: Math.max(0, parseFloat(document.getElementById('monthlyRequests').value) || 0),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        cacheHit: Math.min(100, Math.max(0, parseFloat(document.getElementById('cacheHit').value) || 0)) / 100,
+        utilization: Math.min(200, Math.max(0, parseFloat(document.getElementById('utilization').value) || 0)) / 100,
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function onDemandCost(p, inps) {
+      const requests = inps.monthlyRequests;
+      const inputCost = (requests * inps.inputTokens / 1_000_000) * ((1 - inps.cacheHit) * p.input_per_1m + inps.cacheHit * (p.cached_input_per_1m || p.input_per_1m));
+      const outputCost = (requests * inps.outputTokens / 1_000_000) * p.output_per_1m;
+      return inputCost + outputCost;
+    }
+
+    function commitmentCost(p, inps) {
+      const od = onDemandCost(p, inps);
+      if (!p.commitment_discount_pct || !p.min_monthly_commitment) {
+        return { cost: od, waste: 0, breakEven: Infinity };
+      }
+      const discounted = od * (1 - p.commitment_discount_pct / 100);
+      const cost = Math.max(discounted, p.min_monthly_commitment);
+      const waste = Math.max(0, p.min_monthly_commitment - discounted);
+      // Break-even utilization of the minimum spend relative to full discounted on-demand at 100% volume
+      const breakEven = p.min_monthly_commitment / (od * (1 - p.commitment_discount_pct / 100));
+      return { cost, waste, breakEven: Math.min(breakEven * 100, 200) };
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const rows = data.map(p => {
+        const od = onDemandCost(p, inps);
+        const commit = commitmentCost(p, inps);
+        const savings = od - commit.cost;
+        return { slug: p.slug, name: p.name, od, cost: commit.cost, waste: commit.waste, breakEven: commit.breakEven, hasCommit: !!p.commitment_discount_pct, savings };
+      });
+      rows.sort((a, b) => a.cost - b.cost);
+
+      const cheapest = rows[0];
+      const onDemandTotal = rows.reduce((sum, r) => sum + r.od, 0) / rows.length; // just a reference: use user's current provider? Better: show overall cheapest on-demand
+      // Actually show cheapest on-demand separately
+      const cheapestOnDemand = [...rows].sort((a, b) => a.od - b.od)[0];
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const slug = tr.dataset.provider;
+        const row = rows.find(r => r.slug === slug);
+        if (!row) return;
+        tr.querySelector('.on-demand-cell').textContent = fmt(row.od);
+        tr.querySelector('.commit-cell').textContent = fmt(row.cost) + (row.hasCommit ? '' : ' (on-demand)');
+        tr.querySelector('.waste-cell').textContent = row.waste > 0 ? fmt(row.waste) : '—';
+        tr.querySelector('.break-even-cell').textContent = row.hasCommit && isFinite(row.breakEven) ? fmtPct(row.breakEven) : '—';
+        const vCell = tr.querySelector('.verdict-cell');
+        if (!row.hasCommit) {
+          vCell.textContent = 'No published commitment';
+        } else if (row.cost < row.od) {
+          vCell.textContent = `Save ${fmtPct((row.od - row.cost) / row.od * 100)} vs on-demand`;
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-emerald-400';
+        } else if (row.cost > row.od) {
+          vCell.textContent = `${fmtPct((row.cost - row.od) / row.od * 100)} more than on-demand`;
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-amber-400';
+        } else {
+          vCell.textContent = 'Same as on-demand';
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-neutral-400';
+        }
+        if (rows[0].slug === slug) {
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      const totalCommitCost = cheapest.cost;
+      const totalOnDemandCost = cheapestOnDemand.od;
+      const monthlySavings = totalOnDemandCost - totalCommitCost;
+      const periodSavings = monthlySavings * inps.projectionMonths;
+      const roiPct = totalCommitCost > 0 ? (periodSavings / totalCommitCost) * 100 : 0;
+
+      document.getElementById('onDemandCost').textContent = fmt(totalOnDemandCost);
+      document.getElementById('commitCost').textContent = fmt(totalCommitCost);
+      document.getElementById('monthlySavings').textContent = (monthlySavings >= 0 ? '+' : '-') + fmt(Math.abs(monthlySavings));
+      document.getElementById('periodRoi').textContent = fmtNum(roiPct) + '%';
+
+      document.getElementById('bestLine').textContent = `Cheapest route: ${cheapest.name} at ${fmt(cheapest.cost)}/month (${cheapest.hasCommit ? 'commitment' : 'on-demand'}). On-demand baseline from ${cheapestOnDemand.name} would be ${fmt(cheapestOnDemand.od)}/month.`;
+
+      let verdict = '';
+      if (monthlySavings > 0) {
+        verdict = `A commitment wins for this workload. ${cheapest.name} under commitment costs ${fmt(totalCommitCost)}/month, saving ${fmt(monthlySavings)}/month versus the cheapest pure on-demand option (${cheapestOnDemand.name}). Over ${inps.projectionMonths} months that is ${fmt(periodSavings)} in savings (${fmtNum(roiPct)}% ROI vs commit spend). Keep monitoring actual utilization so the minimum spend does not turn into waste.`;
+      } else if (monthlySavings < -50) {
+        verdict = `On-demand is currently cheaper. Your expected utilization is too low to absorb any commitment floor. Stick with ${cheapestOnDemand.name} on-demand at ${fmt(totalOnDemandCost)}/month. Re-run this calculator when monthly usage is 2–3× higher or when a provider offers a custom enterprise rate.`;
+      } else {
+        verdict = `The difference is small. ${cheapest.name} commitment is roughly the same price as ${cheapestOnDemand.name} on-demand. A short-term or no-commit route preserves flexibility until your volume is more predictable.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_requests !== undefined) document.getElementById('monthlyRequests').value = obj.monthly_requests;
+      if (obj.input_tokens !== undefined) document.getElementById('inputTokens').value = obj.input_tokens;
+      if (obj.output_tokens !== undefined) document.getElementById('outputTokens').value = obj.output_tokens;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cacheHit').value = obj.cached_input_pct;
+      if (obj.commitment_utilization_pct !== undefined) document.getElementById('utilization').value = obj.commitment_utilization_pct;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['monthlyRequests','inputTokens','outputTokens','cacheHit','utilization','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
