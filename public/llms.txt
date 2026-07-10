@@ -867,11 +867,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Cross-links: Per-User Cost Calculator, API Pricing Comparator, Hosting Cost Comparator, Memory / RAG Cost Calculator, Observability Cost Calculator.
 ||
 ## AI Agent Hosting Region / Latency Cost Comparator
-||- URL: https://hermesdispatch.dev/tools/agent-hosting-region-cost-comparator/
-||- Description: Compare cloud GPU and inference API costs across AWS, GCP, Azure, CoreWeave, Lambda, Vast.ai, RunPod, and bare-metal regions. Factor in egress, latency, carbon, and spot/reserved pricing.
-||- Inputs: workload type (managed LLM API, cloud GPU rental, bare-metal colocation), user region, commitment/pricing model (on-demand, reserved, spot), monthly requests or GPU hours or servers, input/output tokens or GPU model or power/bandwidth, egress GB/month, optional carbon price per tonne, projection months.
-||- Outputs: cheapest region, lowest monthly cost, best latency region, greenest region, provider/region comparison table with compute, egress, carbon cost, total monthly, score, and status, projected period cost.
-||- Audience: AI agent builders choosing a hosting region by cost, latency, and carbon footprint.
-||- Cross-links: Agent Hosting Cost Comparator, GPU Cloud vs Buy Calculator, Inference Capacity Planner, Latency Budget Calculator.
-||
+|||- URL: https://hermesdispatch.dev/tools/agent-hosting-region-cost-comparator/
+|||- Description: Compare cloud GPU and inference API costs across AWS, GCP, Azure, CoreWeave, Lambda, Vast.ai, RunPod, and bare-metal regions. Factor in egress, latency, carbon, and spot/reserved pricing.
+|||- Inputs: workload type (managed LLM API, cloud GPU rental, bare-metal colocation), user region, commitment/pricing model (on-demand, reserved, spot), monthly requests or GPU hours or servers, input/output tokens or GPU model or power/bandwidth, egress GB/month, optional carbon price per tonne, projection months.
+|||- Outputs: cheapest region, lowest monthly cost, best latency region, greenest region, provider/region comparison table with compute, egress, carbon cost, total monthly, score, and status, projected period cost.
+|||- Audience: AI agent builders choosing a hosting region by cost, latency, and carbon footprint.
+|||- Cross-links: Agent Hosting Cost Comparator, GPU Cloud vs Buy Calculator, Inference Capacity Planner, Latency Budget Calculator.
+|||
+## AI Agent System Prompt Generator
+|- URL: https://hermesdispatch.dev/tools/agent-system-prompt-generator/
+|- Description: Generate a production-ready system prompt for an AI agent based on role, tools, output format, guardrails, and tone.
+|- Inputs: role (support, SDR, coder, researcher, writer, data extraction, scheduler, custom), tone (professional, friendly, direct, technical, teacher, brand voice), output format (plain text, JSON, markdown, bullets, table, numbered steps), allowed tools, guardrails, optional custom goal.
+|- Outputs: a complete system prompt with role, goal, tools, output format, guardrails, workflow, tone, examples, and escalation rules.
+|- Audience: AI agent builders and prompt engineers creating consistent, deployable system prompts.
+|- Cross-links: Agent Benchmark Selector, Agent Stack Builder, LLM Cost Calculator, Prompt Testing Budget Calculator.
+
 ## Hub Pages

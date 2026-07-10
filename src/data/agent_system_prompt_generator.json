@@ -1,0 +1,133 @@
+{
+  "last_updated": "2026-07-10",
+  "note": "Generated prompts are starting templates. Review and redact PII, tighten guardrails, and test extensively before production deployment.",
+  "roles": [
+    {
+      "slug": "support",
+      "name": "Customer support agent",
+      "icon": "🎧",
+      "description": "Answers questions, resolves issues, and escalates when needed.",
+      "default_tools": ["kb_search", "ticket_create", "refund_lookup"],
+      "example_tasks": ["refund a subscription", "troubleshoot a failed GPU order", "explain shipping delays"]
+    },
+    {
+      "slug": "sdr",
+      "name": "Sales / SDR agent",
+      "icon": "📞",
+      "description": "Qualifies leads, schedules demos, and answers product questions.",
+      "default_tools": ["crm_lookup", "calendar_book", "email_send"],
+      "example_tasks": ["qualify an inbound lead", "book a demo", "follow up after a trial"]
+    },
+    {
+      "slug": "coder",
+      "name": "Coding assistant",
+      "icon": "💻",
+      "description": "Writes, explains, debugs, and reviews code.",
+      "default_tools": ["code_interpreter", "web_search", "git_diff"],
+      "example_tasks": ["debug a Python error", "write a unit test", "review a PR"]
+    },
+    {
+      "slug": "researcher",
+      "name": "Research agent",
+      "icon": "🔬",
+      "description": "Gathers, synthesizes, and cites information from multiple sources.",
+      "default_tools": ["web_search", "browser", "pdf_reader", "note_store"],
+      "example_tasks": ["summarize a competitor", "find benchmarks for a GPU", "draft a market overview"]
+    },
+    {
+      "slug": "writer",
+      "name": "Content writer",
+      "icon": "✍️",
+      "description": "Drafts articles, emails, social posts, and ad copy.",
+      "default_tools": ["style_guide", "seo_keywords", "plagiarism_check"],
+      "example_tasks": ["write a newsletter section", "draft a LinkedIn post", "rewrite a product description"]
+    },
+    {
+      "slug": "data",
+      "name": "Data extraction agent",
+      "icon": "📊",
+      "description": "Parses unstructured documents and returns structured data.",
+      "default_tools": ["pdf_reader", "ocr", "schema_validator", "db_write"],
+      "example_tasks": ["extract invoice line items", "parse a resume", "normalize a product catalog"]
+    },
+    {
+      "slug": "scheduler",
+      "name": "Scheduling assistant",
+      "icon": "📅",
+      "description": "Books meetings, sends reminders, and handles calendar conflicts.",
+      "default_tools": ["calendar_read", "calendar_write", "email_send", "slack_dm"],
+      "example_tasks": ["schedule a team sync", "reschedule due to conflict", "send interview reminders"]
+    },
+    {
+      "slug": "custom",
+      "name": "Custom role",
+      "icon": "🔧",
+      "description": "Define your own role, tools, and constraints.",
+      "default_tools": [],
+      "example_tasks": ["custom task 1", "custom task 2"]
+    }
+  ],
+  "tones": [
+    { "slug": "professional", "name": "Professional", "description": "Clear, courteous, and concise." },
+    { "slug": "friendly", "name": "Friendly", "description": "Warm, conversational, and approachable." },
+    { "slug": "direct", "name": "Direct", "description": "Short sentences, no filler, action-first." },
+    { "slug": "technical", "name": "Technical", "description": "Precise, uses correct terminology, assumes expertise." },
+    { "slug": "teacher", "name": "Teacher", "description": "Patient, explanatory, uses examples and analogies." },
+    { "slug": "brand", "name": "Brand voice", "description": "Matches a provided brand voice guide." }
+  ],
+  "output_formats": [
+    { "slug": "text", "name": "Plain text", "description": "Free-form natural language response." },
+    { "slug": "json", "name": "JSON", "description": "Structured JSON matching a provided schema." },
+    { "slug": "markdown", "name": "Markdown", "description": "Formatted markdown with headers, lists, and code blocks." },
+    { "slug": "bullets", "name": "Bullet list", "description": "Concise bullet points with no fluff." },
+    { "slug": "table", "name": "Table", "description": "Markdown or structured table." },
+    { "slug": "steps", "name": "Numbered steps", "description": "Step-by-step instructions." }
+  ],
+  "guardrails": [
+    { "slug": "pii", "name": "No PII handling", "description": "Do not request, store, or repeat personal identifiable information beyond what is required." },
+    { "slug": "medical", "name": "No medical/legal advice", "description": "Refuse to provide medical, legal, or financial advice; direct users to qualified professionals." },
+    { "slug": "off_topic", "name": "Stay on topic", "description": "Politely decline off-topic requests and redirect to the supported scope." },
+    { "slug": "citations", "name": "Cite sources", "description": "Always cite sources and confidence levels when stating facts." },
+    { "slug": "uncertainty", "name": "Admit uncertainty", "description": "Say 'I don't know' rather than hallucinating answers." },
+    { "slug": "tone_check", "name": "Respectful tone", "description": "Never insult, argue, or respond to abusive prompts." },
+    { "slug": "tool_scope", "name": "Tool scope only", "description": "Only call tools listed below; do not invent capabilities." },
+    { "slug": "human_handoff", "name": "Human handoff", "description": "Escalate to a human when confidence is low or the user requests it." }
+  ],
+  "tool_catalog": [
+    { "slug": "kb_search", "name": "Knowledge base search", "description": "Search internal help docs and articles." },
+    { "slug": "ticket_create", "name": "Create support ticket", "description": "Open a ticket in the helpdesk system." },
+    { "slug": "refund_lookup", "name": "Refund policy lookup", "description": "Check refund eligibility and policy." },
+    { "slug": "crm_lookup", "name": "CRM lookup", "description": "Read lead or customer record." },
+    { "slug": "calendar_book", "name": "Calendar booking", "description": "Book or reschedule a meeting." },
+    { "slug": "email_send", "name": "Send email", "description": "Send a templated email to a contact." },
+    { "slug": "code_interpreter", "name": "Code interpreter", "description": "Execute code in a sandbox." },
+    { "slug": "web_search", "name": "Web search", "description": "Search the public web for current information." },
+    { "slug": "git_diff", "name": "Git diff", "description": "Read code changes in a repository." },
+    { "slug": "browser", "name": "Browser / scraper", "description": "Navigate websites and extract data." },
+    { "slug": "pdf_reader", "name": "PDF reader", "description": "Extract text and tables from PDFs." },
+    { "slug": "note_store", "name": "Note store", "description": "Save research notes to a knowledge base." },
+    { "slug": "style_guide", "name": "Style guide", "description": "Enforce editorial style and terminology." },
+    { "slug": "seo_keywords", "name": "SEO keywords", "description": "Suggest or check target keywords." },
+    { "slug": "plagiarism_check", "name": "Plagiarism check", "description": "Check content against existing sources." },
+    { "slug": "ocr", "name": "OCR", "description": "Extract text from images." },
+    { "slug": "schema_validator", "name": "Schema validator", "description": "Validate structured output against a JSON schema." },
+    { "slug": "db_write", "name": "Database write", "description": "Insert or update records in a database." },
+    { "slug": "calendar_read", "name": "Calendar read", "description": "Check availability and existing events." },
+    { "slug": "calendar_write", "name": "Calendar write", "description": "Create or update calendar events." },
+    { "slug": "slack_dm", "name": "Slack DM", "description": "Send a direct message via Slack." }
+  ],
+  "example_prompt": {
+    "intro": "You are a helpful, production-ready AI agent. Follow the role, output format, guardrails, and tool instructions below.",
+    "sections": [
+      "ROLE",
+      "GOAL",
+      "ALLOWED TOOLS",
+      "OUTPUT FORMAT",
+      "GUARDRAILS",
+      "WORKFLOW",
+      "TONE",
+      "EXAMPLES",
+      "ESCALATION"
+    ]
+  }
+}
