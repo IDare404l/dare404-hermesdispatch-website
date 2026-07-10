@@ -795,12 +795,20 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||- Cross-links: AI Agent Multi-Modal Cost Calculator, AI Voice Agent Cost Calculator, Multi-Step Workflow Cost Calculator.
 
 ## AI Agent Image Generation Cost Calculator
-||- URL: https://hermesdispatch.dev/tools/agent-image-generation-cost-calculator/
-||- Description: Estimate monthly cost for AI agents that generate, edit, and deliver images across DALL·E 3, Midjourney, Stable Diffusion API, Leonardo.Ai, Ideogram, Recraft, Adobe Firefly, and self-hosted FLUX.1 / SDXL stacks.
-||- Inputs: final images per month, images per API batch, image size, generation mode, complexity tier, batches per final image, upscale percentage, LLM prompt provider and tokens per request, prompt requests per image, human review rate/minutes/hourly cost, maintenance hours per month, projection months.
-||- Outputs: cheapest provider, monthly image generation cost, monthly prompt cost, total monthly cost, cost per final image, cost per 1,000 final images, projected period cost, provider comparison table, verdict.
-||- Audience: AI agent builders, marketers, and e-commerce operators budgeting generative image pipelines, product-shot workflows, and creative-variant factories.
-||- Cross-links: AI Agent Multi-Modal Cost Calculator, AI Agent Video Generation Cost Calculator, Multi-Step Workflow Cost Calculator.
+|||- URL: https://hermesdispatch.dev/tools/agent-image-generation-cost-calculator/
+|||- Description: Estimate monthly cost for AI agents that generate, edit, and deliver images across DALL·E 3, Midjourney, Stable Diffusion API, Leonardo.Ai, Ideogram, Recraft, Adobe Firefly, and self-hosted FLUX.1 / SDXL stacks.
+|||- Inputs: final images per month, images per API batch, image size, generation mode, complexity tier, batches per final image, upscale percentage, LLM prompt provider and tokens per request, prompt requests per image, human review rate/minutes/hourly cost, maintenance hours per month, projection months.
+|||- Outputs: cheapest provider, monthly image generation cost, monthly prompt cost, total monthly cost, cost per final image, cost per 1,000 final images, projected period cost, provider comparison table, verdict.
+|||- Audience: AI agent builders, marketers, and e-commerce operators budgeting generative image pipelines, product-shot workflows, and creative-variant factories.
+|||- Cross-links: AI Agent Multi-Modal Cost Calculator, AI Agent Video Generation Cost Calculator, Multi-Step Workflow Cost Calculator.
+
+## AI Agent Data Integration / ETL Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-data-integration-cost-calculator/
+|- Description: Estimate monthly cost for AI agents that extract, transform, load, and sync data across sources: extractors, loaders, orchestrators, warehouses, API connectors, and LLM enrichment.
+|- Inputs: monthly jobs, sources per job, transform steps per job, destinations per job, LLM calls per job, input/output tokens per LLM call, cached input percentage, LLM provider, extractor, loader, orchestrator, warehouse, API connector, data volume GB, human review rate/minutes/hourly cost, setup/maintenance hours and rates, projection months.
+|- Outputs: cost per job, monthly LLM cost, total monthly cost, projected period cost, cost breakdown by component, LLM provider comparison table, verdict.
+|- Audience: AI agent builders and data engineers budgeting ETL, pipeline, and data-sync agent workloads.
+|- Cross-links: AI Agent Workflow Cost Calculator, AI Agent Memory / RAG Cost Calculator, AI Agent API Pricing Comparator.
 
 ## AI Agent Deployment Readiness Scorecard
 - URL: https://hermesdispatch.dev/tools/agent-deployment-scorecard/

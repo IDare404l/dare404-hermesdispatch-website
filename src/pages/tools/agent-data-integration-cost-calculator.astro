@@ -1,0 +1,407 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_data_integration_cost.json';
+
+const title = "AI Agent Data Integration / ETL Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost for AI agents that extract, transform, load, and sync data across sources: orchestrators, warehouses, connectors, and LLM enrichment.";
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+const providers = data.llm_providers;
+const extractors = data.extractors;
+const loaders = data.loaders;
+const orchestrators = data.orchestrators;
+const warehouses = data.warehouses;
+const connectors = data.api_connectors;
+
+const faqs = [
+  { q: "What does this calculator estimate?", a: "It estimates the monthly operating cost of an AI data-integration or ETL agent: extractors, loaders, orchestrators, warehouse storage/compute, API connectors, LLM enrichment calls, human review, and setup/maintenance labor." },
+  { q: "What counts as a job?", a: "A job is a single end-to-end pipeline run that may touch multiple sources, transform steps, and destinations. Jobs can be scheduled or event-driven." },
+  { q: "How are warehouse costs estimated?", a: "Warehouse cost includes storage for retained data plus compute/load cost applied to the data volume processed each month." },
+  { q: "Can I compare LLM providers?", a: "Yes. The provider comparison table shows the LLM inference portion of the monthly cost for each provider, using the same job volume and token counts." },
+  { q: "Does it include self-hosted infrastructure?", a: "Self-hosted options assume you provide compute and only charge base tooling fees where applicable. Add cloud VM or colo costs separately if needed." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Data Integration / ETL Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-data-integration-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔄</div>
+      <h1 class="display-heading mb-4">AI Agent Data Integration / ETL Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate monthly cost for AI agents that extract, transform, load, and sync data across sources: orchestrators, warehouses, connectors, and LLM enrichment.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Pipeline workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly jobs</span>
+          <input id="monthlyJobs" type="number" min="0" step="1000" value={defaults.monthly_jobs} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Sources per job</span>
+          <input id="sourcesPerJob" type="number" min="0" step="1" value={defaults.sources_per_job} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Transform steps per job</span>
+          <input id="transformPerJob" type="number" min="0" step="1" value={defaults.transform_steps_per_job} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Destinations per job</span>
+          <input id="destinationsPerJob" type="number" min="0" step="1" value={defaults.destinations_per_job} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM calls per job</span>
+          <input id="llmCallsPerJob" type="number" min="0" step="0.1" value={defaults.llm_calls_per_job} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens per LLM call</span>
+          <input id="inputsPerCall" type="number" min="0" step="100" value={defaults.inputs_per_llm_call} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens per LLM call</span>
+          <input id="outputsPerCall" type="number" min="0" step="100" value={defaults.outputs_per_llm_call} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={p.name} selected={p.name === defaults.llm_provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Extractor</span>
+          <select id="extractor" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {extractors.map(e => <option value={e.name} selected={e.name === defaults.extractor}>{e.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Loader</span>
+          <select id="loader" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {loaders.map(l => <option value={l.name} selected={l.name === defaults.loader}>{l.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Orchestrator</span>
+          <select id="orchestrator" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {orchestrators.map(o => <option value={o.name} selected={o.name === defaults.orchestrator}>{o.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Warehouse / storage</span>
+          <select id="warehouse" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {warehouses.map(w => <option value={w.name} selected={w.name === defaults.warehouse}>{w.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">API connector / workflow</span>
+          <select id="connector" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {connectors.map(c => <option value={c.name} selected={c.name === defaults.api_connector}>{c.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Data volume (GB / month)</span>
+          <input id="dataVolume" type="number" min="0" step="50" value={defaults.data_volume_gb} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate (%)</span>
+          <input id="reviewRate" type="number" min="0" max="100" step="1" value={defaults.human_review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review minutes / job</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.human_review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly rate ($)</span>
+          <input id="reviewerRate" type="number" min="0" step="5" value={defaults.reviewer_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="5" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupRate" type="number" min="0" step="10" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintHours" type="number" min="0" step="1" value={defaults.maintenance_hours_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hourly rate ($)</span>
+          <input id="maintRate" type="number" min="0" step="10" value={defaults.maintenance_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per job</p>
+        <p id="costPerJob" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly LLM cost</p>
+        <p id="monthlyLlmCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="monthlyTotal" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="text-neutral-400 border-b border-neutral-700">
+            <th class="py-2">Component</th>
+            <th class="py-2 text-right">Monthly cost</th>
+            <th class="py-2 text-right">% of total</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownBody" class="text-neutral-300">
+          <tr><td colspan="3" class="py-4 text-neutral-500">Adjust inputs to see costs.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">LLM provider comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="text-neutral-400 border-b border-neutral-700">
+              <th class="py-2">Provider</th>
+              <th class="py-2 text-right">Monthly LLM cost</th>
+              <th class="py-2">Verdict</th>
+            </tr>
+          </thead>
+          <tbody id="providerBody" class="text-neutral-300">
+            <tr><td colspan="3" class="py-4 text-neutral-500">Adjust inputs to see comparison.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdict" class="text-neutral-300">Enter your pipeline workload to see a cost verdict.</p>
+    </section>
+
+    <!-- Cross-links -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Related tools</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <a href="/tools/agent-workflow-cost-calculator/" class="block p-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 transition-colors">
+          <h3 class="font-bold text-brand-gold">Workflow Cost Calculator</h3>
+          <p class="text-sm text-neutral-400 mt-1">Estimate multi-step agent workflow costs.</p>
+        </a>
+        <a href="/tools/agent-memory-cost-calculator/" class="block p-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 transition-colors">
+          <h3 class="font-bold text-brand-gold">Memory / RAG Cost Calculator</h3>
+          <p class="text-sm text-neutral-400 mt-1">Estimate vector memory and embedding costs.</p>
+        </a>
+        <a href="/tools/agent-api-pricing-comparator/" class="block p-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 transition-colors">
+          <h3 class="font-bold text-brand-gold">API Pricing Comparator</h3>
+          <p class="text-sm text-neutral-400 mt-1">Compare per-provider LLM API costs.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <dl class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <dt class="font-semibold text-white">{f.q}</dt>
+            <dd class="text-neutral-400 mt-1">{f.a}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <p id="note" class="text-neutral-500 text-sm max-w-3xl">
+      Notes: Provider rates and connector prices are approximate public rates. Self-hosted options do not include underlying compute, storage, or networking costs. Human review is modeled as a percentage of jobs multiplied by review minutes and hourly rate. Values are directional; update with your actual vendor quotes.
+    </p>
+  </main>
+
+  <script is:inline define:vars={{ providers, extractors, loaders, orchestrators, warehouses, connectors, defaults }}>
+    const fmt = (n) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmt2 = (n) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+
+    function getVal(id) {
+      const el = document.getElementById(id);
+      return el ? (el.type === 'checkbox' ? el.checked : Number(el.value)) : 0;
+    }
+    function setVal(id, v) {
+      const el = document.getElementById(id);
+      if (el) el.value = v;
+    }
+
+    function findByName(arr, name) {
+      return arr.find(x => x.name === name) || arr[0];
+    }
+
+    function calculate() {
+      const monthlyJobs = getVal('monthlyJobs');
+      const sources = getVal('sourcesPerJob');
+      const transforms = getVal('transformPerJob');
+      const destinations = getVal('destinationsPerJob');
+      const llmCalls = getVal('llmCallsPerJob');
+      const inputs = getVal('inputsPerCall');
+      const outputs = getVal('outputsPerCall');
+      const cachedPct = getVal('cachedInputPct') / 100;
+      const dataVolume = getVal('dataVolume');
+      const reviewRate = getVal('reviewRate') / 100;
+      const reviewMinutes = getVal('reviewMinutes');
+      const reviewerRate = getVal('reviewerRate');
+      const setupHours = getVal('setupHours');
+      const setupRate = getVal('setupRate');
+      const maintHours = getVal('maintHours');
+      const maintRate = getVal('maintRate');
+      const months = getVal('projectionMonths');
+
+      const provider = findByName(providers, document.getElementById('provider').value);
+      const extractor = findByName(extractors, document.getElementById('extractor').value);
+      const loader = findByName(loaders, document.getElementById('loader').value);
+      const orchestrator = findByName(orchestrators, document.getElementById('orchestrator').value);
+      const warehouse = findByName(warehouses, document.getElementById('warehouse').value);
+      const connector = findByName(connectors, document.getElementById('connector').value);
+
+      const monthlyActions = monthlyJobs * (sources + transforms + destinations);
+
+      const uncachedInputs = inputs * (1 - cachedPct);
+      const cachedInputs = inputs * cachedPct;
+      const llmCostPerCall = (uncachedInputs * provider.input_1m + cachedInputs * provider.cached_input_1m + outputs * provider.output_1m) / 1_000_000;
+      const monthlyLlmCost = monthlyJobs * llmCalls * llmCostPerCall;
+
+      const extractorCost = extractor.base_monthly + extractor.volume_rate_per_gb * dataVolume + extractor.per_1k_jobs * (monthlyJobs / 1000);
+      const loaderCost = loader.base_monthly + loader.volume_rate_per_gb * dataVolume + loader.per_1k_jobs * (monthlyJobs / 1000);
+      const orchestratorCost = orchestrator.base_monthly + orchestrator.per_1k_jobs * (monthlyJobs / 1000) + orchestrator.per_1k_actions * (monthlyActions / 1000);
+      const warehouseCost = warehouse.storage_per_gb * dataVolume + warehouse.compute_per_gb_ingested * dataVolume;
+      const connectorCost = connector.base_monthly + connector.per_1k_jobs * (monthlyJobs / 1000);
+
+      const reviewCost = monthlyJobs * reviewRate * reviewMinutes / 60 * reviewerRate;
+      const maintenanceCost = maintHours * maintRate;
+      const setupCost = setupHours * setupRate;
+      const monthlyTotal = monthlyLlmCost + extractorCost + loaderCost + orchestratorCost + warehouseCost + connectorCost + reviewCost + maintenanceCost;
+      const periodCost = setupCost + monthlyTotal * months;
+      const costPerJob = monthlyTotal / monthlyJobs;
+
+      document.getElementById('costPerJob').textContent = fmt2(costPerJob);
+      document.getElementById('monthlyLlmCost').textContent = fmt(monthlyLlmCost);
+      document.getElementById('monthlyTotal').textContent = fmt(monthlyTotal);
+      document.getElementById('periodCost').textContent = fmt(periodCost);
+
+      const rows = [
+        { name: 'LLM enrichment', cost: monthlyLlmCost },
+        { name: 'Extractor', cost: extractorCost },
+        { name: 'Loader', cost: loaderCost },
+        { name: 'Orchestrator', cost: orchestratorCost },
+        { name: 'Warehouse / storage', cost: warehouseCost },
+        { name: 'API connector', cost: connectorCost },
+        { name: 'Human review', cost: reviewCost },
+        { name: 'Maintenance', cost: maintenanceCost }
+      ];
+      document.getElementById('breakdownBody').innerHTML = rows.map(r => `
+        <tr class="border-b border-neutral-800">
+          <td class="py-2">${r.name}</td>
+          <td class="py-2 text-right">${fmt(r.cost)}</td>
+          <td class="py-2 text-right">${monthlyTotal ? (r.cost / monthlyTotal * 100).toFixed(1) : 0}%</td>
+        </tr>
+      `).join('');
+
+      const providerRows = providers.map(p => {
+        const costPerCall = (inputs * (1 - cachedPct) * p.input_1m + inputs * cachedPct * p.cached_input_1m + outputs * p.output_1m) / 1_000_000;
+        const cost = monthlyJobs * llmCalls * costPerCall;
+        return { name: p.name, cost };
+      }).sort((a, b) => a.cost - b.cost);
+      const cheapest = providerRows[0];
+      document.getElementById('providerBody').innerHTML = providerRows.map(r => `
+        <tr class="border-b border-neutral-800 ${r.name === provider.name ? 'text-brand-gold font-semibold' : ''}">
+          <td class="py-2">${r.name}${r.name === cheapest.name ? ' (cheapest)' : ''}</td>
+          <td class="py-2 text-right">${fmt(r.cost)}</td>
+          <td class="py-2">${r.name === cheapest.name ? 'Best price' : (r.cost < monthlyLlmCost * 1.2 ? 'Competitive' : 'Premium')}</td>
+        </tr>
+      `).join('');
+
+      let verdict = '';
+      if (monthlyTotal < 500) verdict = 'This is a light pipeline. A managed connector + mini LLM stack is likely cheapest and fastest to deploy.';
+      else if (monthlyTotal < 5000) verdict = 'Mid-size pipeline. Optimize by moving repeat transforms to cached prompts and picking a volume-priced warehouse.';
+      else if (monthlyTotal < 20000) verdict = 'Heavy pipeline. Negotiate enterprise ETL pricing and consider self-hosted orchestration to cut per-job fees.';
+      else verdict = 'Very large data-integration workload. Audit every component—self-hosted orchestration and warehouse compute reservations usually pay off quickly.';
+      document.getElementById('verdict').textContent = verdict;
+    }
+
+    function applyScenario(s) {
+      setVal('monthlyJobs', s.monthly_jobs);
+      setVal('sourcesPerJob', s.sources_per_job);
+      setVal('transformPerJob', s.transform_steps_per_job);
+      setVal('destinationsPerJob', s.destinations_per_job);
+      setVal('llmCallsPerJob', s.llm_calls_per_job);
+      setVal('inputsPerCall', s.inputs_per_llm_call);
+      setVal('outputsPerCall', s.outputs_per_llm_call);
+      setVal('cachedInputPct', s.cached_input_pct);
+      document.getElementById('provider').value = s.llm_provider;
+      document.getElementById('extractor').value = s.extractor;
+      document.getElementById('loader').value = s.loader;
+      document.getElementById('orchestrator').value = s.orchestrator;
+      document.getElementById('warehouse').value = s.warehouse;
+      document.getElementById('connector').value = s.api_connector;
+      setVal('dataVolume', s.data_volume_gb);
+      setVal('reviewRate', s.human_review_rate_pct);
+      setVal('reviewMinutes', s.human_review_minutes);
+      setVal('reviewerRate', s.reviewer_hourly_rate);
+      setVal('setupHours', s.setup_hours);
+      setVal('setupRate', s.setup_hourly_rate);
+      setVal('maintHours', s.maintenance_hours_monthly);
+      setVal('maintRate', s.maintenance_hourly_rate);
+      setVal('projectionMonths', s.projection_months);
+      calculate();
+    }
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyScenario(JSON.parse(btn.dataset.scenario)));
+    });
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calculate));
+
+    calculate();
+  </script>
+</Layout>
