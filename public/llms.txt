@@ -203,13 +203,21 @@ Each tool below is a web page with structured data and a clear input/output cont
 - Outputs: total training tokens, managed training cost, monthly managed usage cost, first-period managed total, local training cost, local GPU period total, cheapest managed provider, training hours, cost per 1k requests, break-even estimate, provider comparison table, verdict
 - Audience: AI builders choosing between managed fine-tuning APIs and local/cloud GPU training
 
+### Fine-Tuning vs RAG Cost Comparator
+- URL: https://hermesdispatch.dev/tools/fine-tuning-vs-rag-cost-comparator/
+- Description: Compare the total cost of fine-tuning an LLM versus building a RAG stack for your AI agent. Includes training, embedding, storage, inference, and break-even analysis.
+- Inputs: documents, tokens per document, queries per month, input/output tokens per query, projection months, fine-tuning provider, local GPU, embedding model, vector DB, reranker, chunk settings
+- Outputs: fine-tuning training cost, fine-tuning usage cost, fine-tuning total period cost, RAG embedding cost, RAG monthly cost, RAG total period cost, storage GB, chunk count, verdict, break-even estimate
+- Audience: AI agent builders deciding between fine-tuning and RAG for domain adaptation
+- Cross-links: LLM Fine-Tuning Cost Calculator, Agent Memory / RAG Cost Calculator, Agent Stack Builder, LLM Cost Calculator
+
 ### Local LLM Inference Engine Selector
 - URL: https://hermesdispatch.dev/tools/inference-engine-selector/
 - Description: Pick the best local LLM backend for your model, hardware, OS, and use case.
 - Inputs: use case, hardware platform, operating system, preferred quantization, top priority (throughput/latency/ease/balanced)
-- Outputs: ranked list of inference engines, setup links, complexity badges, throughput/latency notes
-- Audience: AI builders choosing between Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, and other local inference engines
-
+- Outputs: ranked inference engines, complexity badge, throughput/latency tags, install links, fit note
+- Audience: AI builders choosing a local LLM backend
+- Cross-links: VRAM Calculator, LLM Cost Calculator, Agent Stack Builder, Fine-Tuning vs RAG Cost Comparator
 ### Local LLM Quantization Advisor
 - URL: https://hermesdispatch.dev/tools/quantization-advisor/
 - Description: Pick the right quantization level and format for a local LLM based on your GPU VRAM, quality tolerance, context length, and backend.

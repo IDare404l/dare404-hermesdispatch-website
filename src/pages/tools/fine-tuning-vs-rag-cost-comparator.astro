@@ -1,0 +1,570 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/fine_tuning_vs_rag.json';
+
+const title = "AI Agent Fine-Tuning vs RAG Cost Comparator | Hermes Dispatch";
+const description = "Compare the total cost of fine-tuning an LLM versus building a RAG system for your AI agent. Includes training, embedding, storage, inference, and break-even analysis.";
+
+const defaults = data.defaults;
+const presets = data.presets;
+const ftProviders = data.fine_tuning_providers;
+const localGpus = data.local_gpus;
+const embeddingModels = data.embedding_models;
+const vectorDbs = data.vector_dbs;
+const rerankers = data.rerankers;
+const chunking = data.chunking;
+const faq = data.faq;
+
+const ftProviderMap = Object.fromEntries(ftProviders.map(p => [p.slug, p]));
+const gpuMap = Object.fromEntries(localGpus.map(g => [g.slug, g]));
+const embeddingMap = Object.fromEntries(embeddingModels.map(m => [m.slug, m]));
+const dbMap = Object.fromEntries(vectorDbs.map(d => [d.slug, d]));
+const rerankerMap = Object.fromEntries(rerankers.map(r => [r.slug, r]));
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Fine-Tuning vs RAG Cost Comparator" description={description} url="https://hermesdispatch.dev/tools/fine-tuning-vs-rag-cost-comparator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({"@type": "Question", "name": f.question, "acceptedAnswer": {"@type": "Answer", "text": f.answer}}))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚖️</div>
+        <h1 class="display-heading mb-4">Fine-Tuning vs RAG Cost Comparator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Compare the all-in cost of fine-tuning an LLM versus building a RAG stack for your AI agent. See break-even, monthly run-rate, and which architecture wins for your workload.
+        </p>
+      </div>
+
+      <!-- Presets -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {presets.map((preset, i) => (
+          <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">{preset.icon}</div>
+            <h3 class="font-semibold text-sm">{preset.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">{preset.documents.toLocaleString()} docs • {preset.queries_per_month.toLocaleString()} q/mo</p>
+          </button>
+        ))}
+      </div>
+
+      <!-- Inputs -->
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Knowledge base & workload</h2>
+          <div class="space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Documents</label>
+                <input id="documents" type="number" min="1" step="100" value={defaults.documents} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Tokens per document</label>
+                <input id="tokensPerDoc" type="number" min="1" step="10" value={defaults.tokens_per_doc} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Queries / month</label>
+                <input id="queriesPerMonth" type="number" min="0" step="1000" value={defaults.queries_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Input tokens / query</label>
+                <input id="inputTokensPerQuery" type="number" min="0" step="10" value={defaults.input_tokens_per_query} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Output tokens / query</label>
+                <input id="outputTokensPerQuery" type="number" min="0" step="10" value={defaults.output_tokens_per_query} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Projection (months)</label>
+                <input id="projectionMonths" type="number" min="1" max="60" step="1" value={defaults.projection_months} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+            <h2 class="text-xl font-bold mb-5 text-brand-gold">Fine-tuning route</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Managed provider</label>
+                <select id="ftProvider" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {ftProviders.map(p => <option value={p.slug} selected={p.slug === defaults.fine_tuning_provider}>{p.name}</option>)}
+                </select>
+                <p id="ftProviderNote" class="text-xs text-neutral-500 mt-1">{ftProviderMap[defaults.fine_tuning_provider].notes}</p>
+              </div>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">Training epochs</label>
+                  <input id="epochs" type="number" min="1" max="20" step="1" value={defaults.epochs} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                </div>
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">Tokens per example</label>
+                  <input id="tokensPerExample" type="number" min="1" step="10" value={defaults.tokens_per_example} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Training examples (override)</label>
+                <input id="examplesOverride" type="number" min="0" step="100" value={defaults.examples_override} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                <p class="text-xs text-neutral-500 mt-1">Leave 0 to auto-derive from documents.</p>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Local GPU route (for TCO comparison)</label>
+                <select id="localGpu" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {localGpus.map(g => <option value={g.slug} selected={g.slug === defaults.local_gpu}>{g.name}</option>)}
+                </select>
+              </div>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">Electricity ($/kWh)</label>
+                  <input id="electricityRate" type="number" min="0" step="0.01" value={defaults.electricity_rate} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                </div>
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">GPU utilization (%)</label>
+                  <input id="utilization" type="number" min="0" max="100" step="5" value={defaults.utilization} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+            <h2 class="text-xl font-bold mb-5 text-brand-gold">RAG route</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Embedding model</label>
+                <select id="embeddingModel" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {embeddingModels.map(m => <option value={m.slug} selected={m.slug === defaults.embedding_model}>{m.name}</option>)}
+                </select>
+                <p id="embeddingNote" class="text-xs text-neutral-500 mt-1">{embeddingMap[defaults.embedding_model].notes}</p>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Vector database</label>
+                <select id="vectorDb" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {vectorDbs.map(d => <option value={d.slug} selected={d.slug === defaults.vector_db}>{d.name}</option>)}
+                </select>
+                <p id="vectorDbNote" class="text-xs text-neutral-500 mt-1">{dbMap[defaults.vector_db].notes}</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <input id="includeReranker" type="checkbox" class="w-4 h-4 accent-brand-gold" checked={defaults.include_reranker} />
+                <label for="includeReranker" class="text-sm text-neutral-300">Include reranker</label>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Reranker</label>
+                <select id="reranker" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {rerankers.map(r => <option value={r.slug} selected={r.slug === defaults.reranker}>{r.name}</option>)}
+                </select>
+                <p id="rerankerNote" class="text-xs text-neutral-500 mt-1">{rerankerMap[defaults.reranker].notes}</p>
+              </div>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">Chunk size (tokens)</label>
+                  <input id="tokensPerChunk" type="number" min="1" step="64" value={chunking.tokens_per_chunk} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                </div>
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">Chunk overlap (%)</label>
+                  <input id="overlapPct" type="number" min="0" max="90" step="5" value={chunking.overlap_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                </div>
+              </div>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">Cache hit rate (%)</label>
+                  <input id="cachedQueryPct" type="number" min="0" max="100" step="5" value={defaults.cached_query_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                </div>
+                <div>
+                  <label class="block text-sm text-neutral-400 mb-1">Query tokens</label>
+                  <input id="queryTokens" type="number" min="1" step="1" value={defaults.input_tokens_per_query} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verdict -->
+      <div class="glass-card rounded-2xl p-8 mb-8 border-2 border-brand-gold/40">
+        <h2 class="text-2xl font-bold mb-4 text-brand-gold">Verdict</h2>
+        <p id="verdictText" class="text-lg text-neutral-200">Enter your workload to compare fine-tuning and RAG costs.</p>
+        <p id="breakEvenText" class="text-sm text-neutral-400 mt-2"></p>
+      </div>
+
+      <!-- Results -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h3 class="text-xl font-bold mb-4">Fine-tuning route</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-neutral-900 rounded-xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase">Training cost</p>
+              <p id="ftTrainingCost" class="text-xl font-bold text-white">—</p>
+            </div>
+            <div class="bg-neutral-900 rounded-xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase">Usage / mo</p>
+              <p id="ftMonthlyCost" class="text-xl font-bold text-white">—</p>
+            </div>
+            <div class="bg-neutral-900 rounded-xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase">Total period</p>
+              <p id="ftTotalCost" class="text-xl font-bold text-brand-gold">—</p>
+            </div>
+            <div class="bg-neutral-900 rounded-xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase">Local GPU TCO</p>
+              <p id="ftLocalTco" class="text-xl font-bold text-white">—</p>
+            </div>
+          </div>
+          <p class="text-xs text-neutral-500 mt-4">Training examples: <span id="ftExamples">—</span>. Managed provider training + usage. Local GPU TCO includes rental/power for training and inference.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h3 class="text-xl font-bold mb-4">RAG route</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-neutral-900 rounded-xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase">Embedding cost</p>
+              <p id="ragEmbeddingCost" class="text-xl font-bold text-white">—</p>
+            </div>
+            <div class="bg-neutral-900 rounded-xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase">Usage / mo</p>
+              <p id="ragMonthlyCost" class="text-xl font-bold text-white">—</p>
+            </div>
+            <div class="bg-neutral-900 rounded-xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase">Total period</p>
+              <p id="ragTotalCost" class="text-xl font-bold text-brand-gold">—</p>
+            </div>
+            <div class="bg-neutral-900 rounded-xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase">Storage</p>
+              <p id="ragStorageGb" class="text-xl font-bold text-white">—</p>
+            </div>
+          </div>
+          <p class="text-xs text-neutral-500 mt-4">Chunks: <span id="ragChunks">—</span>. Includes one-time corpus embedding, vector storage, query embedding, search, and reranker.</p>
+        </div>
+      </div>
+
+      <!-- Provider comparison -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Fine-tuning provider comparison</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Provider</th>
+                <th class="text-right py-2">Training</th>
+                <th class="text-right py-2">Usage / mo</th>
+                <th class="text-right py-2">Total period</th>
+              </tr>
+            </thead>
+            <tbody id="ftComparisonTable" class="divide-y divide-neutral-800">
+              {ftProviders.map(p => (
+                <tr data-slug={p.slug} class="hover:bg-neutral-800/30">
+                  <td class="py-3">{p.name}</td>
+                  <td class="py-3 text-right training-cell">—</td>
+                  <td class="py-3 text-right usage-cell">—</td>
+                  <td class="py-3 text-right total-cell font-semibold text-brand-gold">—</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How it works / FAQ -->
+      <div class="grid md:grid-cols-2 gap-6 mb-10">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the comparison works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Fine-tuning</strong>: training cost = examples × tokens/example × epochs × provider training rate. Usage cost = monthly queries × input/output tokens × provider usage rates.</li>
+            <li><strong class="text-white">Local GPU fine-tuning</strong>: training hours = training tokens ÷ GPU training throughput. Inference hours = usage tokens ÷ (GPU inference throughput × utilization).</li>
+            <li><strong class="text-white">RAG</strong>: one-time corpus embedding + monthly vector storage + query embedding + vector DB search + optional reranker.</li>
+            <li><strong class="text-white">Break-even</strong>: months until the lower run-rate option pays back the higher upfront option.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">When to pick each</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• <strong>Pick fine-tuning</strong> for high query volume, narrow style/format tasks, or where latency matters and data is stable.</li>
+            <li>• <strong>Pick RAG</strong> when knowledge changes often, you need source citations, or query volume is too low to amortize training.</li>
+            <li>• <strong>Hybrid</strong> (fine-tuned model + RAG) is often the best accuracy/cost trade-off for production agents.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faq.map(f => (
+            <div>
+              <h3 class="text-cyan-400 font-medium">{f.question}</h3>
+              <p class="text-neutral-300 text-sm mt-1">{f.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Cross-links -->
+      <div class="flex flex-wrap gap-3 mb-8">
+        <a href="/tools/llm-fine-tuning-cost-calculator/" class="btn-primary text-sm">LLM Fine-Tuning Cost Calc →</a>
+        <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Memory / RAG Cost Calc →</a>
+        <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+      </div>
+
+      <p class="text-neutral-500 text-sm">{data.note}</p>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, presets, ftProviders, localGpus, embeddingModels, vectorDbs, rerankers, chunking }}>
+    const el = {
+      documents: document.getElementById('documents'),
+      tokensPerDoc: document.getElementById('tokensPerDoc'),
+      queriesPerMonth: document.getElementById('queriesPerMonth'),
+      inputTokensPerQuery: document.getElementById('inputTokensPerQuery'),
+      outputTokensPerQuery: document.getElementById('outputTokensPerQuery'),
+      projectionMonths: document.getElementById('projectionMonths'),
+      ftProvider: document.getElementById('ftProvider'),
+      ftProviderNote: document.getElementById('ftProviderNote'),
+      epochs: document.getElementById('epochs'),
+      tokensPerExample: document.getElementById('tokensPerExample'),
+      examplesOverride: document.getElementById('examplesOverride'),
+      localGpu: document.getElementById('localGpu'),
+      electricityRate: document.getElementById('electricityRate'),
+      utilization: document.getElementById('utilization'),
+      embeddingModel: document.getElementById('embeddingModel'),
+      embeddingNote: document.getElementById('embeddingNote'),
+      vectorDb: document.getElementById('vectorDb'),
+      vectorDbNote: document.getElementById('vectorDbNote'),
+      includeReranker: document.getElementById('includeReranker'),
+      reranker: document.getElementById('reranker'),
+      rerankerNote: document.getElementById('rerankerNote'),
+      tokensPerChunk: document.getElementById('tokensPerChunk'),
+      overlapPct: document.getElementById('overlapPct'),
+      cachedQueryPct: document.getElementById('cachedQueryPct'),
+      queryTokens: document.getElementById('queryTokens'),
+      verdictText: document.getElementById('verdictText'),
+      breakEvenText: document.getElementById('breakEvenText'),
+      ftTrainingCost: document.getElementById('ftTrainingCost'),
+      ftMonthlyCost: document.getElementById('ftMonthlyCost'),
+      ftTotalCost: document.getElementById('ftTotalCost'),
+      ftLocalTco: document.getElementById('ftLocalTco'),
+      ftExamples: document.getElementById('ftExamples'),
+      ragEmbeddingCost: document.getElementById('ragEmbeddingCost'),
+      ragMonthlyCost: document.getElementById('ragMonthlyCost'),
+      ragTotalCost: document.getElementById('ragTotalCost'),
+      ragStorageGb: document.getElementById('ragStorageGb'),
+      ragChunks: document.getElementById('ragChunks')
+    };
+
+    const ftProviderMap = Object.fromEntries(ftProviders.map(p => [p.slug, p]));
+    const gpuMap = Object.fromEntries(localGpus.map(g => [g.slug, g]));
+    const embeddingMap = Object.fromEntries(embeddingModels.map(m => [m.slug, m]));
+    const dbMap = Object.fromEntries(vectorDbs.map(d => [d.slug, d]));
+    const rerankerMap = Object.fromEntries(rerankers.map(r => [r.slug, r]));
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (n < 0.01) return '$' + n.toFixed(4);
+      if (n < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+    const fmtNum = (n) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const fmtGb = (n) => n < 0.1 ? n.toFixed(3) + ' GB' : n.toFixed(2) + ' GB';
+
+    function getInputs() {
+      return {
+        documents: Math.max(1, parseFloat(el.documents.value) || 1),
+        tokensPerDoc: Math.max(1, parseFloat(el.tokensPerDoc.value) || 1),
+        queriesPerMonth: Math.max(0, parseFloat(el.queriesPerMonth.value) || 0),
+        inputTokensPerQuery: Math.max(0, parseFloat(el.inputTokensPerQuery.value) || 0),
+        outputTokensPerQuery: Math.max(0, parseFloat(el.outputTokensPerQuery.value) || 0),
+        projectionMonths: Math.max(1, parseInt(el.projectionMonths.value, 10) || 1),
+        epochs: Math.max(1, parseInt(el.epochs.value, 10) || 1),
+        tokensPerExample: Math.max(1, parseInt(el.tokensPerExample.value, 10) || 1),
+        examplesOverride: Math.max(0, parseInt(el.examplesOverride.value, 10) || 0),
+        electricityRate: Math.max(0, parseFloat(el.electricityRate.value) || 0),
+        utilization: Math.max(1, Math.min(100, parseFloat(el.utilization.value) || 1)) / 100,
+        cachedQueryPct: Math.max(0, Math.min(100, parseFloat(el.cachedQueryPct.value) || 0)) / 100,
+        overlapPct: Math.max(0, Math.min(90, parseFloat(el.overlapPct.value) || 0)) / 100,
+        tokensPerChunk: Math.max(1, parseInt(el.tokensPerChunk.value, 10) || 1),
+        queryTokens: Math.max(1, parseInt(el.queryTokens.value, 10) || 1)
+      };
+    }
+
+    function calcFineTuning(inputs, providerSlug) {
+      const provider = ftProviderMap[providerSlug] || ftProviders[0];
+      const examples = inputs.examplesOverride > 0 ? inputs.examplesOverride : Math.max(1, Math.ceil(inputs.documents / 2));
+      const trainingTokens = examples * inputs.tokensPerExample * inputs.epochs;
+      const trainingCost = (trainingTokens / 1000) * provider.training_input_cost_per_1k;
+
+      const usageInputCost = (inputs.queriesPerMonth * inputs.inputTokensPerQuery / 1000) * provider.usage_input_cost_per_1k;
+      const usageOutputCost = (inputs.queriesPerMonth * inputs.outputTokensPerQuery / 1000) * provider.usage_output_cost_per_1k;
+      const monthlyUsage = usageInputCost + usageOutputCost;
+      const total = trainingCost + monthlyUsage * inputs.projectionMonths;
+
+      return { examples, trainingTokens, trainingCost, monthlyUsage, total };
+    }
+
+    function calcLocalFtTco(inputs) {
+      const gpu = gpuMap[el.localGpu.value] || localGpus[0];
+      const provider = ftProviderMap[el.ftProvider.value] || ftProviders[0];
+      const examples = inputs.examplesOverride > 0 ? inputs.examplesOverride : Math.max(1, Math.ceil(inputs.documents / 2));
+      const trainingTokens = examples * inputs.tokensPerExample * inputs.epochs;
+      const trainingHours = trainingTokens / Math.max(1, gpu.training_tokens_per_hour);
+      const trainingCost = trainingHours * gpu.cloud_hourly;
+      const trainingKwh = trainingHours * gpu.power_w / 1000;
+      const trainingElectricity = trainingKwh * inputs.electricityRate;
+
+      const usageTokens = inputs.queriesPerMonth * (inputs.inputTokensPerQuery + inputs.outputTokensPerQuery);
+      const inferenceHours = usageTokens / Math.max(1, gpu.inference_tokens_per_hour * inputs.utilization);
+      const inferenceCost = inferenceHours * gpu.cloud_hourly;
+      const inferenceKwh = inferenceHours * gpu.power_w / 1000;
+      const inferenceElectricity = inferenceKwh * inputs.electricityRate;
+
+      const monthly = inferenceCost + inferenceElectricity;
+      const total = trainingCost + trainingElectricity + monthly * inputs.projectionMonths;
+      return { trainingHours, inferenceHours, total, monthly };
+    }
+
+    function calcRag(inputs, embeddingSlug, dbSlug, rerankerSlug, useReranker) {
+      const model = embeddingMap[embeddingSlug] || embeddingModels[0];
+      const db = dbMap[dbSlug] || vectorDbs[0];
+      const reranker = rerankerMap[rerankerSlug] || rerankers[0];
+
+      const totalTokens = inputs.documents * inputs.tokensPerDoc;
+      const effectiveChunkSize = inputs.tokensPerChunk * (1 - inputs.overlapPct);
+      const chunks = Math.max(1, Math.ceil(totalTokens / Math.max(1, effectiveChunkSize)));
+
+      const oneTimeEmbedCost = (totalTokens / 1_000_000) * model.cost_per_1m_tokens_usd;
+
+      const uncachedQueries = inputs.queriesPerMonth * (1 - inputs.cachedQueryPct);
+      const queryEmbedCost = (uncachedQueries * inputs.queryTokens / 1_000_000) * model.cost_per_1m_tokens_usd;
+
+      const vectorBytes = model.dims * chunking.vector_bytes_per_dim * (1 + chunking.vector_overhead_pct / 100);
+      const bytesPerChunk = vectorBytes + chunking.metadata_bytes_per_chunk;
+      const storageGb = (chunks * bytesPerChunk) / 1_000_000_000;
+      const billableGb = Math.max(0, storageGb - db.free_gb);
+      const storageMonthly = billableGb * db.storage_cost_gb_month_usd;
+
+      const billableQueries = Math.max(0, uncachedQueries - db.free_queries);
+      const searchMonthly = (billableQueries / 1000) * db.query_cost_per_1k_usd;
+      const rerankerMonthly = useReranker ? (uncachedQueries / 1000) * reranker.cost_per_1k_queries_usd : 0;
+
+      const monthly = storageMonthly + searchMonthly + queryEmbedCost + rerankerMonthly;
+      const total = oneTimeEmbedCost + monthly * inputs.projectionMonths;
+
+      return { chunks, storageGb, oneTimeEmbedCost, monthly, total };
+    }
+
+    function updateNotes() {
+      const p = ftProviderMap[el.ftProvider.value];
+      const m = embeddingMap[el.embeddingModel.value];
+      const d = dbMap[el.vectorDb.value];
+      const r = rerankerMap[el.reranker.value];
+      if (p && el.ftProviderNote) el.ftProviderNote.textContent = p.notes;
+      if (m && el.embeddingNote) el.embeddingNote.textContent = m.notes;
+      if (d && el.vectorDbNote) el.vectorDbNote.textContent = d.notes;
+      if (r && el.rerankerNote) el.rerankerNote.textContent = r.notes;
+    }
+
+    function calc() {
+      updateNotes();
+      const inputs = getInputs();
+      const ft = calcFineTuning(inputs, el.ftProvider.value);
+      const local = calcLocalFtTco(inputs);
+      const rag = calcRag(inputs, el.embeddingModel.value, el.vectorDb.value, el.reranker.value, el.includeReranker.checked);
+
+      el.ftTrainingCost.textContent = fmtMoney(ft.trainingCost);
+      el.ftMonthlyCost.textContent = fmtMoney(ft.monthlyUsage);
+      el.ftTotalCost.textContent = fmtMoney(ft.total);
+      el.ftLocalTco.textContent = fmtMoney(local.total);
+      el.ftExamples.textContent = fmtNum(ft.examples);
+
+      el.ragEmbeddingCost.textContent = fmtMoney(rag.oneTimeEmbedCost);
+      el.ragMonthlyCost.textContent = fmtMoney(rag.monthly);
+      el.ragTotalCost.textContent = fmtMoney(rag.total);
+      el.ragStorageGb.textContent = fmtGb(rag.storageGb);
+      el.ragChunks.textContent = fmtNum(rag.chunks);
+
+      // Verdict
+      const diff = Math.abs(ft.total - rag.total);
+      const cheaper = ft.total < rag.total ? 'fine-tuning' : 'RAG';
+      const winnerCost = Math.min(ft.total, rag.total);
+      const loserCost = Math.max(ft.total, rag.total);
+      const savings = loserCost - winnerCost;
+      const savingsPct = loserCost > 0 ? (savings / loserCost * 100).toFixed(0) : 0;
+
+      let verdict = `At ${inputs.projectionMonths} months and ${fmtNum(inputs.queriesPerMonth)} queries/month, <strong class="text-brand-gold">${cheaper}</strong> is cheaper by ${fmtMoney(savings)} (${savingsPct}%). `;
+      if (ft.monthlyUsage < rag.monthly && ft.total > rag.total) {
+        const be = ft.trainingCost / Math.max(0.0001, rag.monthly - ft.monthlyUsage);
+        verdict += `RAG wins upfront, but fine-tuning breaks even in ~${be.toFixed(1)} months due to lower run-rate.`;
+      } else if (rag.monthly < ft.monthlyUsage && rag.total > ft.total) {
+        const be = rag.oneTimeEmbedCost / Math.max(0.0001, ft.monthlyUsage - rag.monthly);
+        verdict += `Fine-tuning wins upfront, but RAG breaks even in ~${be.toFixed(1)} months due to lower run-rate.`;
+      } else if (cheaper === 'RAG') {
+        verdict += `RAG stays cheaper because the lower upfront embedding cost outweighs the monthly fine-tuning usage.`;
+      } else {
+        verdict += `Fine-tuning stays cheaper because the lower monthly usage cost amortizes the training spend.`;
+      }
+      el.verdictText.innerHTML = verdict;
+      el.breakEvenText.textContent = `Fine-tuning run-rate: ${fmtMoney(ft.monthlyUsage)}/mo • RAG run-rate: ${fmtMoney(rag.monthly)}/mo • Local GPU TCO (FT): ${fmtMoney(local.total)}`;
+
+      // Comparison table
+      document.querySelectorAll('#ftComparisonTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const res = calcFineTuning(inputs, slug);
+        row.querySelector('.training-cell').textContent = fmtMoney(res.trainingCost);
+        row.querySelector('.usage-cell').textContent = fmtMoney(res.monthlyUsage);
+        row.querySelector('.total-cell').textContent = fmtMoney(res.total);
+        if (slug === el.ftProvider.value) {
+          row.classList.add('bg-brand-gold/10');
+        } else {
+          row.classList.remove('bg-brand-gold/10');
+        }
+      });
+    }
+
+    function applyPreset(idx) {
+      const p = presets[idx];
+      if (!p) return;
+      el.documents.value = p.documents;
+      el.tokensPerDoc.value = p.tokens_per_doc;
+      el.queriesPerMonth.value = p.queries_per_month;
+      el.inputTokensPerQuery.value = p.input_tokens_per_query;
+      el.outputTokensPerQuery.value = p.output_tokens_per_query;
+      el.projectionMonths.value = p.projection_months;
+      el.ftProvider.value = p.fine_tuning_provider;
+      el.localGpu.value = p.local_gpu;
+      el.embeddingModel.value = p.embedding_model;
+      el.vectorDb.value = p.vector_db;
+      el.includeReranker.checked = p.include_reranker;
+      el.reranker.value = p.reranker;
+      el.epochs.value = p.epochs;
+      el.tokensPerExample.value = p.tokens_per_example;
+      el.examplesOverride.value = p.examples_override || 0;
+      el.cachedQueryPct.value = p.cached_query_pct || 30;
+      el.queryTokens.value = p.input_tokens_per_query;
+      calc();
+    }
+
+    ['input', 'change'].forEach(evt => {
+      Object.values(el).forEach(input => {
+        if (input && (input.tagName === 'INPUT' || input.tagName === 'SELECT')) {
+          input.addEventListener(evt, calc);
+        }
+      });
+      el.includeReranker.addEventListener(evt, calc);
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(parseInt(btn.dataset.idx, 10)));
+    });
+
+    calc();
+  </script>
+</Layout>

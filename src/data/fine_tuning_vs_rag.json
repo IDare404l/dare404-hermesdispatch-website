@@ -1,0 +1,392 @@
+{
+  "last_updated": "2026-07-10",
+  "note": "Costs are approximate directional estimates based on public list prices as of mid-2026. Volume discounts, data preparation, labeling, and engineering labor are excluded. Verify current provider pricing before budgeting.",
+  "defaults": {
+    "documents": 10000,
+    "tokens_per_doc": 500,
+    "queries_per_month": 100000,
+    "input_tokens_per_query": 300,
+    "output_tokens_per_query": 150,
+    "projection_months": 12,
+    "cached_query_pct": 30,
+    "fine_tuning_provider": "openai_gpt4o_mini",
+    "local_gpu": "rtx4090",
+    "embedding_model": "openai-text-embedding-3-small",
+    "vector_db": "pinecone",
+    "reranker": "cohere",
+    "include_reranker": true,
+    "electricity_rate": 0.12,
+    "utilization": 60,
+    "examples_override": 0,
+    "epochs": 3,
+    "tokens_per_example": 512
+  },
+  "presets": [
+    {
+      "slug": "support-bot",
+      "name": "Support bot FAQ",
+      "icon": "💬",
+      "documents": 5000,
+      "tokens_per_doc": 300,
+      "queries_per_month": 50000,
+      "input_tokens_per_query": 200,
+      "output_tokens_per_query": 80,
+      "fine_tuning_provider": "openai_gpt4o_mini",
+      "local_gpu": "rtx3090",
+      "embedding_model": "openai-text-embedding-3-small",
+      "vector_db": "qdrant",
+      "include_reranker": true,
+      "reranker": "cohere",
+      "projection_months": 12,
+      "epochs": 3,
+      "tokens_per_example": 256,
+      "examples_override": 0
+    },
+    {
+      "slug": "coding-assistant",
+      "name": "Coding assistant",
+      "icon": "💻",
+      "documents": 50000,
+      "tokens_per_doc": 800,
+      "queries_per_month": 200000,
+      "input_tokens_per_query": 400,
+      "output_tokens_per_query": 250,
+      "fine_tuning_provider": "together_llama31_70b",
+      "local_gpu": "a100_40gb",
+      "embedding_model": "voyage-3",
+      "vector_db": "pinecone",
+      "include_reranker": true,
+      "reranker": "cohere",
+      "projection_months": 12,
+      "epochs": 2,
+      "tokens_per_example": 1024,
+      "examples_override": 15000
+    },
+    {
+      "slug": "enterprise-kb",
+      "name": "Enterprise knowledge base",
+      "icon": "🏢",
+      "documents": 250000,
+      "tokens_per_doc": 700,
+      "queries_per_month": 500000,
+      "input_tokens_per_query": 300,
+      "output_tokens_per_query": 120,
+      "fine_tuning_provider": "fireworks_llama31_8b",
+      "local_gpu": "h100",
+      "embedding_model": "openai-text-embedding-3-large",
+      "vector_db": "weaviate",
+      "include_reranker": true,
+      "reranker": "cohere",
+      "projection_months": 12,
+      "epochs": 1,
+      "tokens_per_example": 512,
+      "examples_override": 50000
+    },
+    {
+      "slug": "local-experiment",
+      "name": "Local GPU experiment",
+      "icon": "🧪",
+      "documents": 1000,
+      "tokens_per_doc": 400,
+      "queries_per_month": 10000,
+      "input_tokens_per_query": 250,
+      "output_tokens_per_query": 100,
+      "fine_tuning_provider": "fireworks_llama31_8b",
+      "local_gpu": "rtx4090",
+      "embedding_model": "local-bge",
+      "vector_db": "chroma",
+      "include_reranker": false,
+      "reranker": "local",
+      "projection_months": 6,
+      "epochs": 3,
+      "tokens_per_example": 512,
+      "examples_override": 0
+    }
+  ],
+  "fine_tuning_providers": [
+    {
+      "slug": "openai_gpt4o",
+      "name": "OpenAI GPT-4o",
+      "training_input_cost_per_1k": 0.025,
+      "training_output_cost_per_1k": 0,
+      "usage_input_cost_per_1k": 0.005,
+      "usage_output_cost_per_1k": 0.015,
+      "notes": "Best for complex instruction/vision tasks; highest per-token cost."
+    },
+    {
+      "slug": "openai_gpt4o_mini",
+      "name": "OpenAI GPT-4o mini",
+      "training_input_cost_per_1k": 0.003,
+      "training_output_cost_per_1k": 0,
+      "usage_input_cost_per_1k": 0.0003,
+      "usage_output_cost_per_1k": 0.0012,
+      "notes": "Cheapest managed route for simple tasks and large datasets."
+    },
+    {
+      "slug": "together_llama31_70b",
+      "name": "Together AI Llama 3.1 70B",
+      "training_input_cost_per_1k": 0.008,
+      "training_output_cost_per_1k": 0,
+      "usage_input_cost_per_1k": 0.001,
+      "usage_output_cost_per_1k": 0.001,
+      "notes": "Strong open-weight fine-tuning with competitive training rates."
+    },
+    {
+      "slug": "fireworks_llama31_8b",
+      "name": "Fireworks Llama 3.1 8B",
+      "training_input_cost_per_1k": 0.002,
+      "training_output_cost_per_1k": 0,
+      "usage_input_cost_per_1k": 0.0002,
+      "usage_output_cost_per_1k": 0.0002,
+      "notes": "Low-cost 8B route for high-volume, narrow tasks."
+    },
+    {
+      "slug": "google_gemini_flash",
+      "name": "Google Gemini 1.5 Flash",
+      "training_input_cost_per_1k": 0.001,
+      "training_output_cost_per_1k": 0,
+      "usage_input_cost_per_1k": 0.000075,
+      "usage_output_cost_per_1k": 0.0003,
+      "notes": "Very low-cost long-context tuning; limited to supported regions."
+    }
+  ],
+  "local_gpus": [
+    {
+      "slug": "rtx4090",
+      "name": "NVIDIA RTX 4090 (24 GB)",
+      "vram_gb": 24,
+      "training_tokens_per_hour": 1500000,
+      "inference_tokens_per_hour": 18000000,
+      "cloud_hourly": 1.29,
+      "purchase_cost": 1599,
+      "power_w": 450,
+      "notes": "Fast consumer card; fits 7B-8B models at higher quantization."
+    },
+    {
+      "slug": "rtx3090",
+      "name": "NVIDIA RTX 3090 (24 GB)",
+      "vram_gb": 24,
+      "training_tokens_per_hour": 900000,
+      "inference_tokens_per_hour": 11000000,
+      "cloud_hourly": 0.79,
+      "purchase_cost": 999,
+      "power_w": 350,
+      "notes": "Budget-friendly 24 GB card; slower than RTX 4090."
+    },
+    {
+      "slug": "a6000",
+      "name": "NVIDIA RTX A6000 (48 GB)",
+      "vram_gb": 48,
+      "training_tokens_per_hour": 1100000,
+      "inference_tokens_per_hour": 14000000,
+      "cloud_hourly": 1.99,
+      "purchase_cost": 4499,
+      "power_w": 300,
+      "notes": "Large VRAM workstation card; good for 13B-30B models."
+    },
+    {
+      "slug": "a100_40gb",
+      "name": "NVIDIA A100 40GB",
+      "vram_gb": 40,
+      "training_tokens_per_hour": 2500000,
+      "inference_tokens_per_hour": 30000000,
+      "cloud_hourly": 2.49,
+      "purchase_cost": 7999,
+      "power_w": 400,
+      "notes": "Datacenter training workhorse; supports bigger batches."
+    },
+    {
+      "slug": "h100",
+      "name": "NVIDIA H100 80GB",
+      "vram_gb": 80,
+      "training_tokens_per_hour": 6000000,
+      "inference_tokens_per_hour": 70000000,
+      "cloud_hourly": 4.99,
+      "purchase_cost": 25000,
+      "power_w": 700,
+      "notes": "Fastest training; cost-effective only for very large workloads."
+    }
+  ],
+  "embedding_models": [
+    {
+      "slug": "openai-text-embedding-3-small",
+      "name": "OpenAI text-embedding-3-small",
+      "provider": "OpenAI",
+      "dims": 1536,
+      "cost_per_1m_tokens_usd": 0.02,
+      "notes": "Cheap default; 1536 dims."
+    },
+    {
+      "slug": "openai-text-embedding-3-large",
+      "name": "OpenAI text-embedding-3-large",
+      "provider": "OpenAI",
+      "dims": 3072,
+      "cost_per_1m_tokens_usd": 0.13,
+      "notes": "Best retrieval quality; 3072 dims."
+    },
+    {
+      "slug": "cohere-embed-english-v3",
+      "name": "Cohere embed-english-v3",
+      "provider": "Cohere",
+      "dims": 1024,
+      "cost_per_1m_tokens_usd": 0.10,
+      "notes": "Good for classification and retrieval."
+    },
+    {
+      "slug": "voyage-3-lite",
+      "name": "Voyage-3-lite",
+      "provider": "Voyage AI",
+      "dims": 512,
+      "cost_per_1m_tokens_usd": 0.02,
+      "notes": "Strong small embedding model."
+    },
+    {
+      "slug": "voyage-3",
+      "name": "Voyage-3",
+      "provider": "Voyage AI",
+      "dims": 1024,
+      "cost_per_1m_tokens_usd": 0.10,
+      "notes": "High retrieval quality for agents."
+    },
+    {
+      "slug": "google-text-embedding-004",
+      "name": "Google text-embedding-004",
+      "provider": "Google",
+      "dims": 768,
+      "cost_per_1m_tokens_usd": 0.10,
+      "notes": "Vertex AI / Google Gen AI embedding."
+    },
+    {
+      "slug": "local-bge",
+      "name": "Local BGE-large / GTE (self-hosted)",
+      "provider": "Self-hosted",
+      "dims": 1024,
+      "cost_per_1m_tokens_usd": 0,
+      "notes": "No token API cost; GPU/CPU cost not included."
+    }
+  ],
+  "vector_dbs": [
+    {
+      "slug": "pinecone",
+      "name": "Pinecone Serverless",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.33,
+      "query_cost_per_1k_usd": 0.06,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Pay for stored vectors plus read units."
+    },
+    {
+      "slug": "weaviate",
+      "name": "Weaviate Cloud",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.25,
+      "query_cost_per_1k_usd": 0.05,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Managed vector database with hybrid search."
+    },
+    {
+      "slug": "qdrant",
+      "name": "Qdrant Cloud",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.20,
+      "query_cost_per_1k_usd": 0.03,
+      "free_gb": 1,
+      "free_queries": 10000,
+      "notes": "Generous free tier for small workloads."
+    },
+    {
+      "slug": "zilliz",
+      "name": "Zilliz / Milvus Cloud",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.15,
+      "query_cost_per_1k_usd": 0.04,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Milvus-as-a-service."
+    },
+    {
+      "slug": "redis",
+      "name": "Redis Cloud (vector search)",
+      "type": "managed",
+      "storage_cost_gb_month_usd": 0.50,
+      "query_cost_per_1k_usd": 0.02,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Existing Redis stack pricing."
+    },
+    {
+      "slug": "pgvector",
+      "name": "pgvector (RDS / self-hosted)",
+      "type": "self-hosted",
+      "storage_cost_gb_month_usd": 0.12,
+      "query_cost_per_1k_usd": 0,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "DB compute cost is separate."
+    },
+    {
+      "slug": "chroma",
+      "name": "Chroma (self-hosted)",
+      "type": "self-hosted",
+      "storage_cost_gb_month_usd": 0,
+      "query_cost_per_1k_usd": 0,
+      "free_gb": 0,
+      "free_queries": 0,
+      "notes": "Local disk only; hardware cost separate."
+    }
+  ],
+  "rerankers": [
+    {
+      "slug": "cohere",
+      "name": "Cohere Rerank v3",
+      "provider": "Cohere",
+      "cost_per_1k_queries_usd": 1.00,
+      "notes": "Per-query reranking of top-k results."
+    },
+    {
+      "slug": "mixedbread",
+      "name": "mixedbread.ai rerank",
+      "provider": "mixedbread",
+      "cost_per_1k_queries_usd": 0.20,
+      "notes": "Lower-cost hosted reranker."
+    },
+    {
+      "slug": "local",
+      "name": "Local cross-encoder",
+      "provider": "Self-hosted",
+      "cost_per_1k_queries_usd": 0,
+      "notes": "GPU/CPU cost separate."
+    }
+  ],
+  "chunking": {
+    "tokens_per_chunk": 512,
+    "overlap_pct": 10,
+    "metadata_bytes_per_chunk": 250,
+    "vector_bytes_per_dim": 4,
+    "vector_overhead_pct": 15
+  },
+  "faq": [
+    {
+      "question": "When is fine-tuning cheaper than RAG?",
+      "answer": "Fine-tuning tends to be cheaper than RAG at very high query volume once the upfront training cost is amortized, especially with small, efficient fine-tuned models. It also wins when the task requires style, format, or behavior changes that retrieval alone cannot enforce."
+    },
+    {
+      "question": "When is RAG cheaper than fine-tuning?",
+      "answer": "RAG is usually cheaper when knowledge changes frequently, when you have many documents to ground answers in, or when query volume is low enough that paying per query is cheaper than training and hosting a custom model."
+    },
+    {
+      "question": "Can I combine fine-tuning and RAG?",
+      "answer": "Yes. Many production agents use a fine-tuned model for tone, format, and task behavior, while RAG supplies up-to-date facts and source citations. This hybrid is often the highest-quality and most maintainable architecture."
+    },
+    {
+      "question": "Does this calculator include data preparation cost?",
+      "answer": "No. Data labeling, cleaning, and evaluation are excluded. Use the AI Agent Data Labeling Cost Calculator and Synthetic Data Generator Cost Calculator for those budgets."
+    },
+    {
+      "question": "Which is better for accuracy?",
+      "answer": "It depends on the failure mode. RAG reduces hallucinations on factual questions by grounding answers in source documents. Fine-tuning improves style, format adherence, and narrow-domain reasoning. For best accuracy, combine both."
+    }
+  ]
+}
