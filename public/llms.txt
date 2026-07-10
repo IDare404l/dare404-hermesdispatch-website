@@ -837,9 +837,17 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ## AI Agent Rollout / Canary Cost Calculator
 ||||- URL: https://hermesdispatch.dev/tools/agent-rollout-cost-calculator/
 ||||- Description: Estimate the cost of rolling out or canary-testing an AI agent: duplicated inference, traffic split, human review, monitoring, incident response, and setup.
-||||- Inputs: monthly requests, input/output tokens per request, cached input percentage, LLM provider, rollout type (shadow / canary / A/B / full), traffic percentage to agent, incident rate percentage, human review rate percentage, review minutes per case, reviewer hourly rate, incident response hours per month, incident response hourly rate, observability tool, setup hours, setup hourly rate, projection months.
-||||- Outputs: inference cost per month, human review cost per month, monitoring and incident response cost per month, total first-month rollout cost, provider comparison table, period cost, verdict.
-||||- Audience: AI agent builders and operators planning a safe, costed launch from shadow mode to full production.
-||||- Cross-links: Agent Shadow / A-B Test Cost Calculator, Agent Deployment Readiness Scorecard, Agent API Pricing Comparator, Agent Red Team Cost Calculator.
+|||||- Inputs: monthly requests, input/output tokens per request, cached input percentage, LLM provider, rollout type (shadow / canary / A/B / full), traffic percentage to agent, incident rate percentage, human review rate percentage, review minutes per case, reviewer hourly rate, incident response hours per month, incident response hourly rate, observability tool, setup hours, setup hourly rate, projection months.
+|||||- Outputs: inference cost per month, human review cost per month, monitoring and incident response cost per month, total first-month rollout cost, provider comparison table, period cost, verdict.
+|||||- Audience: AI agent builders and operators planning a safe, costed launch from shadow mode to full production.
+|||||- Cross-links: Agent Shadow / A-B Test Cost Calculator, Agent Deployment Readiness Scorecard, Agent API Pricing Comparator, Agent Red Team Cost Calculator.
+
+## AI Agent Hallucination Cost Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-hallucination-cost-calculator/
+|- Description: Estimate the monthly cost of AI agent hallucinations and bad answers: rework, support, refunds, churn, compliance exposure, and detection overhead.
+|- Inputs: monthly requests, input/output tokens per request, cached input percentage, LLM provider, hallucination / bad-answer rate (%), severity split (minor / moderate / severe), detection method (user reports / automated eval / human audit / hybrid), support hourly rate, rework hourly rate, human review rate, review minutes, reviewer hourly rate, projection months.
+|- Outputs: bad answers per month, base inference cost per month, remediation cost breakdown (rework, support, refunds, churn, compliance), detection overhead, human review cost, total hallucination cost per month, projected period cost, provider comparison table, verdict.
+|- Audience: AI agent builders and operators quantifying the cost of wrong answers and choosing detection/prevention investments.
+|- Cross-links: Cost Per Failure Calculator, Red Team Cost Calculator, Observability Cost Calculator, Memory / RAG Cost Calculator.
 
 ## Hub Pages

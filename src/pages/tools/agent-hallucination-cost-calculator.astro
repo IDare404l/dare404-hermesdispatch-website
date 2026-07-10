@@ -1,0 +1,418 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_hallucination_cost.json';
+
+const title = "AI Agent Hallucination Cost Calculator | Hermes Dispatch";
+const description = "Estimate the monthly cost of AI agent hallucinations and bad answers: rework, support, refunds, churn, compliance exposure, and detection overhead.";
+const providers = data.providers;
+const severityTypes = data.severity_types;
+const detectionMethods = data.detection_methods;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What counts as a hallucination or bad answer?", a: "Any agent output that is factually wrong, inconsistent with your data, harmful, or fails to meet user intent. This includes confident-sounding false statements, invented citations, bad code, incorrect medical or financial guidance, and policy violations." },
+  { q: "How does detection method affect cost?", a: "User reports are free but catch the fewest errors. Automated evals and guardrails add per-output cost but catch most issues early. Human audit is the most expensive but has the highest coverage. The calculator adds the detection cost and scales caught-error remediation by coverage." },
+  { q: "Does this include the cost of preventing hallucinations?", a: "Prevention is modeled as the detection method cost plus the portion of human review that catches issues before users see them. For deeper prevention investments like RAG improvements, fine-tuning, or red-teaming, cross-check with the Agent Memory Cost Calculator and Red Team Cost Calculator." },
+  { q: "What is the compliance / fine component?", a: "Severe bad answers in regulated domains carry a small probability of a fine or lawsuit. The calculator multiplies that probability by a typical average fine for the severity level. This is an expected value, not a prediction of any specific event." },
+  { q: "Can I compare different LLM providers?", a: "Yes. The provider comparison table recalculates API spend for each provider using your token volume and cached-input percentage, then shows the cheapest option. Note that cheaper providers may trade off accuracy and hallucination rate." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Hallucination Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-hallucination-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🌀</div>
+      <h1 class="display-heading text-4xl md:text-5xl mb-4">AI Agent Hallucination Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the monthly cost of AI agent hallucinations and bad answers: rework, support, refunds, churn, compliance exposure, and detection overhead.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload & accuracy</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly requests</span>
+          <input id="monthlyRequests" type="number" min="0" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input %</span>
+          <input id="cacheHit" type="number" min="0" max="100" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="provider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.provider}>{p.name} ({p.model})</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Hallucination / bad-answer rate %</span>
+          <input id="hallucinationRate" type="number" min="0" max="100" step="0.1" value={defaults.hallucination_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Minor issues %</span>
+          <input id="minorPct" type="number" min="0" max="100" value={defaults.minor_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Moderate issues %</span>
+          <input id="moderatePct" type="number" min="0" max="100" value={defaults.moderate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Severe issues %</span>
+          <input id="severePct" type="number" min="0" max="100" value={defaults.severe_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Detection method</span>
+          <select id="detectionMethod" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {detectionMethods.map(d => (
+              <option value={d.slug} selected={d.slug === defaults.detection_method}>{d.name} (+${d.cost_per_output}/output)</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Support hourly rate ($)</span>
+          <input id="supportRate" type="number" min="0" value={defaults.support_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Rework hourly rate ($)</span>
+          <input id="reworkRate" type="number" min="0" value={defaults.rework_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review rate %</span>
+          <input id="reviewRate" type="number" min="0" max="100" value={defaults.human_review_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review minutes / case</span>
+          <input id="reviewMinutes" type="number" min="0" value={defaults.review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reviewer hourly rate ($)</span>
+          <input id="reviewerRate" type="number" min="0" value={defaults.reviewer_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Costs are estimates. Provider rates last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Bad answers / month</p>
+        <p id="badAnswers" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Base inference / month</p>
+        <p id="inferenceCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Remediation / month</p>
+        <p id="remediationCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total hallucination cost / month</p>
+        <p id="totalCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Inference cost by provider</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Provider</th>
+            <th class="py-3 pr-4">Model</th>
+            <th class="py-3 pr-4 text-right">Inference / mo</th>
+            <th class="py-3 pr-4">Verdict</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {providers.map(p => (
+            <tr class="border-b border-neutral-800/50" data-provider={p.slug}>
+              <td class="py-3 pr-4 font-medium text-white">{p.name}</td>
+              <td class="py-3 pr-4 text-xs text-neutral-500">{p.model}</td>
+              <td class="py-3 pr-4 text-right font-mono inference-cell">—</td>
+              <td class="py-3 pr-4 text-sm verdict-cell text-neutral-400">—</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Remediation breakdown</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Category</th>
+            <th class="py-3 pr-4 text-right">Monthly</th>
+            <th class="py-3 pr-4 text-right">Per bad answer</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownBody" class="text-neutral-200">
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Rework</td><td class="py-3 pr-4 text-right font-mono" id="reworkCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="reworkPerCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Support</td><td class="py-3 pr-4 text-right font-mono" id="supportCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="supportPerCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Refunds</td><td class="py-3 pr-4 text-right font-mono" id="refundCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="refundPerCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Churn</td><td class="py-3 pr-4 text-right font-mono" id="churnCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="churnPerCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Compliance exposure</td><td class="py-3 pr-4 text-right font-mono" id="fineCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="finePerCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Detection overhead</td><td class="py-3 pr-4 text-right font-mono" id="detectionCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="detectionPerCell">—</td></tr>
+          <tr class="border-b border-neutral-800/50"><td class="py-3 pr-4">Human review</td><td class="py-3 pr-4 text-right font-mono" id="reviewCostCell">—</td><td class="py-3 pr-4 text-right font-mono" id="reviewPerCell">—</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Best option -->
+    <section id="best" class="bg-cyan-400/10 border border-cyan-400/30 rounded-xl p-6 mb-12">
+      <h2 class="text-lg font-semibold text-cyan-400 mb-2">Hallucination cost estimate</h2>
+      <p id="bestLine" class="text-white text-xl font-medium">Enter a workload to see the cost of bad answers.</p>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-cost-per-failure-calculator/" class="btn-primary text-sm">Cost Per Failure →</a>
+      <a href="/tools/agent-redteam-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Red Team Cost →</a>
+      <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost →</a>
+      <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Memory / RAG Cost →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), severityTypes: JSON.stringify(severityTypes), detectionMethods: JSON.stringify(detectionMethods), scenarios: JSON.stringify(scenarios) }}>
+    const providerData = JSON.parse(providers);
+    const severityData = JSON.parse(severityTypes);
+    const detectionData = JSON.parse(detectionMethods);
+    const scenarioData = JSON.parse(scenarios);
+    const providerMap = Object.fromEntries(providerData.map(p => [p.slug, p]));
+    const severityMap = Object.fromEntries(severityData.map(s => [s.slug, s]));
+    const detectionMap = Object.fromEntries(detectionData.map(d => [d.slug, d]));
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmt2 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtPct = n => fmtNum(n) + '%';
+
+    function getInputs() {
+      return {
+        monthlyRequests: Math.max(0, parseFloat(document.getElementById('monthlyRequests').value) || 0),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        cacheHit: Math.min(100, Math.max(0, parseFloat(document.getElementById('cacheHit').value) || 0)) / 100,
+        provider: document.getElementById('provider').value,
+        hallucinationRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('hallucinationRate').value) || 0)) / 100,
+        minorPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('minorPct').value) || 0)) / 100,
+        moderatePct: Math.min(100, Math.max(0, parseFloat(document.getElementById('moderatePct').value) || 0)) / 100,
+        severePct: Math.min(100, Math.max(0, parseFloat(document.getElementById('severePct').value) || 0)) / 100,
+        detectionMethod: document.getElementById('detectionMethod').value,
+        supportRate: Math.max(0, parseFloat(document.getElementById('supportRate').value) || 0),
+        reworkRate: Math.max(0, parseFloat(document.getElementById('reworkRate').value) || 0),
+        reviewRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewRate').value) || 0)) / 100,
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        reviewerRate: Math.max(0, parseFloat(document.getElementById('reviewerRate').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function inferenceCost(p, inps) {
+      const requests = inps.monthlyRequests;
+      const inputCost = (requests * inps.inputTokens / 1_000_000) * ((1 - inps.cacheHit) * p.input_per_1m + inps.cacheHit * (p.cached_input_per_1m || p.input_per_1m));
+      const outputCost = (requests * inps.outputTokens / 1_000_000) * p.output_per_1m;
+      return inputCost + outputCost;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const p = providerMap[inps.provider];
+      const detection = detectionMap[inps.detectionMethod];
+
+      // Normalize severity split
+      const totalSeverity = inps.minorPct + inps.moderatePct + inps.severePct;
+      const minorW = totalSeverity > 0 ? inps.minorPct / totalSeverity : 0;
+      const moderateW = totalSeverity > 0 ? inps.moderatePct / totalSeverity : 0;
+      const severeW = totalSeverity > 0 ? inps.severePct / totalSeverity : 0;
+
+      const badAnswers = inps.monthlyRequests * inps.hallucinationRate;
+      const llmCost = inferenceCost(p, inps);
+      const detectionCost = inps.monthlyRequests * detection.cost_per_output;
+
+      const counts = {
+        minor: badAnswers * minorW,
+        moderate: badAnswers * moderateW,
+        severe: badAnswers * severeW
+      };
+
+      // Detected fraction increases coverage but is capped by the method
+      const detectedFraction = Math.min(detection.coverage_pct / 100, 1);
+      const detectedBadAnswers = badAnswers * detectedFraction;
+
+      let reworkCost = 0;
+      let supportCost = 0;
+      let refundCost = 0;
+      let churnCost = 0;
+      let fineCost = 0;
+      ['minor', 'moderate', 'severe'].forEach(slug => {
+        const sev = severityMap[slug];
+        const n = counts[slug] * detectedFraction;
+        reworkCost += n * sev.rework_hours * inps.reworkRate;
+        supportCost += n * sev.support_hours * inps.supportRate;
+        refundCost += n * sev.refund_pct * sev.avg_refund;
+        churnCost += n * sev.churn_pct * sev.avg_churn_lifetime_value;
+        fineCost += n * sev.fine_probability * sev.avg_fine;
+      });
+
+      // Human review cost for sampled outputs (assumed applied to all outputs at review rate)
+      const reviewedOutputs = inps.monthlyRequests * inps.reviewRate;
+      const reviewHours = reviewedOutputs * inps.reviewMinutes / 60;
+      const reviewCost = reviewHours * inps.reviewerRate;
+
+      const remediationCost = reworkCost + supportCost + refundCost + churnCost + fineCost + detectionCost + reviewCost;
+      const totalCost = remediationCost;
+      const periodCost = totalCost * inps.projectionMonths;
+
+      // Provider comparison
+      const rows = providerData.map(pr => ({ slug: pr.slug, name: pr.name, cost: inferenceCost(pr, inps) })).sort((a, b) => a.cost - b.cost);
+      const cheapest = rows[0];
+
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const slug = tr.dataset.provider;
+        const row = rows.find(r => r.slug === slug);
+        if (!row) return;
+        tr.querySelector('.inference-cell').textContent = fmt(row.cost);
+        const vCell = tr.querySelector('.verdict-cell');
+        if (row.slug === cheapest.slug) {
+          vCell.textContent = 'Cheapest';
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-emerald-400';
+          tr.classList.add('bg-cyan-400/10');
+        } else {
+          vCell.textContent = `${fmtPct((row.cost - cheapest.cost) / cheapest.cost * 100)} more`;
+          vCell.className = 'py-3 pr-4 text-sm verdict-cell text-neutral-400';
+          tr.classList.remove('bg-cyan-400/10');
+        }
+      });
+
+      function setCell(id, monthly, per) {
+        document.getElementById(id + 'CostCell').textContent = fmt(monthly);
+        document.getElementById(id + 'PerCell').textContent = badAnswers > 0 ? fmt2(per) : '—';
+      }
+
+      setCell('rework', reworkCost, badAnswers > 0 ? reworkCost / badAnswers : 0);
+      setCell('support', supportCost, badAnswers > 0 ? supportCost / badAnswers : 0);
+      setCell('refund', refundCost, badAnswers > 0 ? refundCost / badAnswers : 0);
+      setCell('churn', churnCost, badAnswers > 0 ? churnCost / badAnswers : 0);
+      setCell('fine', fineCost, badAnswers > 0 ? fineCost / badAnswers : 0);
+      setCell('detection', detectionCost, inps.monthlyRequests > 0 ? detectionCost / inps.monthlyRequests : 0);
+      setCell('review', reviewCost, inps.monthlyRequests > 0 ? reviewCost / inps.monthlyRequests : 0);
+
+      document.getElementById('badAnswers').textContent = fmtNum(badAnswers);
+      document.getElementById('inferenceCost').textContent = fmt(llmCost);
+      document.getElementById('remediationCost').textContent = fmt(remediationCost);
+      document.getElementById('totalCost').textContent = fmt(totalCost);
+
+      document.getElementById('bestLine').textContent = `At ${fmtNum(inps.hallucinationRate * 100)}% bad-answer rate, expect ~${fmtNum(badAnswers)} bad answers/month. Remediation plus detection/review costs ${fmt(totalCost)}/month (${fmt(periodCost)} over ${inps.projectionMonths} months).`;
+
+      let verdict = '';
+      if (badAnswers === 0) {
+        verdict = 'With a zero hallucination rate, your only cost is detection overhead. Keep measuring real error rates because user-reported rates are usually much lower than actual error rates.';
+      } else if (inps.hallucinationRate < 0.01) {
+        verdict = `A low hallucination rate still produces ${fmtNum(badAnswers)} bad answers/month. Focus spend on detection (${fmt(detectionCost)}/mo) and human review (${fmt(reviewCost)}/mo) to catch severe cases before they reach users.`;
+      } else if (inps.hallucinationRate < 0.05) {
+        verdict = `At ${fmtNum(inps.hallucinationRate * 100)}%, remediation costs ${fmt(remediationCost)}/month. Churn and refunds are likely the biggest line items. Consider stricter guardrails, retrieval-augmented generation, and a smaller model for fact-critical tasks.`;
+      } else {
+        verdict = `A ${fmtNum(inps.hallucinationRate * 100)}% bad-answer rate is very expensive: ${fmt(totalCost)}/month. This usually means the agent is deployed before it is reliable. Pause expansion, improve RAG/evals, and run a red-team sprint before increasing traffic.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_requests !== undefined) document.getElementById('monthlyRequests').value = obj.monthly_requests;
+      if (obj.input_tokens !== undefined) document.getElementById('inputTokens').value = obj.input_tokens;
+      if (obj.output_tokens !== undefined) document.getElementById('outputTokens').value = obj.output_tokens;
+      if (obj.cached_input_pct !== undefined) document.getElementById('cacheHit').value = obj.cached_input_pct;
+      if (obj.provider !== undefined) document.getElementById('provider').value = obj.provider;
+      if (obj.hallucination_rate_pct !== undefined) document.getElementById('hallucinationRate').value = obj.hallucination_rate_pct;
+      if (obj.minor_pct !== undefined) document.getElementById('minorPct').value = obj.minor_pct;
+      if (obj.moderate_pct !== undefined) document.getElementById('moderatePct').value = obj.moderate_pct;
+      if (obj.severe_pct !== undefined) document.getElementById('severePct').value = obj.severe_pct;
+      if (obj.detection_method !== undefined) document.getElementById('detectionMethod').value = obj.detection_method;
+      if (obj.support_hourly_rate !== undefined) document.getElementById('supportRate').value = obj.support_hourly_rate;
+      if (obj.rework_hourly_rate !== undefined) document.getElementById('reworkRate').value = obj.rework_hourly_rate;
+      if (obj.human_review_rate_pct !== undefined) document.getElementById('reviewRate').value = obj.human_review_rate_pct;
+      if (obj.review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.review_minutes;
+      if (obj.reviewer_hourly_rate !== undefined) document.getElementById('reviewerRate').value = obj.reviewer_hourly_rate;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['monthlyRequests','inputTokens','outputTokens','cacheHit','provider','hallucinationRate','minorPct','moderatePct','severePct','detectionMethod','supportRate','reworkRate','reviewRate','reviewMinutes','reviewerRate','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', compute);
+          el.addEventListener('change', compute);
+        }
+      });
+
+      compute();
+    });
+  </script>
+</Layout>
