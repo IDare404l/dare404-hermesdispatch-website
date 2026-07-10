@@ -661,13 +661,21 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 - Cross-links: Newsletter Revenue Calculator, Affiliate Revenue Estimator, Newsletter Topic Finder, Advertise page
 
 ## AI Agent Inference Capacity Planner
-||- URL: https://hermesdispatch.dev/tools/agent-inference-capacity-planner/
-||- Description: Size GPU or API capacity for an AI agent workload by requests per minute, tokens per request, target latency, and concurrency buffer.
-||- Inputs: requests per minute, input tokens per request, output tokens per request, target p95 latency (ms), concurrency buffer, GPU utilization target, cache hit rate, cloud provider, GPU model, local GPUs owned
-||- Outputs: minimum GPUs needed, estimated time per request, monthly cloud rental cost, self-hosted cost, managed API costs (OpenAI, Anthropic, Together), cheapest option, latency verdict
-||- Audience: AI agent builders sizing inference infrastructure for production workloads
-||- Cross-links: GPU Cloud vs Buy Calculator, Agent Hosting Cost Comparator, Agent API Pricing Comparator, Agent Latency Budget Calculator, VRAM Calculator
-|
+|||- URL: https://hermesdispatch.dev/tools/agent-inference-capacity-planner/
+|||- Description: Size GPU or API capacity for an AI agent workload by requests per minute, tokens per request, target latency, and concurrency buffer.
+|||- Inputs: requests per minute, input tokens per request, output tokens per request, target p95 latency (ms), concurrency buffer, GPU utilization target, cache hit rate, cloud provider, GPU model, local GPUs owned
+|||- Outputs: minimum GPUs needed, estimated time per request, monthly cloud rental cost, self-hosted cost, managed API costs (OpenAI, Anthropic, Together), cheapest option, latency verdict
+|||- Audience: AI agent builders sizing inference infrastructure for production workloads
+|||- Cross-links: GPU Cloud vs Buy Calculator, Agent Hosting Cost Comparator, Agent API Pricing Comparator, Agent Latency Budget Calculator, VRAM Calculator
+||
+## AI Agent Rate Limit & Quota Planner
+||- URL: https://hermesdispatch.dev/tools/agent-rate-limit-planner/
+||- Description: Estimate required RPM and TPM for an AI agent workload, compare provider rate limits and burst headroom, and identify quota walls before launch.
+||- Inputs: monthly requests, peak-hours share of daily traffic (%), input tokens per request, output tokens per request, cached input (%), LLM provider, provider tier, burst headroom (%), batch/offline share (%), projection months
+||- Outputs: required peak RPM, required peak TPM, provider limit with headroom, RPM/TPM utilization, monthly API cost, peak-to-average ratio, provider comparison table, verdict
+||- Audience: AI agent builders planning production scaling and negotiating provider limits
+||- Cross-links: Agent Concurrency & Queue Cost Calculator, Agent API Pricing Comparator, Agent Model Router Cost Calculator, Agent Inference Capacity Planner
+||
 ## AI Agent Per-User Cost Calculator
 |||- URL: https://hermesdispatch.dev/tools/agent-per-user-cost-calculator/
 |||- Description: Estimate monthly AI agent cost per active user across LLM tokens, vector memory, tool calls, human review, and hosting. Compare cost of revenue, gross margin, and required seat price.

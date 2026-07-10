@@ -1,0 +1,391 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_rate_limit_planner.json';
+
+const title = "AI Agent Rate Limit & Quota Planner | Hermes Dispatch";
+const description = "Estimate required RPM and TPM for an AI agent workload, compare provider rate limits and burst headroom, and spot quota walls before launch.";
+const providers = data.providers;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "Why do rate limits matter for AI agents?", a: "Most LLM APIs throttle by requests-per-minute (RPM) and tokens-per-minute (TPM). If your agent's peak traffic exceeds those limits, calls queue up, time out, or fail. Planning limits up front prevents launch-day incidents." },
+  { q: "How are peak RPM and TPM estimated?", a: "The calculator spreads monthly requests across effective peak minutes (hours per day × peak-percentage of traffic). TPM multiplies RPM by average tokens per request, including output and uncached input." },
+  { q: "What is burst headroom?", a: "Real traffic is spiky. Burst headroom is the percentage of provider RPM/TPM you deliberately keep free so short spikes don't trip throttles. 20-30% is a common starting point." },
+  { q: "What does 'quota wall' mean?", a: "A quota wall is any dimension where required throughput exceeds the provider limit after headroom: RPM, TPM, or daily cap. The planner flags the first wall you would hit." },
+  { q: "Can batch requests help?", a: "Yes. A percentage of traffic sent through batch/offline APIs (which tolerate slower turnaround and often cost less) lowers real-time RPM/TPM needs. The calculator subtracts batch share from peak real-time load." },
+  { q: "Should I pick tier 2 limits from day one?", a: "Only if you can qualify and commit. Tier 1 limits are the defaults many developers start with; tier 2 requires higher spend, verified use case, or enterprise agreement depending on the provider." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Rate Limit & Quota Planner" description={description} url="https://hermesdispatch.dev/tools/agent-rate-limit-planner/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⏱️</div>
+      <h1 class="display-heading mb-4">AI Agent Rate Limit & Quota Planner</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate required RPM and TPM for an AI agent workload, compare provider rate limits and burst headroom, and spot quota walls before launch.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload & limits</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly requests</span>
+          <input id="monthlyRequests" type="number" min="0" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Peak hours share of daily traffic (%)</span>
+          <input id="peakHoursPct" type="number" min="1" max="100" step="5" value={defaults.peak_hours_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" step="50" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" step="50" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input (%)</span>
+          <input id="cachedInputPct" type="number" min="0" max="100" step="5" value={defaults.cached_input_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM provider</span>
+          <select id="providerSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Provider tier</span>
+          <select id="tierSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            <option value="tier1" selected={defaults.tier === 'tier1'}>Tier 1 (default/entry)</option>
+            <option value="tier2" selected={defaults.tier === 'tier2'}>Tier 2 (raised/enterprise)</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Burst headroom (%)</span>
+          <input id="burstHeadroomPct" type="number" min="0" max="90" step="5" value={defaults.burst_headroom_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Batch / offline share (%)</span>
+          <input id="batchPct" type="number" min="0" max="100" step="5" value={defaults.batch_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Provider limits change; verify with your actual account and contract. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Required peak RPM</p>
+        <p id="requiredRpm" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Required peak TPM</p>
+        <p id="requiredTpm" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Limit RPM (with headroom)</p>
+        <p id="limitRpm" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Limit TPM (with headroom)</p>
+        <p id="limitTpm" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg">—</p>
+      <p id="verdictSub" class="text-neutral-400 mt-2">—</p>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Avg requests / minute (24/7)</p>
+        <p id="avgRpm" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">RPM utilization after headroom</p>
+        <p id="rpmUtil" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">TPM utilization after headroom</p>
+        <p id="tpmUtil" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Estimated monthly API cost</p>
+        <p id="monthlyCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Peak-to-average ratio</p>
+        <p id="peakRatio" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="periodCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider limit comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4 text-right">Tier</th>
+              <th class="py-3 pr-4 text-right">RPM limit</th>
+              <th class="py-3 pr-4 text-right">TPM limit</th>
+              <th class="py-3 pr-4 text-right">RPM headroom</th>
+              <th class="py-3 pr-4 text-right">TPM headroom</th>
+              <th class="py-3 pr-4">Status</th>
+            </tr>
+          </thead>
+          <tbody id="providerTable" class="text-neutral-200">
+            <tr><td colspan="7" class="py-4 text-neutral-500">Run a calculation to compare providers.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Related tools</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="/tools/agent-concurrency-cost-calculator/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Concurrency & Queue Cost Calc</a>
+        <a href="/tools/agent-api-pricing-comparator/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">API Pricing Comparator</a>
+        <a href="/tools/agent-model-router-cost-calculator/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Model Router Cost Calc</a>
+        <a href="/tools/agent-inference-capacity-planner/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Inference Capacity Planner</a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group border border-neutral-800 rounded-lg">
+            <summary class="px-4 py-3 cursor-pointer font-medium hover:bg-neutral-800/50 transition">{f.q}</summary>
+            <p class="px-4 py-3 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Notes -->
+    <section id="note" class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Methodology notes</h2>
+      <ul class="list-disc pl-5 text-neutral-400 space-y-2">
+        <li>Peak RPM = monthly_requests × (1 - batch_pct) × peak_hours_pct / (30 days × peak_hours_per_day × 60 min). Assumes 8-hour peak window and 30-day month.</li>
+        <li>Peak TPM = peak RPM × (output_tokens + cached_input_pct × cached_input_rate_tokens + (1 - cached_input_pct) × input_tokens). Cached tokens are counted at the cached rate.</li>
+        <li>Headroom = provider limit × (1 - burst_headroom_pct). Required throughput must stay below that value.</li>
+        <li>Daily caps are shown in the provider table but not included in the main verdict unless you exceed them. Check your actual account for project- or key-level limits.</li>
+        <li>Costs use list prices; enterprise or prepaid discounts are not modeled.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ providers, scenarios, defaults }}>
+    const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+    const fmt1 = new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const fmtCur = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtCur2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function $(id) { return document.getElementById(id); }
+
+    function getProvider() { return JSON.parse($('providerSelect').value); }
+
+    function readInputs() {
+      return {
+        monthlyRequests: parseFloat($('monthlyRequests').value) || 0,
+        peakHoursPct: parseFloat($('peakHoursPct').value) || 25,
+        inputTokens: parseFloat($('inputTokens').value) || 0,
+        outputTokens: parseFloat($('outputTokens').value) || 0,
+        cachedInputPct: parseFloat($('cachedInputPct').value) || 0,
+        tier: $('tierSelect').value,
+        burstHeadroomPct: parseFloat($('burstHeadroomPct').value) || 0,
+        batchPct: parseFloat($('batchPct').value) || 0,
+        projectionMonths: parseFloat($('projectionMonths').value) || 1,
+      };
+    }
+
+    function calculate() {
+      const inputs = readInputs();
+      const p = getProvider();
+      const peakHoursPerDay = 8;
+      const daysPerMonth = 30;
+      const effectiveRealtime = inputs.monthlyRequests * (1 - inputs.batchPct / 100);
+      const peakMinutes = daysPerMonth * peakHoursPerDay * 60;
+      const requiredRpm = effectiveRealtime * (inputs.peakHoursPct / 100) / peakMinutes;
+      const avgRpm = effectiveRealtime / (daysPerMonth * 24 * 60);
+
+      const effectiveInputTokens = inputs.cachedInputPct / 100 * inputs.inputTokens + (1 - inputs.cachedInputPct / 100) * inputs.inputTokens;
+      const tokensPerRequest = inputs.outputTokens + effectiveInputTokens;
+      const requiredTpm = requiredRpm * tokensPerRequest;
+
+      const rpmLimit = p['rpm_' + inputs.tier] || p.rpm_tier1 || 0;
+      const tpmLimit = p['tpm_' + inputs.tier] || p.tpm_tier1 || 0;
+      const dailyLimit = p['daily_' + inputs.tier] || p.daily_tier1 || null;
+
+      const usableRpm = rpmLimit * (1 - inputs.burstHeadroomPct / 100);
+      const usableTpm = tpmLimit * (1 - inputs.burstHeadroomPct / 100);
+
+      const rpmUtil = usableRpm ? (requiredRpm / usableRpm) : 0;
+      const tpmUtil = usableTpm ? (requiredTpm / usableTpm) : 0;
+
+      // Cost
+      const cachedInputTokens = inputs.inputTokens * (inputs.cachedInputPct / 100);
+      const uncachedInputTokens = inputs.inputTokens - cachedInputTokens;
+      const monthlyInputCost = (uncachedInputTokens * inputs.monthlyRequests / 1e6) * p.input_per_1m + (cachedInputTokens * inputs.monthlyRequests / 1e6) * p.cached_input_per_1m;
+      const monthlyOutputCost = (inputs.outputTokens * inputs.monthlyRequests / 1e6) * p.output_per_1m;
+      const monthlyCost = monthlyInputCost + monthlyOutputCost;
+      const periodCost = monthlyCost * inputs.projectionMonths;
+
+      // Daily cap check
+      let dailyStatus = 'ok';
+      let dailyMsg = '';
+      if (dailyLimit) {
+        const dailyRequired = requiredRpm * 60 * peakHoursPerDay;
+        if (dailyRequired > dailyLimit) {
+          dailyStatus = 'wall';
+          dailyMsg = `Daily cap (${fmt.format(dailyLimit)}) exceeded at peak. `;
+        }
+      }
+
+      // Verdict
+      let verdict = 'Within limits';
+      let verdictClass = 'text-emerald-400';
+      let wall = '';
+      if (requiredRpm > usableRpm && requiredTpm > usableTpm) {
+        verdict = 'Hitting RPM and TPM walls';
+        wall = `You need ${fmt.format(requiredRpm)} RPM / ${fmt.format(requiredTpm)} TPM, but ${inputs.tier} headroom is only ${fmt.format(usableRpm)} RPM / ${fmt.format(usableTpm)} TPM. ${dailyMsg}`;
+        verdictClass = 'text-rose-400';
+      } else if (requiredTpm > usableTpm) {
+        verdict = 'Hitting TPM wall';
+        wall = `TPM required ${fmt.format(requiredTpm)} exceeds headroom ${fmt.format(usableTpm)}. Lower tokens, raise tier, cache more, or shard across keys. ${dailyMsg}`;
+        verdictClass = 'text-rose-400';
+      } else if (requiredRpm > usableRpm) {
+        verdict = 'Hitting RPM wall';
+        wall = `RPM required ${fmt.format(requiredRpm)} exceeds headroom ${fmt.format(usableRpm)}. Batch more traffic or request a limit increase. ${dailyMsg}`;
+        verdictClass = 'text-rose-400';
+      } else if (dailyStatus === 'wall') {
+        verdict = 'Hitting daily cap';
+        wall = dailyMsg;
+        verdictClass = 'text-rose-400';
+      } else if (rpmUtil > 0.8 || tpmUtil > 0.8) {
+        verdict = 'Tight but fits';
+        wall = `You fit within ${inputs.tier} headroom, but utilization is high (${fmt1.format(rpmUtil * 100)}% RPM, ${fmt1.format(tpmUtil * 100)}% TPM). Monitor bursts closely.`;
+        verdictClass = 'text-amber-400';
+      } else {
+        wall = `Workload fits comfortably in ${inputs.tier} with ${inputs.burstHeadroomPct}% headroom. RPM utilization ${fmt1.format(rpmUtil * 100)}%; TPM utilization ${fmt1.format(tpmUtil * 100)}%.`;
+      }
+
+      // Render
+      $('requiredRpm').textContent = fmt.format(requiredRpm);
+      $('requiredTpm').textContent = fmt.format(requiredTpm);
+      $('limitRpm').textContent = fmt.format(usableRpm);
+      $('limitTpm').textContent = fmt.format(usableTpm);
+      $('avgRpm').textContent = fmt.format(avgRpm);
+      $('rpmUtil').textContent = fmt1.format(rpmUtil * 100) + '%';
+      $('tpmUtil').textContent = fmt1.format(tpmUtil * 100) + '%';
+      $('monthlyCost').textContent = monthlyCost >= 100 ? fmtCur.format(monthlyCost) : fmtCur2.format(monthlyCost);
+      $('peakRatio').textContent = avgRpm ? fmt1.format(requiredRpm / avgRpm) + '×' : '—';
+      $('periodCost').textContent = periodCost >= 100 ? fmtCur.format(periodCost) : fmtCur2.format(periodCost);
+
+      const vt = $('verdictText');
+      vt.textContent = verdict;
+      vt.className = 'text-lg font-bold ' + verdictClass;
+      $('verdictSub').textContent = wall;
+
+      renderProviderTable(requiredRpm, requiredTpm, inputs.burstHeadroomPct, inputs.tier, p.slug);
+    }
+
+    function renderProviderTable(reqRpm, reqTpm, headroomPct, tier, currentSlug) {
+      const tbody = $('providerTable');
+      tbody.innerHTML = '';
+      providers.forEach(p => {
+        const rpmLimit = p['rpm_' + tier] || p.rpm_tier1 || 0;
+        const tpmLimit = p['tpm_' + tier] || p.tpm_tier1 || 0;
+        const usableRpm = rpmLimit * (1 - headroomPct / 100);
+        const usableTpm = tpmLimit * (1 - headroomPct / 100);
+        const rpmFit = reqRpm <= usableRpm;
+        const tpmFit = reqTpm <= usableTpm;
+        let status = '✅ Fits';
+        let statusClass = 'text-emerald-400';
+        if (!rpmFit && !tpmFit) { status = '⛔ RPM + TPM wall'; statusClass = 'text-rose-400'; }
+        else if (!tpmFit) { status = '⛔ TPM wall'; statusClass = 'text-rose-400'; }
+        else if (!rpmFit) { status = '⛔ RPM wall'; statusClass = 'text-rose-400'; }
+
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-neutral-800/50' + (p.slug === currentSlug ? ' bg-neutral-800/30' : '');
+        tr.innerHTML = `
+          <td class="py-3 pr-4 font-medium">${p.name}${p.slug === currentSlug ? ' <span class="text-brand-gold">←</span>' : ''}</td>
+          <td class="py-3 pr-4 text-right text-neutral-400">${tier}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmt.format(rpmLimit)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmt.format(tpmLimit)}</td>
+          <td class="py-3 pr-4 text-right font-mono ${rpmFit ? 'text-emerald-400' : 'text-rose-400'}">${fmt.format(usableRpm - reqRpm)}</td>
+          <td class="py-3 pr-4 text-right font-mono ${tpmFit ? 'text-emerald-400' : 'text-rose-400'}">${fmt.format(usableTpm - reqTpm)}</td>
+          <td class="py-3 pr-4 ${statusClass} font-medium">${status}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Scenario buttons
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const s = JSON.parse(btn.dataset.scenario);
+        $('monthlyRequests').value = s.monthly_requests;
+        $('peakHoursPct').value = s.peak_hours_pct;
+        $('inputTokens').value = s.input_tokens;
+        $('outputTokens').value = s.output_tokens;
+        $('cachedInputPct').value = s.cached_input_pct;
+        $('batchPct').value = s.batch_pct;
+        $('burstHeadroomPct').value = s.burst_headroom_pct;
+        $('tierSelect').value = s.tier;
+        // select provider by slug
+        for (let i = 0; i < $('providerSelect').options.length; i++) {
+          const opt = $('providerSelect').options[i];
+          const optP = JSON.parse(opt.value);
+          if (optP.slug === s.provider) { $('providerSelect').selectedIndex = i; break; }
+        }
+        calculate();
+      });
+    });
+
+    const inputs = ['monthlyRequests', 'peakHoursPct', 'inputTokens', 'outputTokens', 'cachedInputPct', 'providerSelect', 'tierSelect', 'burstHeadroomPct', 'batchPct', 'projectionMonths'];
+    inputs.forEach(id => $(id).addEventListener('input', calculate));
+
+    calculate();
+  </script>
+</Layout>
