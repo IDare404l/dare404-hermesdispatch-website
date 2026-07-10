@@ -1,0 +1,340 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/vector_db_selector.json';
+
+const title = "AI Agent Vector Database Selector | Hermes Dispatch";
+const description = "Pick the right vector database for your AI agent or RAG system based on scale, budget, deployment model, latency, and feature needs.";
+
+const faqs = [
+  { q: "Which vector database is best for a small AI agent prototype?", a: "Start with Chroma or pgvector. Chroma is the easiest Python-native option. pgvector is ideal if you already run Postgres and want one database for relational + vector data." },
+  { q: "Which vector DB has the lowest latency?", a: "Pinecone and Redis typically deliver sub-100 ms P99 query latency. Qdrant and Weaviate are also very fast, especially when sized correctly." },
+  { q: "What is the cheapest vector database at scale?", a: "Self-hosted Qdrant, pgvector, or Milvus are usually cheapest when you can run your own compute. Managed options trade cost for zero operations overhead." },
+  { q: "Do I need hybrid search?", a: "Hybrid search (vector + keyword) improves recall when users search by exact names, IDs, or jargon that embeddings may miss. Weaviate, Pinecone, Qdrant, Milvus, and Vespa all support it well." },
+  { q: "Can I self-host any of these?", a: "Yes. Qdrant, Weaviate, Milvus, pgvector, Chroma, Redis, and Vespa all have self-hosted or open-source options. Pinecone is managed-only." }
+];
+
+const dbs = data.vector_dbs;
+const priorities = data.priorities;
+const modes = data.deployment_modes;
+const tiers = data.scale_tiers;
+const dims = [768, 1024, 1536, 2048, 3072];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Vector Database Selector" description={description} url="https://hermesdispatch.dev/tools/vector-db-selector/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔍</div>
+      <h1 class="display-heading mb-4">AI Agent Vector Database Selector</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Pick the right vector database for your agent's memory, RAG, or semantic search workload.</p>
+    </div>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Your workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Deployment model</span>
+          <select id="modeSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {modes.map(m => <option value={m.id}>{m.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Top priority</span>
+          <select id="prioritySelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {priorities.map(p => <option value={p.id}>{p.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Scale tier</span>
+          <select id="tierSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {tiers.map(t => <option value={t.id}>{t.name} — {t.vectors.toLocaleString()} vectors, ~{t.qps} QPS</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Embedding dimensions</span>
+          <select id="dimSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {dims.map(d => <option value={d} selected={d === 1536}>{d}</option>)}
+          </select>
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Top recommendation -->
+    <section id="topRecommendation" class="hidden mb-10">
+      <div class="glass-card rounded-2xl p-8 border-2 border-brand-gold/40 glow-gold">
+        <div class="flex flex-col md:flex-row md:items-start gap-6">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber flex items-center justify-center text-3xl flex-shrink-0">🏆</div>
+          <div class="flex-1">
+            <h2 class="text-2xl font-bold text-brand-gold mb-2">Top recommendation: <span id="recName"></span></h2>
+            <p id="recBestFor" class="text-neutral-300 mb-4"></p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Estimated monthly</p>
+                <p id="recCost" class="text-xl font-bold text-white">—</p>
+              </div>
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Latency</p>
+                <p id="recLatency" class="text-xl font-bold text-white">—</p>
+              </div>
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Scale</p>
+                <p id="recScale" class="text-xl font-bold text-white">—</p>
+              </div>
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Deployment</p>
+                <p id="recDeployment" class="text-xl font-bold text-white">—</p>
+              </div>
+            </div>
+            <p class="text-sm text-neutral-400">Key features: <span id="recFeatures" class="text-neutral-200"></span></p>
+            <div id="recProsCons" class="grid md:grid-cols-2 gap-4 mt-4 text-sm"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison table -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">All vector databases</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Database</th>
+            <th class="py-3 pr-4">Deployment</th>
+            <th class="py-3 pr-4">Est. monthly</th>
+            <th class="py-3 pr-4">Latency</th>
+            <th class="py-3 pr-4">Scale</th>
+            <th class="py-3 pr-4">Fit score</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {dbs.map(db => (
+            <tr class="border-b border-neutral-800/50" data-db={db.id}>
+              <td class="py-3 pr-4 font-medium text-white">{db.name}</td>
+              <td class="py-3 pr-4 deployment-cell">—</td>
+              <td class="py-3 pr-4 font-mono cost-cell">—</td>
+              <td class="py-3 pr-4 latency-cell">—</td>
+              <td class="py-3 pr-4 scale-cell">—</td>
+              <td class="py-3 pr-4 fit-cell">—</td>
+              <td class="py-3 pr-4 text-sm text-neutral-400 bestfor-cell">{db.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">Select your deployment model, priority, scale, and embedding dimensions to see recommendations.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-memory-cost-calculator/" class="btn-primary text-sm">Agent Memory / RAG Cost Calc →</a>
+      <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+      <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+      <a href="/tools/quantization-advisor/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Quantization Advisor →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ dbsJson: JSON.stringify(dbs), tiersJson: JSON.stringify(tiers), prioritiesJson: JSON.stringify(priorities), modesJson: JSON.stringify(modes), dimMultJson: JSON.stringify(data.dimension_cost_multiplier) }}>
+    const dbs = JSON.parse(dbsJson);
+    const tiers = JSON.parse(tiersJson);
+    const priorities = JSON.parse(prioritiesJson);
+    const modes = JSON.parse(modesJson);
+    const dimMult = JSON.parse(dimMultJson);
+    const tierMap = Object.fromEntries(tiers.map(t => [t.id, t]));
+
+    const scaleRank = { low: 1, medium: 2, high: 3, very_high: 4, huge: 5 };
+    const latencyRank = { excellent: 4, very_good: 3, good: 2, moderate: 1 };
+
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        mode: document.getElementById('modeSelect').value,
+        priority: document.getElementById('prioritySelect').value,
+        tier: document.getElementById('tierSelect').value,
+        dims: parseInt(document.getElementById('dimSelect').value, 10)
+      };
+    }
+
+    function estimateMonthlyCost(db, inps) {
+      const tier = tierMap[inps.tier];
+      const dimFactor = dimMult[inps.dims] || 1.0;
+      const vectors = tier.vectors;
+      const qps = tier.qps;
+
+      // Rough storage GB: vectors * dims * 4 bytes (float32) / 1e9 plus metadata overhead 1.5x
+      const storageGB = vectors * inps.dims * 4 / 1e9 * 1.5;
+      const queriesPerMonth = qps * 60 * 60 * 24 * 30;
+
+      let cost = 0;
+      if (db.id === 'pinecone') {
+        // serverless blended
+        cost = storageGB * 0.24 + (queriesPerMonth / 1000) * 0.001;
+      } else if (db.id === 'weaviate') {
+        // managed small-ish cluster: ~0.30/hr blended
+        cost = 0.30 * 730;
+      } else if (db.id === 'qdrant') {
+        // resource based: storage + ram + cpu
+        cost = storageGB * 0.30 + (4 * 0.025 * 730) + (2 * 0.05 * 730);
+      } else if (db.id === 'pgvector') {
+        // managed db or self hosted
+        const hourly = inps.mode === 'managed_cloud' ? db.pricing.managed_db_hour : db.pricing.self_hosted_compute_hour;
+        cost = hourly * 730;
+      } else if (db.id === 'chroma') {
+        cost = db.pricing.self_hosted_compute_hour * 730;
+      } else if (db.id === 'milvus_zilliz') {
+        cost = (db.pricing.managed_cu_hour * 2 * 730) + storageGB * db.pricing.managed_storage_per_gb_month;
+      } else if (db.id === 'redis') {
+        const hourly = inps.mode === 'managed_cloud' ? db.pricing.managed_redis_hour : db.pricing.self_hosted_compute_hour;
+        cost = hourly * 730;
+      } else if (db.id === 'vespa') {
+        const hourly = inps.mode === 'managed_cloud' ? db.pricing.managed_query_node_hour : db.pricing.self_hosted_compute_hour;
+        cost = hourly * 730;
+      }
+
+      // dimension multiplier adjustment
+      cost *= dimFactor;
+      // small scale floor
+      cost = Math.max(10, cost);
+      return { storageGB, queriesPerMonth, cost };
+    }
+
+    function scoreDb(db, inps, est) {
+      // Filter: if selected managed_cloud, require managed_cloud true; hybrid requires hybrid or self_hosted true depending on mode
+      if (inps.mode === 'managed_cloud' && !db.managed_cloud) return -Infinity;
+      if (inps.mode === 'hybrid' && !db.hybrid) return -Infinity;
+      if (inps.mode === 'self_hosted' && !db.self_hosted) return -Infinity;
+
+      // Tier fit: if scale tier > db scale, penalize
+      const neededScale = scaleRank[tierMap[inps.tier].id === 'tiny' ? 'low' : tierMap[inps.tier].id === 'small' ? 'low' : tierMap[inps.tier].id === 'medium' ? 'medium' : tierMap[inps.tier].id === 'large' ? 'high' : 'huge'];
+      const dbScale = scaleRank[db.scale] || 1;
+      let scalePenalty = 0;
+      if (neededScale > dbScale) scalePenalty = (neededScale - dbScale) * 20;
+
+      let score = 0;
+      if (inps.priority === 'latency') score = (latencyRank[db.latency] || 0) * 10 - scalePenalty;
+      else if (inps.priority === 'cost') score = Math.max(0, 200 - est.cost / 5) - scalePenalty;
+      else if (inps.priority === 'scale') score = (dbScale * 10) - scalePenalty;
+      else if (inps.priority === 'ease') score = (db.ease === 'excellent' ? 4 : db.ease === 'very_good' ? 3 : db.ease === 'good' ? 2 : 1) * 10 - scalePenalty;
+      else if (inps.priority === 'features') score = (db.features.includes('hybrid_search') ? 3 : 0) + (db.features.includes('reranker') ? 2 : 0) + (db.features.includes('multi_tenancy') ? 2 : 0) + (db.features.includes('metadata_filters') ? 1 : 0) - scalePenalty;
+      else score = (latencyRank[db.latency] * 3 + dbScale * 2) - scalePenalty;
+
+      return score;
+    }
+
+    function badgeClass(score) {
+      if (score >= 35) return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+      if (score >= 20) return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+      return 'bg-red-500/15 text-red-400 border-red-500/30';
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const results = dbs.map(db => {
+        const est = estimateMonthlyCost(db, inps);
+        const score = scoreDb(db, inps, est);
+        return { ...db, est, score };
+      }).filter(r => r.score > -Infinity).sort((a, b) => b.score - a.score);
+
+      // Update table
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const dbId = tr.dataset.db;
+        const r = results.find(x => x.id === dbId);
+        const deploymentCell = tr.querySelector('.deployment-cell');
+        const costCell = tr.querySelector('.cost-cell');
+        const latencyCell = tr.querySelector('.latency-cell');
+        const scaleCell = tr.querySelector('.scale-cell');
+        const fitCell = tr.querySelector('.fit-cell');
+        if (!r) {
+          tr.style.opacity = '0.5';
+          deploymentCell.textContent = 'Unsupported';
+          return;
+        }
+        tr.style.opacity = '1';
+        const supportsManaged = r.managed_cloud ? 'Managed' : '';
+        const supportsHybrid = r.hybrid ? 'Hybrid' : '';
+        const supportsSelf = r.self_hosted ? 'Self-hosted' : '';
+        deploymentCell.textContent = [supportsManaged, supportsHybrid, supportsSelf].filter(Boolean).join(' / ') || '—';
+        costCell.textContent = fmtMoney(r.est.cost);
+        latencyCell.textContent = r.latency.replace('_', ' ');
+        scaleCell.textContent = r.scale.replace('_', ' ');
+        fitCell.innerHTML = `<span class="status-badge border ${badgeClass(r.score)}">${r.score.toFixed(0)}</span>`;
+        tr.classList.remove('bg-cyan-400/10');
+      });
+
+      const top = results[0];
+      const topSection = document.getElementById('topRecommendation');
+      const verdictText = document.getElementById('verdictText');
+
+      if (top) {
+        topSection.classList.remove('hidden');
+        document.getElementById('recName').textContent = top.name;
+        document.getElementById('recBestFor').textContent = top.best_for;
+        document.getElementById('recCost').textContent = fmtMoney(top.est.cost);
+        document.getElementById('recLatency').textContent = top.latency.replace('_', ' ');
+        document.getElementById('recScale').textContent = top.scale.replace('_', ' ');
+        const depText = [];
+        if (top.managed_cloud) depText.push('Managed cloud');
+        if (top.hybrid) depText.push('Hybrid');
+        if (top.self_hosted) depText.push('Self-hosted');
+        document.getElementById('recDeployment').textContent = depText.join(' / ');
+        document.getElementById('recFeatures').textContent = top.features.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        document.getElementById('recProsCons').innerHTML = `
+          <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
+            <p class="font-semibold text-emerald-400 mb-1">Pros</p>
+            <ul class="list-disc list-inside text-neutral-300">${top.pros.map(p => `<li>${p}</li>`).join('')}</ul>
+          </div>
+          <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+            <p class="font-semibold text-red-400 mb-1">Cons</p>
+            <ul class="list-disc list-inside text-neutral-300">${top.cons.map(c => `<li>${c}</li>`).join('')}</ul>
+          </div>
+        `;
+        const topRow = document.querySelector(`tr[data-db="${top.id}"]`);
+        if (topRow) topRow.classList.add('bg-cyan-400/10');
+
+        const modeName = modes.find(m => m.id === inps.mode).name.toLowerCase();
+        const priorityName = priorities.find(p => p.id === inps.priority).name.toLowerCase();
+        verdictText.textContent = `${top.name} is the best fit for a ${modeName} workload prioritizing ${priorityName} at ${tierMap[inps.tier].name.toLowerCase()} scale. Estimated monthly cost: ${fmtMoney(top.est.cost)}.`;
+      } else {
+        topSection.classList.add('hidden');
+        verdictText.textContent = 'No vector database matches your filters. Try a different deployment model or scale tier.';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      ['modeSelect', 'prioritySelect', 'tierSelect', 'dimSelect'].forEach(id => {
+        document.getElementById(id).addEventListener('change', compute);
+      });
+      compute();
+    });
+  </script>
+</Layout>

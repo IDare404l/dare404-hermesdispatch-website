@@ -1,0 +1,215 @@
+{
+  "last_updated": "2026-07-10",
+  "note": "Costs and limits are approximate market rates as of mid-2026. Always verify current provider pricing before committing. Self-hosted costs assume $0.03/GB object storage and $0.05/hr compute unless otherwise stated.",
+  "deployment_modes": [
+    { "id": "managed_cloud", "name": "Managed cloud (fully hosted)" },
+    { "id": "hybrid", "name": "Hybrid (hosted control plane, bring-your-own compute)" },
+    { "id": "self_hosted", "name": "Self-hosted / open-source" }
+  ],
+  "priorities": [
+    { "id": "latency", "name": "Lowest query latency" },
+    { "id": "cost", "name": "Lowest total cost" },
+    { "id": "scale", "name": "Highest ingest & vector scale" },
+    { "id": "ease", "name": "Easiest setup & ops" },
+    { "id": "features", "name": "Rich features (hybrid, rerank, multi-tenant)" }
+  ],
+  "scale_tiers": [
+    { "id": "tiny", "name": "Tiny", "vectors": 100000, "qps": 10, "notes": "Prototyping, personal agents" },
+    { "id": "small", "name": "Small", "vectors": 1000000, "qps": 100, "notes": "Early product, small support bot" },
+    { "id": "medium", "name": "Medium", "vectors": 10000000, "qps": 1000, "notes": "Production SaaS, multiple agents" },
+    { "id": "large", "name": "Large", "vectors": 100000000, "qps": 5000, "notes": "Enterprise knowledge base, search" },
+    { "id": "huge", "name": "Huge", "vectors": 1000000000, "qps": 10000, "notes": "Large-scale platform, billions of vectors" }
+  ],
+  "vector_dbs": [
+    {
+      "id": "pinecone",
+      "name": "Pinecone",
+      "managed_cloud": true,
+      "hybrid": false,
+      "self_hosted": false,
+      "free_tier": true,
+      "pricing": {
+        "storage_per_gb_month": 0,
+        "query_per_1k": 0,
+        "metadata_ops_per_1k": 0,
+        "base_pod_hour": 0.096,
+        "serverless_query_per_1k": 0,
+        "serverless_storage_per_gb_hour": 0.00033,
+        "notes": "Serverless: pay for storage + queries consumed; pods: per-hour. Approximate blended $0.10/pod-hr and serverless ~$0.24/GB-month at typical query load."
+      },
+      "latency": "excellent",
+      "scale": "very_high",
+      "ease": "excellent",
+      "features": "hybrid_search metadata_filters namespaces reranker_integration",
+      "pros": ["Zero ops", "Very fast P99", "Strong hybrid search", "Namespaces for multi-tenancy"],
+      "cons": ["Vendor lock-in", "Can get expensive at scale", "Limited self-hosted option"],
+      "best_for": "Teams that want fast, managed vector search without infrastructure work.",
+      "not_for": "Strict on-prem or cost-sensitive multi-billion-vector workloads.",
+      "supported_dims": [768, 1024, 1536, 2048]
+    },
+    {
+      "id": "weaviate",
+      "name": "Weaviate",
+      "managed_cloud": true,
+      "hybrid": true,
+      "self_hosted": true,
+      "free_tier": true,
+      "pricing": {
+        "managed_small_hour": 0.30,
+        "managed_standard_hour": 1.20,
+        "self_hosted_compute_hour": 0.08,
+        "notes": "Weaviate Cloud tiers vary; self-hosted uses your own infra."
+      },
+      "latency": "very_good",
+      "scale": "very_high",
+      "ease": "good",
+      "features": "hybrid_search metadata_filters reranker multi_tenancy_graphql",
+      "pros": ["Strong hybrid search out of the box", "GraphQL interface", "Generous free sandbox", "Can self-host"],
+      "cons": ["Managed pricing jumps at scale", "GraphQL learning curve"],
+      "best_for": "AI agents that need hybrid (BM25 + vector) search and flexible deployment.",
+      "not_for": "Tiny prototypes where lowest cost is the only priority.",
+      "supported_dims": [768, 1024, 1536, 2048, 3072]
+    },
+    {
+      "id": "qdrant",
+      "name": "Qdrant",
+      "managed_cloud": true,
+      "hybrid": true,
+      "self_hosted": true,
+      "free_tier": true,
+      "pricing": {
+        "managed_storage_per_gb_month": 0.30,
+        "managed_ram_per_gb_hour": 0.025,
+        "managed_cpu_per_hour": 0.05,
+        "self_hosted_compute_hour": 0.06,
+        "notes": "Qdrant Cloud pricing is resource-based (RAM, CPU, disk). Self-hosted is free beyond infra."
+      },
+      "latency": "excellent",
+      "scale": "high",
+      "ease": "very_good",
+      "features": "hybrid_search metadata_filters payload_indexes sparse_vectors",
+      "pros": ["Excellent Rust-based performance", "Clean REST/gRPC API", "Strong Docker/k8s support", "Good payload filtering"],
+      "cons": ["Fewer managed-region options than Pinecone", "Enterprise features in paid plans"],
+      "best_for": "Builders who want open-source core with optional managed cloud and great performance.",
+      "not_for": "Teams needing fully managed multi-region auto-scaling with no ops thought.",
+      "supported_dims": [768, 1024, 1536, 2048]
+    },
+    {
+      "id": "pgvector",
+      "name": "pgvector",
+      "managed_cloud": true,
+      "hybrid": true,
+      "self_hosted": true,
+      "free_tier": false,
+      "pricing": {
+        "self_hosted_compute_hour": 0.05,
+        "managed_db_hour": 0.15,
+        "notes": "Use existing Postgres. Managed Postgres costs vary by provider."
+      },
+      "latency": "good",
+      "scale": "medium",
+      "ease": "excellent",
+      "features": "sql_filters metadata_filters ivfflat_hnsw full_text_via_extensions",
+      "pros": ["No new database to learn", "ACID transactions", "Already in your Postgres stack", "Great for small/medium workloads"],
+      "cons": ["Not a dedicated vector DB at scale", "HNSW builds can be slow", "Harder to shard vectors horizontally"],
+      "best_for": "Teams already using Postgres who want one database for relational + vector data.",
+      "not_for": "High-QPS, billion-vector search or advanced hybrid ranking.",
+      "supported_dims": [768, 1024, 1536, 2048]
+    },
+    {
+      "id": "chroma",
+      "name": "Chroma",
+      "managed_cloud": false,
+      "hybrid": false,
+      "self_hosted": true,
+      "free_tier": true,
+      "pricing": {
+        "self_hosted_compute_hour": 0.04,
+        "notes": "Open-source; cloud offering in development."
+      },
+      "latency": "good",
+      "scale": "low",
+      "ease": "excellent",
+      "features": "metadata_filters embeddings_documents simple_api",
+      "pros": ["Easiest Python integration", "Great for prototypes", "Document-oriented API", "Active ecosystem"],
+      "cons": ["Limited horizontal scaling", "No managed cloud yet", "Fewer enterprise features"],
+      "best_for": "Python-first prototypes, LangChain/LlamaIndex apps, and local-first agents.",
+      "not_for": "Production SaaS at scale or strict latency SLAs.",
+      "supported_dims": [768, 1024, 1536, 2048]
+    },
+    {
+      "id": "milvus_zilliz",
+      "name": "Milvus / Zilliz Cloud",
+      "managed_cloud": true,
+      "hybrid": true,
+      "self_hosted": true,
+      "free_tier": true,
+      "pricing": {
+        "managed_cu_hour": 0.16,
+        "managed_storage_per_gb_month": 0.30,
+        "self_hosted_compute_hour": 0.10,
+        "notes": "Zilliz Cloud uses CU-hour pricing. Self-hosted Milvus is open source."
+      },
+      "latency": "very_good",
+      "scale": "huge",
+      "ease": "good",
+      "features": "hybrid_search metadata_filters gpu_index multi_tenancy_partitioning sparse_vectors",
+      "pros": ["Designed for massive scale", "GPU index support", "Strong enterprise features", "Cloud-native architecture"],
+      "cons": ["Heavier operational footprint", "Managed tier can be costly for small workloads"],
+      "best_for": "Large-scale or enterprise deployments with billions of vectors and strict partitioning needs.",
+      "not_for": "Simple prototypes or teams without DevOps capacity for self-hosted Milvus.",
+      "supported_dims": [768, 1024, 1536, 2048, 3072]
+    },
+    {
+      "id": "redis",
+      "name": "Redis (RediSearch/Vector Library)",
+      "managed_cloud": true,
+      "hybrid": true,
+      "self_hosted": true,
+      "free_tier": false,
+      "pricing": {
+        "managed_redis_hour": 0.20,
+        "self_hosted_compute_hour": 0.06,
+        "notes": "Redis Cloud and self-hosted both support vector search modules."
+      },
+      "latency": "excellent",
+      "scale": "medium",
+      "ease": "good",
+      "features": "metadata_filters hybrid_search real_time_cache pub_sub",
+      "pros": ["Sub-millisecond latency when cached", "Already in many stacks", "Combines cache + vector search"],
+      "cons": ["Vector search is secondary feature", "Costly RAM footprint at scale", "Less advanced reranking"],
+      "best_for": "Apps that already use Redis and need low-latency vector + cache combo.",
+      "not_for": "Primary long-term document store or massive vector collections.",
+      "supported_dims": [768, 1024, 1536, 2048]
+    },
+    {
+      "id": "vespa",
+      "name": "Vespa",
+      "managed_cloud": true,
+      "hybrid": true,
+      "self_hosted": true,
+      "free_tier": false,
+      "pricing": {
+        "managed_query_node_hour": 0.60,
+        "self_hosted_compute_hour": 0.12,
+        "notes": "Vespa Cloud is feature-rich but pricing is usage and node based."
+      },
+      "latency": "very_good",
+      "scale": "huge",
+      "ease": "moderate",
+      "features": "hybrid_search metadata_filters tensor_ml_model_serving real_time",
+      "pros": ["Advanced ranking and ML model serving", "Massive scale", "Real-time updates", "Self-hosted + cloud"],
+      "cons": ["Steeper learning curve", "Higher managed cost", "Overkill for simple vector search"],
+      "best_for": "Search teams needing unified ranking, vector, and ML inference in one platform.",
+      "not_for": "Quick prototypes or teams without search engineering experience.",
+      "supported_dims": [768, 1024, 1536, 2048, 3072]
+    }
+  ],
+  "dimension_cost_multiplier": {
+    "768": 0.75,
+    "1024": 1.0,
+    "1536": 1.25,
+    "2048": 1.6,
+    "3072": 2.2
+  }
+}
