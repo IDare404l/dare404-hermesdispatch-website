@@ -906,4 +906,12 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Audience: AI agent builders and prompt engineers creating consistent, deployable system prompts.
 |- Cross-links: Agent Benchmark Selector, Agent Stack Builder, LLM Cost Calculator, Prompt Testing Budget Calculator.
 
+## AI Agent PII Detection & Data Classification Cost Calculator
+|||– URL: https://hermesdispatch.dev/tools/agent-pii-detection-cost-calculator/
+|||– Description: Estimate monthly cost to detect, classify, review, and store PII, PHI, financial, and custom sensitive data across AI agent inputs, outputs, and documents. Compare managed SaaS, cloud APIs, and open-source self-hosted routes.
+|||– Inputs: detection provider (AWS Macie, Google Cloud DLP, Azure AI Language PII, Presidio self-hosted, Nightfall, OneTrust, Private AI, Amazon Comprehend PII, LLM classifier), classification depth (PII only, PII + PHI, PII + PHI + financial, custom/multilingual), items to scan per month, average characters per item, false-positive review rate (%), review hourly cost ($), minutes to review one flag, storage (GB), storage cost ($/GB/month), setup hours, setup hourly rate ($), maintenance hours per month, projection months.
+|||– Outputs: items scanned per month, monthly detection cost, all-in monthly cost, cost per 1K items, estimated flags per month, review hours and cost, storage cost, setup cost, projected period cost, provider comparison table, verdict.
+|||– Audience: AI agent builders and operators choosing a PII/PHI detection and data-classification stack while budgeting review and storage overhead.
+|||– Cross-links: AI Agent Privacy / Compliance Checker, AI Agent Security Audit Cost Calculator, AI Agent Data Integration / ETL Cost Calculator, AI Agent Output Value Calculator.
+
 ## Hub Pages

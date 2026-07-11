@@ -1,0 +1,388 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_pii_detection_cost.json';
+
+const title = "AI Agent PII Detection & Data Classification Cost Calculator | Hermes Dispatch";
+const description = "Estimate monthly cost to detect, classify, review, and store PII, PHI, financial, and custom sensitive data across AI agent inputs, outputs, and documents. Compare managed SaaS, cloud, and open-source self-hosted routes.";
+const providers = data.providers;
+const depths = data.classification_depths;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is PII/PHI detection for AI agents?", a: "It is the process of scanning agent inputs, outputs, uploaded documents, and stored conversations for personally identifiable information (PII), protected health information (PHI), financial data, and other sensitive categories so it can be redacted, quarantined, or handled under the right compliance policy." },
+  { q: "Does this include redaction or de-identification cost?", a: "The calculator estimates classification and review cost. Many providers charge extra for transformation, redaction, or synthetic replacement. Add those to review labor or tool costs if needed." },
+  { q: "Why is self-hosted Presidio not free in this calculator?", a: "Presidio has no license fee, but it still costs engineering time, container compute, and maintenance. The calculator captures those operational costs so you can compare against managed SaaS honestly." },
+  { q: "How are false-positive review costs calculated?", a: "The flagged-item count is multiplied by the false-positive rate to estimate how many alerts need human review, then by review minutes and hourly cost." },
+  { q: "Which deployment model is cheapest?", a: "For very high volumes, open-source self-hosted is usually cheapest but requires engineering effort. For low volumes or strict time-to-value, managed cloud APIs win. For strict data residency, private-cloud/on-device options justify a higher per-item cost." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent PII Detection & Data Classification Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-pii-detection-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔒</div>
+      <h1 class="display-heading mb-4">AI Agent PII Detection & Data Classification Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the monthly cost to detect, classify, review, and store PII, PHI, financial, and custom sensitive data across AI agent inputs, outputs, and documents. Compare managed SaaS, cloud APIs, and open-source self-hosted routes.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Detection workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block sm:col-span-2 lg:col-span-1">
+          <span class="text-neutral-400 text-sm">Detection provider</span>
+          <select id="providerSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {providers.map(p => <option value={JSON.stringify(p)} selected={p.slug === defaults.provider}>{p.name}</option>)}
+          </select>
+          <p id="providerNotes" class="text-neutral-500 text-xs mt-1">Select a provider to load its pricing model.</p>
+        </label>
+        <label class="block sm:col-span-2 lg:col-span-1">
+          <span class="text-neutral-400 text-sm">Classification depth</span>
+          <select id="depthSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {depths.map(d => <option value={JSON.stringify(d)} selected={d.slug === defaults.classification_depth}>{d.name}</option>)}
+          </select>
+        </label>
+        <label class="block sm:col-span-2 lg:col-span-1">
+          <span class="text-neutral-400 text-sm">Items to scan / month</span>
+          <input id="monthlyItems" type="number" min="0" step="1000" value={defaults.monthly_items} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Avg characters per item</span>
+          <input id="charsPerItem" type="number" min="1" step="50" value={defaults.chars_per_item} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">False-positive review rate (%)</span>
+          <input id="falsePositiveRate" type="number" min="0" max="100" step="1" value={defaults.false_positive_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Review hourly cost ($)</span>
+          <input id="reviewHourlyCost" type="number" min="0" step="5" value={defaults.review_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Minutes to review one flag</span>
+          <input id="reviewMinutes" type="number" min="0" step="0.25" value={defaults.review_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage (GB)</span>
+          <input id="storageGb" type="number" min="0" step="10" value={defaults.storage_gb} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Storage cost ($/GB/month)</span>
+          <input id="storageCostPerGb" type="number" min="0" step="0.001" value={defaults.storage_cost_per_gb} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hours</span>
+          <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+          <input id="setupHourlyRate" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Maintenance hours / month</span>
+          <input id="maintenanceHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Items scanned / mo</p>
+        <p id="totalItems" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly detection cost</p>
+        <p id="detectionCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1K items</p>
+        <p id="costPer1kItems" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">All-in monthly cost</p>
+        <p id="allInMonthly" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Secondary metrics -->
+    <section class="grid md:grid-cols-3 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Estimated flags / mo</p>
+        <p id="totalFlags" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Review hours / mo</p>
+        <p id="reviewHours" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Review cost / mo</p>
+        <p id="reviewCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Storage cost / mo</p>
+        <p id="storageCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Setup cost</p>
+        <p id="setupCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected <span id="periodLabel">12</span>-month cost</p>
+        <p id="periodCost" class="text-xl font-semibold text-white">—</p>
+      </div>
+    </section>
+
+    <!-- Provider comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Provider comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[720px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Provider</th>
+              <th class="py-3 pr-4">Model</th>
+              <th class="py-3 pr-4 text-right">Detection / mo</th>
+              <th class="py-3 pr-4 text-right">All-in / mo</th>
+              <th class="py-3 pr-4 text-left">Best for</th>
+            </tr>
+          </thead>
+          <tbody id="providerComparisonBody" class="text-neutral-200">
+            <tr><td colspan="5" class="py-4 text-neutral-500">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/ai-agent-compliance-checker/" class="btn-primary text-sm">AI Agent Compliance Checker →</a>
+      <a href="/tools/agent-security-audit-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Security Audit Cost Calc →</a>
+      <a href="/tools/agent-data-integration-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Data Integration Cost Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ providers: JSON.stringify(providers), depths: JSON.stringify(depths) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        monthlyItems: Math.max(0, parseFloat(document.getElementById('monthlyItems').value) || 0),
+        charsPerItem: Math.max(1, parseFloat(document.getElementById('charsPerItem').value) || 1),
+        falsePositiveRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('falsePositiveRate').value) || 0)),
+        reviewHourlyCost: Math.max(0, parseFloat(document.getElementById('reviewHourlyCost').value) || 0),
+        reviewMinutes: Math.max(0, parseFloat(document.getElementById('reviewMinutes').value) || 0),
+        storageGb: Math.max(0, parseFloat(document.getElementById('storageGb').value) || 0),
+        storageCostPerGb: Math.max(0, parseFloat(document.getElementById('storageCostPerGb').value) || 0),
+        setupHours: Math.max(0, parseFloat(document.getElementById('setupHours').value) || 0),
+        setupHourlyRate: Math.max(0, parseFloat(document.getElementById('setupHourlyRate').value) || 0),
+        maintenanceHours: Math.max(0, parseFloat(document.getElementById('maintenanceHours').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function getProvider() {
+      return JSON.parse(document.getElementById('providerSelect').value);
+    }
+
+    function getDepth() {
+      return JSON.parse(document.getElementById('depthSelect').value);
+    }
+
+    function setInputs(obj) {
+      if (obj.monthly_items !== undefined) document.getElementById('monthlyItems').value = obj.monthly_items;
+      if (obj.chars_per_item !== undefined) document.getElementById('charsPerItem').value = obj.chars_per_item;
+      if (obj.classification_depth !== undefined) {
+        const options = Array.from(document.getElementById('depthSelect').options);
+        const match = options.find(o => JSON.parse(o.value).slug === obj.classification_depth);
+        if (match) document.getElementById('depthSelect').selectedIndex = options.indexOf(match);
+      }
+      if (obj.provider !== undefined) {
+        const options = Array.from(document.getElementById('providerSelect').options);
+        const match = options.find(o => JSON.parse(o.value).slug === obj.provider);
+        if (match) document.getElementById('providerSelect').selectedIndex = options.indexOf(match);
+      }
+      if (obj.false_positive_rate !== undefined) document.getElementById('falsePositiveRate').value = obj.false_positive_rate;
+      if (obj.review_minutes !== undefined) document.getElementById('reviewMinutes').value = obj.review_minutes;
+      if (obj.review_hourly_cost !== undefined) document.getElementById('reviewHourlyCost').value = obj.review_hourly_cost;
+      if (obj.storage_gb !== undefined) document.getElementById('storageGb').value = obj.storage_gb;
+      if (obj.storage_cost_per_gb !== undefined) document.getElementById('storageCostPerGb').value = obj.storage_cost_per_gb;
+      if (obj.setup_hours !== undefined) document.getElementById('setupHours').value = obj.setup_hours;
+      if (obj.setup_hourly_rate !== undefined) document.getElementById('setupHourlyRate').value = obj.setup_hourly_rate;
+      if (obj.maintenance_hours_per_month !== undefined) document.getElementById('maintenanceHours').value = obj.maintenance_hours_per_month;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    function detectionCost(provider, monthlyItems, charsPerItem, depth) {
+      let cost = 0;
+      if (provider.slug === 'presidio_self_hosted') {
+        // Presidio has no per-item license; cost captured in maintenance + setup.
+        cost = 0;
+      } else if (provider.slug === 'amazon_comprehend_pii') {
+        const totalChars = monthlyItems * charsPerItem;
+        cost = totalChars * (provider.per_1m_chars / 1e6);
+      } else if (provider.slug === 'llm_classifier') {
+        // Rough estimate: 1 item ≈ 300 input tokens, 50 output tokens (classification label JSON).
+        const inputTokens = monthlyItems * 300;
+        const outputTokens = monthlyItems * 50;
+        cost = inputTokens * (provider.per_1m_input_tokens / 1e6) + outputTokens * (provider.per_1m_output_tokens / 1e6);
+      } else {
+        cost = monthlyItems * (provider.cost_per_1m_items / 1e6) || 0;
+      }
+      // Apply classification-depth multiplier for providers that charge by complexity.
+      if (provider.slug !== 'presidio_self_hosted' && provider.slug !== 'llm_classifier') {
+        cost *= depth.multiplier;
+      }
+      if (provider.min_monthly) {
+        cost = Math.max(cost, provider.min_monthly);
+      }
+      return cost;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const provider = getProvider();
+      const depth = getDepth();
+      const totalChars = inps.monthlyItems * inps.charsPerItem;
+
+      const detCost = detectionCost(provider, inps.monthlyItems, inps.charsPerItem, depth);
+      const storageCost = inps.storageGb * inps.storageCostPerGb;
+      // Assume a conservative 5% of scanned items trigger a sensitive-data flag.
+      const flagRate = 0.05 * depth.multiplier;
+      const totalFlags = inps.monthlyItems * flagRate;
+      const reviewedFlags = totalFlags * (inps.falsePositiveRate / 100);
+      const reviewHours = reviewedFlags * (inps.reviewMinutes / 60);
+      const reviewCost = reviewHours * inps.reviewHourlyCost;
+      const maintenanceCost = inps.maintenanceHours * inps.setupHourlyRate;
+      const setupCost = inps.setupHours * inps.setupHourlyRate;
+      const allInMonthly = detCost + storageCost + reviewCost + maintenanceCost;
+      const periodCost = allInMonthly * inps.projectionMonths + setupCost;
+      const costPer1kItems = inps.monthlyItems > 0 ? (allInMonthly / inps.monthlyItems) * 1000 : 0;
+
+      document.getElementById('totalItems').textContent = fmtInt(inps.monthlyItems);
+      document.getElementById('detectionCost').textContent = fmtMoney0(detCost);
+      document.getElementById('costPer1kItems').textContent = fmtMoney(costPer1kItems);
+      document.getElementById('allInMonthly').textContent = fmtMoney0(allInMonthly);
+      document.getElementById('totalFlags').textContent = fmtInt(totalFlags);
+      document.getElementById('reviewHours').textContent = fmtNum(reviewHours);
+      document.getElementById('reviewCost').textContent = fmtMoney0(reviewCost);
+      document.getElementById('storageCost').textContent = fmtMoney0(storageCost);
+      document.getElementById('setupCost').textContent = fmtMoney0(setupCost);
+      document.getElementById('periodCost').textContent = fmtMoney0(periodCost);
+      document.getElementById('periodLabel').textContent = inps.projectionMonths;
+
+      // Provider comparison
+      const tbody = document.getElementById('providerComparisonBody');
+      const rows = JSON.parse(providers).map(p => {
+        const pDet = detectionCost(p, inps.monthlyItems, inps.charsPerItem, depth);
+        const pMonthly = pDet + storageCost + reviewCost + maintenanceCost;
+        return { p, pDet, pMonthly };
+      }).sort((a, b) => a.pMonthly - b.pMonthly);
+      tbody.innerHTML = rows.map(({ p, pDet, pMonthly }) => `
+        <tr class="border-b border-neutral-800/50 ${p.slug === provider.slug ? 'bg-brand-gold/10' : ''}">
+          <td class="py-3 pr-4 font-medium">${p.name}</td>
+          <td class="py-3 pr-4 text-sm text-neutral-400">${p.billing_model}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(pDet)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(pMonthly)}</td>
+          <td class="py-3 pr-4 text-sm text-neutral-400">${p.best_for}</td>
+        </tr>
+      `).join('');
+
+      // Verdict
+      const costPerItem = inps.monthlyItems > 0 ? allInMonthly / inps.monthlyItems : 0;
+      let verdict = '';
+      if (costPerItem < 0.01) {
+        verdict = `Very low cost at ${fmtMoney(costPerItem)} per item. ${provider.name} is a strong fit for this volume. Keep review headroom as classification depth grows.`;
+      } else if (costPerItem < 0.05) {
+        verdict = `Moderate cost at ${fmtMoney(costPerItem)} per item. Detection is ${fmtMoney0(detCost)}/mo and review overhead is ${fmtMoney0(reviewCost)}/mo. If volumes rise, negotiate volume pricing or move selective workloads to self-hosted Presidio.`;
+      } else {
+        verdict = `High cost at ${fmtMoney(costPerItem)} per item. For ${fmtInt(inps.monthlyItems)} items/month, explore self-hosted/open-source detection, reduce false-positive rate, or tier depth by data source to cut spend.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      document.getElementById('providerSelect').addEventListener('change', e => {
+        const p = JSON.parse(e.target.value);
+        document.getElementById('providerNotes').textContent = `${p.billing_model}. ${p.notes}`;
+        compute();
+      });
+
+      document.getElementById('depthSelect').addEventListener('change', () => {
+        const d = getDepth();
+        document.getElementById('falsePositiveRate').value = d.false_positive_rate_default;
+        compute();
+      });
+
+      ['monthlyItems','charsPerItem','falsePositiveRate','reviewHourlyCost','reviewMinutes','storageGb','storageCostPerGb','setupHours','setupHourlyRate','maintenanceHours','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      // Set initial provider note
+      const p0 = getProvider();
+      document.getElementById('providerNotes').textContent = `${p0.billing_model}. ${p0.notes}`;
+
+      compute();
+    });
+  </script>
+</Layout>

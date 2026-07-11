@@ -1,0 +1,191 @@
+{
+  "last_updated": "2026-07-10",
+  "note": "PII/PHI detection and data-classification costs are based on typical public SaaS/API pricing and open-source self-hosted estimates. Replace defaults with actual vendor quotes, negotiated discounts, and internal labor rates.",
+  "defaults": {
+    "monthly_items": 50000,
+    "items_per_unit": 1,
+    "chars_per_item": 1200,
+    "classification_depth": "pii_phi",
+    "provider": "presidio_self_hosted",
+    "false_positive_rate": 8,
+    "review_minutes": 1,
+    "review_hourly_cost": 55,
+    "storage_gb": 100,
+    "storage_cost_per_gb": 0.023,
+    "setup_hours": 12,
+    "setup_hourly_rate": 125,
+    "maintenance_hours_per_month": 6,
+    "projection_months": 12
+  },
+  "providers": [
+    {
+      "slug": "aws_macie",
+      "name": "AWS Macie",
+      "billing_model": "per 1M sensitive data units (1 SDU ≈ 4 KB)",
+      "cost_per_1m_items": 1250,
+      "cost_per_gb_processed": 0,
+      "min_monthly": 0,
+      "notes": "Managed PII discovery across S3. Pricing tiers lower at scale. Good for storage-centric workloads.",
+      "best_for": "AWS-native data lakes and S3 buckets"
+    },
+    {
+      "slug": "google_cloud_dlp",
+      "name": "Google Cloud Data Loss Prevention",
+      "billing_model": "per 1K content inspection units",
+      "cost_per_1m_items": 3000,
+      "cost_per_gb_processed": 0,
+      "min_monthly": 0,
+      "notes": "Per-inspection-unit pricing; redaction and de-identification extra. Strong for structured/unstructured content.",
+      "best_for": "GCP workloads needing inspection + transformation"
+    },
+    {
+      "slug": "azure_ai_language_pii",
+      "name": "Azure AI Language PII",
+      "billing_model": "per 1K text records",
+      "cost_per_1m_items": 1000,
+      "cost_per_gb_processed": 0,
+      "min_monthly": 0,
+      "notes": "Text PII/PHI extraction. Conversation PII and custom categories may add cost. Bundled with Azure AI services.",
+      "best_for": "Microsoft-centric apps and conversation redaction"
+    },
+    {
+      "slug": "presidio_self_hosted",
+      "name": "Presidio (open-source, self-hosted)",
+      "billing_model": "compute + engineering time",
+      "cost_per_1m_items": 0,
+      "cost_per_gb_processed": 0,
+      "min_monthly": 0,
+      "notes": "No license cost; estimate container compute and human maintenance. Use compute-hour cost field to model infrastructure.",
+      "best_for": "Cost-sensitive teams with engineering capacity"
+    },
+    {
+      "slug": "nightfall",
+      "name": "Nightfall AI",
+      "billing_model": "per detected finding / tiered platform fee",
+      "cost_per_1m_items": 4500,
+      "cost_per_gb_processed": 0,
+      "min_monthly": 0,
+      "notes": "SaaS DLP with API and browser plugins. Pricing varies by detection volume and seats.",
+      "best_for": "Cloud/SaaS DLP with quick time-to-value"
+    },
+    {
+      "slug": "onetrust",
+      "name": "OneTrust Privacy & Data Discovery",
+      "billing_model": "platform subscription + data-source fee",
+      "cost_per_1m_items": 2500,
+      "cost_per_gb_processed": 0,
+      "min_monthly": 2500,
+      "notes": "Enterprise privacy suite; subscription floor is significant. Includes consent, governance, and DSAR tooling.",
+      "best_for": "Regulated enterprises needing governance beyond detection"
+    },
+    {
+      "slug": "private_ai",
+      "name": "Private AI",
+      "billing_model": "per 1K API calls",
+      "cost_per_1m_items": 6000,
+      "cost_per_gb_processed": 0,
+      "min_monthly": 0,
+      "notes": "On-device or private-cloud PII detection. Higher per-call cost but avoids sending data to third-party clouds.",
+      "best_for": "Strict data-residency and privacy-first deployments"
+    },
+    {
+      "slug": "amazon_comprehend_pii",
+      "name": "Amazon Comprehend PII",
+      "billing_model": "per 1K characters",
+      "cost_per_1m_items": 0,
+      "cost_per_gb_processed": 0,
+      "per_1m_chars": 100,
+      "min_monthly": 0,
+      "notes": "Per-character pricing; use for text messages and documents. Custom entity recognition is separate.",
+      "best_for": "AWS apps with text-heavy agent inputs/outputs"
+    },
+    {
+      "slug": "llm_classifier",
+      "name": "LLM-based classifier (OpenAI / Anthropic)",
+      "billing_model": "per 1K input/output tokens",
+      "cost_per_1m_items": 0,
+      "cost_per_gb_processed": 0,
+      "per_1m_input_tokens": 2500,
+      "per_1m_output_tokens": 10000,
+      "min_monthly": 0,
+      "notes": "Use an LLM to classify, tag, and redact sensitive content. Cost scales with prompt length and classification labels.",
+      "best_for": "Complex or custom categories beyond built-in PII patterns"
+    }
+  ],
+  "classification_depths": [
+    { "slug": "pii_only", "name": "PII only (name, email, phone, address, SSN)", "multiplier": 1.0, "false_positive_rate_default": 6 },
+    { "slug": "pii_phi", "name": "PII + PHI (medical, insurance, biometrics)", "multiplier": 1.25, "false_positive_rate_default": 8 },
+    { "slug": "pii_phi_financial", "name": "PII + PHI + financial (cards, accounts, tax)", "multiplier": 1.5, "false_positive_rate_default": 10 },
+    { "slug": "custom", "name": "Custom categories + multilingual", "multiplier": 1.8, "false_positive_rate_default": 12 }
+  ],
+  "scenarios": [
+    {
+      "name": "Support chat redaction",
+      "monthly_items": 100000,
+      "items_per_unit": 1,
+      "chars_per_item": 600,
+      "classification_depth": "pii_phi",
+      "provider": "amazon_comprehend_pii",
+      "false_positive_rate": 8,
+      "review_minutes": 0.5,
+      "review_hourly_cost": 50,
+      "storage_gb": 50,
+      "storage_cost_per_gb": 0.023,
+      "setup_hours": 8,
+      "setup_hourly_rate": 120,
+      "maintenance_hours_per_month": 4,
+      "projection_months": 12
+    },
+    {
+      "name": "Healthcare intake agent",
+      "monthly_items": 25000,
+      "items_per_unit": 1,
+      "chars_per_item": 2500,
+      "classification_depth": "pii_phi",
+      "provider": "private_ai",
+      "false_positive_rate": 12,
+      "review_minutes": 2,
+      "review_hourly_cost": 75,
+      "storage_gb": 200,
+      "storage_cost_per_gb": 0.023,
+      "setup_hours": 20,
+      "setup_hourly_rate": 150,
+      "maintenance_hours_per_month": 10,
+      "projection_months": 12
+    },
+    {
+      "name": "Financial onboarding bot",
+      "monthly_items": 40000,
+      "items_per_unit": 1,
+      "chars_per_item": 1800,
+      "classification_depth": "pii_phi_financial",
+      "provider": "google_cloud_dlp",
+      "false_positive_rate": 10,
+      "review_minutes": 1.5,
+      "review_hourly_cost": 65,
+      "storage_gb": 120,
+      "storage_cost_per_gb": 0.02,
+      "setup_hours": 16,
+      "setup_hourly_rate": 140,
+      "maintenance_hours_per_month": 8,
+      "projection_months": 12
+    },
+    {
+      "name": "Open-source self-hosted pipeline",
+      "monthly_items": 200000,
+      "items_per_unit": 1,
+      "chars_per_item": 1000,
+      "classification_depth": "pii_only",
+      "provider": "presidio_self_hosted",
+      "false_positive_rate": 6,
+      "review_minutes": 0.5,
+      "review_hourly_cost": 45,
+      "storage_gb": 300,
+      "storage_cost_per_gb": 0.018,
+      "setup_hours": 24,
+      "setup_hourly_rate": 110,
+      "maintenance_hours_per_month": 12,
+      "projection_months": 12
+    }
+  ]
+}
