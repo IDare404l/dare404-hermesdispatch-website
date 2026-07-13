@@ -1,0 +1,276 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_gross_margin_calculator.json';
+
+const title = "AI Agent Gross Margin & Unit Economics Calculator | Hermes Dispatch";
+const description = "Estimate gross margin and unit economics for an AI agent SaaS. Subtract LLM/API, hosting, storage, support, payment processing, and other COGS from ARPU to find margin per user and pricing headroom.";
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is gross margin for an AI agent SaaS?", a: "Gross margin is monthly revenue minus the direct variable costs of serving each user. For AI agent products, those direct costs usually include LLM/API calls, hosting/compute, vector storage, customer support, payment processing, and other per-user COGS." },
+  { q: "Should I include LLM API costs in gross margin?", a: "Yes. LLM API spend is typically the largest variable cost for an AI agent product and should be included in cost of goods sold (COGS), not operating expenses." },
+  { q: "What is a healthy gross margin for a SaaS or AI agent business?", a: "Most SaaS businesses target 70–80%+ gross margins. AI agent products often start lower because of API costs; anything above 60% is usually acceptable to investors, while below 40% signals a need to raise prices or reduce per-user costs." },
+  { q: "How do payment processing fees affect margin?", a: "Payment processors typically charge a percentage plus a fixed fee per transaction. For low ARPU products, the fixed fee can be meaningful, so this calculator includes both components." },
+  { q: "How do I improve gross margin per user?", a: "Raise prices, switch to cheaper models or local inference, reduce context length, cache prompts, lower support cost through better self-serve, or negotiate lower payment processing rates at scale." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Gross Margin & Unit Economics Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-gross-margin-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📊</div>
+      <h1 class="display-heading mb-4">AI Agent Gross Margin & Unit Economics Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Subtract direct per-user costs from ARPU to find gross margin, margin dollars, and pricing headroom for an AI agent SaaS.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Per-user economics</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Average revenue per user ($/mo)</span>
+          <input id="arpu" type="number" min="0" step="1" value={defaults.arpu} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Active users</span>
+          <input id="activeUsers" type="number" min="1" step="1" value={defaults.active_users} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM / API cost per user ($/mo)</span>
+          <input id="llmCost" type="number" min="0" step="0.1" value={defaults.llm_api_cost_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Hosting / compute cost per user ($/mo)</span>
+          <input id="hostingCost" type="number" min="0" step="0.1" value={defaults.hosting_compute_cost_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Vector / storage cost per user ($/mo)</span>
+          <input id="storageCost" type="number" min="0" step="0.1" value={defaults.vector_storage_cost_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Support cost per user ($/mo)</span>
+          <input id="supportCost" type="number" min="0" step="0.1" value={defaults.support_cost_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Payment processing (%)</span>
+          <input id="paymentPct" type="number" min="0" max="100" step="0.1" value={defaults.payment_processing_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Payment fixed fee ($/transaction)</span>
+          <input id="paymentFixed" type="number" min="0" step="0.01" value={defaults.payment_processing_fixed} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Other COGS per user ($/mo)</span>
+          <input id="otherCogs" type="number" min="0" step="0.1" value={defaults.other_cogs_per_user} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Target gross margin (%)</span>
+          <input id="targetMargin" type="number" min="0" max="100" step="1" value={defaults.target_gross_margin_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Gross margin</p>
+        <p id="summaryMarginPct" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Margin per user</p>
+        <p id="summaryMarginPerUser" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly gross profit</p>
+        <p id="summaryGrossProfit" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Pricing headroom</p>
+        <p id="summaryHeadroom" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Per-user cost breakdown</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[480px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Cost category</th>
+              <th class="py-3 pr-4 text-right">$/user/mo</th>
+              <th class="py-3 pr-4 text-right">% of ARPU</th>
+            </tr>
+          </thead>
+          <tbody id="costTableBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-cac-calculator/" class="btn-primary text-sm">CAC Calculator →</a>
+      <a href="/tools/agent-per-user-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Per-User Cost Calc →</a>
+      <a href="/tools/startup-runway-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Runway Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtPct = n => n.toLocaleString('en-US', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+    function getInputs() {
+      return {
+        arpu: Math.max(0, parseFloat(document.getElementById('arpu').value) || 0),
+        activeUsers: Math.max(1, parseFloat(document.getElementById('activeUsers').value) || 1),
+        llmCost: Math.max(0, parseFloat(document.getElementById('llmCost').value) || 0),
+        hostingCost: Math.max(0, parseFloat(document.getElementById('hostingCost').value) || 0),
+        storageCost: Math.max(0, parseFloat(document.getElementById('storageCost').value) || 0),
+        supportCost: Math.max(0, parseFloat(document.getElementById('supportCost').value) || 0),
+        paymentPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('paymentPct').value) || 0)),
+        paymentFixed: Math.max(0, parseFloat(document.getElementById('paymentFixed').value) || 0),
+        otherCogs: Math.max(0, parseFloat(document.getElementById('otherCogs').value) || 0),
+        targetMargin: Math.min(100, Math.max(0, parseFloat(document.getElementById('targetMargin').value) || 0))
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.arpu !== undefined) document.getElementById('arpu').value = obj.arpu;
+      if (obj.active_users !== undefined) document.getElementById('activeUsers').value = obj.active_users;
+      if (obj.llm_api_cost_per_user !== undefined) document.getElementById('llmCost').value = obj.llm_api_cost_per_user;
+      if (obj.hosting_compute_cost_per_user !== undefined) document.getElementById('hostingCost').value = obj.hosting_compute_cost_per_user;
+      if (obj.vector_storage_cost_per_user !== undefined) document.getElementById('storageCost').value = obj.vector_storage_cost_per_user;
+      if (obj.support_cost_per_user !== undefined) document.getElementById('supportCost').value = obj.support_cost_per_user;
+      if (obj.payment_processing_pct !== undefined) document.getElementById('paymentPct').value = obj.payment_processing_pct;
+      if (obj.payment_processing_fixed !== undefined) document.getElementById('paymentFixed').value = obj.payment_processing_fixed;
+      if (obj.other_cogs_per_user !== undefined) document.getElementById('otherCogs').value = obj.other_cogs_per_user;
+      if (obj.target_gross_margin_pct !== undefined) document.getElementById('targetMargin').value = obj.target_gross_margin_pct;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const paymentCost = inps.arpu * (inps.paymentPct / 100) + inps.paymentFixed;
+      const totalCogs = inps.llmCost + inps.hostingCost + inps.storageCost + inps.supportCost + paymentCost + inps.otherCogs;
+      const marginPerUser = inps.arpu - totalCogs;
+      const marginPct = inps.arpu > 0 ? marginPerUser / inps.arpu : 0;
+      const grossProfit = marginPerUser * inps.activeUsers;
+      const targetCogs = inps.arpu * (1 - inps.targetMargin / 100);
+      const headroom = targetCogs - totalCogs;
+      const targetPriceForMargin = inps.targetMargin >= 100 ? Infinity : totalCogs / (1 - inps.targetMargin / 100);
+      const priceGap = targetPriceForMargin - inps.arpu;
+
+      document.getElementById('summaryMarginPct').textContent = fmtPct(marginPct);
+      document.getElementById('summaryMarginPerUser').textContent = fmtMoney(marginPerUser);
+      document.getElementById('summaryGrossProfit').textContent = fmtMoney0(grossProfit) + '/mo';
+      document.getElementById('summaryHeadroom').textContent = (headroom >= 0 ? '+' : '') + fmtMoney(headroom) + '/user';
+
+      const rows = [
+        { name: 'LLM / API', cost: inps.llmCost },
+        { name: 'Hosting / compute', cost: inps.hostingCost },
+        { name: 'Vector / storage', cost: inps.storageCost },
+        { name: 'Support', cost: inps.supportCost },
+        { name: 'Payment processing', cost: paymentCost },
+        { name: 'Other COGS', cost: inps.otherCogs },
+        { name: 'Total COGS', cost: totalCogs, bold: true }
+      ];
+      const tbody = document.getElementById('costTableBody');
+      tbody.innerHTML = rows.map((r, i) => `
+        <tr class="border-b border-neutral-800/50 ${r.bold ? 'bg-brand-gold/10' : ''}">
+          <td class="py-3 pr-4 font-medium ${r.bold ? 'text-brand-gold' : ''}">${r.name}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney(r.cost)}</td>
+          <td class="py-3 pr-4 text-right">${inps.arpu > 0 ? fmtPct(r.cost / inps.arpu) : '—'}</td>
+        </tr>
+      `).join('');
+
+      let verdict = '';
+      if (marginPct >= inps.targetMargin / 100) {
+        verdict = `Gross margin of ${fmtPct(marginPct)} meets or beats your ${fmtPct(inps.targetMargin / 100)} target. `;
+        verdict += `Each user contributes ${fmtMoney(marginPerUser)} in gross profit, totaling ${fmtMoney0(grossProfit)}/mo across ${inps.activeUsers.toLocaleString()} active users. `;
+        verdict += `You have ${fmtMoney(headroom)}/user of cost headroom before falling below target margin.`;
+      } else if (marginPct >= 0.6) {
+        verdict = `Gross margin of ${fmtPct(marginPct)} is healthy but below your ${fmtPct(inps.targetMargin / 100)} target. `;
+        if (isFinite(targetPriceForMargin) && priceGap > 0) {
+          verdict += `You would need to raise ARPU by ${fmtMoney(priceGap)} (to ${fmtMoney(targetPriceForMargin)}) or cut COGS by ${fmtMoney(-headroom)}/user to hit the target. `;
+        }
+        verdict += `Total gross profit is ${fmtMoney0(grossProfit)}/mo.`;
+      } else if (marginPct >= 0.4) {
+        verdict = `Gross margin of ${fmtPct(marginPct)} is tight for SaaS. COGS of ${fmtMoney(totalCogs)} eats most of your ${fmtMoney(inps.arpu)} ARPU. `;
+        if (isFinite(targetPriceForMargin) && priceGap > 0) {
+          verdict += `Raise price to ${fmtMoney(targetPriceForMargin)} (+${fmtMoney(priceGap)}) or reduce LLM/hosting costs before scaling acquisition. `;
+        }
+        verdict += `Gross profit is ${fmtMoney0(grossProfit)}/mo.`;
+      } else if (marginPct >= 0) {
+        verdict = `Gross margin of ${fmtPct(marginPct)} is dangerously low. Your AI agent is barely covering variable costs. `;
+        if (isFinite(targetPriceForMargin) && priceGap > 0) {
+          verdict += `You would need to charge ${fmtMoney(targetPriceForMargin)} to hit your target margin. `;
+        }
+        verdict += `Fix unit economics before adding paid users or you will burn cash on every customer.`;
+      } else {
+        verdict = `Negative gross margin: you lose ${fmtMoney(-marginPerUser)} on every user before fixed costs. Pause paid acquisition immediately and reduce LLM/API, hosting, or support costs, or raise prices.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['arpu','activeUsers','llmCost','hostingCost','storageCost','supportCost','paymentPct','paymentFixed','otherCogs','targetMargin'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

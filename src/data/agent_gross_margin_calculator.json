@@ -1,0 +1,70 @@
+{
+  "last_updated": "2026-07-13",
+  "note": "Gross margin here is revenue minus direct variable costs (LLM/API, hosting, support, payments, and other COGS). It excludes fixed R&D, sales, and G&A. Use this calculator to set pricing and target margins before scaling paid acquisition.",
+  "defaults": {
+    "arpu": 79,
+    "active_users": 1000,
+    "llm_api_cost_per_user": 18,
+    "hosting_compute_cost_per_user": 8,
+    "vector_storage_cost_per_user": 1.5,
+    "support_cost_per_user": 4,
+    "payment_processing_pct": 2.9,
+    "payment_processing_fixed": 0.30,
+    "other_cogs_per_user": 2,
+    "target_gross_margin_pct": 75
+  },
+  "scenarios": [
+    {
+      "name": "AI agent SaaS — self-serve",
+      "arpu": 49,
+      "active_users": 2500,
+      "llm_api_cost_per_user": 12,
+      "hosting_compute_cost_per_user": 5,
+      "vector_storage_cost_per_user": 1,
+      "support_cost_per_user": 2,
+      "payment_processing_pct": 2.9,
+      "payment_processing_fixed": 0.30,
+      "other_cogs_per_user": 1,
+      "target_gross_margin_pct": 75
+    },
+    {
+      "name": "AI agent SaaS — enterprise",
+      "arpu": 799,
+      "active_users": 200,
+      "llm_api_cost_per_user": 95,
+      "hosting_compute_cost_per_user": 35,
+      "vector_storage_cost_per_user": 8,
+      "support_cost_per_user": 45,
+      "payment_processing_pct": 0,
+      "payment_processing_fixed": 0,
+      "other_cogs_per_user": 20,
+      "target_gross_margin_pct": 70
+    },
+    {
+      "name": "AI voice agent per-seat",
+      "arpu": 149,
+      "active_users": 500,
+      "llm_api_cost_per_user": 28,
+      "hosting_compute_cost_per_user": 12,
+      "vector_storage_cost_per_user": 2,
+      "support_cost_per_user": 8,
+      "payment_processing_pct": 2.9,
+      "payment_processing_fixed": 0.30,
+      "other_cogs_per_user": 3,
+      "target_gross_margin_pct": 70
+    },
+    {
+      "name": "AI newsletter / content automation",
+      "arpu": 19,
+      "active_users": 5000,
+      "llm_api_cost_per_user": 3,
+      "hosting_compute_cost_per_user": 1.5,
+      "vector_storage_cost_per_user": 0.25,
+      "support_cost_per_user": 0.75,
+      "payment_processing_pct": 2.9,
+      "payment_processing_fixed": 0.30,
+      "other_cogs_per_user": 0.5,
+      "target_gross_margin_pct": 80
+    }
+  ]
+}

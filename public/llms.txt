@@ -939,15 +939,23 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||- Cross-links: Affiliate Revenue Estimator, AI Agent Per-User Cost Calculator, Startup Runway Calculator, Agent Output Value Calculator.
 
 ## AI Agent API Cost Spike / Overrun Forecaster
-||||- URL: https://hermesdispatch.dev/tools/agent-api-cost-spike-forecaster/
-||||- Description: Forecast how traffic spikes, retries, provider fallbacks, shadow traffic, and on-call response inflate your AI agent's monthly LLM API bill beyond the baseline.
-||||- Inputs: baseline requests/month, input/output tokens per request, cached input percentage, base model, spike profile (normal, launch week, viral event, provider outage), spike multiplier, spike days/month, normal/spike failure rates, retry multiplier, fallback percentage, fallback premium percentage, shadow traffic percentage, anomaly tooling monthly cost, on-call hours per event, on-call hourly rate, projection months.
-||||- Outputs: baseline monthly cost, forecast monthly cost, overrun percentage vs baseline, recommended reserve, cost component breakdown, model/provider comparison table, projected period cost, worst-case month estimate, verdict.
-||||- Audience: AI agent operators and founders budgeting API spend under uncertain or bursty traffic.
-||||- Cross-links: Agent API Pricing Comparator, Prompt Cost Forecaster, Rate Limit & Quota Planner, Model Router / Fallback Cost Calculator.
+|||||- URL: https://hermesdispatch.dev/tools/agent-api-cost-spike-forecaster/
+|||||- Description: Forecast how traffic spikes, retries, provider fallbacks, shadow traffic, and on-call response inflate your AI agent's monthly LLM API bill beyond the baseline.
+|||||- Inputs: baseline requests/month, input/output tokens per request, cached input percentage, base model, spike profile (normal, launch week, viral event, provider outage), spike multiplier, spike days/month, normal/spike failure rates, retry multiplier, fallback percentage, fallback premium percentage, shadow traffic percentage, anomaly tooling monthly cost, on-call hours per event, on-call hourly rate, projection months.
+|||||- Outputs: baseline monthly cost, forecast monthly cost, overrun percentage vs baseline, recommended reserve, cost component breakdown, model/provider comparison table, projected period cost, worst-case month estimate, verdict.
+|||||- Audience: AI agent operators and founders budgeting API spend under uncertain or bursty traffic.
+|||||- Cross-links: Agent API Pricing Comparator, Prompt Cost Forecaster, Rate Limit & Quota Planner, Model Router / Fallback Cost Calculator.
+
+## AI Agent Gross Margin & Unit Economics Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-gross-margin-calculator/
+||- Description: Estimate gross margin and unit economics for an AI agent SaaS by subtracting direct per-user costs from ARPU.
+||- Inputs: ARPU, active users, LLM/API cost per user, hosting/compute cost per user, vector/storage cost per user, support cost per user, payment processing percentage and fixed fee, other COGS per user, target gross margin percentage.
+||- Outputs: gross margin percentage, margin per user, monthly gross profit, pricing headroom, per-user cost breakdown, verdict.
+||- Audience: AI agent SaaS founders, operators, and investors setting pricing and evaluating unit economics.
+||- Cross-links: CAC Calculator, Per-User Cost Calculator, Startup Runway Calculator, Agent Output Value Calculator.
 
 ## AI Agent Bug Bounty Cost Calculator
-|||- URL: https://hermesdispatch.dev/tools/agent-bug-bounty-cost-calculator/
+||||- URL: https://hermesdispatch.dev/tools/agent-bug-bounty-cost-calculator/
 |||- Description: Estimate the monthly cost to run a bug bounty or vulnerability disclosure program for an AI agent: payouts, triage, fixes, legal/compliance, tooling, retainer, and reserve.
 |||- Inputs: program type (public, private, VDP, hybrid), platform/management, monthly submissions, valid bug rate, average bounty payout, triage/fix hours, engineering rate, legal hours/rate, tooling cost, retainer, projection months, reserve months.
 |||- Outputs: valid bugs per month, bounty cost, platform fees, triage cost, fix cost, legal cost, total monthly program cost, cost per valid bug, recommended reserve, period projection, platform comparison table, verdict.
