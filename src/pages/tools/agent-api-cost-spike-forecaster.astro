@@ -1,0 +1,402 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_api_cost_spike_forecaster.json';
+
+const title = "AI Agent API Cost Spike / Overrun Forecaster | Hermes Dispatch";
+const description = "Forecast how traffic spikes, retries, provider fallbacks, shadow traffic, and on-call response inflate your AI agent's monthly LLM API bill beyond the baseline.";
+const models = data.models;
+const profiles = data.spike_profiles;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is an API cost spike forecaster?", a: "It estimates how much your LLM API bill can exceed the steady-state budget when traffic surges, retries multiply, fallback providers activate, shadow traffic runs, and engineering hours are spent diagnosing the event." },
+  { q: "How is the baseline monthly cost calculated?", a: "Baseline cost = requests × (input tokens × effective input price + output tokens × output price). Cached input tokens get the discounted cached-input price." },
+  { q: "What does the spike multiplier represent?", a: "The spike multiplier is the peak request-volume multiplier during high-traffic days. For example, a 3.5x spike on launch day means the day's traffic is 3.5× the average daily baseline." },
+  { q: "How do retries and failures add cost?", a: "During spikes a higher share of requests fail and are retried. Each retry consumes additional tokens. The calculator applies the retry multiplier to the failed portion of spike traffic." },
+  { q: "What is shadow traffic cost?", a: "Shadow traffic is duplicated inference sent to a candidate model or new prompt version without serving users. It adds directly to token spend during test or rollout windows." },
+  { q: "How should I use the recommended reserve?", a: "The recommended reserve is a buffer above baseline cost to cover typical spikes, retries, fallback premiums, and response labor. It helps set monthly budget caps and alert thresholds." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent API Cost Spike / Overrun Forecaster" description={description} url="https://hermesdispatch.dev/tools/agent-api-cost-spike-forecaster/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📈</div>
+      <h1 class="display-heading mb-4">AI Agent API Cost Spike / Overrun Forecaster</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Forecast how traffic spikes, retries, provider fallbacks, shadow traffic, and on-call response inflate your AI agent's monthly LLM API bill beyond the baseline.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Workload</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Requests / month</span>
+          <input id="requestsPerMonth" type="number" min="0" step="1000" value={defaults.requests_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Input tokens / request</span>
+          <input id="inputTokens" type="number" min="0" step="50" value={defaults.input_tokens_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Output tokens / request</span>
+          <input id="outputTokens" type="number" min="0" step="50" value={defaults.output_tokens_per_request} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Cached input %</span>
+          <input id="cachedPercent" type="number" min="0" max="100" step="5" value={defaults.cached_input_percent} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Base model</span>
+          <select id="baseModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {models.map(m => (
+              <option value={m.slug} selected={m.slug === defaults.model_slug}>{m.name}</option>
+            ))}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Spike profile</span>
+          <select id="spikeProfile" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {profiles.map(p => (
+              <option value={p.slug} selected={p.slug === defaults.spike_profile}>{p.emoji} {p.name}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <h2 class="text-xl font-bold mt-8 mb-6 text-brand-gold">Spike & response</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Spike multiplier (peak vs avg)</span>
+          <input id="spikeMultiplier" type="number" min="1" step="0.1" value={defaults.spike_multiplier} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Spike days / month</span>
+          <input id="spikeDays" type="number" min="0" max="31" value={defaults.spike_days_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Normal failure rate (%)</span>
+          <input id="failureRateNormal" type="number" min="0" max="100" step="0.5" value={defaults.failure_rate_normal} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Spike failure rate (%)</span>
+          <input id="failureRateSpike" type="number" min="0" max="100" step="0.5" value={defaults.failure_rate_spike} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Retry cost multiplier</span>
+          <input id="retryMultiplier" type="number" min="1" step="0.1" value={defaults.retry_multiplier} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fallback traffic (%)</span>
+          <input id="fallbackPercent" type="number" min="0" max="100" step="1" value={defaults.fallback_percent} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fallback premium (%)</span>
+          <input id="fallbackPremium" type="number" min="0" max="500" step="5" value={defaults.fallback_premium_percent} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Shadow traffic (%)</span>
+          <input id="shadowTraffic" type="number" min="0" max="100" step="1" value={defaults.shadow_traffic_percent} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Anomaly tooling ($/mo)</span>
+          <input id="anomalyTooling" type="number" min="0" step="50" value={defaults.anomaly_tooling_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">On-call hours / event</span>
+          <input id="oncallHours" type="number" min="0" step="1" value={defaults.oncall_hours_per_event} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">On-call hourly rate ($)</span>
+          <input id="oncallRate" type="number" min="0" step="5" value={defaults.oncall_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Baseline monthly cost</p>
+        <p id="summaryBaseline" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Forecast monthly cost</p>
+        <p id="summaryForecast" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Overrun vs baseline</p>
+        <p id="summaryOverrun" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Recommended reserve</p>
+        <p id="summaryReserve" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Monthly cost breakdown</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[480px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Component</th>
+              <th class="py-3 pr-4 text-right">Cost</th>
+              <th class="py-3 pr-4 text-right">% of forecast</th>
+            </tr>
+          </thead>
+          <tbody id="breakdownBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Model comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Model / provider comparison at this workload</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[480px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Model</th>
+              <th class="py-3 pr-4 text-right">Baseline</th>
+              <th class="py-3 pr-4 text-right">Forecast with spikes</th>
+              <th class="py-3 pr-4 text-right">Overrun</th>
+            </tr>
+          </thead>
+          <tbody id="modelCompareBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-api-pricing-comparator/" class="btn-primary text-sm">API Pricing Comparator →</a>
+      <a href="/tools/agent-prompt-cost-forecaster/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Prompt Cost Forecaster →</a>
+      <a href="/tools/agent-rate-limit-planner/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Rate Limit Planner →</a>
+      <a href="/tools/agent-model-router-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Model Router Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ modelsJson: JSON.stringify(models), profilesJson: JSON.stringify(profiles) }}>
+    const models = JSON.parse(modelsJson);
+    const profiles = JSON.parse(profilesJson);
+    const fmt = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmt0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtPct = n => n.toLocaleString('en-US', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const fmtN = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        requests: Math.max(0, parseFloat(document.getElementById('requestsPerMonth').value) || 0),
+        inputTokens: Math.max(0, parseFloat(document.getElementById('inputTokens').value) || 0),
+        outputTokens: Math.max(0, parseFloat(document.getElementById('outputTokens').value) || 0),
+        cachedPercent: Math.max(0, Math.min(100, parseFloat(document.getElementById('cachedPercent').value) || 0)),
+        baseModel: document.getElementById('baseModel').value,
+        spikeProfile: document.getElementById('spikeProfile').value,
+        spikeMultiplier: Math.max(1, parseFloat(document.getElementById('spikeMultiplier').value) || 1),
+        spikeDays: Math.max(0, Math.min(31, parseFloat(document.getElementById('spikeDays').value) || 0)),
+        failureRateNormal: Math.max(0, Math.min(100, parseFloat(document.getElementById('failureRateNormal').value) || 0)),
+        failureRateSpike: Math.max(0, Math.min(100, parseFloat(document.getElementById('failureRateSpike').value) || 0)),
+        retryMultiplier: Math.max(1, parseFloat(document.getElementById('retryMultiplier').value) || 1),
+        fallbackPercent: Math.max(0, Math.min(100, parseFloat(document.getElementById('fallbackPercent').value) || 0)),
+        fallbackPremium: Math.max(0, parseFloat(document.getElementById('fallbackPremium').value) || 0),
+        shadowTraffic: Math.max(0, Math.min(100, parseFloat(document.getElementById('shadowTraffic').value) || 0)),
+        anomalyTooling: Math.max(0, parseFloat(document.getElementById('anomalyTooling').value) || 0),
+        oncallHours: Math.max(0, parseFloat(document.getElementById('oncallHours').value) || 0),
+        oncallRate: Math.max(0, parseFloat(document.getElementById('oncallRate').value) || 0),
+        projection: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.requests_per_month !== undefined) document.getElementById('requestsPerMonth').value = obj.requests_per_month;
+      if (obj.input_tokens_per_request !== undefined) document.getElementById('inputTokens').value = obj.input_tokens_per_request;
+      if (obj.output_tokens_per_request !== undefined) document.getElementById('outputTokens').value = obj.output_tokens_per_request;
+      if (obj.cached_input_percent !== undefined) document.getElementById('cachedPercent').value = obj.cached_input_percent;
+      if (obj.model_slug !== undefined) document.getElementById('baseModel').value = obj.model_slug;
+      if (obj.spike_profile !== undefined) document.getElementById('spikeProfile').value = obj.spike_profile;
+      if (obj.spike_multiplier !== undefined) document.getElementById('spikeMultiplier').value = obj.spike_multiplier;
+      if (obj.spike_days_per_month !== undefined) document.getElementById('spikeDays').value = obj.spike_days_per_month;
+      if (obj.failure_rate_normal !== undefined) document.getElementById('failureRateNormal').value = obj.failure_rate_normal;
+      if (obj.failure_rate_spike !== undefined) document.getElementById('failureRateSpike').value = obj.failure_rate_spike;
+      if (obj.retry_multiplier !== undefined) document.getElementById('retryMultiplier').value = obj.retry_multiplier;
+      if (obj.fallback_percent !== undefined) document.getElementById('fallbackPercent').value = obj.fallback_percent;
+      if (obj.fallback_premium_percent !== undefined) document.getElementById('fallbackPremium').value = obj.fallback_premium_percent;
+      if (obj.shadow_traffic_percent !== undefined) document.getElementById('shadowTraffic').value = obj.shadow_traffic_percent;
+      if (obj.anomaly_tooling_monthly !== undefined) document.getElementById('anomalyTooling').value = obj.anomaly_tooling_monthly;
+      if (obj.oncall_hours_per_event !== undefined) document.getElementById('oncallHours').value = obj.oncall_hours_per_event;
+      if (obj.oncall_rate !== undefined) document.getElementById('oncallRate').value = obj.oncall_rate;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    function costForModelSlug(slug, inp) {
+      const m = models.find(x => x.slug === slug) || models[0];
+      const inputTokens = inp.inputTokens;
+      const cached = inputTokens * (inp.cachedPercent / 100);
+      const uncached = inputTokens - cached;
+      const perReqInput = (uncached / 1_000_000) * m.input_price_per_1m + (cached / 1_000_000) * m.cached_input_price_per_1m;
+      const perReqOutput = (inp.outputTokens / 1_000_000) * m.output_price_per_1m;
+      return { ...m, perReq: perReqInput + perReqOutput, perReqInput, perReqOutput };
+    }
+
+    function compute() {
+      const inp = getInputs();
+      const base = costForModelSlug(inp.baseModel, inp);
+      const dailyBaseline = inp.requests / 30;
+      const spikeDays = Math.min(30, inp.spikeDays);
+      const normalDays = 30 - spikeDays;
+
+      // Baseline (no spike effects)
+      const baselineMonthly = base.perReq * inp.requests;
+
+      // Volume spike: on spike days traffic is spikeMultiplier * average daily; normal days stay average
+      const spikeVolume = dailyBaseline * spikeDays * (inp.spikeMultiplier - 1);
+      const volumeSpikeCost = spikeVolume * base.perReq;
+
+      // Retry cost: difference in failure rate between spike and normal applied to spike traffic
+      const extraFailureRate = Math.max(0, inp.failureRateSpike - inp.failureRateNormal) / 100;
+      const spikeRequests = dailyBaseline * spikeDays * inp.spikeMultiplier;
+      const retryCost = spikeRequests * base.perReq * extraFailureRate * (inp.retryMultiplier - 1);
+
+      // Fallback premium: fallback percent of all traffic, priced at base + premium
+      const fallbackCost = inp.requests * base.perReq * (inp.fallbackPercent / 100) * (inp.fallbackPremium / 100);
+
+      // Shadow traffic: duplicated requests at base cost
+      const shadowCost = inp.requests * base.perReq * (inp.shadowTraffic / 100);
+
+      // Response tooling and on-call labor
+      const oncallCost = spikeDays * inp.oncallHours * inp.oncallRate;
+      const responseCost = inp.anomalyTooling + oncallCost;
+
+      const forecastMonthly = baselineMonthly + volumeSpikeCost + retryCost + fallbackCost + shadowCost + responseCost;
+      const overrun = baselineMonthly > 0 ? (forecastMonthly - baselineMonthly) / baselineMonthly : 0;
+      const reserve = (forecastMonthly - baselineMonthly) * 1.2; // 20% safety margin on the overrun
+      const periodCost = forecastMonthly * inp.projection;
+      const worstCase = baselineMonthly + volumeSpikeCost * 1.3 + retryCost * 1.5 + fallbackCost * 1.2 + shadowCost * 1.2 + responseCost * 1.2;
+
+      document.getElementById('summaryBaseline').textContent = fmt0(baselineMonthly);
+      document.getElementById('summaryForecast').textContent = fmt0(forecastMonthly);
+      document.getElementById('summaryOverrun').textContent = fmtPct(overrun);
+      document.getElementById('summaryReserve').textContent = fmt0(reserve);
+
+      const rows = [
+        { name: 'Baseline traffic', cost: baselineMonthly },
+        { name: 'Volume spike', cost: volumeSpikeCost },
+        { name: 'Retry / failure surge', cost: retryCost },
+        { name: 'Fallback premium', cost: fallbackCost },
+        { name: 'Shadow traffic', cost: shadowCost },
+        { name: 'Anomaly tooling', cost: inp.anomalyTooling },
+        { name: 'On-call / incident labor', cost: oncallCost }
+      ];
+      const tbody = document.getElementById('breakdownBody');
+      tbody.innerHTML = rows.map((r, i) => `
+        <tr class="border-b border-neutral-800/50 ${i === 0 ? 'bg-brand-gold/10' : ''}">
+          <td class="py-3 pr-4 font-medium">${r.name}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmt(r.cost)}</td>
+          <td class="py-3 pr-4 text-right">${fmtPct(forecastMonthly > 0 ? r.cost / forecastMonthly : 0)}</td>
+        </tr>
+      `).join('');
+
+      // Model comparison
+      const compareRows = models.map(m => {
+        const c = costForModelSlug(m.slug, inp);
+        const modelBaseline = c.perReq * inp.requests;
+        const modelSpikeCost = spikeVolume * c.perReq;
+        const modelRetryCost = spikeRequests * c.perReq * extraFailureRate * (inp.retryMultiplier - 1);
+        const modelFallbackCost = inp.requests * c.perReq * (inp.fallbackPercent / 100) * (inp.fallbackPremium / 100);
+        const modelShadowCost = inp.requests * c.perReq * (inp.shadowTraffic / 100);
+        const modelForecast = modelBaseline + modelSpikeCost + modelRetryCost + modelFallbackCost + modelShadowCost + responseCost;
+        const modelOverrun = modelBaseline > 0 ? (modelForecast - modelBaseline) / modelBaseline : 0;
+        return { ...c, baseline: modelBaseline, forecast: modelForecast, overrun: modelOverrun };
+      }).sort((a, b) => a.forecast - b.forecast);
+
+      const cmpBody = document.getElementById('modelCompareBody');
+      cmpBody.innerHTML = compareRows.map((r, i) => `
+        <tr class="border-b border-neutral-800/50 ${r.slug === inp.baseModel ? 'bg-brand-gold/10' : ''}">
+          <td class="py-3 pr-4"><span class="font-medium">${r.name}</span><span class="block text-xs text-neutral-500">${r.note}</span></td>
+          <td class="py-3 pr-4 text-right font-mono">${fmt0(r.baseline)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmt0(r.forecast)}</td>
+          <td class="py-3 pr-4 text-right">${fmtPct(r.overrun)}</td>
+        </tr>
+      `).join('');
+
+      // Verdict
+      let verdict = '';
+      if (overrun < 0.25) {
+        verdict = `Low overrun risk. The forecast monthly cost is ${fmt(forecastMonthly)}, only ${fmtPct(overrun)} above baseline. Reserve ${fmt0(reserve)}/mo for tooling and small bursts.`;
+      } else if (overrun < 0.75) {
+        verdict = `Moderate overrun risk. The forecast monthly cost is ${fmt(forecastMonthly)}, ${fmtPct(overrun)} above baseline. Set monthly budget alerts at ${fmt0(forecastMonthly * 1.1)} and keep a reserve of ${fmt0(reserve)}/mo.`;
+      } else if (overrun < 1.5) {
+        verdict = `High overrun risk. The forecast monthly cost is ${fmt(forecastMonthly)}, ${fmtPct(overrun)} above baseline. Add circuit breakers, caching, and rate limits. Recommended reserve: ${fmt0(reserve)}/mo.`;
+      } else {
+        verdict = `Severe overrun risk. The forecast monthly cost is ${fmt(forecastMonthly)}, ${fmtPct(overrun)} above baseline. If this spike profile is realistic, redesign for throttling, aggressive caching, or a cheaper model. Recommended reserve: ${fmt0(reserve)}/mo.`;
+      }
+      verdict += ` Projected ${inp.projection}-month spend: ${fmt(periodCost)}. A plausible worst-case month could reach ${fmt0(worstCase)}.`;
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['requestsPerMonth','inputTokens','outputTokens','cachedPercent','baseModel','spikeProfile','spikeMultiplier','spikeDays','failureRateNormal','failureRateSpike','retryMultiplier','fallbackPercent','fallbackPremium','shadowTraffic','anomalyTooling','oncallHours','oncallRate','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

@@ -931,12 +931,20 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||||– Cross-links: AI Agent Per-User Cost Calculator, AI Agent Multi-Tenant SaaS Cost Calculator, AI Agent Observability Cost Calculator, Startup Runway Calculator.
 
 ## AI Agent Customer Acquisition Cost (CAC) Calculator
-||- URL: https://hermesdispatch.dev/tools/agent-cac-calculator/
-||- Description: Estimate blended CAC, paid CAC, LTV:CAC ratio, and payback period for AI agent products across ads, content/SEO, outbound, partnerships, and product-led growth.
-||- Inputs: monthly spend by channel (paid ads, content/SEO, outbound/SDR, partnerships/affiliates, product-led growth, other), new paying customers per month, free-to-paid conversion rate, ARPU, gross margin percentage, trial/free signups per month, projection months.
-||- Outputs: blended CAC, paid CAC, LTV:CAC ratio, CAC payback period, channel spend breakdown with implied CAC, cost per trial signup, projected period spend, verdict.
-||- Audience: AI agent founders, growth operators, and investors evaluating unit economics.
-||- Cross-links: Affiliate Revenue Estimator, AI Agent Per-User Cost Calculator, Startup Runway Calculator, Agent Output Value Calculator.
+|||- URL: https://hermesdispatch.dev/tools/agent-cac-calculator/
+|||- Description: Estimate blended CAC, paid CAC, LTV:CAC ratio, and payback period for AI agent products across ads, content/SEO, outbound, partnerships, and product-led growth.
+|||- Inputs: monthly spend by channel (paid ads, content/SEO, outbound/SDR, partnerships/affiliates, product-led growth, other), new paying customers per month, free-to-paid conversion rate, ARPU, gross margin percentage, trial/free signups per month, projection months.
+|||- Outputs: blended CAC, paid CAC, LTV:CAC ratio, CAC payback period, channel spend breakdown with implied CAC, projected period spend, verdict.
+|||- Audience: AI agent founders, growth operators, and investors evaluating unit economics.
+|||- Cross-links: Affiliate Revenue Estimator, AI Agent Per-User Cost Calculator, Startup Runway Calculator, Agent Output Value Calculator.
+
+## AI Agent API Cost Spike / Overrun Forecaster
+||||- URL: https://hermesdispatch.dev/tools/agent-api-cost-spike-forecaster/
+||||- Description: Forecast how traffic spikes, retries, provider fallbacks, shadow traffic, and on-call response inflate your AI agent's monthly LLM API bill beyond the baseline.
+||||- Inputs: baseline requests/month, input/output tokens per request, cached input percentage, base model, spike profile (normal, launch week, viral event, provider outage), spike multiplier, spike days/month, normal/spike failure rates, retry multiplier, fallback percentage, fallback premium percentage, shadow traffic percentage, anomaly tooling monthly cost, on-call hours per event, on-call hourly rate, projection months.
+||||- Outputs: baseline monthly cost, forecast monthly cost, overrun percentage vs baseline, recommended reserve, cost component breakdown, model/provider comparison table, projected period cost, worst-case month estimate, verdict.
+||||- Audience: AI agent operators and founders budgeting API spend under uncertain or bursty traffic.
+||||- Cross-links: Agent API Pricing Comparator, Prompt Cost Forecaster, Rate Limit & Quota Planner, Model Router / Fallback Cost Calculator.
 
 ## AI Agent Bug Bounty Cost Calculator
 ||- URL: https://hermesdispatch.dev/tools/agent-bug-bounty-cost-calculator/
