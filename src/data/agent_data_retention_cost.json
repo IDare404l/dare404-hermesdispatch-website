@@ -1,0 +1,192 @@
+{
+  "title": "AI Agent Data Retention / Audit Log Cost Calculator",
+  "description": "Estimate monthly cost to store, archive, query, and export AI agent audit logs, conversation history, PII/PHI logs, and compliance telemetry.",
+  "route": "/tools/agent-data-retention-cost-calculator/",
+  "retention_profiles": {
+    "startup": {
+      "label": "Startup / MVP",
+      "retention_months": 6,
+      "hot_storage_months": 3,
+      "warm_storage_months": 3,
+      "archive_storage_months": 0,
+      "monthly_requests": 50000,
+      "events_per_request": 2,
+      "event_size_kb": 1.2,
+      "conversation_retention_rate": 0.2,
+      "queries_per_month": 200,
+      "exports_per_month": 2,
+      "export_gb": 1,
+      "pii_rate": 0.05,
+      "backup_retention_months": 6
+    },
+    "saas_default": {
+      "label": "SaaS / Default",
+      "retention_months": 12,
+      "hot_storage_months": 6,
+      "warm_storage_months": 6,
+      "archive_storage_months": 0,
+      "monthly_requests": 500000,
+      "events_per_request": 3,
+      "event_size_kb": 1.5,
+      "conversation_retention_rate": 0.4,
+      "queries_per_month": 2000,
+      "exports_per_month": 5,
+      "export_gb": 5,
+      "pii_rate": 0.1,
+      "backup_retention_months": 12
+    },
+    "enterprise": {
+      "label": "Enterprise / SOC 2",
+      "retention_months": 36,
+      "hot_storage_months": 6,
+      "warm_storage_months": 18,
+      "archive_storage_months": 12,
+      "monthly_requests": 2000000,
+      "events_per_request": 4,
+      "event_size_kb": 2.0,
+      "conversation_retention_rate": 0.6,
+      "queries_per_month": 10000,
+      "exports_per_month": 20,
+      "export_gb": 25,
+      "pii_rate": 0.15,
+      "backup_retention_months": 36
+    },
+    "regulated": {
+      "label": "Regulated / HIPAA / Finance",
+      "retention_months": 84,
+      "hot_storage_months": 12,
+      "warm_storage_months": 24,
+      "archive_storage_months": 48,
+      "monthly_requests": 1000000,
+      "events_per_request": 5,
+      "event_size_kb": 3.0,
+      "conversation_retention_rate": 0.8,
+      "queries_per_month": 5000,
+      "exports_per_month": 15,
+      "export_gb": 20,
+      "pii_rate": 0.3,
+      "backup_retention_months": 84
+    }
+  },
+  "storage_tiers": {
+    "hot": {
+      "label": "Hot (queryable logs)",
+      "cost_per_gb_month": 0.30,
+      "cost_per_query": 0.00005,
+      "ingest_cost_per_gb": 0.60
+    },
+    "warm": {
+      "label": "Warm (occasional search)",
+      "cost_per_gb_month": 0.10,
+      "cost_per_query": 0.00015,
+      "ingest_cost_per_gb": 0.25
+    },
+    "archive": {
+      "label": "Archive / cold",
+      "cost_per_gb_month": 0.02,
+      "cost_per_query": 0.001,
+      "ingest_cost_per_gb": 0.10
+    }
+  },
+  "backup_storage": {
+    "label": "Object storage backup",
+    "cost_per_gb_month": 0.023
+  },
+  "compliance_overhead": {
+    "startup": {
+      "label": "Minimal compliance",
+      "monthly_engineering_hours": 2,
+      "hourly_rate": 100
+    },
+    "saas_default": {
+      "label": "SOC 2 readiness",
+      "monthly_engineering_hours": 8,
+      "hourly_rate": 125
+    },
+    "enterprise": {
+      "label": "Enterprise audit trail",
+      "monthly_engineering_hours": 20,
+      "hourly_rate": 150
+    },
+    "regulated": {
+      "label": "Regulated (HIPAA/finance)",
+      "monthly_engineering_hours": 40,
+      "hourly_rate": 200
+    }
+  },
+  "defaults": {
+    "retention_profile": "saas_default",
+    "hot_storage_months": 6,
+    "warm_storage_months": 6,
+    "archive_storage_months": 0,
+    "monthly_requests": 500000,
+    "events_per_request": 3,
+    "event_size_kb": 1.5,
+    "conversation_retention_rate": 0.4,
+    "conversation_size_kb": 8.0,
+    "queries_per_month": 2000,
+    "exports_per_month": 5,
+    "export_gb": 5,
+    "pii_rate": 0.1,
+    "pii_scan_cost_per_1k_items": 0.50,
+    "backup_retention_months": 12,
+    "hot_cost_per_gb_month": 0.30,
+    "warm_cost_per_gb_month": 0.10,
+    "archive_cost_per_gb_month": 0.02,
+    "backup_cost_per_gb_month": 0.023,
+    "hot_query_cost": 0.00005,
+    "warm_query_cost": 0.00015,
+    "archive_query_cost": 0.001,
+    "hot_ingest_cost_per_gb": 0.60,
+    "warm_ingest_cost_per_gb": 0.25,
+    "archive_ingest_cost_per_gb": 0.10,
+    "export_cost_per_gb": 0.09,
+    "monthly_engineering_hours": 8,
+    "engineering_hourly_rate": 125,
+    "projection_months": 12
+  },
+  "scenarios": [
+    {
+      "id": "saas_default",
+      "name": "SaaS / Default",
+      "description": "A typical AI agent SaaS keeping 12 months of audit logs and conversations with SOC 2 readiness."
+    },
+    {
+      "id": "startup",
+      "name": "Startup / MVP",
+      "description": "Lean retention: 6 months of logs, minimal compliance, rare exports."
+    },
+    {
+      "id": "enterprise",
+      "name": "Enterprise / SOC 2",
+      "description": "3-year retention with tiered storage and structured exports for enterprise customers."
+    },
+    {
+      "id": "regulated",
+      "name": "Regulated / HIPAA / Finance",
+      "description": "7-year retention, high PII/PHI rate, encrypted archives, and strict audit controls."
+    }
+  ],
+  "faq": [
+    {
+      "question": "What does this calculator estimate?",
+      "answer": "Monthly and projected cost for AI agent audit logging and data retention: log ingestion, hot/warm/archive storage, queries, exports, backups, PII scanning, and engineering/compliance labor."
+    },
+    {
+      "question": "Which retention rules does it cover?",
+      "answer": "It includes preset profiles for GDPR, SOC 2, HIPAA, and CCPA-style retention ranges from 6 months up to 7 years. You can override every month and cost assumption."
+    },
+    {
+      "question": "How are conversation histories costed separately from audit events?",
+      "answer": "Audit events are small structured telemetry records. Conversation histories include prompts, outputs, and tool results. The calculator applies the conversation retention rate to monthly requests and a separate per-conversation size estimate."
+    },
+    {
+      "question": "What counts as hot, warm, and archive storage?",
+      "answer": "Hot storage is live and frequently queried. Warm storage is searched occasionally at a higher per-query cost. Archive is cold long-term retention, cheap to store but expensive to query or restore."
+    },
+    {
+      "question": "Does the tool include backups?",
+      "answer": "Yes. It adds a backup copy stored at object-storage rates for the selected backup retention period."
+    }
+  ]
+}

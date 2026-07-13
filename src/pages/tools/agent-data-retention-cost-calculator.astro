@@ -1,0 +1,474 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_data_retention_cost.json';
+
+const title = `${data.title} | Hermes Dispatch`;
+const description = data.description;
+const canonicalUrl = "https://hermesdispatch.dev/tools/agent-data-retention-cost-calculator/";
+
+const scenarioList = data.scenarios;
+const faqList = data.faq;
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqList.map((f) => ({
+    "@type": "Question",
+    "name": f.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": f.answer
+    }
+  }))
+};
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema
+    name={data.title}
+    description={description}
+    url={canonicalUrl}
+    applicationCategory="DeveloperApplication"
+    operatingSystem="Any"
+    slot="head"
+  />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqJsonLd)} slot="head" />
+
+  <article class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <header class="mb-10">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">{data.title}</h1>
+      <p class="text-xl text-gray-400">{description}</p>
+    </header>
+
+    <section class="mb-8">
+      <h2 class="text-lg font-semibold mb-3">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarioList.map((scenario) => (
+          <button
+            type="button"
+            class="scenario-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-cyan-400 text-gray-300 text-sm"
+            data-scenario={scenario.id}
+          >
+            {scenario.name}
+          </button>
+        ))}
+      </div>
+      <p id="scenario-description" class="text-sm text-gray-400 mt-3">Pick a preset to load default assumptions, then adjust them below.</p>
+    </section>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      <section class="glass-card rounded-xl p-6 md:p-8 border border-neutral-800">
+        <h2 class="text-2xl font-bold mb-6">Inputs</h2>
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium mb-1">Monthly agent requests</label>
+            <input type="number" id="monthlyRequests" value={data.defaults.monthly_requests} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Events per request</label>
+              <input type="number" id="eventsPerRequest" value={data.defaults.events_per_request} min="0" step="0.1" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Event size (KB)</label>
+              <input type="number" id="eventSizeKb" value={data.defaults.event_size_kb} min="0" step="0.1" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Conversation retention rate</label>
+            <input type="number" id="conversationRetentionRate" value={data.defaults.conversation_retention_rate} min="0" max="1" step="0.01" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            <p class="text-xs text-gray-500 mt-1">Share of requests that store a full conversation history.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Avg conversation size (KB)</label>
+            <input type="number" id="conversationSizeKb" value={data.defaults.conversation_size_kb} min="0" step="0.1" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+          </div>
+
+          <hr class="border-neutral-800" />
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-sm font-medium mb-1">Hot months</label>
+              <input type="number" id="hotMonths" value={data.defaults.hot_storage_months} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Warm months</label>
+              <input type="number" id="warmMonths" value={data.defaults.warm_storage_months} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Archive months</label>
+              <input type="number" id="archiveMonths" value={data.defaults.archive_storage_months} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3 text-xs text-gray-500">
+            <span>Hot storage is live and queryable.</span>
+            <span>Warm is searched occasionally.</span>
+            <span>Archive is cold long-term retention.</span>
+          </div>
+
+          <hr class="border-neutral-800" />
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Queries / month</label>
+              <input type="number" id="queriesPerMonth" value={data.defaults.queries_per_month} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Exports / month</label>
+              <input type="number" id="exportsPerMonth" value={data.defaults.exports_per_month} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Export size (GB)</label>
+            <input type="number" id="exportGb" value={data.defaults.export_gb} min="0" step="0.1" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">PII/PHI rate</label>
+            <input type="number" id="piiRate" value={data.defaults.pii_rate} min="0" max="1" step="0.01" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            <p class="text-xs text-gray-500 mt-1">Share of events that need PII/PHI scanning.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">PII scan cost / 1K items</label>
+            <input type="number" id="piiScanCostPer1k" value={data.defaults.pii_scan_cost_per_1k_items} min="0" step="0.01" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Backup retention (months)</label>
+            <input type="number" id="backupRetentionMonths" value={data.defaults.backup_retention_months} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+          </div>
+
+          <hr class="border-neutral-800" />
+
+          <h3 class="text-sm font-semibold text-gray-300">Storage pricing ($/GB/month)</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Hot</label>
+              <input type="number" id="hotCostPerGb" value={data.defaults.hot_cost_per_gb_month} min="0" step="0.001" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Warm</label>
+              <input type="number" id="warmCostPerGb" value={data.defaults.warm_cost_per_gb_month} min="0" step="0.001" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Archive</label>
+              <input type="number" id="archiveCostPerGb" value={data.defaults.archive_cost_per_gb_month} min="0" step="0.001" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+
+          <h3 class="text-sm font-semibold text-gray-300 mt-4">Query & ingest costs</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Hot query</label>
+              <input type="number" id="hotQueryCost" value={data.defaults.hot_query_cost} min="0" step="0.000001" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Warm query</label>
+              <input type="number" id="warmQueryCost" value={data.defaults.warm_query_cost} min="0" step="0.000001" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Archive query</label>
+              <input type="number" id="archiveQueryCost" value={data.defaults.archive_query_cost} min="0" step="0.000001" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Hot ingest $/GB</label>
+              <input type="number" id="hotIngestCost" value={data.defaults.hot_ingest_cost_per_gb} min="0" step="0.01" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Warm ingest $/GB</label>
+              <input type="number" id="warmIngestCost" value={data.defaults.warm_ingest_cost_per_gb} min="0" step="0.01" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Archive ingest $/GB</label>
+              <input type="number" id="archiveIngestCost" value={data.defaults.archive_ingest_cost_per_gb} min="0" step="0.01" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">Object storage backup $/GB/month</label>
+            <input type="number" id="backupCostPerGb" value={data.defaults.backup_cost_per_gb_month} min="0" step="0.001" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Export egress $/GB</label>
+            <input type="number" id="exportCostPerGb" value={data.defaults.export_cost_per_gb} min="0" step="0.001" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+          </div>
+
+          <hr class="border-neutral-800" />
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Compliance engineering hrs/mo</label>
+              <input type="number" id="engHours" value={data.defaults.monthly_engineering_hours} min="0" step="0.1" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Engineering hourly rate</label>
+              <input type="number" id="engRate" value={data.defaults.engineering_hourly_rate} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Projection (months)</label>
+            <input type="number" id="projectionMonths" value={data.defaults.projection_months} min="1" max="60" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-6">
+        <div class="glass-card rounded-xl p-6 md:p-8 border border-neutral-800">
+          <h2 class="text-2xl font-bold mb-4">Monthly cost estimate</h2>
+          <div class="text-4xl font-bold text-brand-gold mb-2" id="totalMonthly">$0</div>
+          <p class="text-sm text-gray-400 mb-6">Total all-in monthly retention cost</p>
+
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Monthly log volume</span>
+              <span id="monthlyLogGb">0 GB</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Stored log volume</span>
+              <span id="storedLogGb">0 GB</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Monthly conversation volume</span>
+              <span id="monthlyConvGb">0 GB</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Stored conversation volume</span>
+              <span id="storedConvGb">0 GB</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Hot storage</span>
+              <span id="hotCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Warm storage</span>
+              <span id="warmCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Archive storage</span>
+              <span id="archiveCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Ingest cost</span>
+              <span id="ingestCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Query cost</span>
+              <span id="queryCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Export cost</span>
+              <span id="exportCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Backup storage</span>
+              <span id="backupCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">PII/PHI scanning</span>
+              <span id="piiCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Compliance engineering</span>
+              <span id="engCost">$0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-xl p-6 md:p-8 border border-neutral-800">
+          <h2 class="text-2xl font-bold mb-4">Projected cost</h2>
+          <div class="text-3xl font-bold text-cyan-400 mb-2" id="projectedCost">$0</div>
+          <p class="text-sm text-gray-400">Total cost over the projection period</p>
+          <p class="text-sm text-gray-500 mt-2">Assumes constant volume; in practice, storage grows until retention caps are reached.</p>
+        </div>
+
+        <div class="bg-cyan-400/10 border border-cyan-400/30 rounded-lg p-4">
+          <p class="text-sm text-cyan-400 m-0"><strong>Verdict:</strong> <span id="verdict">Loading…</span></p>
+        </div>
+      </section>
+    </div>
+
+    <section class="mt-16">
+      <h2 class="text-2xl font-bold mb-6">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqList.map((f) => (
+          <details class="group bg-neutral-900 border border-neutral-800 rounded-lg p-4">
+            <summary class="font-medium cursor-pointer list-none flex justify-between items-center">
+              {f.question}
+              <span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <p class="text-gray-400 mt-3 text-sm">{f.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-16 glass-card rounded-xl p-6 md:p-8 border border-neutral-800">
+      <h2 class="text-2xl font-bold mb-4">Related tools</h2>
+      <ul class="list-disc pl-5 space-y-2 text-gray-400">
+        <li><a href="/tools/ai-agent-compliance-checker" class="text-cyan-400 hover:underline">AI Agent Privacy / Compliance Checker</a></li>
+        <li><a href="/tools/agent-pii-detection-cost-calculator" class="text-cyan-400 hover:underline">AI Agent PII Detection & Data Classification Cost Calculator</a></li>
+        <li><a href="/tools/agent-memory-cost-calculator" class="text-cyan-400 hover:underline">AI Agent Memory / RAG Cost Calculator</a></li>
+        <li><a href="/tools/agent-observability-cost-calculator" class="text-cyan-400 hover:underline">AI Agent Observability Cost Calculator</a></li>
+      </ul>
+    </section>
+  </article>
+
+  <script is:inline define:vars={{ retentionProfiles: data.retention_profiles }}>
+    const $ = (id) => document.getElementById(id);
+    const fmtMoney = (n) => "$" + Math.round(n).toLocaleString();
+    const fmtGb = (n) => n.toFixed(2) + " GB";
+
+    const scenarioDescriptions = {
+      startup: "Lean retention: 6 months of logs, minimal compliance, rare exports.",
+      saas_default: "A typical AI agent SaaS keeping 12 months of audit logs and conversations with SOC 2 readiness.",
+      enterprise: "3-year retention with tiered storage and structured exports for enterprise customers.",
+      regulated: "7-year retention, high PII/PHI rate, encrypted archives, and strict audit controls."
+    };
+
+    function getVal(id) {
+      return parseFloat($(id).value) || 0;
+    }
+
+    function setVal(id, value) {
+      $(id).value = value;
+    }
+
+    function applyScenario(id) {
+      const p = retentionProfiles[id];
+      if (!p) return;
+      setVal("hotMonths", p.hot_storage_months);
+      setVal("warmMonths", p.warm_storage_months);
+      setVal("archiveMonths", p.archive_storage_months);
+      setVal("monthlyRequests", p.monthly_requests);
+      setVal("eventsPerRequest", p.events_per_request);
+      setVal("eventSizeKb", p.event_size_kb);
+      setVal("conversationRetentionRate", p.conversation_retention_rate);
+      setVal("queriesPerMonth", p.queries_per_month);
+      setVal("exportsPerMonth", p.exports_per_month);
+      setVal("exportGb", p.export_gb);
+      setVal("piiRate", p.pii_rate);
+      setVal("backupRetentionMonths", p.backup_retention_months);
+      $("scenario-description").textContent = scenarioDescriptions[id] || "";
+      calculate();
+    }
+
+    function calculate() {
+      const monthlyRequests = getVal("monthlyRequests");
+      const eventsPerRequest = getVal("eventsPerRequest");
+      const eventSizeKb = getVal("eventSizeKb");
+      const convRate = getVal("conversationRetentionRate");
+      const convSizeKb = getVal("conversationSizeKb");
+      const hotMonths = getVal("hotMonths");
+      const warmMonths = getVal("warmMonths");
+      const archiveMonths = getVal("archiveMonths");
+      const queries = getVal("queriesPerMonth");
+      const exports = getVal("exportsPerMonth");
+      const exportGb = getVal("exportGb");
+      const piiRate = getVal("piiRate");
+      const piiCostPer1k = getVal("piiScanCostPer1k");
+      const backupMonths = getVal("backupRetentionMonths");
+      const hotCost = getVal("hotCostPerGb");
+      const warmCost = getVal("warmCostPerGb");
+      const archiveCost = getVal("archiveCostPerGb");
+      const backupCost = getVal("backupCostPerGb");
+      const hotQueryCost = getVal("hotQueryCost");
+      const warmQueryCost = getVal("warmQueryCost");
+      const archiveQueryCost = getVal("archiveQueryCost");
+      const hotIngest = getVal("hotIngestCost");
+      const warmIngest = getVal("warmIngestCost");
+      const archiveIngest = getVal("archiveIngestCost");
+      const exportCostPerGb = getVal("exportCostPerGb");
+      const engHours = getVal("engHours");
+      const engRate = getVal("engRate");
+      const projectionMonths = getVal("projectionMonths");
+
+      // Volumes
+      const monthlyLogGb = (monthlyRequests * eventsPerRequest * eventSizeKb) / 1048576;
+      const monthlyConvGb = (monthlyRequests * convRate * convSizeKb) / 1048576;
+      const monthlyTotalGb = monthlyLogGb + monthlyConvGb;
+      const storedLogGb = monthlyLogGb * (hotMonths + warmMonths + archiveMonths);
+      const storedConvGb = monthlyConvGb * (hotMonths + warmMonths + archiveMonths);
+      const storedTotalGb = storedLogGb + storedConvGb;
+
+      // Storage (assume equal monthly write rate; average retention is half max for growing state)
+      const avgHotGb = monthlyTotalGb * Math.min(hotMonths, 1 + (hotMonths - 1) / 2);
+      const avgWarmGb = monthlyTotalGb * Math.min(warmMonths, 1 + (warmMonths - 1) / 2);
+      const avgArchiveGb = monthlyTotalGb * Math.min(archiveMonths, 1 + (archiveMonths - 1) / 2);
+
+      // Storage costs (averaging write-through for the first months)
+      const hotStorageCost = avgHotGb * hotCost;
+      const warmStorageCost = avgWarmGb * warmCost;
+      const archiveStorageCost = avgArchiveGb * archiveCost;
+
+      // Ingest costs
+      const ingestCost = monthlyTotalGb * (
+        hotMonths > 0 ? hotIngest : 0 +
+        warmMonths > 0 ? warmIngest : 0 +
+        archiveMonths > 0 ? archiveIngest : 0
+      );
+
+      // Query costs: split queries evenly across tiers that exist
+      const activeTiers = (hotMonths > 0 ? 1 : 0) + (warmMonths > 0 ? 1 : 0) + (archiveMonths > 0 ? 1 : 0) || 1;
+      const queryCost = queries * (
+        (hotMonths > 0 ? hotQueryCost : 0) +
+        (warmMonths > 0 ? warmQueryCost : 0) +
+        (archiveMonths > 0 ? archiveQueryCost : 0)
+      ) / activeTiers;
+
+      // Export + backup + PII + labor
+      const exportCost = exports * exportGb * exportCostPerGb;
+      const backupGb = monthlyTotalGb * backupMonths;
+      const backupCostTotal = backupGb * backupCost;
+      const eventsPerMonth = monthlyRequests * eventsPerRequest;
+      const piiItems = eventsPerMonth * piiRate;
+      const piiCost = (piiItems / 1000) * piiCostPer1k;
+      const engCost = engHours * engRate;
+
+      const totalMonthly = hotStorageCost + warmStorageCost + archiveStorageCost + ingestCost + queryCost + exportCost + backupCostTotal + piiCost + engCost;
+      const projectedCost = totalMonthly * projectionMonths;
+
+      $("monthlyLogGb").textContent = fmtGb(monthlyLogGb);
+      $("storedLogGb").textContent = fmtGb(storedLogGb);
+      $("monthlyConvGb").textContent = fmtGb(monthlyConvGb);
+      $("storedConvGb").textContent = fmtGb(storedConvGb);
+      $("hotCost").textContent = fmtMoney(hotStorageCost);
+      $("warmCost").textContent = fmtMoney(warmStorageCost);
+      $("archiveCost").textContent = fmtMoney(archiveStorageCost);
+      $("ingestCost").textContent = fmtMoney(ingestCost);
+      $("queryCost").textContent = fmtMoney(queryCost);
+      $("exportCost").textContent = fmtMoney(exportCost);
+      $("backupCost").textContent = fmtMoney(backupCostTotal);
+      $("piiCost").textContent = fmtMoney(piiCost);
+      $("engCost").textContent = fmtMoney(engCost);
+      $("totalMonthly").textContent = fmtMoney(totalMonthly);
+      $("projectedCost").textContent = fmtMoney(projectedCost);
+
+      let verdict = "Storage dominates — consider shorter hot retention and tiered compression to cut monthly cost.";
+      if (engCost > totalMonthly * 0.35) {
+        verdict = "Compliance labor is the largest cost driver — automation, policy templates, or a managed compliance platform could help.";
+      } else if (piiCost > totalMonthly * 0.25) {
+        verdict = "PII/PHI scanning is a major line item — review detection accuracy and false-positive rate to reduce review overhead.";
+      } else if (queryCost > totalMonthly * 0.25) {
+        verdict = "Query costs are high — aggregate dashboards or sampled searches can reduce scan charges.";
+      } else if (archiveMonths > 24) {
+        verdict = "Long retention archive is cheap to store but expensive to restore or query — lock it and run exports on warm data only.";
+      }
+      $("verdict").textContent = verdict;
+    }
+
+    document.querySelectorAll(".scenario-btn").forEach((btn) => {
+      btn.addEventListener("click", () => applyScenario(btn.dataset.scenario));
+    });
+
+    document.querySelectorAll("input").forEach((input) => {
+      input.addEventListener("input", calculate);
+    });
+
+    applyScenario("saas_default");
+  </script>
+</Layout>

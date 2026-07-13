@@ -947,11 +947,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||||- Cross-links: Agent API Pricing Comparator, Prompt Cost Forecaster, Rate Limit & Quota Planner, Model Router / Fallback Cost Calculator.
 
 ## AI Agent Bug Bounty Cost Calculator
-||- URL: https://hermesdispatch.dev/tools/agent-bug-bounty-cost-calculator/
-||- Description: Estimate the monthly cost to run a bug bounty or vulnerability disclosure program for an AI agent: payouts, triage, fixes, legal/compliance, tooling, retainer, and reserve.
-||- Inputs: program type (public, private, VDP, hybrid), platform/management, monthly submissions, valid bug rate, average bounty payout, triage/fix hours, engineering rate, legal hours/rate, tooling cost, retainer, projection months, reserve months.
-||- Outputs: valid bugs per month, monthly bounty cost, platform fees, triage cost, fix cost, legal cost, total monthly program cost, cost per valid bug, recommended reserve, period projection, platform comparison table, verdict.
-||- Audience: AI agent builders, security teams, and founders budgeting a bounty program or VDP for prompt injection, data exfiltration, tool hijacking, and PII leak risks.
-||- Cross-links: Prompt Injection Scanner, Security Audit Cost Calculator, Red Team Cost Calculator, AI Agent Compliance Checker.
+|||- URL: https://hermesdispatch.dev/tools/agent-bug-bounty-cost-calculator/
+|||- Description: Estimate the monthly cost to run a bug bounty or vulnerability disclosure program for an AI agent: payouts, triage, fixes, legal/compliance, tooling, retainer, and reserve.
+|||- Inputs: program type (public, private, VDP, hybrid), platform/management, monthly submissions, valid bug rate, average bounty payout, triage/fix hours, engineering rate, legal hours/rate, tooling cost, retainer, projection months, reserve months.
+|||- Outputs: valid bugs per month, bounty cost, platform fees, triage cost, fix cost, legal cost, total monthly program cost, cost per valid bug, recommended reserve, period projection, platform comparison table, verdict.
+|||- Audience: AI agent builders, security teams, and founders budgeting a bounty program or VDP for prompt injection, data exfiltration, tool hijacking, and PII leak risks.
+|||- Cross-links: Prompt Injection Scanner, Security Audit Cost Calculator, Red Team Cost Calculator, AI Agent Compliance Checker.
+
+## AI Agent Data Retention / Audit Log Cost Calculator
+|||- URL: https://hermesdispatch.dev/tools/agent-data-retention-cost-calculator/
+|||- Description: Estimate monthly cost to store, archive, query, and export AI agent audit logs, conversation history, PII/PHI logs, and compliance telemetry for retention rules like GDPR, SOC 2, HIPAA, and CCPA.
+|||- Inputs: monthly requests, events per request, event size (KB), conversation retention rate, conversation size (KB), hot/warm/archive months, queries per month, exports per month, export size (GB), PII/PHI rate, PII scan cost per 1K items, backup retention months, hot/warm/archive storage cost per GB/month, hot/warm/archive query cost, hot/warm/archive ingest cost per GB, object storage backup cost per GB/month, export egress cost per GB, compliance engineering hours per month, engineering hourly rate, projection months.
+|||- Outputs: monthly log volume, stored log volume, monthly conversation volume, stored conversation volume, hot/warm/archive storage cost, ingest cost, query cost, export cost, backup cost, PII scanning cost, compliance engineering cost, total monthly cost, projected period cost, verdict.
+|||- Audience: AI agent builders, operators, security, and compliance teams budgeting audit-log storage, retention, and retrieval.
+|||- Cross-links: AI Agent Privacy / Compliance Checker, AI Agent PII Detection & Data Classification Cost Calculator, AI Agent Memory / RAG Cost Calculator, AI Agent Observability Cost Calculator.
 
 ## Hub Pages
