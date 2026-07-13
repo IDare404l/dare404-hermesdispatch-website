@@ -1,0 +1,389 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_bug_bounty_cost.json';
+
+const title = "AI Agent Bug Bounty Cost Calculator | Hermes Dispatch";
+const description = "Estimate the monthly cost to run a bug bounty or vulnerability disclosure program for an AI agent: payouts, triage, fixes, legal, tooling, and reserve.";
+
+const programTypes = data.program_types;
+const platforms = data.platforms;
+const bugCategories = data.bug_categories;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What does an AI agent bug bounty program cost per month?", a: "A small private program with ~20 submissions/month typically costs $2,000-$6,000/month including payouts, triage, and fixes. A public enterprise program can exceed $50,000/month once high-severity findings are paid." },
+  { q: "Should AI agents have a VDP or paid bounty first?", a: "Start with a Vulnerability Disclosure Program if budget is tight and attack surface is low. Move to a paid private bounty before a public launch once prompt injection, tool hijacking, and PII leak risks are confirmed." },
+  { q: "How are valid-bug rate and payouts estimated?", a: "Public programs often see 5-15% valid bugs. Private/curated programs can hit 20-30%. Average payouts depend on scope and max bounty, with critical agent vulnerabilities often $2,000-$10,000+." },
+  { q: "Does the calculator include platform fees?", a: "Yes. Platform fees are applied to bounty payouts using the selected platform or program-type default. Self-managed programs have no platform fee but higher triage overhead." },
+  { q: "What is the recommended reserve?", a: "A reserve equal to 2-4 months of expected total program cost helps cover spikes after launches, disclosures, or high-severity findings." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Bug Bounty Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-bug-bounty-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-brand-gold mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-red-500/30">🐞</div>
+      <h1 class="display-heading mb-4">AI Agent Bug Bounty Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the monthly cost to run a bug bounty or vulnerability disclosure program for an AI agent: payouts, triage, fixes, legal, tooling, and reserve.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Program parameters</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Program type</span>
+          <select id="programType" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {programTypes.map(pt => <option value={JSON.stringify(pt)} selected={pt.slug === defaults.program_type}>{pt.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Platform / management</span>
+          <select id="platform" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {platforms.map(pf => <option value={JSON.stringify(pf)} selected={pf.slug === defaults.platform}>{pf.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Submissions / month</span>
+          <input id="monthlySubmissions" type="number" min="0" step="1" value={defaults.monthly_submissions} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Valid bug rate (%)</span>
+          <input id="validBugPct" type="number" min="0" max="100" step="1" value={defaults.valid_bug_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Average bounty payout ($)</span>
+          <input id="avgBounty" type="number" min="0" step="50" value={defaults.avg_bounty} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Triage hours / submission</span>
+          <input id="triageHours" type="number" min="0" step="0.05" value={defaults.triage_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Fix hours / valid bug</span>
+          <input id="fixHours" type="number" min="0" step="0.5" value={defaults.fix_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Engineering hourly rate ($)</span>
+          <input id="engineeringRate" type="number" min="0" step="5" value={defaults.engineering_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Legal / compliance hours / month</span>
+          <input id="legalHours" type="number" min="0" step="0.5" value={defaults.legal_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Legal hourly rate ($)</span>
+          <input id="legalRate" type="number" min="0" step="10" value={defaults.legal_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tooling cost / month ($)</span>
+          <input id="toolingCost" type="number" min="0" step="50" value={defaults.tooling_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Security retainer / month ($)</span>
+          <input id="retainer" type="number" min="0" step="100" value={defaults.retainer} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reserve (months of cost)</span>
+          <input id="reserveMonths" type="number" min="0" max="12" step="1" value={defaults.reserve_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Valid bugs / month</p>
+        <p id="validBugs" class="text-4xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly program cost</p>
+        <p id="totalCost" class="text-4xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per valid bug</p>
+        <p id="costPerBug" class="text-4xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Recommended reserve</p>
+        <p id="reserve" class="text-4xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg">—</p>
+      <p id="verdictSub" class="text-neutral-400 mt-2">—</p>
+    </section>
+
+    <!-- Cost breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost breakdown</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Line item</th>
+              <th class="py-3 pr-4 text-right">Monthly</th>
+              <th class="py-3 pr-4 text-right">% of total</th>
+            </tr>
+          </thead>
+          <tbody id="breakdownTable" class="text-neutral-200">
+            <tr><td colspan="3" class="py-4 text-neutral-500">Run a calculation to see the breakdown.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Platform comparison -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Platform comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Platform</th>
+              <th class="py-3 pr-4 text-right">Monthly fee</th>
+              <th class="py-3 pr-4 text-right">Platform fee</th>
+              <th class="py-3 pr-4 text-right">Extra triage</th>
+              <th class="py-3 pr-4 text-right">Total monthly</th>
+              <th class="py-3 pr-4">Status</th>
+            </tr>
+          </thead>
+          <tbody id="platformTable" class="text-neutral-200">
+            <tr><td colspan="6" class="py-4 text-neutral-500">Run a calculation to compare platforms.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Related tools</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="/tools/agent-prompt-injection-scanner/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Prompt Injection Scanner</a>
+        <a href="/tools/agent-security-audit-cost-calculator/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Security Audit Cost Calc</a>
+        <a href="/tools/agent-redteam-cost-calculator/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Red Team Cost Calc</a>
+        <a href="/tools/ai-agent-compliance-checker/" class="block px-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-cyan-400 transition">Compliance Checker</a>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group border border-neutral-800 rounded-lg">
+            <summary class="px-4 py-3 cursor-pointer font-medium hover:bg-neutral-800/50 transition">{f.q}</summary>
+            <p class="px-4 py-3 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Notes -->
+    <section id="note" class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Methodology notes</h2>
+      <ul class="list-disc pl-5 text-neutral-400 space-y-2">
+        <li>Valid bugs per month = submissions × valid bug rate. Average bounty payouts are multiplied by valid bugs to estimate bounty cost.</li>
+        <li>Triage cost = submissions × triage hours × engineering rate. Fix cost = valid bugs × fix hours × engineering rate.</li>
+        <li>Platform fee = bounty cost × platform fee percentage. Self-managed programs skip the fee but add extra triage hours.</li>
+        <li>Legal/compliance cost = legal hours × legal rate. Tooling and retainer are direct monthly costs.</li>
+        <li>Recommended reserve = monthly total × reserve months. It is not included in the monthly total.</li>
+        <li>Projection = monthly total × projection months, without compounding bounty spikes.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ programTypes, platforms, bugCategories, scenarios, defaults }}>
+    const fmtCur = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtCur2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt1 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
+    const fmt0 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+
+    function $(id) { return document.getElementById(id); }
+
+    function getProgramType() { return JSON.parse($('programType').value); }
+    function getPlatform() { return JSON.parse($('platform').value); }
+
+    function readInputs() {
+      return {
+        programType: getProgramType(),
+        platform: getPlatform(),
+        monthlySubmissions: parseFloat($('monthlySubmissions').value) || 0,
+        validBugPct: Math.min(100, Math.max(0, parseFloat($('validBugPct').value) || 0)),
+        avgBounty: parseFloat($('avgBounty').value) || 0,
+        triageHours: parseFloat($('triageHours').value) || 0,
+        fixHours: parseFloat($('fixHours').value) || 0,
+        engineeringRate: parseFloat($('engineeringRate').value) || 0,
+        legalHours: parseFloat($('legalHours').value) || 0,
+        legalRate: parseFloat($('legalRate').value) || 0,
+        toolingCost: parseFloat($('toolingCost').value) || 0,
+        retainer: parseFloat($('retainer').value) || 0,
+        projectionMonths: parseFloat($('projectionMonths').value) || 1,
+        reserveMonths: parseFloat($('reserveMonths').value) || 0,
+      };
+    }
+
+    function compute(inputs) {
+      const validBugs = inputs.monthlySubmissions * inputs.validBugPct / 100;
+      const bountyCost = validBugs * inputs.avgBounty;
+      const platformFeePct = inputs.platform.platform_fee_pct !== undefined ? inputs.platform.platform_fee_pct : inputs.programType.platform_fee_pct;
+      const platformFee = bountyCost * platformFeePct / 100;
+      const triageCost = inputs.monthlySubmissions * inputs.triageHours * inputs.engineeringRate;
+      const extraTriageCost = inputs.platform.triage_addon_hours * inputs.monthlySubmissions * inputs.engineeringRate;
+      const fixCost = validBugs * inputs.fixHours * inputs.engineeringRate;
+      const legalCost = inputs.legalHours * inputs.legalRate;
+      const monthlyTotal = bountyCost + platformFee + triageCost + extraTriageCost + fixCost + legalCost + inputs.toolingCost + inputs.retainer + inputs.platform.base_monthly_fee;
+      const costPerBug = validBugs > 0 ? monthlyTotal / validBugs : 0;
+      const reserve = monthlyTotal * inputs.reserveMonths;
+      return { validBugs, bountyCost, platformFee, triageCost, extraTriageCost, fixCost, legalCost, monthlyTotal, costPerBug, reserve };
+    }
+
+    function formatMoney(x) {
+      return x >= 100 ? fmtCur.format(x) : fmtCur2.format(x);
+    }
+
+    function calculate() {
+      const inputs = readInputs();
+      const result = compute(inputs);
+
+      $('validBugs').textContent = fmt1.format(result.validBugs);
+      $('totalCost').textContent = formatMoney(result.monthlyTotal);
+      $('costPerBug').textContent = formatMoney(result.costPerBug);
+      $('reserve').textContent = formatMoney(result.reserve);
+
+      const periodCost = result.monthlyTotal * inputs.projectionMonths;
+      const periodBounties = result.bountyCost * inputs.projectionMonths;
+      $('verdictText').textContent = `${inputs.programType.name} on ${inputs.platform.name}`;
+      $('verdictText').className = 'text-lg font-bold text-emerald-400';
+      $('verdictSub').textContent = `Expect ~${fmt1.format(result.validBugs)} valid bugs/month. Monthly cost ${formatMoney(result.monthlyTotal)} (bounties ${formatMoney(result.bountyCost)}, platform fee ${formatMoney(result.platformFee)}, triage ${formatMoney(result.triageCost + result.extraTriageCost)}, fixes ${formatMoney(result.fixCost)}). Projected ${inputs.projectionMonths}-month cost ${formatMoney(periodCost)}, with ~${formatMoney(periodBounties)} in payouts.`;
+
+      renderBreakdown(result);
+      renderPlatforms(inputs, result);
+    }
+
+    function renderBreakdown(result) {
+      const rows = [
+        { label: 'Bounty payouts', value: result.bountyCost },
+        { label: 'Platform fees', value: result.platformFee },
+        { label: 'Triage (incl. self-managed overhead)', value: result.triageCost + result.extraTriageCost },
+        { label: 'Fix engineering', value: result.fixCost },
+        { label: 'Legal / compliance', value: result.legalCost },
+        { label: 'Tooling', value: parseFloat($('toolingCost').value) || 0 },
+        { label: 'Retainer / managed service', value: parseFloat($('retainer').value) || 0 },
+      ];
+      const baseFee = 0; // included in platformFee? actually base_monthly_fee not separate; if not platform fee, base fee is part of platform row. Add as separate line.
+      const base = parseFloat(($('platform').value ? JSON.parse($('platform').value).base_monthly_fee : 0)) || 0;
+      if (base > 0) rows.push({ label: 'Base platform / retainer fee', value: base });
+      const tbody = $('breakdownTable');
+      tbody.innerHTML = '';
+      rows.forEach(r => {
+        const pct = result.monthlyTotal > 0 ? (r.value / result.monthlyTotal * 100) : 0;
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-neutral-800/50';
+        tr.innerHTML = `
+          <td class="py-3 pr-4">${r.label}</td>
+          <td class="py-3 pr-4 text-right font-mono">${formatMoney(r.value)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmt1.format(pct)}%</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      const totalTr = document.createElement('tr');
+      totalTr.className = 'font-semibold text-brand-gold';
+      totalTr.innerHTML = `
+        <td class="py-3 pr-4">Total monthly</td>
+        <td class="py-3 pr-4 text-right font-mono">${formatMoney(result.monthlyTotal)}</td>
+        <td class="py-3 pr-4 text-right font-mono">100%</td>
+      `;
+      tbody.appendChild(totalTr);
+    }
+
+    function renderPlatforms(inputs, currentResult) {
+      const rows = [];
+      platforms.forEach(pf => {
+        const platformInputs = { ...inputs, platform: pf };
+        const r = compute(platformInputs);
+        rows.push({ name: pf.name, total: r.monthlyTotal, fee: r.platformFee, base: pf.base_monthly_fee, extraTriage: r.extraTriageCost, selected: pf.slug === inputs.platform.slug });
+      });
+      rows.sort((a, b) => a.total - b.total);
+      const tbody = $('platformTable');
+      tbody.innerHTML = '';
+      rows.forEach((r, i) => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-neutral-800/50' + (r.selected ? ' bg-neutral-800/30' : '');
+        const status = r.selected ? '▶ Selected' : (i === 0 ? '🏆 Cheapest' : '—');
+        tr.innerHTML = `
+          <td class="py-3 pr-4 font-medium">${r.name}</td>
+          <td class="py-3 pr-4 text-right font-mono">${formatMoney(r.base)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${formatMoney(r.fee)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${formatMoney(r.extraTriage)}</td>
+          <td class="py-3 pr-4 text-right font-mono font-semibold text-brand-gold">${formatMoney(r.total)}</td>
+          <td class="py-3 pr-4 ${i === 0 ? 'text-emerald-400 font-medium' : 'text-neutral-300'}">${status}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function setSelectBySlug(selectId, slug, key) {
+      const sel = $(selectId);
+      for (let i = 0; i < sel.options.length; i++) {
+        if (JSON.parse(sel.options[i].value)[key] === slug) { sel.selectedIndex = i; return true; }
+      }
+      return false;
+    }
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const s = JSON.parse(btn.dataset.scenario);
+        setSelectBySlug('programType', s.program_type, 'slug');
+        setSelectBySlug('platform', s.platform, 'slug');
+        if (s.monthly_submissions !== undefined) $('monthlySubmissions').value = s.monthly_submissions;
+        if (s.valid_bug_pct !== undefined) $('validBugPct').value = s.valid_bug_pct;
+        if (s.avg_bounty !== undefined) $('avgBounty').value = s.avg_bounty;
+        if (s.triage_hours !== undefined) $('triageHours').value = s.triage_hours;
+        if (s.fix_hours !== undefined) $('fixHours').value = s.fix_hours;
+        if (s.engineering_rate !== undefined) $('engineeringRate').value = s.engineering_rate;
+        if (s.legal_hours !== undefined) $('legalHours').value = s.legal_hours;
+        if (s.legal_rate !== undefined) $('legalRate').value = s.legal_rate;
+        if (s.tooling_cost !== undefined) $('toolingCost').value = s.tooling_cost;
+        if (s.retainer !== undefined) $('retainer').value = s.retainer;
+        if (s.projection_months !== undefined) $('projectionMonths').value = s.projection_months;
+        calculate();
+      });
+    });
+
+    const inputIds = ['programType', 'platform', 'monthlySubmissions', 'validBugPct', 'avgBounty', 'triageHours', 'fixHours', 'engineeringRate', 'legalHours', 'legalRate', 'toolingCost', 'retainer', 'projectionMonths', 'reserveMonths'];
+    inputIds.forEach(id => $(id).addEventListener('input', calculate));
+
+    calculate();
+  </script>
+</Layout>

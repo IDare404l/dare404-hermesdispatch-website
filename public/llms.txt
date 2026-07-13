@@ -931,11 +931,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||||– Cross-links: AI Agent Per-User Cost Calculator, AI Agent Multi-Tenant SaaS Cost Calculator, AI Agent Observability Cost Calculator, Startup Runway Calculator.
 
 ## AI Agent Customer Acquisition Cost (CAC) Calculator
-|- URL: https://hermesdispatch.dev/tools/agent-cac-calculator/
-|- Description: Estimate blended CAC, paid CAC, LTV:CAC ratio, and payback period for AI agent products across ads, content/SEO, outbound, partnerships, and product-led growth.
-|- Inputs: monthly spend by channel (paid ads, content/SEO, outbound/SDR, partnerships/affiliates, product-led growth, other), new paying customers per month, free-to-paid conversion rate, ARPU, gross margin percentage, trial/free signups per month, projection months.
-|- Outputs: blended CAC, paid CAC, LTV:CAC ratio, CAC payback period, channel spend breakdown with implied CAC, cost per trial signup, projected period spend, verdict.
-|- Audience: AI agent founders, growth operators, and investors evaluating unit economics.
-|- Cross-links: Affiliate Revenue Estimator, AI Agent Per-User Cost Calculator, Startup Runway Calculator, Agent Output Value Calculator.
+||- URL: https://hermesdispatch.dev/tools/agent-cac-calculator/
+||- Description: Estimate blended CAC, paid CAC, LTV:CAC ratio, and payback period for AI agent products across ads, content/SEO, outbound, partnerships, and product-led growth.
+||- Inputs: monthly spend by channel (paid ads, content/SEO, outbound/SDR, partnerships/affiliates, product-led growth, other), new paying customers per month, free-to-paid conversion rate, ARPU, gross margin percentage, trial/free signups per month, projection months.
+||- Outputs: blended CAC, paid CAC, LTV:CAC ratio, CAC payback period, channel spend breakdown with implied CAC, cost per trial signup, projected period spend, verdict.
+||- Audience: AI agent founders, growth operators, and investors evaluating unit economics.
+||- Cross-links: Affiliate Revenue Estimator, AI Agent Per-User Cost Calculator, Startup Runway Calculator, Agent Output Value Calculator.
+
+## AI Agent Bug Bounty Cost Calculator
+||- URL: https://hermesdispatch.dev/tools/agent-bug-bounty-cost-calculator/
+||- Description: Estimate the monthly cost to run a bug bounty or vulnerability disclosure program for an AI agent: payouts, triage, fixes, legal/compliance, tooling, retainer, and reserve.
+||- Inputs: program type (public, private, VDP, hybrid), platform/management, monthly submissions, valid bug rate, average bounty payout, triage/fix hours, engineering rate, legal hours/rate, tooling cost, retainer, projection months, reserve months.
+||- Outputs: valid bugs per month, monthly bounty cost, platform fees, triage cost, fix cost, legal cost, total monthly program cost, cost per valid bug, recommended reserve, period projection, platform comparison table, verdict.
+||- Audience: AI agent builders, security teams, and founders budgeting a bounty program or VDP for prompt injection, data exfiltration, tool hijacking, and PII leak risks.
+||- Cross-links: Prompt Injection Scanner, Security Audit Cost Calculator, Red Team Cost Calculator, AI Agent Compliance Checker.
 
 ## Hub Pages

@@ -1,0 +1,49 @@
+{
+  "last_updated": "2026-07-13",
+  "note": "Bounty payouts, triage/fix effort, and platform fees are representative. Actual costs depend on scope, attacker attention, and program maturity.",
+  "program_types": [
+    { "slug": "private", "name": "Private/invite-only bounty", "platform_fee_pct": 20, "description": "Curated researchers, lower noise, higher triage quality." },
+    { "slug": "public", "name": "Public bounty program", "platform_fee_pct": 20, "description": "Open to all researchers; higher submission volume and noise." },
+    { "slug": "vdp", "name": "Vulnerability Disclosure Program (VDP)", "platform_fee_pct": 0, "description": "No payouts for findings; primarily triage and fix cost." },
+    { "slug": "hybrid", "name": "Hybrid: VDP + private bounty", "platform_fee_pct": 15, "description": "Public VDP with private paid tier for high-impact bugs." }
+  ],
+  "platforms": [
+    { "slug": "hackerone", "name": "HackerOne", "base_monthly_fee": 0, "platform_fee_pct": 20, "triage_addon_hours": 0, "notes": "20% fee on bounty payouts; managed triage extra." },
+    { "slug": "bugcrowd", "name": "Bugcrowd", "base_monthly_fee": 0, "platform_fee_pct": 20, "triage_addon_hours": 0, "notes": "Similar 20% fee; managed triage services available." },
+    { "slug": "intigriti", "name": "Intigriti", "base_monthly_fee": 0, "platform_fee_pct": 20, "triage_addon_hours": 0, "notes": "EU-focused, ~20% fee." },
+    { "slug": "self_managed", "name": "Self-managed (email/form)", "base_monthly_fee": 0, "platform_fee_pct": 0, "triage_addon_hours": 2, "notes": "No platform fee, but expect more triage overhead." },
+    { "slug": "security_firm", "name": "Managed security firm retainer", "base_monthly_fee": 5000, "platform_fee_pct": 0, "triage_addon_hours": 0, "notes": "Retainer covers triage; bounties paid on top." }
+  ],
+  "bug_categories": [
+    { "slug": "prompt_injection", "name": "Prompt injection / jailbreak", "severity": "critical", "share_pct": 25, "avg_bounty": 2000, "triage_hours": 0.5, "fix_hours": 8 },
+    { "slug": "data_exfiltration", "name": "Data exfiltration via tools", "severity": "critical", "share_pct": 15, "avg_bounty": 3000, "triage_hours": 0.75, "fix_hours": 12 },
+    { "slug": "tool_hijacking", "name": "Tool / function hijacking", "severity": "high", "share_pct": 15, "avg_bounty": 1500, "triage_hours": 0.5, "fix_hours": 8 },
+    { "slug": "pii_leak", "name": "PII / sensitive data leak", "severity": "high", "share_pct": 15, "avg_bounty": 1200, "triage_hours": 0.5, "fix_hours": 6 },
+    { "slug": "indirect_injection", "name": "Indirect / multi-turn injection", "severity": "high", "share_pct": 10, "avg_bounty": 1800, "triage_hours": 0.75, "fix_hours": 10 },
+    { "slug": "model_extraction", "name": "Model extraction / prompt theft", "severity": "medium", "share_pct": 5, "avg_bounty": 800, "triage_hours": 0.5, "fix_hours": 4 },
+    { "slug": "access_control", "name": "Access control / auth bypass", "severity": "high", "share_pct": 10, "avg_bounty": 1500, "triage_hours": 0.5, "fix_hours": 8 },
+    { "slug": "other", "name": "Other / low severity", "severity": "low", "share_pct": 5, "avg_bounty": 250, "triage_hours": 0.25, "fix_hours": 2 }
+  ],
+  "scenarios": [
+    { "name": "Small AI startup — private bounty", "program_type": "private", "platform": "hackerone", "monthly_submissions": 15, "valid_bug_pct": 20, "avg_bounty": 1200, "triage_hours": 0.5, "fix_hours": 6, "engineering_rate": 150, "legal_hours": 4, "legal_rate": 300, "tooling_cost": 500, "retainer": 0, "projection_months": 12 },
+    { "name": "Enterprise AI agent — public bounty", "program_type": "public", "platform": "bugcrowd", "monthly_submissions": 80, "valid_bug_pct": 12, "avg_bounty": 2500, "triage_hours": 0.75, "fix_hours": 10, "engineering_rate": 200, "legal_hours": 10, "legal_rate": 400, "tooling_cost": 2000, "retainer": 5000, "projection_months": 12 },
+    { "name": "Launch week VDP only", "program_type": "vdp", "platform": "self_managed", "monthly_submissions": 40, "valid_bug_pct": 8, "avg_bounty": 0, "triage_hours": 0.5, "fix_hours": 4, "engineering_rate": 175, "legal_hours": 2, "legal_rate": 350, "tooling_cost": 0, "retainer": 0, "projection_months": 3 },
+    { "name": "High-stakes regulated agent", "program_type": "hybrid", "platform": "security_firm", "monthly_submissions": 30, "valid_bug_pct": 25, "avg_bounty": 4000, "triage_hours": 1, "fix_hours": 12, "engineering_rate": 250, "legal_hours": 16, "legal_rate": 500, "tooling_cost": 3000, "retainer": 8000, "projection_months": 12 }
+  ],
+  "defaults": {
+    "program_type": "private",
+    "platform": "hackerone",
+    "monthly_submissions": 20,
+    "valid_bug_pct": 15,
+    "avg_bounty": 1500,
+    "triage_hours": 0.5,
+    "fix_hours": 6,
+    "engineering_rate": 175,
+    "legal_hours": 4,
+    "legal_rate": 350,
+    "tooling_cost": 500,
+    "retainer": 0,
+    "projection_months": 12,
+    "reserve_months": 3
+  }
+}
