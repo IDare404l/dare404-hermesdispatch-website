@@ -2,22 +2,20 @@
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/agent_prompt_injection_scanner.json';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
-const title = "AI Agent Prompt Injection & Security Risk Scanner | Hermes Dispatch";
-const description = "Score your AI agent's system prompt and tool setup for prompt injection, jailbreak, data exfiltration, tool hijacking, and indirect injection risks. Get prioritized fixes and estimated mitigation cost.";
-
+const title = "AI Agent Prompt Injection & Security Risk Scanner";
+const description = "Score an AI agent's system prompt and tool setup for prompt injection, jailbreak, data exfiltration, tool hijacking, and indirect injection risks.";
 const categories = data.risk_categories;
 const checklist = data.checklist;
 const profiles = data.exposure_profiles;
-const riskLevels = data.risk_levels;
+const levels = data.risk_levels;
 
 const faqs = [
-  { q: "What is prompt injection in an AI agent?", a: "Prompt injection is an attack where user input overrides or leaks the system instructions. In agents it is especially dangerous because injected prompts can also trigger tool calls, exfiltrate data, or manipulate workflows." },
-  { q: "What is indirect prompt injection?", a: "Indirect prompt injection hides malicious instructions inside content the agent retrieves — web pages, emails, documents, or tool outputs. The LLM then follows those instructions as if they were part of the task." },
-  { q: "Why is tool hijacking a separate risk?", a: "Even if the LLM itself is well-behaved, an attacker can coerce it into calling tools with bad arguments. Without schema validation and confirmation gates, the agent can send emails, delete data, or make purchases on the attacker's behalf." },
-  { q: "How reliable is this scanner?", a: "It is a heuristic / checklist scanner, not a live red-team. It finds structural weaknesses and estimates relative risk. For a production launch, pair it with automated tools such as Garak or PyRIT and a manual security review." },
-  { q: "What should I fix first?", a: "Start with the highest-weight P0 items: strict tool-call schema validation, removing secrets from prompts, adding per-user rate limits, and ensuring retrieved content cannot directly trigger tools." }
+  { q: "What is prompt injection?", a: "Prompt injection is an attack where user input overrides or leaks the system prompt, hidden instructions, or tool policies. It can happen directly in chat input or indirectly through retrieved documents, emails, web pages, or tool outputs." },
+  { q: "Can a scanner replace a security audit?", a: "No. This scanner is a self-service screen that scores common control gaps and prompt signals. For production systems, pair it with manual red-teaming, code review, and a full security audit." },
+  { q: "Why do tools increase risk so much?", a: "Tools let the agent take real-world actions. If an attacker can manipulate tool arguments or chain unintended calls, the blast radius is much larger than a text-only chatbot." },
+  { q: "What is indirect prompt injection?", a: "Indirect injection hides malicious instructions in data the agent retrieves, such as a web page, PDF, email, or database row. The model then follows those instructions because it cannot distinguish trusted system text from untrusted content." },
+  { q: "Which fix usually has the highest impact?", a: "Separating trusted instructions from untrusted content with delimiters, validating every tool call against a strict schema, and running an output guard layer after the LLM are the highest-impact fixes for most agents." }
 ];
 ---
 
@@ -30,238 +28,393 @@ const faqs = [
     "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
   })} />
 
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <div class="text-center mb-12">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔐</div>
-      <h1 class="display-heading mb-4">AI Agent Prompt Injection &amp; Security Risk Scanner</h1>
-      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Score your agent's system prompt and tool setup for injection, jailbreak, exfiltration, and tool-hijack risks. Get a prioritized fix list and estimated mitigation cost.</p>
-    </div>
-
-    <!-- Exposure profile -->
-    <section class="glass-card rounded-2xl p-6 mb-6 border border-brand-gold/20">
-      <h2 class="text-xl font-bold mb-4 text-brand-gold">Exposure profile</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="profileGrid">
-        {profiles.map(p => (
-          <label class="profile-card glass-card rounded-xl p-4 cursor-pointer hover:border-brand-gold/50 transition-all flex items-start gap-3">
-            <input type="radio" name="exposure" value={p.slug} class="mt-1 accent-brand-gold" checked={p.slug === 'public'} />
-            <div>
-              <div class="font-semibold text-sm">{p.name}</div>
-              <div class="text-xs text-neutral-400 mt-1">{p.description}</div>
-            </div>
-          </label>
-        ))}
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🛡️</div>
+        <h1 class="display-heading mb-4">AI Agent Prompt Injection & Security Risk Scanner</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Paste your system prompt, choose your exposure profile, and check the security controls you already have in place. Get a risk score, top attack paths, and a prioritized fix list.
+        </p>
       </div>
-    </section>
 
-    <!-- Checklist -->
-    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
-      <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-brand-gold">Security checklist</h2>
-        <span class="text-sm text-neutral-400">Check every control your agent already has.</span>
-      </div>
-      <div class="space-y-2" id="checklistContainer">
-        {checklist.map(item => (
-          <label class="check-item flex items-start gap-3 p-3 rounded-lg bg-neutral-900/50 border border-neutral-800 hover:bg-neutral-800/50 transition cursor-pointer" data-category={item.category} data-weight={item.weight}>
-            <input type="checkbox" class="check-box mt-0.5 w-5 h-5 accent-brand-gold" data-id={item.id} />
-            <div class="flex-1">
-              <div class="text-sm font-medium">{item.text}</div>
-              <div class="text-xs text-neutral-500 mt-0.5">{categories.find(c => c.slug === item.category)?.name} • weight {item.weight}</div>
-            </div>
-          </label>
-        ))}
-      </div>
-    </section>
-
-    <!-- Summary -->
-    <section id="summary" class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/30 text-center">
-      <p class="text-xs text-neutral-500 uppercase mb-1">Overall security risk score</p>
-      <p id="scoreLine" class="text-4xl font-bold text-brand-gold">0 / 100</p>
-      <p id="riskLabel" class="text-lg font-semibold mt-2">Select controls to score</p>
-      <p id="riskMessage" class="text-sm text-neutral-400 mt-1">—</p>
-    </section>
-
-    <!-- Results by category -->
-    <section class="grid md:grid-cols-2 gap-4 mb-12" id="categoryResults">
-      {categories.map(cat => (
-        <div class="glass-card rounded-xl p-5 border border-neutral-800" data-cat={cat.slug}>
-          <div class="flex items-center gap-3 mb-3">
-            <div class="text-2xl">{cat.emoji}</div>
-            <div>
-              <h3 class="font-semibold">{cat.name}</h3>
-              <div class="text-xs text-neutral-400">{cat.description}</div>
-            </div>
-          </div>
-          <div class="mb-3">
-            <div class="flex justify-between text-xs text-neutral-400 mb-1">
-              <span>Risk</span>
-              <span class="cat-score">0%</span>
-            </div>
-            <div class="w-full bg-neutral-800 rounded-full h-2">
-              <div class="cat-bar bg-brand-gold h-2 rounded-full transition-all" style="width: 0%"></div>
-            </div>
-          </div>
-          <div class="space-y-2">
-            <div>
-              <p class="text-xs font-semibold text-cyan-400 mb-1">Likely signals in your setup</p>
-              <ul class="text-xs text-neutral-400 list-disc list-inside space-y-0.5">
-                {cat.signals.slice(0, 3).map(s => <li>{s}</li>)}
-              </ul>
-            </div>
-            <div>
-              <p class="text-xs font-semibold text-emerald-400 mb-1">Top mitigations</p>
-              <ul class="text-xs text-neutral-400 list-disc list-inside space-y-0.5">
-                {cat.mitigations.slice(0, 3).map(m => <li>{m}</li>)}
-              </ul>
-            </div>
-          </div>
-          <p class="text-xs text-neutral-500 mt-3">Estimated mitigation cost: <span class="cat-cost text-brand-gold font-mono">—</span></p>
-        </div>
-      ))}
-    </section>
-
-    <!-- Priority fix list -->
-    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
-      <h2 class="text-xl font-bold mb-4 text-brand-gold">Priority fix list</h2>
-      <div id="priorityList" class="space-y-2">
-        <p class="text-neutral-400 text-sm">Check controls above to generate a prioritized fix list.</p>
-      </div>
-    </section>
-
-    <!-- FAQ -->
-    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
-      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
-      <div class="space-y-4">
-        {faqs.map(f => (
+      <!-- Exposure and prompt -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">1. Agent exposure</h2>
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
           <div>
-            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
-            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+            <label class="block text-sm text-neutral-400 mb-2">Exposure profile</label>
+            <select id="profileSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
+              {profiles.map(p => <option value={JSON.stringify(p)}>{p.name}</option>)}
+            </select>
+            <p id="profileDesc" class="text-xs text-neutral-500 mt-2">{profiles[0].description}</p>
           </div>
-        ))}
+          <div>
+            <label class="block text-sm text-neutral-400 mb-2">Number of tools the agent can call</label>
+            <input id="toolCount" type="number" min="0" step="1" value="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <label class="flex items-center gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 cursor-pointer">
+            <input id="hasTools" type="checkbox" class="w-4 h-4 accent-brand-gold" />
+            <span class="text-sm text-neutral-200">Agent uses tools / functions</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 cursor-pointer">
+            <input id="autonomousTools" type="checkbox" class="w-4 h-4 accent-brand-gold" />
+            <span class="text-sm text-neutral-200">Tools can run without user confirmation</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 cursor-pointer">
+            <input id="untrustedRetrieval" type="checkbox" class="w-4 h-4 accent-brand-gold" />
+            <span class="text-sm text-neutral-200">Retrieves untrusted web/email/docs</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 cursor-pointer">
+            <input id="handlesPii" type="checkbox" class="w-4 h-4 accent-brand-gold" />
+            <span class="text-sm text-neutral-200">Handles PII, PHI, or secrets</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 cursor-pointer">
+            <input id="userInputAllowed" type="checkbox" checked class="w-4 h-4 accent-brand-gold" />
+            <span class="text-sm text-neutral-200">Untrusted user input is allowed</span>
+          </label>
+          <label class="flex items-center gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 cursor-pointer">
+            <input id="multiAgent" type="checkbox" class="w-4 h-4 accent-brand-gold" />
+            <span class="text-sm text-neutral-200">Multi-agent / reflection loops</span>
+          </label>
+        </div>
+
+        <div class="mb-6">
+          <label class="block text-sm text-neutral-400 mb-2">System prompt (optional — scanned for signals)</label>
+          <textarea id="systemPrompt" rows="6" placeholder="Paste your system prompt here..." class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none font-mono text-sm"></textarea>
+          <p id="signalNote" class="text-xs text-neutral-500 mt-2">The scanner looks for missing delimiters, instruction-override phrases, secret disclosure, and roleplay hooks.</p>
+        </div>
       </div>
-    </section>
 
-    <!-- Cross-links -->
-    <div class="flex flex-wrap gap-3 mb-8">
-      <a href="/tools/agent-redteam-cost-calculator/" class="btn-primary text-sm">Red Team Cost Calculator →</a>
-      <a href="/tools/agent-evaluation-planner/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Evaluation Planner →</a>
-      <a href="/tools/ai-agent-compliance-checker/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compliance Checker →</a>
-      <a href="/tools/agent-deployment-scorecard/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Deployment Readiness Scorecard →</a>
+      <!-- Checklist -->
+      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-brand-gold">2. Security controls</h2>
+          <button id="resetChecklist" type="button" class="text-xs px-3 py-1.5 rounded-lg border border-neutral-700 hover:bg-neutral-800 transition-colors">Uncheck all</button>
+        </div>
+        <p class="text-sm text-neutral-400 mb-4">Check each control your agent already implements. Missing high-weight controls raise risk and appear in the fix list.</p>
+        <div id="checklistContainer" class="space-y-6 max-h-[720px] overflow-y-auto pr-2"></div>
+      </div>
+
+      <!-- Results -->
+      <div id="results" class="grid lg:grid-cols-3 gap-6 mb-10">
+        <div class="lg:col-span-1 space-y-4">
+          <div class="glass-card rounded-2xl p-6 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Overall risk score</p>
+            <p id="riskScore" class="text-5xl font-bold text-brand-gold">0</p>
+            <p id="riskLevel" class="text-lg font-medium mt-2">—</p>
+            <p id="riskMessage" class="text-sm text-neutral-400 mt-2">—</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 border border-red-500/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Open critical controls</p>
+            <p id="openCritical" class="text-3xl font-bold text-red-400">—</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 border border-emerald-500/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Controls implemented</p>
+            <p id="implementedCount" class="text-3xl font-bold text-emerald-400">—</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Top risk category</p>
+            <p id="topCategory" class="text-lg font-bold text-brand-gold">—</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Est. mitigation cost</p>
+            <p id="mitigationCost" class="text-lg font-bold text-white">—</p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+          <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+            <h3 class="text-lg font-bold mb-4 text-brand-gold">Risk breakdown by category</h3>
+            <div id="categoryBreakdown" class="space-y-3"></div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+            <h3 class="text-lg font-bold mb-4 text-brand-gold">Prioritized fix list</h3>
+            <div id="fixList" class="space-y-2 max-h-[400px] overflow-y-auto pr-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cross-links -->
+      <div class="flex flex-wrap gap-3 mb-10">
+        <a href="/tools/agent-security-audit-cost-calculator/" class="btn-primary text-sm">Security Audit Cost Calculator →</a>
+        <a href="/tools/agent-redteam-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Red Team Cost Calculator →</a>
+        <a href="/tools/ai-agent-compliance-checker/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compliance Checker →</a>
+        <a href="/tools/agent-pii-detection-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">PII Detection Cost Calc →</a>
+      </div>
+
+      <!-- FAQ -->
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faqs.map(f => (
+            <details class="group">
+              <summary class="font-semibold cursor-pointer text-white">{f.q}</summary>
+              <p class="text-neutral-400 text-sm mt-2">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
     </div>
+  </section>
 
-    <p class="text-neutral-500 text-sm">{data.note}</p>
-  </main>
+  <script is:inline define:vars={{ categories: JSON.stringify(categories), checklist: JSON.stringify(checklist), profiles: JSON.stringify(profiles), levels: JSON.stringify(levels) }}>
+    const fmtInt = n => Math.round(n).toLocaleString('en-US');
+    const categoryData = JSON.parse(categories);
+    const checklistData = JSON.parse(checklist);
+    const profileData = JSON.parse(profiles);
+    const levelData = JSON.parse(levels);
 
-  <script is:inline define:vars={{ categoriesJson: JSON.stringify(categories), checklistJson: JSON.stringify(checklist), profilesJson: JSON.stringify(profiles), levelsJson: JSON.stringify(riskLevels) }}>
-    const categories = JSON.parse(categoriesJson);
-    const checklistItems = JSON.parse(checklistJson);
-    const profiles = JSON.parse(profilesJson);
-    const levels = JSON.parse(levelsJson);
+    const injectionSignals = [
+      { pattern: /ignore previous (instructions|prompt)|ignore all previous|disregard previous/i, category: 'prompt_injection', bonus: 8, label: "instruction override phrase" },
+      { pattern: /system prompt|your system prompt|reveal your prompt|show me your instructions/i, category: 'prompt_injection', bonus: 6, label: "system prompt disclosure probe" },
+      { pattern: /DAN|jailbreak|do anything now|developer mode|pretend to be/i, category: 'jailbreak', bonus: 8, label: "jailbreak/roleplay phrase" },
+      { pattern: /new instructions?:|updated instructions?|you will now/i, category: 'prompt_injection', bonus: 5, label: "new instruction injection" },
+      { pattern: /-----|## User|## Instructions?|### User|### Assistant|<user>|<instructions?>/i, category: 'delimiter_ok', bonus: -4, label: "delimiter present" },
+      { pattern: /API key|secret|password|token|credential|private key/i, category: 'data_exfil', bonus: 10, label: "secret-like strings in prompt" }
+    ];
 
-    function getExposureMultiplier() {
-      const selected = document.querySelector('input[name="exposure"]:checked');
-      const p = profiles.find(x => x.slug === selected?.value) || profiles.find(x => x.slug === 'public');
-      return p?.multiplier || 1;
+    function getProfile() {
+      return JSON.parse(document.getElementById('profileSelect').value);
     }
 
-    function compute() {
-      const multiplier = getExposureMultiplier();
-      const checkedIds = new Set();
-      document.querySelectorAll('.check-box:checked').forEach(cb => checkedIds.add(cb.dataset.id));
+    function getSignals() {
+      const text = document.getElementById('systemPrompt').value || '';
+      const signals = [];
+      injectionSignals.forEach(s => {
+        if (s.pattern.test(text)) signals.push({ category: s.category, bonus: s.bonus, label: s.label });
+      });
+      return signals;
+    }
 
-      // Map each checklist item to its category and weight
-      const categoryScores = {};
-      const categoryMax = {};
-      categories.forEach(c => { categoryScores[c.slug] = 0; categoryMax[c.slug] = 0; });
+    function getCheckedIds() {
+      return new Set([...document.querySelectorAll('.check-item:checked')].map(cb => cb.dataset.id));
+    }
 
-      checklistItems.forEach(item => {
-        categoryMax[item.category] = (categoryMax[item.category] || 0) + item.weight;
-        if (checkedIds.has(item.id)) {
-          categoryScores[item.category] = (categoryScores[item.category] || 0) + item.weight;
+    function priorityForWeight(w) {
+      if (w >= 4) return 'P0';
+      if (w >= 3) return 'P1';
+      return 'P2';
+    }
+
+    function priorityClass(p) {
+      if (p === 'P0') return 'bg-red-500/10 text-red-400 border-red-500/20';
+      if (p === 'P1') return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+    }
+
+    function renderChecklist() {
+      const byCategory = {};
+      checklistData.forEach(item => {
+        byCategory[item.category] = byCategory[item.category] || [];
+        byCategory[item.category].push(item);
+      });
+
+      const catMap = Object.fromEntries(categoryData.map(c => [c.slug, c]));
+      const container = document.getElementById('checklistContainer');
+      container.innerHTML = Object.entries(byCategory).map(([slug, items]) => {
+        const cat = catMap[slug];
+        return `
+          <div>
+            <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+              <span>${cat?.emoji || '•'}</span> ${cat?.name || slug}
+            </h3>
+            <div class="space-y-2">
+              ${items.map(it => {
+                const p = priorityForWeight(it.weight);
+                return `
+                  <label class="flex items-start gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 hover:border-brand-gold/30 transition-colors cursor-pointer">
+                    <input type="checkbox" class="check-item mt-1 w-4 h-4 accent-brand-gold" data-id="${it.id}" data-weight="${it.weight}" data-category="${it.category}">
+                    <div class="flex-1">
+                      <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <span class="text-xs px-2 py-0.5 rounded border ${priorityClass(p)}">${p}</span>
+                      </div>
+                      <p class="text-sm text-neutral-200">${it.text}</p>
+                    </div>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.addEventListener('change', compute);
+    }
+
+    function computeCategoryRisk() {
+      const profile = getProfile();
+      const checked = getCheckedIds();
+      const signals = getSignals();
+      const multiplier = profile.multiplier;
+
+      // Add exposure-based signal bonuses for tool and retrieval toggles.
+      const toggles = {
+        hasTools: document.getElementById('hasTools').checked,
+        autonomousTools: document.getElementById('autonomousTools').checked,
+        untrustedRetrieval: document.getElementById('untrustedRetrieval').checked,
+        handlesPii: document.getElementById('handlesPii').checked,
+        userInputAllowed: document.getElementById('userInputAllowed').checked,
+        multiAgent: document.getElementById('multiAgent').checked,
+        toolCount: Math.max(0, parseInt(document.getElementById('toolCount').value, 10) || 0)
+      };
+
+      const catBonuses = {};
+      if (toggles.hasTools || toggles.toolCount > 0) catBonuses.tool_hijack = (catBonuses.tool_hijack || 0) + Math.min(12, toggles.toolCount * 2);
+      if (toggles.autonomousTools) {
+        catBonuses.tool_hijack = (catBonuses.tool_hijack || 0) + 10;
+        catBonuses.data_exfil = (catBonuses.data_exfil || 0) + 4;
+      }
+      if (toggles.untrustedRetrieval) {
+        catBonuses.indirect_injection = (catBonuses.indirect_injection || 0) + 12;
+        catBonuses.data_exfil = (catBonuses.data_exfil || 0) + 6;
+      }
+      if (toggles.handlesPii) catBonuses.data_exfil = (catBonuses.data_exfil || 0) + 10;
+      if (toggles.userInputAllowed) {
+        catBonuses.prompt_injection = (catBonuses.prompt_injection || 0) + 6;
+        catBonuses.jailbreak = (catBonuses.jailbreak || 0) + 4;
+      }
+      if (toggles.multiAgent) catBonuses.model_self_correction = (catBonuses.model_self_correction || 0) + 8;
+
+      signals.forEach(s => {
+        if (s.category === 'delimiter_ok') {
+          // Delimiter reduces prompt injection risk
+          catBonuses.prompt_injection = (catBonuses.prompt_injection || 0) + s.bonus;
+        } else {
+          catBonuses[s.category] = (catBonuses[s.category] || 0) + s.bonus;
         }
       });
 
-      // Per-category risk %
-      const catRisk = {};
-      let totalScore = 0;
-      let totalWeight = 0;
-      categories.forEach(cat => {
-        const max = categoryMax[cat.slug] || cat.base_weight;
-        const score = categoryScores[cat.slug] || 0;
-        const missing = Math.max(0, max - score);
-        // Weighted by category base_weight and exposure multiplier
-        const risk = Math.min(100, Math.round((missing / (max || 1)) * 100));
-        catRisk[cat.slug] = risk;
-        totalScore += missing * (cat.base_weight / 100);
-        totalWeight += max * (cat.base_weight / 100);
+      const categoryRisks = categoryData.map(cat => {
+        const items = checklistData.filter(it => it.category === cat.slug);
+        const totalWeight = items.reduce((sum, it) => sum + it.weight, 0);
+        const checkedWeight = items.reduce((sum, it) => sum + (checked.has(it.id) ? it.weight : 0), 0);
+        const coverage = totalWeight > 0 ? checkedWeight / totalWeight : 1;
+        const bonus = catBonuses[cat.slug] || 0;
+        const rawRisk = cat.base_weight * multiplier * (1 - coverage) + Math.max(0, bonus);
+        const maxRisk = cat.base_weight * Math.max(1, multiplier);
+        return {
+          ...cat,
+          coverage,
+          rawRisk,
+          maxRisk,
+          riskScore: Math.min(rawRisk, maxRisk),
+          openItems: items.filter(it => !checked.has(it.id))
+        };
       });
 
-      const rawScore = totalWeight > 0 ? (totalScore / totalWeight) * 100 : 0;
-      const finalScore = Math.min(100, Math.round(rawScore * multiplier));
+      return categoryRisks;
+    }
 
-      // Update summary
-      document.getElementById('scoreLine').textContent = finalScore + ' / 100';
-      const level = levels.find(l => finalScore <= l.max) || levels[levels.length - 1];
-      const labelEl = document.getElementById('riskLabel');
-      labelEl.textContent = level.label;
-      labelEl.className = 'text-lg font-semibold mt-2 status-badge border ' +
-        (level.color === 'emerald' ? 'status-active' :
-         level.color === 'amber' ? 'status-learning' :
-         level.color === 'orange' ? 'bg-orange-500/15 text-orange-400 border-orange-500/30' :
-         'bg-red-500/15 text-red-400 border-red-500/30');
+    function compute() {
+      const categoryRisks = computeCategoryRisk();
+      const totalRisk = categoryRisks.reduce((sum, c) => sum + c.riskScore, 0);
+      const maxTotal = categoryRisks.reduce((sum, c) => sum + c.maxRisk, 0);
+      const score = maxTotal > 0 ? Math.round((totalRisk / maxTotal) * 100) : 0;
+      const clampedScore = Math.min(100, Math.max(0, score));
+
+      const level = levelData.find(l => clampedScore <= l.max) || levelData[levelData.length - 1];
+      document.getElementById('riskScore').textContent = clampedScore;
+      document.getElementById('riskScore').className = `text-5xl font-bold text-${level.color}-400`;
+      document.getElementById('riskLevel').textContent = level.label;
+      document.getElementById('riskLevel').className = `text-lg font-medium mt-2 text-${level.color}-400`;
       document.getElementById('riskMessage').textContent = level.message;
 
-      // Update category cards
-      categories.forEach(cat => {
-        const card = document.querySelector(`#categoryResults div[data-cat="${cat.slug}"]`);
-        if (!card) return;
-        const risk = catRisk[cat.slug] || 0;
-        card.querySelector('.cat-score').textContent = risk + '%';
-        const bar = card.querySelector('.cat-bar');
-        bar.style.width = risk + '%';
-        bar.className = 'cat-bar h-2 rounded-full transition-all ' +
-          (risk < 25 ? 'bg-emerald-500' : risk < 50 ? 'bg-amber-500' : risk < 75 ? 'bg-orange-500' : 'bg-red-500');
+      const checked = getCheckedIds();
+      const criticalOpen = checklistData.filter(it => it.weight >= 4 && !checked.has(it.id)).length;
+      document.getElementById('openCritical').textContent = criticalOpen;
+      document.getElementById('implementedCount').textContent = `${checked.size}/${checklistData.length}`;
 
-        // Estimated mitigation cost scales with risk
-        const cost = cat.cost_low + (cat.cost_high - cat.cost_low) * (risk / 100);
-        card.querySelector('.cat-cost').textContent = '$' + Math.round(cost).toLocaleString();
+      const top = categoryRisks.slice().sort((a, b) => b.riskScore - a.riskScore)[0];
+      document.getElementById('topCategory').textContent = top ? `${top.emoji} ${top.name}` : 'None';
+
+      // Mitigation cost range based on open high-weight items per category.
+      let costLow = 0, costHigh = 0;
+      categoryRisks.forEach(c => {
+        const openHighWeight = c.openItems.filter(it => it.weight >= 3).length;
+        if (openHighWeight > 0) {
+          costLow += c.cost_low * Math.min(openHighWeight, 3);
+          costHigh += c.cost_high * Math.min(openHighWeight, 3);
+        }
+      });
+      document.getElementById('mitigationCost').textContent = `$${fmtInt(costLow)} – $${fmtInt(costHigh)}`;
+
+      // Breakdown bars
+      const breakdown = document.getElementById('categoryBreakdown');
+      breakdown.innerHTML = categoryRisks.map(c => {
+        const pct = Math.round((c.riskScore / c.maxRisk) * 100);
+        return `
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-neutral-200 font-medium">${c.emoji} ${c.name}</span>
+              <span class="text-neutral-400">${pct}% risk</span>
+            </div>
+            <div class="w-full bg-neutral-800 rounded-full h-2.5 overflow-hidden">
+              <div class="bg-gradient-to-r from-brand-gold to-brand-amber h-2.5 rounded-full" style="width: ${pct}%"></div>
+            </div>
+            <p class="text-xs text-neutral-500 mt-1">${c.openItems.length} open controls</p>
+          </div>
+        `;
+      }).join('');
+
+      // Fix list: sort open items by weight desc, then by category risk desc.
+      const categoryOrder = Object.fromEntries(categoryRisks.map((c, i) => [c.slug, i]));
+      const openItems = checklistData.filter(it => !checked.has(it.id)).map(it => {
+        const cat = categoryRisks.find(c => c.slug === it.category);
+        return { ...it, catRisk: cat ? cat.riskScore : 0, priority: priorityForWeight(it.weight) };
+      }).sort((a, b) => {
+        if (b.weight !== a.weight) return b.weight - a.weight;
+        return b.catRisk - a.catRisk;
       });
 
-      // Priority list: unchecked high-weight items, sorted by weight desc
-      const unchecked = checklistItems.filter(i => !checkedIds.has(i.id)).sort((a, b) => b.weight - a.weight);
-      const list = document.getElementById('priorityList');
-      if (unchecked.length === 0) {
-        list.innerHTML = '<p class="text-emerald-400 text-sm">🎉 All checklist controls are in place. Continue monitoring and periodic red-teaming.</p>';
+      const fixList = document.getElementById('fixList');
+      if (openItems.length === 0) {
+        fixList.innerHTML = `<p class="text-emerald-400 text-sm">All controls are implemented. Keep red-teaming as the agent evolves.</p>`;
       } else {
-        list.innerHTML = unchecked.slice(0, 8).map(item => {
-          const cat = categories.find(c => c.slug === item.category);
-          return `<div class="flex items-start gap-3 p-3 rounded-lg bg-neutral-900/50 border border-neutral-800">
-            <div class="text-lg">${cat?.emoji || '•'}</div>
+        fixList.innerHTML = openItems.map((it, i) => `
+          <div class="flex items-start gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50">
+            <span class="text-brand-gold font-bold text-sm">${i + 1}</span>
             <div class="flex-1">
-              <div class="text-sm font-medium">${item.text}</div>
-              <div class="text-xs text-neutral-500">${cat?.name} • priority weight ${item.weight}</div>
+              <div class="flex flex-wrap items-center gap-2 mb-1">
+                <span class="text-xs px-2 py-0.5 rounded border ${priorityClass(it.priority)}">${it.priority}</span>
+                <span class="text-xs text-neutral-500">${it.category}</span>
+              </div>
+              <p class="text-sm text-neutral-200">${it.text}</p>
             </div>
-          </div>`;
-        }).join('');
+          </div>
+        `).join('');
       }
     }
 
-    document.querySelectorAll('input[name="exposure"], .check-box').forEach(el => {
-      el.addEventListener('change', compute);
-      el.addEventListener('input', compute);
+    document.addEventListener('DOMContentLoaded', function() {
+      renderChecklist();
+
+      document.getElementById('profileSelect').addEventListener('change', e => {
+        const p = JSON.parse(e.target.value);
+        document.getElementById('profileDesc').textContent = p.description;
+        compute();
+      });
+
+      ['toolCount','hasTools','autonomousTools','untrustedRetrieval','handlesPii','userInputAllowed','multiAgent','systemPrompt'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener(id === 'systemPrompt' ? 'input' : 'change', compute);
+          if (id === 'toolCount') el.addEventListener('input', compute);
+        }
+      });
+
+      document.getElementById('resetChecklist').addEventListener('click', () => {
+        document.querySelectorAll('.check-item').forEach(cb => cb.checked = false);
+        compute();
+      });
+
+      compute();
     });
-
-    compute();
   </script>
-
-  
-
-  
-
-  <AgentCodeBlock
-    toolName="Agent Prompt Injection Scanner"
-    toolPath="/tools/agent-prompt-injection-scanner/"
-    description="Copy-paste Hermes Agent script for agent prompt injection scanner."
-    scriptPath="/hermes-tools/agent_prompt_injection_scanner.py"
-    locked={false}
-  />
 </Layout>
