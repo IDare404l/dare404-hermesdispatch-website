@@ -915,11 +915,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 ||||– Cross-links: AI Agent Privacy / Compliance Checker, AI Agent Security Audit Cost Calculator, AI Agent Data Integration / ETL Cost Calculator, AI Agent Output Value Calculator.
 
 ## AI Agent Cost Allocation & Chargeback Calculator
-||||– URL: https://hermesdispatch.dev/tools/agent-cost-allocation-calculator/
-||||– Description: Allocate AI agent spend across teams, products, or tenants by usage, headcount, value, or equal split. Model chargeback, showback, and overhead recovery.
-||||– Inputs: total monthly AI agent cost ($), allocation method (equal split, usage-based, value-based, headcount-based), number of teams/tenants, dimension weights for LLM API, vector/memory, tool calls, human review, hosting/compute, and shared infrastructure, shared overhead recovery percentage, showback margin percentage, projection months.
-||||– Outputs: total monthly cost, cost per team/tenant, cost with overhead and margin, projected period cost, per-team allocation table, cost-dimension breakdown, verdict.
-||||– Audience: AI agent platform teams, FinOps, and SaaS operators building chargeback or showback models for shared AI infrastructure.
-||||– Cross-links: AI Agent Per-User Cost Calculator, AI Agent Multi-Tenant SaaS Cost Calculator, AI Agent Observability Cost Calculator, Startup Runway Calculator.
+|||||– URL: https://hermesdispatch.dev/tools/agent-cost-allocation-calculator/
+|||||– Description: Allocate AI agent spend across teams, products, or tenants by usage, headcount, value, or equal split. Model chargeback, showback, and overhead recovery.
+|||||– Inputs: total monthly AI agent cost ($), allocation method (equal split, usage-based, value-based, headcount-based), number of teams/tenants, dimension weights for LLM API, vector/memory, tool calls, human review, hosting/compute, and shared infrastructure, shared overhead recovery percentage, showback margin percentage, projection months.
+|||||– Outputs: total monthly cost, cost per team/tenant, cost with overhead and margin, projected period cost, per-team allocation table, cost-dimension breakdown, verdict.
+|||||– Audience: AI agent platform teams, FinOps, and SaaS operators building chargeback or showback models for shared AI infrastructure.
+|||||– Cross-links: AI Agent Per-User Cost Calculator, AI Agent Multi-Tenant SaaS Cost Calculator, AI Agent Observability Cost Calculator, Startup Runway Calculator.
+
+## AI Agent Customer Acquisition Cost (CAC) Calculator
+|- URL: https://hermesdispatch.dev/tools/agent-cac-calculator/
+|- Description: Estimate blended CAC, paid CAC, LTV:CAC ratio, and payback period for AI agent products across ads, content/SEO, outbound, partnerships, and product-led growth.
+|- Inputs: monthly spend by channel (paid ads, content/SEO, outbound/SDR, partnerships/affiliates, product-led growth, other), new paying customers per month, free-to-paid conversion rate, ARPU, gross margin percentage, trial/free signups per month, projection months.
+|- Outputs: blended CAC, paid CAC, LTV:CAC ratio, CAC payback period, channel spend breakdown with implied CAC, cost per trial signup, projected period spend, verdict.
+|- Audience: AI agent founders, growth operators, and investors evaluating unit economics.
+|- Cross-links: Affiliate Revenue Estimator, AI Agent Per-User Cost Calculator, Startup Runway Calculator, Agent Output Value Calculator.
 
 ## Hub Pages

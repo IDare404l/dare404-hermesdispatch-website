@@ -1,0 +1,319 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_cac_calculator.json';
+
+const title = "AI Agent Customer Acquisition Cost (CAC) Calculator | Hermes Dispatch";
+const description = "Estimate blended CAC, paid CAC, LTV:CAC ratio, and payback period for AI agent products across ads, content/SEO, outbound, partnerships, and product-led growth.";
+const channels = data.channels;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is CAC for an AI agent business?", a: "Customer Acquisition Cost (CAC) is the total sales and marketing spend required to acquire one new paying customer. For AI agent products it usually blends paid ads, content/SEO labor, outbound tools, partnerships, and product-led growth costs." },
+  { q: "What is the difference between blended CAC and paid CAC?", a: "Blended CAC divides total acquisition spend by total new customers, including organic and near-free channels. Paid CAC only counts direct paid spend (ads + outbound + partnerships), giving a stricter view of scalable paid channels." },
+  { q: "How do I calculate CAC payback period?", a: "Divide CAC by the monthly gross margin dollars per customer. For example, a $300 CAC with $50 monthly contribution margin pays back in 6 months." },
+  { q: "What is a good LTV:CAC ratio?", a: "A healthy SaaS or AI agent business usually targets 3:1 or higher. Below 2:1 suggests unit economics are stressed; above 5:1 may mean you are under-investing in growth." },
+  { q: "Should I include content and SEO labor in CAC?", a: "Yes, if that content is primarily aimed at acquiring customers. Many teams amortize content/SEO investment over the expected useful life (e.g., 12–24 months) to avoid overstating early CAC." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Customer Acquisition Cost (CAC) Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-cac-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🎯</div>
+      <h1 class="display-heading mb-4">AI Agent Customer Acquisition Cost (CAC) Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate blended CAC, paid CAC, LTV:CAC ratio, and payback period across ads, content/SEO, outbound, partnerships, and product-led growth.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Acquisition inputs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Paid ads ($/mo)</span>
+          <input id="adSpend" type="number" min="0" step="100" value={defaults.ad_spend} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Content / SEO ($/mo)</span>
+          <input id="contentSpend" type="number" min="0" step="100" value={defaults.content_seo_spend} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Outbound / SDR ($/mo)</span>
+          <input id="outboundSpend" type="number" min="0" step="100" value={defaults.outbound_spend} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Partnerships / affiliates ($/mo)</span>
+          <input id="partnershipSpend" type="number" min="0" step="100" value={defaults.partnership_spend} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Product-led growth ($/mo)</span>
+          <input id="plgSpend" type="number" min="0" step="100" value={defaults.plg_spend} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Other acquisition ($/mo)</span>
+          <input id="otherSpend" type="number" min="0" step="100" value={defaults.other_spend} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">New paying customers / mo</span>
+          <input id="newCustomers" type="number" min="1" step="1" value={defaults.new_customers_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Free / trial to paid conversion (%)</span>
+          <input id="conversionRate" type="number" min="0" max="100" step="0.1" value={defaults.free_to_paid_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Average revenue per user ($/mo)</span>
+          <input id="arpu" type="number" min="0" step="1" value={defaults.arpu_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Gross margin (%)</span>
+          <input id="grossMargin" type="number" min="0" max="100" step="1" value={defaults.gross_margin_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Trial / free signups / mo</span>
+          <input id="trialSignups" type="number" min="0" step="1" value={defaults.trial_signups_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Blended CAC</p>
+        <p id="summaryBlendedCAC" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Paid CAC</p>
+        <p id="summaryPaidCAC" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">LTV:CAC ratio</p>
+        <p id="summaryLTVCAC" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">CAC payback</p>
+        <p id="summaryPayback" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Channel breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Channel spend breakdown</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[480px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Channel</th>
+              <th class="py-3 pr-4 text-right">Monthly spend</th>
+              <th class="py-3 pr-4 text-right">% of spend</th>
+              <th class="py-3 pr-4 text-right">Implied CAC*</th>
+            </tr>
+          </thead>
+          <tbody id="channelTableBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+      <p class="text-neutral-500 text-xs mt-3">* Implied CAC assumes each channel drives customers in proportion to its share of total spend.</p>
+    </section>
+
+    <!-- Unit economics -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Unit economics</h2>
+      <div id="unitEconGrid" class="grid md:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/affiliate-revenue-estimator/" class="btn-primary text-sm">Affiliate Revenue Estimator →</a>
+      <a href="/tools/agent-per-user-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Per-User Cost Calc →</a>
+      <a href="/tools/startup-runway-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Runway Calc →</a>
+      <a href="/tools/agent-output-value-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Output Value Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtPct = n => n.toLocaleString('en-US', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const fmtRatio = n => n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+    function getInputs() {
+      return {
+        adSpend: Math.max(0, parseFloat(document.getElementById('adSpend').value) || 0),
+        contentSpend: Math.max(0, parseFloat(document.getElementById('contentSpend').value) || 0),
+        outboundSpend: Math.max(0, parseFloat(document.getElementById('outboundSpend').value) || 0),
+        partnershipSpend: Math.max(0, parseFloat(document.getElementById('partnershipSpend').value) || 0),
+        plgSpend: Math.max(0, parseFloat(document.getElementById('plgSpend').value) || 0),
+        otherSpend: Math.max(0, parseFloat(document.getElementById('otherSpend').value) || 0),
+        newCustomers: Math.max(1, parseFloat(document.getElementById('newCustomers').value) || 1),
+        conversionRate: Math.min(100, Math.max(0, parseFloat(document.getElementById('conversionRate').value) || 0)),
+        arpu: Math.max(0, parseFloat(document.getElementById('arpu').value) || 0),
+        grossMargin: Math.min(100, Math.max(0, parseFloat(document.getElementById('grossMargin').value) || 0)),
+        trialSignups: Math.max(0, parseFloat(document.getElementById('trialSignups').value) || 0),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function setInputs(obj) {
+      if (obj.ad_spend !== undefined) document.getElementById('adSpend').value = obj.ad_spend;
+      if (obj.content_seo_spend !== undefined) document.getElementById('contentSpend').value = obj.content_seo_spend;
+      if (obj.outbound_spend !== undefined) document.getElementById('outboundSpend').value = obj.outbound_spend;
+      if (obj.partnership_spend !== undefined) document.getElementById('partnershipSpend').value = obj.partnership_spend;
+      if (obj.plg_spend !== undefined) document.getElementById('plgSpend').value = obj.plg_spend;
+      if (obj.other_spend !== undefined) document.getElementById('otherSpend').value = obj.other_spend;
+      if (obj.new_customers_per_month !== undefined) document.getElementById('newCustomers').value = obj.new_customers_per_month;
+      if (obj.free_to_paid_rate !== undefined) document.getElementById('conversionRate').value = obj.free_to_paid_rate;
+      if (obj.arpu_monthly !== undefined) document.getElementById('arpu').value = obj.arpu_monthly;
+      if (obj.gross_margin_pct !== undefined) document.getElementById('grossMargin').value = obj.gross_margin_pct;
+      if (obj.trial_signups_per_month !== undefined) document.getElementById('trialSignups').value = obj.trial_signups_per_month;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const totalSpend = inps.adSpend + inps.contentSpend + inps.outboundSpend + inps.partnershipSpend + inps.plgSpend + inps.otherSpend;
+      const paidSpend = inps.adSpend + inps.outboundSpend + inps.partnershipSpend;
+      const blendedCAC = totalSpend / inps.newCustomers;
+      const paidCAC = paidSpend / inps.newCustomers;
+      const contributionMargin = inps.arpu * (inps.grossMargin / 100);
+      const ltv = contributionMargin * inps.projectionMonths;
+      const ltvCAC = blendedCAC > 0 ? ltv / blendedCAC : 0;
+      const paybackMonths = contributionMargin > 0 ? blendedCAC / contributionMargin : Infinity;
+      const periodSpend = totalSpend * inps.projectionMonths;
+      const cpl = inps.trialSignups > 0 ? totalSpend / inps.trialSignups : 0;
+
+      document.getElementById('summaryBlendedCAC').textContent = fmtMoney0(blendedCAC);
+      document.getElementById('summaryPaidCAC').textContent = fmtMoney0(paidCAC);
+      document.getElementById('summaryLTVCAC').textContent = fmtRatio(ltvCAC) + 'x';
+      document.getElementById('summaryPayback').textContent = isFinite(paybackMonths) ? fmtRatio(paybackMonths) + ' mo' : '∞';
+
+      const channelNames = {
+        adSpend: 'Paid ads',
+        contentSpend: 'Content / SEO',
+        outboundSpend: 'Outbound / SDR',
+        partnershipSpend: 'Partnerships / affiliates',
+        plgSpend: 'Product-led growth',
+        otherSpend: 'Other'
+      };
+      const channelKeys = ['adSpend', 'contentSpend', 'outboundSpend', 'partnershipSpend', 'plgSpend', 'otherSpend'];
+      const tbody = document.getElementById('channelTableBody');
+      tbody.innerHTML = channelKeys.map((key, i) => {
+        const spend = inps[key];
+        const pct = totalSpend > 0 ? spend / totalSpend : 0;
+        const impliedCAC = inps.newCustomers > 0 ? spend / inps.newCustomers : 0;
+        return `
+          <tr class="border-b border-neutral-800/50 ${i === 0 ? 'bg-brand-gold/10' : ''}">
+            <td class="py-3 pr-4 font-medium">${channelNames[key]}</td>
+            <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(spend)}</td>
+            <td class="py-3 pr-4 text-right">${fmtPct(pct)}</td>
+            <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(impliedCAC)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const unitGrid = document.getElementById('unitEconGrid');
+      unitGrid.innerHTML = `
+        <div class="glass-card rounded-xl p-4 border border-brand-gold/10">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Monthly acquisition spend</p>
+          <p class="text-xl font-semibold text-white">${fmtMoney0(totalSpend)}</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 border border-brand-gold/10">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Contribution margin / user / mo</p>
+          <p class="text-xl font-semibold text-white">${fmtMoney0(contributionMargin)}</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 border border-brand-gold/10">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Projected LTV (${inps.projectionMonths} mo)</p>
+          <p class="text-xl font-semibold text-white">${fmtMoney0(ltv)}</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 border border-brand-gold/10">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cost per trial/free signup</p>
+          <p class="text-xl font-semibold text-white">${fmtMoney0(cpl)}</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 border border-brand-gold/10">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Customers from ${inps.trialSignups} signups</p>
+          <p class="text-xl font-semibold text-white">${inps.trialSignups > 0 ? Math.round(inps.trialSignups * inps.conversionRate / 100).toLocaleString() : '—'}</p>
+        </div>
+        <div class="glass-card rounded-xl p-4 border border-brand-gold/10">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Projected period spend</p>
+          <p class="text-xl font-semibold text-white">${fmtMoney0(periodSpend)}</p>
+        </div>
+      `;
+
+      let verdict = '';
+      if (ltvCAC >= 3 && paybackMonths <= 12) {
+        verdict = `Strong unit economics. Blended CAC is ${fmtMoney0(blendedCAC)}, LTV:CAC is ${fmtRatio(ltvCAC)}x, and payback is ${fmtRatio(paybackMonths)} months. This is generally fundable and scalable if retention holds.`;
+      } else if (ltvCAC >= 2 && paybackMonths <= 18) {
+        verdict = `Good unit economics. Blended CAC ${fmtMoney0(blendedCAC)} with ${fmtRatio(paybackMonths)}-month payback is workable, but focus on improving conversion or gross margin to reach 3:1 LTV:CAC.`;
+      } else if (ltvCAC >= 1 && paybackMonths <= 24) {
+        verdict = `Marginal unit economics. Blended CAC ${fmtMoney0(blendedCAC)} and ${fmtRatio(paybackMonths)}-month payback leave little room for churn. Lower paid CAC or increase ARPU/gross margin before scaling spend.`;
+      } else {
+        verdict = `Weak unit economics. Blended CAC ${fmtMoney0(blendedCAC)} is too high relative to contribution margin (${fmtMoney0(contributionMargin)}/mo). Fix conversion, pricing, or channel mix before increasing acquisition spend.`;
+      }
+      const paidShare = totalSpend > 0 ? paidSpend / totalSpend : 0;
+      verdict += ` Paid channels make up ${fmtPct(paidShare)} of total spend${paidShare > 0.6 ? ' — high dependence on paid acquisition increases burn risk if CAC rises' : ' — a balanced mix reduces acquisition risk'}.`;
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      ['adSpend','contentSpend','outboundSpend','partnershipSpend','plgSpend','otherSpend','newCustomers','conversionRate','arpu','grossMargin','trialSignups','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      compute();
+    });
+  </script>
+</Layout>

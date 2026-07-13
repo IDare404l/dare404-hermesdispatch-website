@@ -1,0 +1,112 @@
+{
+  "last_updated": "2026-07-13",
+  "note": "CAC estimates blend paid and organic acquisition spend. Treat content/SEO and product-led costs as amortized monthly investments. Replace defaults with your actual funnel and accounting data.",
+  "defaults": {
+    "ad_spend": 8000,
+    "content_seo_spend": 4000,
+    "outbound_spend": 3000,
+    "partnership_spend": 1500,
+    "plg_spend": 2000,
+    "other_spend": 500,
+    "new_customers_per_month": 120,
+    "free_to_paid_rate": 18,
+    "arpu_monthly": 79,
+    "gross_margin_pct": 75,
+    "projection_months": 12,
+    "trial_signups_per_month": 400
+  },
+  "channels": [
+    {
+      "slug": "ads",
+      "name": "Paid ads",
+      "description": "Google, Meta, LinkedIn, X, Reddit, and retargeting spend."
+    },
+    {
+      "slug": "content_seo",
+      "name": "Content / SEO",
+      "description": "Writers, editors, tools, link building, and technical SEO labor."
+    },
+    {
+      "slug": "outbound",
+      "name": "Outbound / SDR",
+      "description": "SDR tools, list vendors, email/SMS/LinkedIn platforms, and human labor."
+    },
+    {
+      "slug": "partnerships",
+      "name": "Partnerships / Affiliates",
+      "description": "Partner commissions, co-marketing, affiliate platform fees, and relationship overhead."
+    },
+    {
+      "slug": "plg",
+      "name": "Product-led growth",
+      "description": "Freemium infra, onboarding tooling, referral rewards, and product marketing."
+    },
+    {
+      "slug": "other",
+      "name": "Other",
+      "description": "Events, community, brand, PR, and miscellaneous acquisition spend."
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "AI agent SaaS (PLG + content)",
+      "ad_spend": 5000,
+      "content_seo_spend": 8000,
+      "outbound_spend": 2000,
+      "partnership_spend": 1000,
+      "plg_spend": 4000,
+      "other_spend": 500,
+      "new_customers_per_month": 150,
+      "free_to_paid_rate": 15,
+      "arpu_monthly": 99,
+      "gross_margin_pct": 80,
+      "projection_months": 12,
+      "trial_signups_per_month": 1000
+    },
+    {
+      "name": "AI agency / services (outbound + ads)",
+      "ad_spend": 10000,
+      "content_seo_spend": 3000,
+      "outbound_spend": 8000,
+      "partnership_spend": 2000,
+      "plg_spend": 0,
+      "other_spend": 1000,
+      "new_customers_per_month": 25,
+      "free_to_paid_rate": 40,
+      "arpu_monthly": 2500,
+      "gross_margin_pct": 60,
+      "projection_months": 12,
+      "trial_signups_per_month": 60
+    },
+    {
+      "name": "AI newsletter / media (organic + ads)",
+      "ad_spend": 2000,
+      "content_seo_spend": 6000,
+      "outbound_spend": 1000,
+      "partnership_spend": 1500,
+      "plg_spend": 1500,
+      "other_spend": 500,
+      "new_customers_per_month": 500,
+      "free_to_paid_rate": 5,
+      "arpu_monthly": 12,
+      "gross_margin_pct": 90,
+      "projection_months": 12,
+      "trial_signups_per_month": 10000
+    },
+    {
+      "name": "AI hardware affiliate (SEO + ads)",
+      "ad_spend": 4000,
+      "content_seo_spend": 5000,
+      "outbound_spend": 0,
+      "partnership_spend": 1000,
+      "plg_spend": 0,
+      "other_spend": 500,
+      "new_customers_per_month": 300,
+      "free_to_paid_rate": 25,
+      "arpu_monthly": 45,
+      "gross_margin_pct": 85,
+      "projection_months": 12,
+      "trial_signups_per_month": 1200
+    }
+  ]
+}
