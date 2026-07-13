@@ -907,11 +907,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |- Cross-links: Agent Benchmark Selector, Agent Stack Builder, LLM Cost Calculator, Prompt Testing Budget Calculator.
 
 ## AI Agent PII Detection & Data Classification Cost Calculator
-|||– URL: https://hermesdispatch.dev/tools/agent-pii-detection-cost-calculator/
-|||– Description: Estimate monthly cost to detect, classify, review, and store PII, PHI, financial, and custom sensitive data across AI agent inputs, outputs, and documents. Compare managed SaaS, cloud APIs, and open-source self-hosted routes.
-|||– Inputs: detection provider (AWS Macie, Google Cloud DLP, Azure AI Language PII, Presidio self-hosted, Nightfall, OneTrust, Private AI, Amazon Comprehend PII, LLM classifier), classification depth (PII only, PII + PHI, PII + PHI + financial, custom/multilingual), items to scan per month, average characters per item, false-positive review rate (%), review hourly cost ($), minutes to review one flag, storage (GB), storage cost ($/GB/month), setup hours, setup hourly rate ($), maintenance hours per month, projection months.
-|||– Outputs: items scanned per month, monthly detection cost, all-in monthly cost, cost per 1K items, estimated flags per month, review hours and cost, storage cost, setup cost, projected period cost, provider comparison table, verdict.
-|||– Audience: AI agent builders and operators choosing a PII/PHI detection and data-classification stack while budgeting review and storage overhead.
-|||– Cross-links: AI Agent Privacy / Compliance Checker, AI Agent Security Audit Cost Calculator, AI Agent Data Integration / ETL Cost Calculator, AI Agent Output Value Calculator.
+||||– URL: https://hermesdispatch.dev/tools/agent-pii-detection-cost-calculator/
+||||– Description: Estimate monthly cost to detect, classify, review, and store PII, PHI, financial, and custom sensitive data across AI agent inputs, outputs, and documents. Compare managed SaaS, cloud APIs, and open-source self-hosted routes.
+||||– Inputs: detection provider (AWS Macie, Google Cloud DLP, Azure AI Language PII, Presidio self-hosted, Nightfall, OneTrust, Private AI, Amazon Comprehend PII, LLM classifier), classification depth (PII only, PII + PHI, PII + PHI + financial, custom/multilingual), items to scan per month, average characters per item, false-positive review rate (%), review hourly cost ($), minutes to review one flag, storage (GB), storage cost ($/GB/month), setup hours, setup hourly rate ($), maintenance hours per month, projection months.
+||||– Outputs: items scanned per month, monthly detection cost, all-in monthly cost, cost per 1K items, estimated flags per month, review hours and cost, storage cost, setup cost, projected period cost, provider comparison table, verdict.
+||||– Audience: AI agent builders and operators choosing a PII/PHI detection and data-classification stack while budgeting review and storage overhead.
+||||– Cross-links: AI Agent Privacy / Compliance Checker, AI Agent Security Audit Cost Calculator, AI Agent Data Integration / ETL Cost Calculator, AI Agent Output Value Calculator.
+
+## AI Agent Cost Allocation & Chargeback Calculator
+||||– URL: https://hermesdispatch.dev/tools/agent-cost-allocation-calculator/
+||||– Description: Allocate AI agent spend across teams, products, or tenants by usage, headcount, value, or equal split. Model chargeback, showback, and overhead recovery.
+||||– Inputs: total monthly AI agent cost ($), allocation method (equal split, usage-based, value-based, headcount-based), number of teams/tenants, dimension weights for LLM API, vector/memory, tool calls, human review, hosting/compute, and shared infrastructure, shared overhead recovery percentage, showback margin percentage, projection months.
+||||– Outputs: total monthly cost, cost per team/tenant, cost with overhead and margin, projected period cost, per-team allocation table, cost-dimension breakdown, verdict.
+||||– Audience: AI agent platform teams, FinOps, and SaaS operators building chargeback or showback models for shared AI infrastructure.
+||||– Cross-links: AI Agent Per-User Cost Calculator, AI Agent Multi-Tenant SaaS Cost Calculator, AI Agent Observability Cost Calculator, Startup Runway Calculator.
 
 ## Hub Pages

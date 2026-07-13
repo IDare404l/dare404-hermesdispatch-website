@@ -1,0 +1,160 @@
+{
+  "last_updated": "2026-07-13",
+  "note": "Cost allocation and chargeback estimates are directional. Replace default weights, usage splits, and overhead rates with your actual accounting or FinOps data.",
+  "defaults": {
+    "total_monthly_cost": 50000,
+    "allocation_method": "usage_based",
+    "team_count": 4,
+    "llm_split_pct": 45,
+    "memory_split_pct": 15,
+    "tool_split_pct": 10,
+    "review_split_pct": 15,
+    "hosting_split_pct": 10,
+    "shared_split_pct": 5,
+    "shared_overhead_pct": 8,
+    "showback_margin_pct": 15,
+    "projection_months": 12
+  },
+  "allocation_methods": [
+    {
+      "slug": "equal_split",
+      "name": "Equal split",
+      "description": "Divide the total cost evenly across teams or tenants regardless of usage."
+    },
+    {
+      "slug": "usage_based",
+      "name": "Usage-based",
+      "description": "Allocate each cost dimension proportionally to its driver: LLM tokens, vector queries, tool calls, review hours, hosting footprint, and shared overhead."
+    },
+    {
+      "slug": "value_based",
+      "name": "Value-based",
+      "description": "Weight allocation by business value metrics such as revenue contribution, active users, or criticality score."
+    },
+    {
+      "slug": "headcount_based",
+      "name": "Headcount-based",
+      "description": "Allocate shared and support costs by team size or number of tenant seats."
+    }
+  ],
+  "cost_dimensions": [
+    { "slug": "llm", "name": "LLM API", "default_weight": 45, "driver": "tokens consumed" },
+    { "slug": "memory", "name": "Vector / memory", "default_weight": 15, "driver": "embedding tokens, storage GB, queries" },
+    { "slug": "tools", "name": "Tool calls", "default_weight": 10, "driver": "external API calls and tool invocations" },
+    { "slug": "review", "name": "Human review", "default_weight": 15, "driver": "escalation and review hours" },
+    { "slug": "hosting", "name": "Hosting / compute", "default_weight": 10, "driver": "container, GPU, or VM hours" },
+    { "slug": "shared", "name": "Shared infrastructure", "default_weight": 5, "driver": "auth, observability, security, networking" }
+  ],
+  "team_profiles": [
+    {
+      "slug": "support",
+      "name": "Customer support",
+      "llm_share_pct": 40,
+      "memory_share_pct": 10,
+      "tool_share_pct": 5,
+      "review_share_pct": 30,
+      "hosting_share_pct": 10,
+      "shared_share_pct": 5,
+      "value_weight": 25,
+      "headcount_weight": 35
+    },
+    {
+      "slug": "sales",
+      "name": "Sales / SDR",
+      "llm_share_pct": 35,
+      "memory_share_pct": 10,
+      "tool_share_pct": 25,
+      "review_share_pct": 10,
+      "hosting_share_pct": 10,
+      "shared_share_pct": 10,
+      "value_weight": 30,
+      "headcount_weight": 15
+    },
+    {
+      "slug": "engineering",
+      "name": "Engineering agent",
+      "llm_share_pct": 50,
+      "memory_share_pct": 20,
+      "tool_share_pct": 15,
+      "review_share_pct": 5,
+      "hosting_share_pct": 8,
+      "shared_share_pct": 2,
+      "value_weight": 25,
+      "headcount_weight": 25
+    },
+    {
+      "slug": "research",
+      "name": "Research / knowledge",
+      "llm_share_pct": 25,
+      "memory_share_pct": 45,
+      "tool_share_pct": 10,
+      "review_share_pct": 5,
+      "hosting_share_pct": 10,
+      "shared_share_pct": 5,
+      "value_weight": 20,
+      "headcount_weight": 25
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Mid-size AI platform",
+      "total_monthly_cost": 50000,
+      "allocation_method": "usage_based",
+      "team_count": 4,
+      "llm_split_pct": 45,
+      "memory_split_pct": 15,
+      "tool_split_pct": 10,
+      "review_split_pct": 15,
+      "hosting_split_pct": 10,
+      "shared_split_pct": 5,
+      "shared_overhead_pct": 8,
+      "showback_margin_pct": 15,
+      "projection_months": 12
+    },
+    {
+      "name": "Multi-tenant SaaS",
+      "total_monthly_cost": 120000,
+      "allocation_method": "usage_based",
+      "team_count": 8,
+      "llm_split_pct": 40,
+      "memory_split_pct": 20,
+      "tool_split_pct": 10,
+      "review_split_pct": 10,
+      "hosting_split_pct": 15,
+      "shared_split_pct": 5,
+      "shared_overhead_pct": 10,
+      "showback_margin_pct": 20,
+      "projection_months": 12
+    },
+    {
+      "name": "Internal shared services",
+      "total_monthly_cost": 18000,
+      "allocation_method": "headcount_based",
+      "team_count": 5,
+      "llm_split_pct": 35,
+      "memory_split_pct": 10,
+      "tool_split_pct": 5,
+      "review_split_pct": 20,
+      "hosting_split_pct": 10,
+      "shared_split_pct": 20,
+      "shared_overhead_pct": 5,
+      "showback_margin_pct": 0,
+      "projection_months": 12
+    },
+    {
+      "name": "Enterprise chargeback",
+      "total_monthly_cost": 250000,
+      "allocation_method": "value_based",
+      "team_count": 6,
+      "llm_split_pct": 40,
+      "memory_split_pct": 15,
+      "tool_split_pct": 5,
+      "review_split_pct": 10,
+      "hosting_split_pct": 15,
+      "shared_split_pct": 15,
+      "shared_overhead_pct": 12,
+      "showback_margin_pct": 18,
+      "projection_months": 12
+    }
+  ]
+}

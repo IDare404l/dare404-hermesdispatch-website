@@ -1,0 +1,350 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_cost_allocation.json';
+
+const title = "AI Agent Cost Allocation & Chargeback Calculator | Hermes Dispatch";
+const description = "Allocate AI agent spend across teams, products, or tenants by usage, headcount, value, or equal split. Model chargeback, showback, and overhead recovery.";
+const methods = data.allocation_methods;
+const dimensions = data.cost_dimensions;
+const teamProfiles = data.team_profiles;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is AI agent cost allocation?", a: "Cost allocation splits a shared AI agent bill into portions assigned to each team, product, or tenant. It turns a single LLM, memory, tool, review, and hosting invoice into understandable unit economics." },
+  { q: "What is the difference between chargeback and showback?", a: "Showback reports allocated costs for transparency without billing another team. Chargeback actually moves budget from the consuming team to the central AI platform or shared-services cost center." },
+  { q: "Which allocation method is best?", a: "Usage-based is fairest when you can meter tokens, queries, tool calls, and review hours. Headcount-based works for shared overhead. Value-based fits enterprise chargeback where business impact matters more than raw consumption." },
+  { q: "What costs should be included?", a: "Include LLM API, vector memory, tool calls, human review, hosting/compute, and shared infrastructure such as auth, observability, security, and networking. Exclude one-time R&D or exploration projects unless policy says otherwise." },
+  { q: "How do I handle overhead that no team directly consumes?", a: "Apply a shared overhead percentage on top of allocated direct costs, or split it across teams by headcount or value weight. This calculator supports both approaches." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Cost Allocation & Chargeback Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-cost-allocation-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📊</div>
+      <h1 class="display-heading mb-4">AI Agent Cost Allocation & Chargeback Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Allocate AI agent spend across teams, products, or tenants by usage, headcount, value, or equal split. Model chargeback, showback, and overhead recovery.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Allocation inputs</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block sm:col-span-2 lg:col-span-1">
+          <span class="text-neutral-400 text-sm">Total monthly AI agent cost ($)</span>
+          <input id="totalCost" type="number" min="0" step="100" value={defaults.total_monthly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Allocation method</span>
+          <select id="methodSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {methods.map(m => <option value={JSON.stringify(m)} selected={m.slug === defaults.allocation_method}>{m.name}</option>)}
+          </select>
+          <p id="methodDesc" class="text-neutral-500 text-xs mt-1">Select a method to change how costs are split.</p>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Number of teams / tenants</span>
+          <input id="teamCount" type="number" min="1" step="1" value={defaults.team_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">LLM API weight (%)</span>
+          <input id="llmPct" type="number" min="0" max="100" step="1" value={defaults.llm_split_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Vector / memory weight (%)</span>
+          <input id="memoryPct" type="number" min="0" max="100" step="1" value={defaults.memory_split_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Tool calls weight (%)</span>
+          <input id="toolPct" type="number" min="0" max="100" step="1" value={defaults.tool_split_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Human review weight (%)</span>
+          <input id="reviewPct" type="number" min="0" max="100" step="1" value={defaults.review_split_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Hosting / compute weight (%)</span>
+          <input id="hostingPct" type="number" min="0" max="100" step="1" value={defaults.hosting_split_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Shared infra weight (%)</span>
+          <input id="sharedPct" type="number" min="0" max="100" step="1" value={defaults.shared_split_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Shared overhead recovery (%)</span>
+          <input id="overheadPct" type="number" min="0" max="100" step="1" value={defaults.shared_overhead_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Showback margin (%)</span>
+          <input id="marginPct" type="number" min="0" max="100" step="1" value={defaults.showback_margin_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Dimension weights are normalized automatically. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+        <p id="summaryTotal" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per team / mo</p>
+        <p id="summaryPerTeam" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">With overhead + margin</p>
+        <p id="summaryCharged" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Projected period cost</p>
+        <p id="summaryPeriod" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Team allocation table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Team / tenant allocation</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[640px]">
+          <thead>
+            <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+              <th class="py-3 pr-4">Team / tenant</th>
+              <th class="py-3 pr-4 text-right">Allocated / mo</th>
+              <th class="py-3 pr-4 text-right">Overhead / mo</th>
+              <th class="py-3 pr-4 text-right">Showback / mo</th>
+              <th class="py-3 pr-4 text-right">% of total</th>
+            </tr>
+          </thead>
+          <tbody id="teamTableBody" class="text-neutral-200"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Dimension breakdown -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost dimension breakdown</h2>
+      <div id="dimensionGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-per-user-cost-calculator/" class="btn-primary text-sm">Per-User Cost Calculator →</a>
+      <a href="/tools/agent-multi-tenant-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Multi-Tenant SaaS Cost Calc →</a>
+      <a href="/tools/agent-observability-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Observability Cost Calc →</a>
+      <a href="/tools/startup-runway-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Startup Runway Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ teamProfiles: JSON.stringify(teamProfiles), methods: JSON.stringify(methods) }}>
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtPct = n => n.toLocaleString('en-US', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        totalCost: Math.max(0, parseFloat(document.getElementById('totalCost').value) || 0),
+        teamCount: Math.max(1, parseInt(document.getElementById('teamCount').value, 10) || 1),
+        llmPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('llmPct').value) || 0)),
+        memoryPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('memoryPct').value) || 0)),
+        toolPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('toolPct').value) || 0)),
+        reviewPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('reviewPct').value) || 0)),
+        hostingPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('hostingPct').value) || 0)),
+        sharedPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('sharedPct').value) || 0)),
+        overheadPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('overheadPct').value) || 0)),
+        marginPct: Math.min(100, Math.max(0, parseFloat(document.getElementById('marginPct').value) || 0)),
+        projectionMonths: Math.max(1, parseFloat(document.getElementById('projectionMonths').value) || 1)
+      };
+    }
+
+    function getMethod() {
+      return JSON.parse(document.getElementById('methodSelect').value);
+    }
+
+    function setInputs(obj) {
+      if (obj.total_monthly_cost !== undefined) document.getElementById('totalCost').value = obj.total_monthly_cost;
+      if (obj.allocation_method !== undefined) {
+        const options = Array.from(document.getElementById('methodSelect').options);
+        const match = options.find(o => JSON.parse(o.value).slug === obj.allocation_method);
+        if (match) document.getElementById('methodSelect').selectedIndex = options.indexOf(match);
+      }
+      if (obj.team_count !== undefined) document.getElementById('teamCount').value = obj.team_count;
+      if (obj.llm_split_pct !== undefined) document.getElementById('llmPct').value = obj.llm_split_pct;
+      if (obj.memory_split_pct !== undefined) document.getElementById('memoryPct').value = obj.memory_split_pct;
+      if (obj.tool_split_pct !== undefined) document.getElementById('toolPct').value = obj.tool_split_pct;
+      if (obj.review_split_pct !== undefined) document.getElementById('reviewPct').value = obj.review_split_pct;
+      if (obj.hosting_split_pct !== undefined) document.getElementById('hostingPct').value = obj.hosting_split_pct;
+      if (obj.shared_split_pct !== undefined) document.getElementById('sharedPct').value = obj.shared_split_pct;
+      if (obj.shared_overhead_pct !== undefined) document.getElementById('overheadPct').value = obj.shared_overhead_pct;
+      if (obj.showback_margin_pct !== undefined) document.getElementById('marginPct').value = obj.showback_margin_pct;
+      if (obj.projection_months !== undefined) document.getElementById('projectionMonths').value = obj.projection_months;
+    }
+
+    function normalizeWeights(inps) {
+      const raw = [inps.llmPct, inps.memoryPct, inps.toolPct, inps.reviewPct, inps.hostingPct, inps.sharedPct];
+      const total = raw.reduce((a, b) => a + b, 0) || 1;
+      return raw.map(w => w / total);
+    }
+
+    function compute() {
+      const inps = getInputs();
+      const method = getMethod();
+      const weights = normalizeWeights(inps);
+      const dimSlugs = ['llm', 'memory', 'tools', 'review', 'hosting', 'shared'];
+      const dimensionCosts = {};
+      dimSlugs.forEach((slug, i) => {
+        dimensionCosts[slug] = inps.totalCost * weights[i];
+      });
+
+      // Build team rows using the first N team profiles, cycling if needed.
+      const profiles = JSON.parse(teamProfiles);
+      const rows = [];
+      let totalAllocated = 0;
+      for (let i = 0; i < inps.teamCount; i++) {
+        const profile = profiles[i % profiles.length];
+        let allocated = 0;
+        if (method.slug === 'equal_split') {
+          allocated = inps.totalCost / inps.teamCount;
+        } else if (method.slug === 'usage_based') {
+          const teamWeights = [profile.llm_share_pct, profile.memory_share_pct, profile.tool_share_pct, profile.review_share_pct, profile.hosting_share_pct, profile.shared_share_pct];
+          const teamTotal = teamWeights.reduce((a, b) => a + b, 0) || 1;
+          allocated = dimSlugs.reduce((sum, slug, idx) => sum + dimensionCosts[slug] * (teamWeights[idx] / teamTotal), 0);
+        } else if (method.slug === 'value_based') {
+          allocated = inps.totalCost * (profile.value_weight / 100);
+        } else if (method.slug === 'headcount_based') {
+          allocated = inps.totalCost * (profile.headcount_weight / 100);
+        }
+        totalAllocated += allocated;
+        rows.push({ ...profile, allocated });
+      }
+
+      // Normalize if rounding/weighting caused drift, then apply overhead and margin.
+      const driftFactor = inps.totalCost / (totalAllocated || 1);
+      rows.forEach(r => { r.allocated *= driftFactor; });
+      const overheadPerTeam = inps.totalCost * (inps.overheadPct / 100) / inps.teamCount;
+      rows.forEach(r => {
+        r.overhead = overheadPerTeam;
+        r.showback = (r.allocated + r.overhead) * (1 + inps.marginPct / 100);
+        r.pct = inps.totalCost > 0 ? (r.allocated / inps.totalCost) : 0;
+      });
+
+      const perTeamAvg = inps.totalCost / inps.teamCount;
+      const chargedAvg = perTeamAvg * (1 + inps.overheadPct / 100) * (1 + inps.marginPct / 100);
+      const periodCost = inps.totalCost * inps.projectionMonths;
+
+      document.getElementById('summaryTotal').textContent = fmtMoney0(inps.totalCost);
+      document.getElementById('summaryPerTeam').textContent = fmtMoney0(perTeamAvg);
+      document.getElementById('summaryCharged').textContent = fmtMoney0(chargedAvg);
+      document.getElementById('summaryPeriod').textContent = fmtMoney0(periodCost);
+
+      const tbody = document.getElementById('teamTableBody');
+      tbody.innerHTML = rows.map((r, i) => `
+        <tr class="border-b border-neutral-800/50 ${i === 0 ? 'bg-brand-gold/10' : ''}">
+          <td class="py-3 pr-4 font-medium">${r.name}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(r.allocated)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(r.overhead)}</td>
+          <td class="py-3 pr-4 text-right font-mono">${fmtMoney0(r.showback)}</td>
+          <td class="py-3 pr-4 text-right">${fmtPct(r.pct)}</td>
+        </tr>
+      `).join('');
+
+      const dimNames = { llm: 'LLM API', memory: 'Vector / memory', tools: 'Tool calls', review: 'Human review', hosting: 'Hosting / compute', shared: 'Shared infrastructure' };
+      const dimGrid = document.getElementById('dimensionGrid');
+      dimGrid.innerHTML = dimSlugs.map((slug, i) => `
+        <div class="glass-card rounded-xl p-4 border border-brand-gold/10">
+          <p class="text-xs text-neutral-500 uppercase mb-1">${dimNames[slug]}</p>
+          <p class="text-xl font-semibold text-white">${fmtMoney0(dimensionCosts[slug])}</p>
+          <p class="text-neutral-400 text-sm mt-1">${(weights[i] * 100).toFixed(1)}% of total</p>
+        </div>
+      `).join('');
+
+      const overheadTotal = inps.totalCost * (inps.overheadPct / 100);
+      const showbackTotal = inps.totalCost * (1 + inps.overheadPct / 100) * (1 + inps.marginPct / 100);
+      let verdict = '';
+      if (method.slug === 'equal_split') {
+        verdict = `Equal split: every team pays ${fmtMoney0(perTeamAvg)}/mo. Simple, but high-usage teams are subsidized by low-usage teams. Good for early-stage shared platforms.`;
+      } else if (method.slug === 'usage_based') {
+        verdict = `Usage-based allocation ties cost to actual consumption. The highest consumer (${rows.sort((a, b) => b.allocated - a.allocated)[0]?.name}) sees ${fmtMoney0(rows.sort((a, b) => b.allocated - a.allocated)[0]?.showback)}/mo with overhead and margin. Total showback run rate: ${fmtMoney0(showbackTotal)}/mo.`;
+      } else if (method.slug === 'value_based') {
+        verdict = `Value-based allocation: teams are charged by business contribution. Lowest-value team pays ~${fmtMoney0(rows.sort((a, b) => a.allocated - b.allocated)[0]?.showback)}/mo; highest-value team pays ~${fmtMoney0(rows.sort((a, b) => b.allocated - a.allocated)[0]?.showback)}/mo. Useful for enterprise chargeback.`;
+      } else {
+        verdict = `Headcount-based allocation: shared costs follow team size. Each seat carries ~${fmtMoney0(showbackTotal / inps.teamCount)}/mo of loaded AI agent cost. Best for internal shared services.`;
+      }
+      if (inps.marginPct > 0) {
+        verdict += ` The ${fmtPct(inps.marginPct / 100)} showback margin recovers ${fmtMoney0(showbackTotal - inps.totalCost - overheadTotal)}/mo above direct + overhead costs.`;
+      }
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const s = JSON.parse(btn.dataset.scenario);
+          setInputs(s);
+          compute();
+        });
+      });
+
+      document.getElementById('methodSelect').addEventListener('change', e => {
+        const m = JSON.parse(e.target.value);
+        document.getElementById('methodDesc').textContent = m.description;
+        compute();
+      });
+
+      ['totalCost','teamCount','llmPct','memoryPct','toolPct','reviewPct','hostingPct','sharedPct','overheadPct','marginPct','projectionMonths'].forEach(id => {
+        document.getElementById(id).addEventListener('input', compute);
+      });
+
+      const m0 = getMethod();
+      document.getElementById('methodDesc').textContent = m0.description;
+      compute();
+    });
+  </script>
+</Layout>
