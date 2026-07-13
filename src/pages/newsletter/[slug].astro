@@ -1,139 +1,79 @@
 ---
-import { type GetStaticPaths } from 'astro';
-import { marked } from 'marked';
 import Layout from '../../layouts/Layout.astro';
-import { newsletters, getNewsletterBySlug } from '../../data/newsletters';
+import { getNewsletterBySlug, newsletters } from '../../data/newsletters.ts';
+import { marked } from 'marked';
 
-export const getStaticPaths = (async () => {
-  return newsletters
-    .filter(n => n.published)
-    .map(issue => ({
-      params: { slug: issue.slug },
-      props: { issue },
-    }));
-}) satisfies GetStaticPaths;
+export function getStaticPaths() {
+  return newsletters.map(n => ({ params: { slug: n.slug }, props: { newsletter: n } }));
+}
 
-const { issue } = Astro.props;
+const { newsletter } = Astro.props;
+if (!newsletter) {
+  return new Response(null, { status: 404, statusText: 'Not found' });
+}
 
-// Pre-process newsletter labels into blockquotes so the post-processor can style them
-const newsletterContent = issue.content
-  .split('\n')
-  .map((line) => {
-    const s = line.trim();
-    if (s.startsWith('**Agent TL;DR:**')) {
-      return `> **Agent TL;DR:** ${s.replace('**Agent TL;DR:**', '').trim()}`;
-    }
-    if (s.startsWith('**Why it matters:**')) {
-      return `> **Why it matters:** ${s.replace('**Why it matters:**', '').trim()}`;
-    }
-    if (s.startsWith('**The play:**')) {
-      return `> **The play:** ${s.replace('**The play:**', '').trim()}`;
-    }
-    if (/^\*\*(What we shipped this week|Current experiment|What's broken):\*\*/.test(s)) {
-      const [, label, rest] = s.match(/^\*\*(.+?):\*\*(.*)$/) || [];
-      return `> **${label}:** ${rest.trim()}`;
-    }
-    return line;
-  })
-  .join('\n');
-
-// Render markdown content to HTML with dark-mode friendly styling
-const rawHtml = marked.parse(newsletterContent);
-
-// Post-process HTML for newsletter-specific styling
-const styledHtml = rawHtml
-  // Wrap H2 section headers with underline
-  .replace(/<h2>(.*?)<\/h2>/g, '<div class="border-b border-gray-800 pb-3 mt-10 mb-6"><h2 class="text-2xl font-semibold text-white m-0">$1</h2></div>')
-  // Style H3 story headlines
-  .replace(/<h3>(.*?)<\/h3>/g, '<h3 class="text-xl font-semibold mt-8 mb-3 text-white">$1</h3>')
-  // Style horizontal rules
-  .replace(/<hr>/g, '<hr class="border-gray-800 my-8" />')
-  // Split multi-paragraph blockquotes into separate callouts
-  .replace(/<blockquote>([\s\S]*?)<\/blockquote>/g, (match, inner) => {
-    const paras = inner.split(/<\/p>\s*<p[^>]*>/).filter(Boolean);
-    return paras.map(p => {
-      p = p.replace(/<\/?p[^>]*>/g, '').trim();
-      const labelMatch = p.match(/<strong>([^:<]+):\s*<\/strong>/);
-      if (!labelMatch) return `<blockquote class="border-l-4 border-gray-600 p-4 my-4 italic text-gray-300">${p}</blockquote>`;
-      const label = labelMatch[1].trim();
-      const body = p.replace(/<strong>[^:<]+:\s*<\/strong>/, '').trim();
-      const styles = {
-        'Agent TL;DR': 'bg-red-500/5 border-red-500 text-red-400',
-        'Why it matters': 'bg-amber-400/5 border-amber-400 text-amber-400',
-        'The play': 'bg-cyan-400/5 border-cyan-400 text-cyan-400',
-        'What we shipped this week': 'bg-cyan-400/5 border-cyan-400 text-cyan-400',
-        'Current experiment': 'bg-cyan-400/5 border-cyan-400 text-cyan-400',
-        "What's broken": 'bg-red-500/5 border-red-500 text-red-400',
-      };
-      const classes = styles[label] || 'bg-gray-500/5 border-gray-500 text-gray-400';
-      const [bgClass, borderClass, textClass] = classes.split(' ');
-      return `<div class="${bgClass} border-l-4 ${borderClass} p-4 my-4 rounded-r"><p class="${textClass} text-xs font-semibold uppercase tracking-wider m-0 mb-1">${label}</p><p class="text-gray-200 m-0">${body}</p></div>`;
-    }).join('\n');
-  })
-  // Style links
-  .replace(/<a href=/g, '<a class="text-cyan-400 underline hover:text-cyan-300" target="_blank" rel="noopener" href=')
-  // Style strong inside paragraphs
-  .replace(/<p>(.*?)<\/p>/g, '<p class="mb-4">$1</p>');
+const html = marked(newsletter.content);
+const title = `${newsletter.title} | Hermes Dispatch`;
+const description = newsletter.excerpt;
+const issueUrl = `https://hermesdispatch.dev/newsletter/${newsletter.slug}/`;
 ---
 
-<Layout title={`${issue.title} - The Hermes Dispatch`}
-  description={issue.excerpt}>
-  
-  <!-- AEO / Article Schema -->
-  <script type="application/ld+json" is:inline set:html={JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": issue.title,
-    "description": issue.excerpt,
-    "datePublished": issue.date,
-    "dateModified": issue.date,
-    "url": `https://hermesdispatch.dev/newsletter/${issue.slug}`,
-    "author": {
-      "@type": "Person",
-      "name": "dare404",
-      "url": "https://hermesdispatch.dev/about-dare404/"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "The Hermes Dispatch by Mission Freedom",
-      "logo": "https://hermesdispatch.dev/favicon.svg"
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `https://hermesdispatch.dev/newsletter/${issue.slug}`
-    }
-  })} />
-  
-  <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <header class="mb-10">
-      <div class="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-500">
-        <time>{new Date(issue.date).toLocaleDateString('en-US', { 
-          month: 'long', 
-          day: 'numeric', 
-          year: 'numeric' 
-        })}  </time>
-        <span>•</span>
-        <span>{issue.readTime}</span>
-        <span>•</span>
-        <span>{issue.tags.join(', ')}</span>
+<Layout title={title} description={description}>
+  <section class="relative py-16 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-cyan-900/10"></div>
+    <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" class="mb-8">
+        <ol class="flex items-center gap-2 text-sm text-gray-400">
+          <li><a href="/" class="hover:text-cyan-400">Home</a><span class="mx-1">/</span></li>
+          <li><a href="/newsletter" class="hover:text-cyan-400">Newsletter</a><span class="mx-1">/</span></li>
+          <li aria-current="page" class="text-gray-300">{newsletter.date}</li>
+        </ol>
+      </nav>
+
+      <!-- Header -->
+      <div class="mb-10">
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+          <span class="px-2 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs">{newsletter.date}</span>
+          <span class="text-gray-500 text-sm">{newsletter.readTime}</span>
+          {newsletter.featured && (
+            <span class="px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs">Featured</span>
+          )}
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">{newsletter.title}</h1>
+        <p class="text-xl text-gray-400">{newsletter.excerpt}</p>
       </div>
-      <h1 class="text-4xl font-bold mb-4">{issue.title}</h1>
-      <p class="text-xl text-gray-400">{issue.excerpt}</p>
-    </header>
-    
-    <div class="newsletter-body text-gray-200 leading-relaxed text-lg">
-      <div set:html={styledHtml} />
+
+      <!-- Content -->
+      <article class="prose prose-invert prose-lg max-w-none mb-12">
+        <div set:html={html} />
+      </article>
+
+      <!-- Subscribe CTA -->
+      <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-8 mb-12">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <h2 class="text-2xl font-bold text-white mb-2">Get the next dispatch</h2>
+            <p class="text-gray-400">Daily AI/tech insights from dare404. One email, no spam.</p>
+          </div>
+          <a href="/subscribe" class="btn-primary inline-flex items-center gap-2 whitespace-nowrap">
+            <span>Subscribe</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Issue Article schema -->
+      <script type="application/ld+json" is:inline set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        headline: newsletter.title,
+        description: newsletter.excerpt,
+        datePublished: newsletter.date,
+        url: issueUrl,
+        author: { "@type": "Person", name: "dare404" },
+        publisher: { "@type": "Organization", name: "Hermes Dispatch", url: "https://hermesdispatch.dev" }
+      })} />
     </div>
-    
-    <footer class="mt-12 pt-8 border-t border-gray-800">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <a href="/newsletter" class="text-gray-400 hover:text-brand-gold transition">
-          ← Back to Newsletter
-        </a>
-        <a href="/subscribe" class="px-4 py-2 border border-gray-700 rounded-lg hover:border-brand-gold transition text-brand-gold">
-          Join the Dispatch →
-        </a>
-      </div>
-    </footer>
-  </article>
+  </section>
 </Layout>

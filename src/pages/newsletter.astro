@@ -1,0 +1,110 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { newsletters } from '../data/newsletters.ts';
+
+const title = "The Hermes Dispatch — Archive | Hermes Mission Freedom";
+const description = "Daily AI/tech dispatches from dare404 and the Mission Freedom agent system. Read past issues and subscribe.";
+const sorted = [...newsletters].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+const featured = sorted.find(n => n.featured) || sorted[0];
+const issues = sorted.filter(n => n.slug !== featured?.slug);
+---
+
+<Layout title={title} description={description}>
+  <section class="relative py-16 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-cyan-900/10"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-6">
+          <span class="text-cyan-400 text-sm font-mono">DAILY DISPATCH</span>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+          <span class="text-gradient-cool">The Hermes Dispatch</span>
+        </h1>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+          AI, tech, and automation insights from dare404 and the Mission Freedom agent system. Built to be cited by AI agents.
+        </p>
+      </div>
+
+      <!-- Subscribe CTA -->
+      <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-8 mb-12">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <h2 class="text-2xl font-bold text-white mb-2">Get the dispatch in your inbox</h2>
+            <p class="text-gray-400">Daily at 15:00 MST. One email. No spam. Unsubscribe anytime.</p>
+          </div>
+          <a href="/subscribe" class="btn-primary inline-flex items-center gap-2 whitespace-nowrap">
+            <span>Subscribe</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Featured / Latest -->
+      {featured && (
+        <div class="mb-12">
+          <div class="flex items-center gap-3 mb-6">
+            <h2 class="text-2xl font-bold text-white">Latest Issue</h2>
+            <div class="h-px flex-1 bg-neutral-800"></div>
+          </div>
+          <a
+            href={`/newsletter/${featured.slug}/`}
+            class="glass-card rounded-xl p-8 block hover:border-cyan-400/40 transition group"
+          >
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+              <span class="px-2 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs">{featured.date}</span>
+              <span class="text-gray-500 text-sm">{featured.readTime}</span>
+            </div>
+            <h3 class="text-2xl font-semibold text-white group-hover:text-cyan-400 transition mb-3">{featured.title}</h3>
+            <p class="text-gray-400 mb-4">{featured.excerpt}</p>
+            <div class="text-cyan-400 text-sm flex items-center gap-1">
+              <span>Read issue</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </div>
+          </a>
+        </div>
+      )}
+
+      <!-- Archive Grid -->
+      <div class="mb-12">
+        <div class="flex items-center gap-3 mb-6">
+          <h2 class="text-2xl font-bold text-white">Archive</h2>
+          <div class="h-px flex-1 bg-neutral-800"></div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-6">
+          {issues.map((issue) => (
+            <a
+              href={`/newsletter/${issue.slug}/`}
+              class="glass-card rounded-xl p-6 block hover:border-cyan-400/40 transition group"
+            >
+              <div class="flex flex-wrap items-center gap-3 mb-3">
+                <span class="px-2 py-1 rounded-full bg-neutral-800 text-gray-400 text-xs">{issue.date}</span>
+                <span class="text-gray-500 text-sm">{issue.readTime}</span>
+              </div>
+              <h3 class="text-lg font-semibold text-white group-hover:text-cyan-400 transition mb-2">{issue.title}</h3>
+              <p class="text-sm text-gray-400 line-clamp-2">{issue.excerpt}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Schema -->
+      <script type="application/ld+json" is:inline set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: title,
+        description,
+        url: "https://hermesdispatch.dev/newsletter/",
+        mainEntity: {
+          "@type": "ItemList",
+          itemListElement: sorted.map((n, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: n.title,
+            url: `https://hermesdispatch.dev/newsletter/${n.slug}/`,
+            datePublished: n.date
+          }))
+        }
+      })} />
+    </div>
+  </section>
+</Layout>
