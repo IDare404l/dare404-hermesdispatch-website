@@ -1,0 +1,183 @@
+{
+  "last_updated": "2026-07-13",
+  "note": "Incident response cost estimates are directional. They assume average detection, triage, containment, communication, and recovery costs. Hidden costs such as brand damage, regulatory notification, legal review, and long-tail customer churn are not modeled.",
+  "defaults": {
+    "monthly_requests": 500000,
+    "incidents_per_month": 3,
+    "avg_incident_minutes": 45,
+    "severity": "medium",
+    "detection_minutes": 12,
+    "escalation_rate_pct": 20,
+    "hourly_l1_cost": 35,
+    "hourly_l2_cost": 95,
+    "hourly_engineer_cost": 150,
+    "hourly_comms_cost": 120,
+    "customers_affected_per_incident": 1200,
+    "customer_touch_cost": 0.25,
+    "revenue_at_risk_per_minute": 50,
+    "reputation_buffer_pct": 15,
+    "tool_stack_monthly": 800,
+    "retainer_monthly": 0,
+    "projection_months": 12
+  },
+  "severities": [
+    {
+      "slug": "low",
+      "name": "Low — single user / internal tool",
+      "multiplier": 0.5,
+      "l2_hours": 0.5,
+      "engineer_hours": 0.5,
+      "comms_hours": 0,
+      "description": "Minor issue with limited blast radius; usually resolved by L1."
+    },
+    {
+      "slug": "medium",
+      "name": "Medium — degraded feature or subset of users",
+      "multiplier": 1.0,
+      "l2_hours": 1.5,
+      "engineer_hours": 2,
+      "comms_hours": 0.5,
+      "description": "Noticeable customer impact requiring escalation and a small incident bridge."
+    },
+    {
+      "slug": "high",
+      "name": "High — major outage or safety issue",
+      "multiplier": 2.5,
+      "l2_hours": 4,
+      "engineer_hours": 6,
+      "comms_hours": 2,
+      "description": "Significant outage, data-quality incident, or potential compliance exposure."
+    },
+    {
+      "slug": "critical",
+      "name": "Critical — full outage, breach, or harmful agent outputs",
+      "multiplier": 5.0,
+      "l2_hours": 8,
+      "engineer_hours": 16,
+      "comms_hours": 6,
+      "description": "All-hands incident with executive communication, possible regulator or customer notification."
+    }
+  ],
+  "incident_types": [
+    {
+      "slug": "api-outage",
+      "name": "LLM API outage / rate limit",
+      "detect_multiplier": 1.0,
+      "resolve_multiplier": 1.0,
+      "revenue_multiplier": 1.0
+    },
+    {
+      "slug": "model-degradation",
+      "name": "Model degradation / bad outputs",
+      "detect_multiplier": 1.4,
+      "resolve_multiplier": 1.3,
+      "revenue_multiplier": 0.8
+    },
+    {
+      "slug": "prompt-injection",
+      "name": "Prompt injection / safety incident",
+      "detect_multiplier": 1.8,
+      "resolve_multiplier": 2.0,
+      "revenue_multiplier": 0.5
+    },
+    {
+      "slug": "deployment-failure",
+      "name": "Deployment / rollback failure",
+      "detect_multiplier": 0.8,
+      "resolve_multiplier": 1.2,
+      "revenue_multiplier": 1.1
+    },
+    {
+      "slug": "tool-integration-failure",
+      "name": "Critical tool / integration failure",
+      "detect_multiplier": 1.2,
+      "resolve_multiplier": 1.4,
+      "revenue_multiplier": 0.9
+    },
+    {
+      "slug": "data-pipeline-failure",
+      "name": "RAG / data pipeline failure",
+      "detect_multiplier": 1.5,
+      "resolve_multiplier": 1.6,
+      "revenue_multiplier": 0.7
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "High-volume support bot",
+      "monthly_requests": 2000000,
+      "incidents_per_month": 5,
+      "avg_incident_minutes": 30,
+      "severity": "medium",
+      "detection_minutes": 8,
+      "escalation_rate_pct": 15,
+      "hourly_l1_cost": 30,
+      "hourly_l2_cost": 75,
+      "hourly_engineer_cost": 140,
+      "hourly_comms_cost": 100,
+      "customers_affected_per_incident": 5000,
+      "customer_touch_cost": 0.15,
+      "revenue_at_risk_per_minute": 25,
+      "reputation_buffer_pct": 10,
+      "tool_stack_monthly": 600,
+      "retainer_monthly": 0
+    },
+    {
+      "name": "AI sales SDR",
+      "monthly_requests": 200000,
+      "incidents_per_month": 2,
+      "avg_incident_minutes": 60,
+      "severity": "medium",
+      "detection_minutes": 15,
+      "escalation_rate_pct": 25,
+      "hourly_l1_cost": 40,
+      "hourly_l2_cost": 110,
+      "hourly_engineer_cost": 160,
+      "hourly_comms_cost": 140,
+      "customers_affected_per_incident": 300,
+      "customer_touch_cost": 0.5,
+      "revenue_at_risk_per_minute": 120,
+      "reputation_buffer_pct": 20,
+      "tool_stack_monthly": 900,
+      "retainer_monthly": 0
+    },
+    {
+      "name": "Enterprise coding assistant",
+      "monthly_requests": 500000,
+      "incidents_per_month": 3,
+      "avg_incident_minutes": 90,
+      "severity": "high",
+      "detection_minutes": 10,
+      "escalation_rate_pct": 30,
+      "hourly_l1_cost": 50,
+      "hourly_l2_cost": 130,
+      "hourly_engineer_cost": 180,
+      "hourly_comms_cost": 150,
+      "customers_affected_per_incident": 800,
+      "customer_touch_cost": 1.0,
+      "revenue_at_risk_per_minute": 80,
+      "reputation_buffer_pct": 25,
+      "tool_stack_monthly": 1200,
+      "retainer_monthly": 5000
+    },
+    {
+      "name": "Multi-tenant SaaS agent",
+      "monthly_requests": 1000000,
+      "incidents_per_month": 4,
+      "avg_incident_minutes": 55,
+      "severity": "high",
+      "detection_minutes": 5,
+      "escalation_rate_pct": 35,
+      "hourly_l1_cost": 35,
+      "hourly_l2_cost": 100,
+      "hourly_engineer_cost": 170,
+      "hourly_comms_cost": 130,
+      "customers_affected_per_incident": 2500,
+      "customer_touch_cost": 0.35,
+      "revenue_at_risk_per_minute": 200,
+      "reputation_buffer_pct": 20,
+      "tool_stack_monthly": 1500,
+      "retainer_monthly": 3000
+    }
+  ]
+}

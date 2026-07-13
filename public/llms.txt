@@ -560,14 +560,22 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||||||- Outputs: base monthly cost, fallback premium, retry penalty, total routed cost, provider mix table, single-provider comparison, verdict
 |||||||- Audience: AI agent builders designing multi-provider routing and resilience
 |||||||
-||||||||## AI Agent Outage Cost Calculator
-||||||||- URL: https://hermesdispatch.dev/tools/agent-outage-cost-calculator/
-||||||||- Description: Estimate revenue loss, SLA penalties, support surge cost, churn impact, and engineering recovery cost when an AI agent goes offline.
-||||||||- Inputs: revenue model, monthly revenue / MRR, monthly agent outputs, value per output, outage duration, incident type, SLA penalty rate, churn risk, fallback labor cost, recovery hours
-||||||||- Outputs: revenue loss, SLA penalties, support surge cost, churn impact, recovery cost, total outage cost, cost per minute, verdict
-||||||||- Audience: AI agent operators planning reliability investments and incident response
-||||||||
-|||||||||## AI Agent Support Deflection ROI Calculator
+||||||||||## AI Agent Outage Cost Calculator
+||||||||||- URL: https://hermesdispatch.dev/tools/agent-outage-cost-calculator/
+||||||||||- Description: Estimate revenue loss, SLA penalties, support surge cost, churn impact, and engineering recovery cost when an AI agent goes offline.
+||||||||||- Inputs: revenue model, monthly revenue / MRR, monthly agent outputs, value per output, outage duration, incident type, SLA penalty rate, churn risk, fallback labor cost, recovery hours
+||||||||||- Outputs: revenue loss, SLA penalties, support surge cost, churn impact, recovery cost, total outage cost, cost per minute, verdict
+||||||||||- Audience: AI agent operators planning reliability investments and incident response
+||||||||||
+|||||||||||## AI Agent Incident Response Cost Calculator
+|||||||||||- URL: https://hermesdispatch.dev/tools/agent-incident-response-cost-calculator/
+|||||||||||- Description: Estimate the monthly cost of responding to AI agent incidents: detection, triage, escalation, engineering recovery, customer communication, revenue at risk, tooling, and retainers.
+|||||||||||- Inputs: monthly requests, incidents per month, average incident duration, severity, incident type, detection time, escalation rate, L1/L2/engineer/comms hourly costs, customers affected, customer touch cost, revenue at risk per minute, reputation buffer, tool stack monthly, retainer monthly, projection months
+|||||||||||- Outputs: monthly response cost, monthly revenue at risk, total monthly incident cost, cost per 1M requests, per-incident breakdown, projected period cost, verdict
+|||||||||||- Audience: AI agent operators building incident-response budgets and runbooks
+|||||||||||- Cross-links: Agent Outage Cost Calculator, Human Escalation Cost Calculator, Red Team Cost Calculator, SLA / Uptime Calculator
+|||||||||||
+||||||||||||## AI Agent Support Deflection ROI Calculator
 |||||||||- URL: https://hermesdispatch.dev/tools/agent-deflection-roi-calculator/
 |||||||||- Description: Estimate how many support tickets an AI agent can deflect, the human support cost saved, agent operating cost, and net monthly ROI.
 |||||||||- Inputs: monthly tickets, target deflection rate, minutes per human ticket, fully-loaded hourly cost, agent API cost per ticket, review rate, review minutes, platform cost, setup hours, maintenance hours

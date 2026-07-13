@@ -1,0 +1,401 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_incident_response_cost.json';
+
+const title = "AI Agent Incident Response Cost Calculator | Hermes Dispatch";
+const description = "Estimate the monthly cost of responding to AI agent incidents: detection, triage, escalation, engineering recovery, customer communication, revenue at risk, tooling, and retainers.";
+
+const severities = data.severities;
+const incidentTypes = data.incident_types;
+const scenarios = data.scenarios;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "What is included in AI agent incident response cost?", a: "The calculator covers detection time, L1/L2 support labor, engineering recovery hours, customer communication, revenue at risk during the incident, incident tooling, and any retainer for managed response or security support." },
+  { q: "How does severity affect cost?", a: "Each severity applies a multiplier to base incident minutes and adds fixed L2, engineering, and communications hours. Critical incidents can cost 5x more than low-severity incidents due to executive communication, longer bridges, and recovery work." },
+  { q: "What is revenue at risk per minute?", a: "This is the estimated direct revenue or productivity value exposed for every minute the agent is impaired. It varies by agent type: transaction agents lose conversions, support bots increase ticket backlog cost, and SaaS agents face SLA exposure." },
+  { q: "Should I include a managed incident-response retainer?", a: "If you use a third-party SOC, MSSP, or security retainer specifically for agent incidents, add the monthly retainer. Many startups self-manage incidents initially and leave this at zero." },
+  { q: "Does this include hidden costs like churn or brand damage?", a: "No. The calculator models direct response cost plus a reputation buffer percentage you can set. It does not estimate long-tail churn, legal exposure, or regulatory fines." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Incident Response Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-incident-response-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🚨</div>
+      <h1 class="display-heading mb-4">AI Agent Incident Response Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate the monthly cost of responding to AI agent incidents: detection, triage, escalation, engineering recovery, customer communication, revenue at risk, tooling, and retainers.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Incident assumptions</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Monthly agent requests</span>
+          <input id="monthlyRequests" type="number" min="0" step="10000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Incidents per month</span>
+          <input id="incidentsPerMonth" type="number" min="0" step="1" value={defaults.incidents_per_month} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Average incident duration (minutes)</span>
+          <input id="avgIncidentMinutes" type="number" min="0" step="5" value={defaults.avg_incident_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Severity</span>
+          <select id="severity" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {severities.map(s => <option value={s.slug} selected={s.slug === defaults.severity}>{s.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Incident type</span>
+          <select id="incidentType" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {incidentTypes.map(t => <option value={t.slug}>{t.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Detection time (minutes)</span>
+          <input id="detectionMinutes" type="number" min="0" step="1" value={defaults.detection_minutes} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Escalation rate (%)</span>
+          <input id="escalationRate" type="number" min="0" max="100" step="1" value={defaults.escalation_rate_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">L1 hourly cost ($)</span>
+          <input id="l1Cost" type="number" min="0" step="1" value={defaults.hourly_l1_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">L2 hourly cost ($)</span>
+          <input id="l2Cost" type="number" min="0" step="1" value={defaults.hourly_l2_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Engineer hourly cost ($)</span>
+          <input id="engineerCost" type="number" min="0" step="1" value={defaults.hourly_engineer_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Comms / PM hourly cost ($)</span>
+          <input id="commsCost" type="number" min="0" step="1" value={defaults.hourly_comms_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Customers affected per incident</span>
+          <input id="customersAffected" type="number" min="0" step="10" value={defaults.customers_affected_per_incident} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Customer touch cost ($)</span>
+          <input id="customerTouchCost" type="number" min="0" step="0.05" value={defaults.customer_touch_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <p class="text-xs text-neutral-500 mt-1">Notification, apology credit, support follow-up.</p>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Revenue at risk / minute ($)</span>
+          <input id="revenueAtRisk" type="number" min="0" step="1" value={defaults.revenue_at_risk_per_minute} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Reputation / hidden-cost buffer (%)</span>
+          <input id="reputationBuffer" type="number" min="0" max="100" step="1" value={defaults.reputation_buffer_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Incident tool stack / month ($)</span>
+          <input id="toolStack" type="number" min="0" step="10" value={defaults.tool_stack_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          <p class="text-xs text-neutral-500 mt-1">PagerDuty, Opsgenie, incident.io, status page, observability.</p>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Response retainer / month ($)</span>
+          <input id="retainer" type="number" min="0" step="100" value={defaults.retainer_monthly} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Projection (months)</span>
+          <input id="projectionMonths" type="number" min="1" max="60" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- Summary cards -->
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Monthly response cost</p>
+        <p id="monthlyResponseCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Revenue at risk / month</p>
+        <p id="monthlyRevenueRisk" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly incident cost</p>
+        <p id="totalMonthlyCost" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/30 text-center">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1M requests</p>
+        <p id="costPerMillion" class="text-2xl font-bold text-brand-gold">—</p>
+      </div>
+    </section>
+
+    <!-- Breakdown -->
+    <section class="grid lg:grid-cols-2 gap-6 mb-12">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Per-incident cost breakdown</h2>
+        <div class="space-y-3 text-neutral-200">
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>Detection & triage</span>
+            <span id="breakdownTriage" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>L1 support time</span>
+            <span id="breakdownL1" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>L2 escalation time</span>
+            <span id="breakdownL2" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>Engineering recovery</span>
+            <span id="breakdownEngineering" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>Customer communication</span>
+            <span id="breakdownComms" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>Revenue at risk (incident)</span>
+            <span id="breakdownRevenue" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>Reputation buffer</span>
+            <span id="breakdownBuffer" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between pt-1">
+            <span class="font-semibold">Total per incident</span>
+            <span id="breakdownTotal" class="font-mono font-bold text-brand-gold">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Projection</h2>
+        <div class="space-y-3 text-neutral-200">
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>Tool stack over period</span>
+            <span id="projTools" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>Retainer over period</span>
+            <span id="projRetainer" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>Response costs over period</span>
+            <span id="projResponse" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between border-b border-neutral-800 pb-2">
+            <span>Revenue at risk over period</span>
+            <span id="projRisk" class="font-mono">—</span>
+          </div>
+          <div class="flex justify-between pt-1">
+            <span class="font-semibold">Total incident program cost</span>
+            <span id="projTotal" class="font-mono font-bold text-brand-gold">—</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">—</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <div>
+            <h3 class="text-cyan-400 font-medium">{f.q}</h3>
+            <p class="text-neutral-300 text-sm mt-1">{f.a}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-outage-cost-calculator/" class="btn-primary text-sm">Outage Cost Calc →</a>
+      <a href="/tools/agent-escalation-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Human Escalation Cost Calc →</a>
+      <a href="/tools/agent-redteam-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Red Team Cost Calc →</a>
+      <a href="/tools/agent-sla-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">SLA / Uptime Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ severitiesJson: JSON.stringify(severities), typesJson: JSON.stringify(incidentTypes), scenariosJson: JSON.stringify(scenarios) }}>
+    const severities = JSON.parse(severitiesJson);
+    const incidentTypes = JSON.parse(typesJson);
+    const scenarios = JSON.parse(scenariosJson);
+
+    const fmt = n => '$' + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+    function getNum(id) {
+      const el = document.getElementById(id);
+      return el ? parseFloat(el.value) || 0 : 0;
+    }
+
+    function getSeverity() {
+      const slug = document.getElementById('severity').value;
+      return severities.find(s => s.slug === slug) || severities.find(s => s.slug === 'medium');
+    }
+
+    function getIncidentType() {
+      const slug = document.getElementById('incidentType').value;
+      return incidentTypes.find(t => t.slug === slug) || incidentTypes[0];
+    }
+
+    function compute() {
+      const incidents = getNum('incidentsPerMonth');
+      const baseMinutes = getNum('avgIncidentMinutes');
+      const detectionMinutes = getNum('detectionMinutes');
+      const escalationRate = Math.min(100, Math.max(0, getNum('escalationRate'))) / 100;
+      const severity = getSeverity();
+      const type = getIncidentType();
+      const monthlyRequests = Math.max(1, getNum('monthlyRequests'));
+      const reputationBuffer = Math.min(100, Math.max(0, getNum('reputationBuffer'))) / 100;
+      const projectionMonths = Math.max(1, getNum('projectionMonths'));
+
+      const l1Cost = getNum('l1Cost');
+      const l2Cost = getNum('l2Cost');
+      const engineerCost = getNum('engineerCost');
+      const commsCost = getNum('commsCost');
+      const customersAffected = getNum('customersAffected');
+      const customerTouchCost = getNum('customerTouchCost');
+      const revenueAtRisk = getNum('revenueAtRisk');
+      const toolStack = getNum('toolStack');
+      const retainer = getNum('retainer');
+
+      const resolveMultiplier = severity.multiplier * type.resolve_multiplier;
+      const detectMultiplier = type.detect_multiplier;
+      const revenueMultiplier = severity.multiplier * type.revenue_multiplier;
+
+      const incidentMinutes = baseMinutes * resolveMultiplier;
+      const totalTriageMinutes = (detectionMinutes * detectMultiplier) + incidentMinutes;
+
+      // Labor hours per incident
+      const l1Hours = (totalTriageMinutes / 60) * (1 - escalationRate);
+      const l2Hours = severity.l2_hours + ((totalTriageMinutes / 60) * escalationRate);
+      const engineerHours = severity.engineer_hours;
+      const commsHours = severity.comms_hours;
+
+      const l1IncidentCost = l1Hours * l1Cost;
+      const l2IncidentCost = l2Hours * l2Cost;
+      const engineeringIncidentCost = engineerHours * engineerCost;
+      const commsIncidentCost = commsHours * commsCost;
+      const triageCost = l1IncidentCost + l2IncidentCost;
+
+      const customerCommsCost = customersAffected * customerTouchCost;
+      const revenueRiskPerIncident = incidentMinutes * revenueAtRisk * revenueMultiplier;
+      const reputationCostPerIncident = (triageCost + engineeringIncidentCost + commsIncidentCost + customerCommsCost + revenueRiskPerIncident) * reputationBuffer;
+
+      const perIncidentCost = triageCost + engineeringIncidentCost + commsIncidentCost + customerCommsCost + revenueRiskPerIncident + reputationCostPerIncident;
+      const monthlyResponseCost = perIncidentCost * incidents;
+      const monthlyRevenueRisk = revenueRiskPerIncident * incidents;
+      const totalMonthlyCost = monthlyResponseCost + toolStack + retainer;
+      const costPerMillion = (totalMonthlyCost / monthlyRequests) * 1_000_000;
+
+      // Projection
+      const projTools = toolStack * projectionMonths;
+      const projRetainer = retainer * projectionMonths;
+      const projResponse = monthlyResponseCost * projectionMonths;
+      const projRisk = monthlyRevenueRisk * projectionMonths;
+      const projTotal = projTools + projRetainer + projResponse + projRisk;
+
+      // Verdict
+      const responsePct = (monthlyResponseCost / (monthlyResponseCost + monthlyRevenueRisk + toolStack + retainer)) * 100;
+      let verdict = '';
+      if (totalMonthlyCost / monthlyRequests < 0.001) {
+        verdict = `Incident response cost is low relative to request volume (${fmt(costPerMillion)} per 1M requests). Focus on reducing detection time and MTTR rather than cutting labor rates.`;
+      } else if (monthlyRevenueRisk > monthlyResponseCost * 2) {
+        verdict = `Revenue at risk dominates. Invest in faster detection, automated rollback, and runbooks to shorten incidents before adding more headcount.`;
+      } else if (responsePct > 60) {
+        verdict = `Labor and tooling make up most of the cost. Consider self-service runbooks, lower-severity routing, and incident-platform automation to reduce L2/engineer hours.`;
+      } else {
+        verdict = `Cost mix is balanced. Track MTTR and incidents-per-month over time; small reductions in either will materially lower total spend.`;
+      }
+
+      // Render
+      document.getElementById('monthlyResponseCost').textContent = fmt(monthlyResponseCost);
+      document.getElementById('monthlyRevenueRisk').textContent = fmt(monthlyRevenueRisk);
+      document.getElementById('totalMonthlyCost').textContent = fmt(totalMonthlyCost);
+      document.getElementById('costPerMillion').textContent = fmt(costPerMillion);
+
+      document.getElementById('breakdownTriage').textContent = fmt(triageCost);
+      document.getElementById('breakdownL1').textContent = fmt(l1IncidentCost);
+      document.getElementById('breakdownL2').textContent = fmt(l2IncidentCost);
+      document.getElementById('breakdownEngineering').textContent = fmt(engineeringIncidentCost);
+      document.getElementById('breakdownComms').textContent = fmt(commsIncidentCost + customerCommsCost);
+      document.getElementById('breakdownRevenue').textContent = fmt(revenueRiskPerIncident);
+      document.getElementById('breakdownBuffer').textContent = fmt(reputationCostPerIncident);
+      document.getElementById('breakdownTotal').textContent = fmt(perIncidentCost);
+
+      document.getElementById('projTools').textContent = fmt(projTools);
+      document.getElementById('projRetainer').textContent = fmt(projRetainer);
+      document.getElementById('projResponse').textContent = fmt(projResponse);
+      document.getElementById('projRisk').textContent = fmt(projRisk);
+      document.getElementById('projTotal').textContent = fmt(projTotal);
+
+      document.getElementById('verdictText').textContent = verdict;
+    }
+
+    function applyScenario(s) {
+      document.getElementById('monthlyRequests').value = s.monthly_requests;
+      document.getElementById('incidentsPerMonth').value = s.incidents_per_month;
+      document.getElementById('avgIncidentMinutes').value = s.avg_incident_minutes;
+      document.getElementById('severity').value = s.severity;
+      document.getElementById('detectionMinutes').value = s.detection_minutes;
+      document.getElementById('escalationRate').value = s.escalation_rate_pct;
+      document.getElementById('l1Cost').value = s.hourly_l1_cost;
+      document.getElementById('l2Cost').value = s.hourly_l2_cost;
+      document.getElementById('engineerCost').value = s.hourly_engineer_cost;
+      document.getElementById('commsCost').value = s.hourly_comms_cost;
+      document.getElementById('customersAffected').value = s.customers_affected_per_incident;
+      document.getElementById('customerTouchCost').value = s.customer_touch_cost;
+      document.getElementById('revenueAtRisk').value = s.revenue_at_risk_per_minute;
+      document.getElementById('reputationBuffer').value = s.reputation_buffer_pct;
+      document.getElementById('toolStack').value = s.tool_stack_monthly;
+      document.getElementById('retainer').value = s.retainer_monthly;
+      compute();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyScenario(JSON.parse(btn.dataset.scenario)));
+      });
+      ['monthlyRequests','incidentsPerMonth','avgIncidentMinutes','severity','incidentType','detectionMinutes','escalationRate','l1Cost','l2Cost','engineerCost','commsCost','customersAffected','customerTouchCost','revenueAtRisk','reputationBuffer','toolStack','retainer','projectionMonths'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', compute);
+      });
+      compute();
+    });
+  </script>
+</Layout>
