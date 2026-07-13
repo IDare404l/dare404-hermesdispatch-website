@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import ToolSchema from '../../components/ToolSchema.astro';
-import pricing from '../../data/agent_api_pricing.json';
+import pricing from '../../data/prompt_tokenizer_pricing.json';
 import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
 
 const title = "Prompt Tokenizer & Pricing Estimator — Count Tokens Before You Send";
@@ -10,7 +10,7 @@ const providers = pricing.providers;
 
 const faqs = [
   { q: "How accurate is this tokenizer estimate?", a: "It uses a fast approximation based on whitespace, punctuation, and average token ratios (~0.6 tokens per word for English, adjusted for code and special characters). It is accurate within ±10-15% for most LLM tokenizers. For exact counts, use the provider's own tokenizer API or tiktoken." },
-  { q: "Which provider pricing is used?", a: "Prices are pulled from the same dataset as the AI Agent API Pricing Comparator and reviewed monthly. Last updated: " + pricing.last_updated + ". Always confirm current rates on the provider's pricing page before committing to a budget." },
+  { q: "Which provider pricing is used?", a: "Prices are pulled from the dedicated Prompt Tokenizer dataset and reviewed monthly. Last updated: " + pricing.last_updated + ". Always confirm current rates on the provider's pricing page before committing to a budget." },
   { q: "Does this include cached input discounts?", a: "Yes. Select a provider that supports cached input (OpenAI GPT-4o/4o-mini and Anthropic Claude 3.5 Sonnet/Haiku), then set the cached input percentage. The estimator applies the cached rate to that portion and the standard rate to the rest." },
   { q: "What about system prompts and repeated context?", a: "Paste the full prompt including system instructions, examples, and user messages. The tokenizer counts everything. For multi-turn chat, duplicate turns to simulate context-window growth." }
 ];
@@ -218,14 +218,10 @@ const faqs = [
     compute();
   </script>
 
-  
-
-  
-
   <AgentCodeBlock
-    toolName="Prompt Tokenizer Pricing Estimator"
+    toolName="Prompt Tokenizer & Pricing Estimator"
     toolPath="/tools/prompt-tokenizer-pricing-estimator/"
-    description="Copy-paste Hermes Agent script for prompt tokenizer pricing estimator."
+    description="Estimate tokens in a prompt and compare LLM API pricing across providers."
     scriptPath="/hermes-tools/prompt_tokenizer_pricing_estimator.py"
     locked={false}
   />
