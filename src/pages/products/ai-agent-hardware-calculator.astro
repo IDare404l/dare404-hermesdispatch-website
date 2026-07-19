@@ -1,0 +1,51 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const title = "AI Agent Hardware Cost Calculator Spreadsheet | The Hermes Dispatch";
+const description = "Plan, price, and compare local LLM and AI agent hardware builds. Excel + Google Sheets compatible. Built from real Ollama benchmarks.";
+---
+
+<Layout title={title} description={description}>
+  <section class="py-16 px-4 max-w-4xl mx-auto text-center">
+  <h1 class="text-4xl md:text-5xl font-bold mb-4">AI Agent Hardware Cost Calculator</h1>
+  <p class="text-xl text-gray-300 mb-8">A done-for-you spreadsheet that plans, prices, and compares local LLM / AI agent builds in minutes.</p>
+
+  <div class="grid md:grid-cols-2 gap-8 text-left mb-12">
+    <div class="bg-[#141428] rounded-xl p-6 border border-[#2d2d4a]">
+      <h2 class="text-2xl font-semibold mb-4 text-cyan-400">What you get</h2>
+      <ul class="space-y-3 text-gray-300">
+        <li>✅ Build Configurator — pick a mini PC, GPU, RAM, storage, and extras</li>
+        <li>✅ Model Fit Matrix — match 7B to 70B+ models to the right hardware</li>
+        <li>✅ Cost Calculator — hardware + power + total cost of ownership</li>
+        <li>✅ Cloud vs Local — compare against API pricing and find break-even</li>
+        <li>✅ Instructions tab — no spreadsheet skills needed</li>
+      </ul>
+    </div>
+
+    <div class="bg-[#141428] rounded-xl p-6 border border-[#2d2d4a]">
+      <h2 class="text-2xl font-semibold mb-4 text-cyan-400">Built from real data</h2>
+      <p class="text-gray-300 mb-4">Prices, power estimates, and tokens-per-second figures sourced from Ollama benchmarks on Apple Mac mini M4 Pro, Beelink GTR9 Pro, GMKtec EVO-X2, Minisforum AI X1 Pro, GEEKOM A8, and Intel NUC.</p>
+      <p class="text-gray-300">Compatible with Microsoft Excel and Google Sheets. Instant digital download.</p>
+    </div>
+  </div>
+
+  <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+    <a
+      href="https://www.etsy.com/shop/dare404digital"
+      target="_blank"
+      rel="noopener"
+      class="inline-block bg-cyan-500 hover:bg-cyan-400 text-[#0d0d1a] font-bold py-4 px-10 rounded-lg text-lg transition"
+    >
+      Buy on Etsy — $19.99
+    </a>
+    <a
+      href="/tools/agent-hardware-sizer/"
+      class="inline-block border border-cyan-500 text-cyan-400 hover:bg-cyan-500/10 font-semibold py-4 px-8 rounded-lg text-lg transition"
+    >
+      Try the free sizer first
+    </a>
+  </div>
+
+  <p class="text-sm text-gray-500">Digital download. No physical product shipped. Prices are planning estimates; update before buying.</p>
+  </section>
+</Layout>
