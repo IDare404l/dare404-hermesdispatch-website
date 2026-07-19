@@ -5,7 +5,7 @@ category: hardware-grid
 subcategory: mini-pc
 price: 649
 price_range: 600-700
-amazon_link: https://www.amazon.com/dp/B0CCP7XRV4?tag=dare404-20
+amazon_link: https://www.amazon.com/dp/B0CQT9N951?tag=dare404-20
 affiliate_tags:
 - mini-pc
 - ollama-compatible
@@ -24,7 +24,7 @@ benchmark_model: llama3.2 3B Q4_K_M
 featured: true
 sponsored: false
 image: https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&q=80
-source: https://www.amazon.com/dp/B0CCP7XRV4?tag=dare404-20
+source: https://www.amazon.com/dp/B0CQT9N951?tag=dare404-20
 faq_schema:
 - question: Is the Beelink SER7 good for Ollama?
   answer: It is a compact mini PC for light inference and agent prototyping. For large

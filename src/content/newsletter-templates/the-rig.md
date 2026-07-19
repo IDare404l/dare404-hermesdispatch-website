@@ -3,7 +3,7 @@ section: "The Rig"
 title: "Mini PC Benchmark: Beelink SER7 at 42 tok/s"
 emoji: "📦"
 source: "Based on community benchmarks"
-affiliate_link: "https://www.amazon.com/dp/B0CCP7XRV4?tag=dare404-20"
+affiliate_link: "https://www.amazon.com/dp/B0CQT9N951?tag=dare404-20"
 cta_text: "View on Amazon"
 ---
 

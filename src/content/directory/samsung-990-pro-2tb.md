@@ -5,7 +5,7 @@ category: hardware-grid
 subcategory: storage
 price: 149
 price_range: 120-180
-amazon_link: https://www.amazon.com/dp/B0BHJF2DPN?tag=dare404-20
+amazon_link: https://www.amazon.com/dp/B0BHJJ9Y77?tag=dare404-20
 affiliate_tags:
 - storage
 - ssd
@@ -20,7 +20,7 @@ ihardware_tags:
 featured: false
 sponsored: false
 image: https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80
-source: https://www.amazon.com/s?k=samsung+990+pro+2tb&tag=dare404-20
+source: https://www.amazon.com/dp/B0BHJJ9Y77?tag=dare404-20
 faq_schema:
 - question: Does SSD speed matter for LLM inference?
   answer: For model loading, yes. For token generation, RAM/VRAM speed matters far

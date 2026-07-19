@@ -5,7 +5,7 @@ category: hardware-grid
 subcategory: gpu
 price: 1599
 price_range: 1500-1700
-amazon_link: https://www.amazon.com/dp/B0GBL341F3?tag=dare404-20
+amazon_link: https://www.amazon.com/dp/B0BH8MK76C?tag=dare404-20
 affiliate_tags:
 - gpu
 - nvidia
@@ -23,7 +23,7 @@ tokens_per_second: 95
 benchmark_model: llama3.2 3B Q4_K_M
 featured: true
 sponsored: false
-source: https://www.amazon.com/s?k=rtx+4090&tag=dare404-20
+source: https://www.amazon.com/dp/B0BH8MK76C?tag=dare404-20
 brand: NVIDIA
 image: "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=600&q=80"
 faq_schema:

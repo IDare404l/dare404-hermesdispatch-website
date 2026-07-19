@@ -5,7 +5,7 @@ category: hardware-grid
 subcategory: gpu
 price: 999
 price_range: 900-1100
-amazon_link: https://www.amazon.com/dp/B0BMRZXPKY?tag=dare404-20
+amazon_link: https://www.amazon.com/dp/B0BTPK5J68?tag=dare404-20
 affiliate_tags:
 - gpu
 - amd
@@ -24,7 +24,7 @@ benchmark_model: llama3.2 3B Q4_K_M
 featured: false
 sponsored: false
 image: https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&q=80
-source: https://www.amazon.com/s?k=amd+rx+7900+xtx&tag=dare404-20
+source: https://www.amazon.com/dp/B0BTPK5J68?tag=dare404-20
 faq_schema:
 - question: Is 7900 XTX better than 4090 for LLMs?
   answer: "For pure performance, no \u2014 the 4090 is faster. For price-per-VRAM\
