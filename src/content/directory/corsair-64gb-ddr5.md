@@ -5,7 +5,7 @@ category: hardware-grid
 subcategory: memory
 price: 189
 price_range: 150-200
-amazon_link: https://www.amazon.com/dp/B0BSXH6DZZ?tag=dare404-20
+amazon_link: https://www.amazon.com/dp/B09WN2H42Y?tag=dare404-20
 affiliate_tags:
 - ram
 - ddr5
@@ -19,7 +19,7 @@ ihardware_tags:
 featured: false
 sponsored: false
 image: https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80
-source: https://www.amazon.com/s?k=corsair+64gb+ddr5&tag=dare404-20
+source: https://www.amazon.com/dp/B09WN2H42Y?tag=dare404-20
 faq_schema:
 - question: How much RAM do I need for local LLMs?
   answer: 7B models need 8-16GB, 13B models need 16-32GB, and 70B models need 48-64GB+

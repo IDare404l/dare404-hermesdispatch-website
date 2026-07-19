@@ -5,7 +5,7 @@
     "msrp": 1599,
     "typical_low": 1700,
     "check_urls": [
-      "https://www.amazon.com/s?k=rtx+4090",
+      "https://www.amazon.com/s?k=rtx+4090&tag=dare404-20",
       "https://www.newegg.com/apple-rtx-4090"
     ],
     "note": "Flagship local LLM card. 24GB VRAM runs 70B quantized models.",
@@ -19,7 +19,7 @@
     "msrp": 1999,
     "typical_low": 2200,
     "check_urls": [
-      "https://www.amazon.com/s?k=rtx+5090"
+      "https://www.amazon.com/s?k=rtx+5090&tag=dare404-20"
     ],
     "note": "Next-gen 32GB flagship. Best for large models and inference hosting.",
     "affiliate_slug": "rtx-5090",
@@ -32,7 +32,7 @@
     "msrp": 3299,
     "typical_low": 3299,
     "check_urls": [
-      "https://www.amazon.com/s?k=mac+studio+m4+max"
+      "https://www.amazon.com/s?k=mac+studio+m4+max&tag=dare404-20"
     ],
     "note": "Silent, efficient local inference. Great for developers and content agents.",
     "affiliate_slug": "mac-studio-m4-max",
@@ -45,7 +45,7 @@
     "msrp": 899,
     "typical_low": 799,
     "check_urls": [
-      "https://www.amazon.com/s?k=beelink+gtr9+pro"
+      "https://www.amazon.com/s?k=beelink+gtr9+pro&tag=dare404-20"
     ],
     "note": "Ryzen AI 9 HX 370 with strong NPU. Good portable AI box.",
     "affiliate_slug": "beelink-gtr9-pro",
@@ -58,7 +58,7 @@
     "msrp": 1299,
     "typical_low": 1199,
     "check_urls": [
-      "https://www.amazon.com/s?k=gmktec+evo+x2"
+      "https://www.amazon.com/s?k=gmktec+evo+x2&tag=dare404-20"
     ],
     "note": "Mini PC with dedicated GPU option for local LLMs.",
     "affiliate_slug": "gmktec-evo-x2",
@@ -71,7 +71,7 @@
     "msrp": 699,
     "typical_low": 599,
     "check_urls": [
-      "https://www.amazon.com/s?k=ryzen+9+7950x3d"
+      "https://www.amazon.com/s?k=ryzen+9+7950x3d&tag=dare404-20"
     ],
     "note": "High-core CPU for CPU-fallback inference and data preprocessing.",
     "affiliate_slug": "ryzen-9-7950x3d",
@@ -84,7 +84,7 @@
     "msrp": 220,
     "typical_low": 180,
     "check_urls": [
-      "https://www.amazon.com/s?k=64gb+ddr5+6000"
+      "https://www.amazon.com/s?k=64gb+ddr5+6000&tag=dare404-20"
     ],
     "note": "Minimum RAM for serious local LLM builds; 128GB preferred for 70B models.",
     "affiliate_slug": "ddr5-64gb",
@@ -97,7 +97,7 @@
     "msrp": 229,
     "typical_low": 169,
     "check_urls": [
-      "https://www.amazon.com/s?k=samsung+990+pro+2tb"
+      "https://www.amazon.com/s?k=samsung+990+pro+2tb&tag=dare404-20"
     ],
     "note": "Fast storage matters for loading large models and datasets.",
     "affiliate_slug": "samsung-990-pro-2tb",
