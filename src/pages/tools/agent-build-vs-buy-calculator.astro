@@ -1,0 +1,321 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_build_vs_buy.json';
+
+const title = "AI Agent Build vs Buy Calculator | Hermes Dispatch";
+const description = "Compare the 1-year cost of building an AI agent in-house versus buying a SaaS or point solution. Includes setup, engineering, API, infra, vendor pricing, and risk buffers.";
+const useCases = data.useCases;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "When is it cheaper to build an AI agent instead of buying one?", a: "Build usually wins when you have unique data or workflows, high volume, and in-house engineering capacity. Buy wins when speed-to-launch, compliance, or maintenance overhead matter more than marginal cost savings." },
+  { q: "What costs are included in the 'build' side?", a: "One-time setup labor, ongoing engineering maintenance, infrastructure hosting, LLM/API inference spend, and any internal tooling or observability subscriptions." },
+  { q: "What costs are included in the 'buy' side?", a: "Vendor base fee, per-unit usage pricing, one-time implementation/onboarding, and any customization premium or annual-contract discount." },
+  { q: "How should I interpret the risk buffer?", a: "The risk buffer is a percentage added to the build cost to model scope creep, rework, and unforeseen integration work. It reflects the reality that in-house projects usually run over budget." },
+  { q: "Does this tool recommend a specific vendor?", a: "No. The calculator uses editable placeholders. Replace them with quotes from your shortlisted vendors to get an apples-to-apples comparison." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Build vs Buy Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-build-vs-buy-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🏗️</div>
+      <h1 class="display-heading mb-4">AI Agent Build vs Buy Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Compare the 1-year cost of building an AI agent in-house versus buying a SaaS or point solution. Includes setup, engineering, API, infra, vendor pricing, and risk buffers.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Use-case preset</h2>
+      <div class="flex flex-wrap gap-3" id="preset-buttons">
+        {useCases.map(uc => (
+          <button type="button" class="preset-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-preset={JSON.stringify(uc)}>
+            {uc.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold flex items-center gap-2">
+          <span>🏗️</span> Build in-house
+        </h2>
+        <div class="space-y-4">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Setup hours</span>
+            <input id="buildSetupHours" type="number" min="0" step="10" value={useCases[0].build.setup_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Setup hourly rate ($)</span>
+            <input id="buildSetupRate" type="number" min="0" step="5" value={useCases[0].build.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Monthly engineering hours</span>
+            <input id="buildMonthlyHours" type="number" min="0" step="1" value={useCases[0].build.monthly_engineering_hours} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Engineering hourly rate ($)</span>
+            <input id="buildHourlyRate" type="number" min="0" step="5" value={useCases[0].build.setup_hourly_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Monthly infra / hosting ($)</span>
+            <input id="buildInfra" type="number" min="0" step="10" value={useCases[0].build.monthly_infra_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Monthly API / model cost ($)</span>
+            <input id="buildApi" type="number" min="0" step="10" value={useCases[0].build.monthly_api_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Monthly tooling / observability ($)</span>
+            <input id="buildTooling" type="number" min="0" step="10" value={useCases[0].build.monthly_tooling_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Risk buffer (%)</span>
+            <input id="riskBuffer" type="number" min="0" max="100" step="1" value={defaults.risk_buffer_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold flex items-center gap-2">
+          <span>🛒</span> Buy / SaaS
+        </h2>
+        <div class="space-y-4">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Monthly volume ({useCases[0].buy.unit_name}s)</span>
+            <input id="buyVolume" type="number" min="1" step="100" value={useCases[0].monthly_tickets} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Price per {useCases[0].buy.unit_name} ($)</span>
+            <input id="buyUnitPrice" type="number" min="0" step="0.01" value={useCases[0].buy.per_unit_price} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Monthly base platform fee ($)</span>
+            <input id="buyBaseFee" type="number" min="0" step="10" value={useCases[0].buy.monthly_base_fee} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">One-time implementation fee ($)</span>
+            <input id="buyImplementation" type="number" min="0" step="100" value={useCases[0].buy.implementation_fee} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Annual-contract discount (%)</span>
+            <input id="buyAnnualDiscount" type="number" min="0" max="100" step="1" value={defaults.annual_discount_pct_buy} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Customization / add-on premium (%)</span>
+            <input id="buyCustomization" type="number" min="0" max="100" step="1" value={defaults.customization_premium_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Time horizon (months)</span>
+            <input id="timeHorizon" type="number" min="1" max="60" step="1" value={defaults.time_horizon_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section id="summary" class="grid md:grid-cols-4 gap-5 mb-10">
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Build — total cost</p>
+        <p id="buildTotal" class="text-2xl font-bold text-white">—</p>
+        <p id="buildMonthly" class="text-sm text-neutral-400 mt-1">—/mo avg</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Buy — total cost</p>
+        <p id="buyTotal" class="text-2xl font-bold text-white">—</p>
+        <p id="buyMonthly" class="text-sm text-neutral-400 mt-1">—/mo avg</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Cheaper option</p>
+        <p id="winner" class="text-2xl font-bold text-brand-gold">—</p>
+        <p id="winnerMargin" class="text-sm text-neutral-400 mt-1">—</p>
+      </div>
+      <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+        <p class="text-xs text-neutral-500 uppercase mb-1">Savings over horizon</p>
+        <p id="savings" class="text-2xl font-bold text-white">—</p>
+        <p id="savingsPct" class="text-sm text-neutral-400 mt-1">—</p>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost breakdown over time</h2>
+      <div class="h-72 w-full" id="chart-container">
+        <canvas id="costChart" class="w-full h-full"></canvas>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">When build usually wins</h2>
+      <ul class="list-disc pl-5 text-neutral-300 space-y-2 mb-6">
+        {data.assumptions.build.map(a => <li>{a}</li>)}
+      </ul>
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">When buy usually wins</h2>
+      <ul class="list-disc pl-5 text-neutral-300 space-y-2">
+        {data.assumptions.buy.map(a => <li>{a}</li>)}
+      </ul>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">
+              {f.q}
+              <span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ useCases, defaults }}>
+    function $(id) { return document.getElementById(id); }
+    function val(id) { return parseFloat($(id).value) || 0; }
+
+    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+    function calc() {
+      const months = Math.max(1, val('timeHorizon'));
+      const setup = val('buildSetupHours') * val('buildSetupRate');
+      const monthlyEngineering = val('buildMonthlyHours') * val('buildHourlyRate');
+      const monthlyInfra = val('buildInfra');
+      const monthlyApi = val('buildApi');
+      const monthlyTooling = val('buildTooling');
+      const risk = 1 + val('riskBuffer') / 100;
+      const buildMonthly = (monthlyEngineering + monthlyInfra + monthlyApi + monthlyTooling) * risk;
+      const buildTotal = setup + buildMonthly * months;
+
+      const volume = Math.max(0, val('buyVolume'));
+      const unitPrice = val('buyUnitPrice');
+      const baseFee = val('buyBaseFee');
+      const implementation = val('buyImplementation');
+      const discount = 1 - val('buyAnnualDiscount') / 100;
+      const premium = 1 + val('buyCustomization') / 100;
+      const buyMonthly = (baseFee + volume * unitPrice) * discount * premium;
+      const buyTotal = implementation + buyMonthly * months;
+
+      const savings = Math.abs(buildTotal - buyTotal);
+      const cheaper = buildTotal < buyTotal ? 'Build' : 'Buy';
+      const higher = buildTotal < buyTotal ? buyTotal : buildTotal;
+      const pct = higher > 0 ? (savings / higher * 100).toFixed(1) : '0.0';
+
+      $('buildTotal').textContent = fmt.format(buildTotal);
+      $('buildMonthly').textContent = fmt.format(buildMonthly) + '/mo avg';
+      $('buyTotal').textContent = fmt.format(buyTotal);
+      $('buyMonthly').textContent = fmt.format(buyMonthly) + '/mo avg';
+      $('winner').textContent = cheaper;
+      $('winnerMargin').textContent = 'by ' + fmt.format(savings);
+      $('savings').textContent = fmt.format(savings);
+      $('savingsPct').textContent = pct + '% cheaper';
+
+      drawChart(setup, buildMonthly, implementation, buyMonthly, months);
+    }
+
+    function drawChart(buildSetup, buildMonthly, buySetup, buyMonthly, months) {
+      const canvas = $('costChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const maxY = Math.max(buildSetup + buildMonthly * months, buySetup + buyMonthly * months) * 1.1 || 1;
+      const padL = 56, padR = 16, padT = 16, padB = 40;
+      const cw = w - padL - padR;
+      const ch = h - padT - padB;
+
+      // grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = padT + ch * i / 4;
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+        ctx.fillStyle = '#a3a3a3';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('$' + (maxY * (1 - i / 4) / 1000).toFixed(1) + 'k', padL - 8, y + 3);
+      }
+
+      // axes
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, h - padB); ctx.lineTo(w - padR, h - padB); ctx.stroke();
+
+      // build line
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      for (let m = 0; m <= months; m++) {
+        const x = padL + cw * (m / months);
+        const y = padT + ch * (1 - (buildSetup + buildMonthly * m) / maxY);
+        if (m === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // buy line
+      ctx.strokeStyle = '#06b6d4';
+      ctx.beginPath();
+      for (let m = 0; m <= months; m++) {
+        const x = padL + cw * (m / months);
+        const y = padT + ch * (1 - (buySetup + buyMonthly * m) / maxY);
+        if (m === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // labels
+      ctx.fillStyle = '#f59e0b'; ctx.textAlign = 'left'; ctx.font = '12px sans-serif';
+      ctx.fillText('Build', padL + 8, padT + 14);
+      ctx.fillStyle = '#06b6d4';
+      ctx.fillText('Buy', padL + 8, padT + 28);
+      ctx.fillStyle = '#a3a3a3'; ctx.textAlign = 'center';
+      ctx.fillText('0', padL, h - padB + 16);
+      ctx.fillText(months + ' mo', w - padR, h - padB + 16);
+    }
+
+    function applyPreset(uc) {
+      $('buildSetupHours').value = uc.build.setup_hours;
+      $('buildSetupRate').value = uc.build.setup_hourly_rate;
+      $('buildMonthlyHours').value = uc.build.monthly_engineering_hours;
+      $('buildHourlyRate').value = uc.build.setup_hourly_rate;
+      $('buildInfra').value = uc.build.monthly_infra_cost;
+      $('buildApi').value = uc.build.monthly_api_cost;
+      $('buildTooling').value = uc.build.monthly_tooling_cost;
+      $('buyVolume').value = uc.monthly_tickets;
+      $('buyUnitPrice').value = uc.buy.per_unit_price;
+      $('buyBaseFee').value = uc.buy.monthly_base_fee;
+      $('buyImplementation').value = uc.buy.implementation_fee;
+      calc();
+    }
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(JSON.parse(btn.dataset.preset)));
+    });
+
+    document.querySelectorAll('input').forEach(input => input.addEventListener('input', calc));
+    window.addEventListener('resize', calc);
+
+    // activate first preset visually
+    const firstBtn = document.querySelector('.preset-btn');
+    if (firstBtn) {
+      firstBtn.classList.add('bg-brand-gold/20', 'border-brand-gold', 'text-brand-gold');
+      firstBtn.classList.remove('bg-neutral-800', 'border-neutral-700');
+    }
+
+    calc();
+  </script>
+</Layout>

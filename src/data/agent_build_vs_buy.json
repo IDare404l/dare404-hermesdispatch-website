@@ -1,0 +1,105 @@
+{
+  "useCases": [
+    {
+      "id": "support",
+      "name": "Customer support agent",
+      "monthly_tickets": 5000,
+      "build": {
+        "setup_hours": 160,
+        "setup_hourly_rate": 175,
+        "monthly_engineering_hours": 40,
+        "monthly_infra_cost": 800,
+        "monthly_api_cost": 1200,
+        "monthly_tooling_cost": 300
+      },
+      "buy": {
+        "per_unit_price": 1.20,
+        "unit_name": "ticket",
+        "monthly_base_fee": 500,
+        "implementation_fee": 2500,
+        "annual_discount_pct": 0
+      }
+    },
+    {
+      "id": "sdr",
+      "name": "Sales development rep (SDR) agent",
+      "monthly_tickets": 3000,
+      "build": {
+        "setup_hours": 200,
+        "setup_hourly_rate": 175,
+        "monthly_engineering_hours": 50,
+        "monthly_infra_cost": 600,
+        "monthly_api_cost": 900,
+        "monthly_tooling_cost": 400
+      },
+      "buy": {
+        "per_unit_price": 0.08,
+        "unit_name": "contact",
+        "monthly_base_fee": 800,
+        "implementation_fee": 3500,
+        "annual_discount_pct": 0
+      }
+    },
+    {
+      "id": "coding",
+      "name": "Coding / code-review agent",
+      "monthly_tickets": 1200,
+      "build": {
+        "setup_hours": 240,
+        "setup_hourly_rate": 200,
+        "monthly_engineering_hours": 60,
+        "monthly_infra_cost": 1000,
+        "monthly_api_cost": 1500,
+        "monthly_tooling_cost": 500
+      },
+      "buy": {
+        "per_unit_price": 12.0,
+        "unit_name": "seat",
+        "monthly_base_fee": 0,
+        "implementation_fee": 5000,
+        "annual_discount_pct": 0
+      }
+    },
+    {
+      "id": "data",
+      "name": "Data extraction / processing agent",
+      "monthly_tickets": 10000,
+      "build": {
+        "setup_hours": 120,
+        "setup_hourly_rate": 175,
+        "monthly_engineering_hours": 30,
+        "monthly_infra_cost": 700,
+        "monthly_api_cost": 600,
+        "monthly_tooling_cost": 250
+      },
+      "buy": {
+        "per_unit_price": 0.03,
+        "unit_name": "page",
+        "monthly_base_fee": 400,
+        "implementation_fee": 1500,
+        "annual_discount_pct": 0
+      }
+    }
+  ],
+  "defaults": {
+    "use_case_id": "support",
+    "time_horizon_months": 12,
+    "annual_discount_pct_buy": 0,
+    "customization_premium_pct": 0,
+    "risk_buffer_pct": 15
+  },
+  "assumptions": {
+    "build": [
+      "In-house engineering time is the dominant build cost.",
+      "API and infra costs scale roughly linearly with volume.",
+      "Maintenance is recurring; setup is one-time.",
+      "A 15% risk buffer covers scope creep and rework."
+    ],
+    "buy": [
+      "Vendor pricing is list price; annual discounts lower effective cost.",
+      "Implementation fees are one-time onboarding costs.",
+      "Per-unit pricing scales with usage volume.",
+      "Customization premium covers API limits, add-ons, or professional services."
+    ]
+  }
+}
