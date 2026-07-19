@@ -18,20 +18,26 @@ export const GET: APIRoute = async ({ params, url, request, locals, clientAddres
   const targetUrl = url.searchParams.get('url') || '';
   const source = url.searchParams.get('source') || 'website';
 
-  if (!slug || !targetUrl) {
-    return new Response('Missing slug or url', { status: 400 });
+  // Fallback: if no URL provided, redirect to the directory entry
+  if (!slug) {
+    return new Response('Missing slug', { status: 400 });
+  }
+
+  let redirectUrl = targetUrl;
+  if (!redirectUrl) {
+    redirectUrl = `https://hermesdispatch.dev/directory/#${slug}`;
   }
 
   try {
-    new URL(targetUrl);
+    new URL(redirectUrl);
   } catch {
-    return new Response(`Invalid destination URL: ${targetUrl}`, { status: 400 });
+    return new Response(`Invalid destination URL: ${redirectUrl}`, { status: 400 });
   }
 
   const click: ClickEvent = {
     event: 'affiliate_click',
     slug,
-    target_url: targetUrl,
+    target_url: redirectUrl,
     source,
     referrer: request.headers.get('referer') || '',
     user_agent: request.headers.get('user-agent') || '',
@@ -62,5 +68,5 @@ export const GET: APIRoute = async ({ params, url, request, locals, clientAddres
 
   console.log(JSON.stringify(click));
 
-  return Response.redirect(targetUrl, 302);
+  return Response.redirect(redirectUrl, 302);
 };

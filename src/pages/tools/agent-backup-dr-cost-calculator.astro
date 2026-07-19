@@ -1,0 +1,400 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_backup_dr_cost.json';
+
+const title = `${data.title} | Hermes Dispatch`;
+const description = data.description;
+const canonicalUrl = "https://hermesdispatch.dev/tools/agent-backup-dr-cost-calculator/";
+
+const scenarioList = data.scenarios;
+const faqList = data.faq;
+const providers = Object.entries(data.storage_providers).map(([id, p]) => ({ id, ...p }));
+const assetKeys = Object.keys(data.asset_types);
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqList.map((f) => ({
+    "@type": "Question",
+    "name": f.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": f.answer
+    }
+  }))
+};
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema
+    name={data.title}
+    description={description}
+    url={canonicalUrl}
+    applicationCategory="DeveloperApplication"
+    operatingSystem="Any"
+    slot="head"
+  />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqJsonLd)} slot="head" />
+
+  <article class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <header class="mb-10">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">{data.title}</h1>
+      <p class="text-xl text-gray-400">{description}</p>
+    </header>
+
+    <section class="mb-8">
+      <h2 class="text-lg font-semibold mb-3">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {scenarioList.map((scenario) => (
+          <button
+            type="button"
+            class="scenario-btn px-4 py-2 rounded-lg bg-neutral-900 border border-neutral-700 hover:border-cyan-400 text-gray-300 text-sm"
+            data-scenario={scenario.id}
+          >
+            {scenario.name}
+          </button>
+        ))}
+      </div>
+      <p id="scenario-description" class="text-sm text-gray-400 mt-3">Pick a preset to load default assumptions, then adjust them below.</p>
+    </section>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      <section class="glass-card rounded-xl p-6 md:p-8 border border-neutral-800">
+        <h2 class="text-2xl font-bold mb-6">Inputs</h2>
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm font-medium mb-1">Primary storage provider</label>
+            <select id="primaryProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white">
+              {providers.map((p) => (
+                <option value={p.id}>{p.label} — ${p.storage_cost_per_gb_month.toFixed(3)}/GB/mo</option>
+              ))}
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Retention (months)</label>
+              <input type="number" id="retentionMonths" value={data.defaults.retention_months} min="1" max="120" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Projection (months)</label>
+              <input type="number" id="projectionMonths" value={data.defaults.projection_months} min="1" max="60" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Compression ratio</label>
+              <input type="number" id="compressionRatio" value={data.defaults.compression_ratio} min="0.1" max="2" step="0.05" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+              <p class="text-xs text-gray-500 mt-1">&lt;1 = compressed, 1 = none, &gt;1 = expansion.</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Deduplication ratio</label>
+              <input type="number" id="dedupeRatio" value={data.defaults.dedupe_ratio} min="0.1" max="2" step="0.05" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+              <p class="text-xs text-gray-500 mt-1">Average logical-to-physical multiplier across snapshots.</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <input type="checkbox" id="replicationEnabled" checked={data.defaults.replication_enabled} class="w-4 h-4 accent-cyan-400" />
+            <label for="replicationEnabled" class="text-sm font-medium">Enable cross-region replication</label>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Replication provider</label>
+            <select id="replicationProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white">
+              {providers.map((p) => (
+                <option value={p.id}>{p.label} — ${p.storage_cost_per_gb_month.toFixed(3)}/GB/mo</option>
+              ))}
+            </select>
+          </div>
+
+          <hr class="border-neutral-800" />
+          <h3 class="text-sm font-semibold text-gray-300">Assets to protect</h3>
+          <p class="text-xs text-gray-500">Set the live size and number of snapshots retained per month for each asset class.</p>
+
+          {assetKeys.map((key) => (
+            <div class="space-y-2">
+              <label class="block text-sm font-medium">{data.asset_types[key].label}</label>
+              <div class="grid grid-cols-2 gap-3">
+                <input type="number" id={`asset_${key}_size_gb`} value={data.defaults[`asset_${key}_size_gb`]} min="0" step="0.1" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" placeholder="Size GB" />
+                <input type="number" id={`asset_${key}_snapshots_per_month`} value={data.defaults[`asset_${key}_snapshots_per_month`]} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" placeholder="Snapshots / mo" />
+              </div>
+            </div>
+          ))}
+
+          <hr class="border-neutral-800" />
+          <h3 class="text-sm font-semibold text-gray-300">Recovery testing</h3>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Tests / month</label>
+              <input type="number" id="recoveryTestsPerMonth" value={data.defaults.recovery_tests_per_month} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Restore GB / test</label>
+              <input type="number" id="restoreGbPerTest" value={data.defaults.restore_gb_per_test} min="0" step="1" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Eng hrs / test</label>
+              <input type="number" id="recoveryEngHoursPerTest" value={data.defaults.recovery_engineering_hours_per_test} min="0" step="0.5" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Eng hourly rate</label>
+              <input type="number" id="recoveryEngHourlyRate" value={data.defaults.recovery_engineering_hourly_rate} min="0" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-6">
+        <div class="glass-card rounded-xl p-6 md:p-8 border border-neutral-800">
+          <h2 class="text-2xl font-bold mb-4">Monthly cost estimate</h2>
+          <div class="text-4xl font-bold text-brand-gold mb-2" id="totalMonthly">$0</div>
+          <p class="text-sm text-gray-400 mb-6">Total all-in backup &amp; DR monthly cost</p>
+
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Protected asset footprint</span>
+              <span id="assetFootprintGb">0 GB</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Snapshot volume / month</span>
+              <span id="snapshotVolumeGb">0 GB</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Effective stored volume</span>
+              <span id="storedVolumeGb">0 GB</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Primary storage</span>
+              <span id="primaryStorageCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Replication storage</span>
+              <span id="replicationStorageCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">API operations</span>
+              <span id="apiCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Restore egress</span>
+              <span id="restoreEgressCost">$0</span>
+            </div>
+            <div class="flex justify-between border-b border-neutral-800 pb-2">
+              <span class="text-gray-400">Recovery test labor</span>
+              <span id="recoveryLaborCost">$0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-xl p-6 md:p-8 border border-neutral-800">
+          <h2 class="text-2xl font-bold mb-4">Provider comparison</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-400">
+              <thead class="text-xs text-gray-500 uppercase border-b border-neutral-800">
+                <tr>
+                  <th class="py-2">Provider</th>
+                  <th class="py-2 text-right">Storage</th>
+                  <th class="py-2 text-right">Ops</th>
+                  <th class="py-2 text-right">Restore</th>
+                  <th class="py-2 text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody id="providerComparisonBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-xl p-6 md:p-8 border border-neutral-800">
+          <h2 class="text-2xl font-bold mb-4">Projected cost</h2>
+          <div class="text-3xl font-bold text-cyan-400 mb-2" id="projectedCost">$0</div>
+          <p class="text-sm text-gray-400">Total cost over the projection period</p>
+        </div>
+
+        <div class="bg-cyan-400/10 border border-cyan-400/30 rounded-lg p-4">
+          <p class="text-sm text-cyan-400 m-0"><strong>Verdict:</strong> <span id="verdict">Loading…</span></p>
+        </div>
+      </section>
+    </div>
+
+    <section class="mt-16">
+      <h2 class="text-2xl font-bold mb-6">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqList.map((f) => (
+          <details class="group bg-neutral-900 border border-neutral-800 rounded-lg p-4">
+            <summary class="font-medium cursor-pointer list-none flex justify-between items-center">
+              {f.question}
+              <span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <p class="text-gray-400 mt-3 text-sm">{f.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-16 glass-card rounded-xl p-6 md:p-8 border border-neutral-800">
+      <h2 class="text-2xl font-bold mb-4">Related tools</h2>
+      <ul class="list-disc pl-5 space-y-2 text-gray-400">
+        <li><a href="/tools/agent-data-retention-cost-calculator" class="text-cyan-400 hover:underline">AI Agent Data Retention / Audit Log Cost Calculator</a></li>
+        <li><a href="/tools/agent-pii-detection-cost-calculator" class="text-cyan-400 hover:underline">AI Agent PII Detection &amp; Data Classification Cost Calculator</a></li>
+        <li><a href="/tools/agent-observability-cost-calculator" class="text-cyan-400 hover:underline">AI Agent Observability Cost Calculator</a></li>
+        <li><a href="/tools/ai-agent-compliance-checker" class="text-cyan-400 hover:underline">AI Agent Privacy / Compliance Checker</a></li>
+      </ul>
+    </section>
+  </article>
+
+  <script is:inline define:vars={{ providers: data.storage_providers, assetKeys: assetKeys, scenarioValues: data.scenario_values, assetTypes: data.asset_types }}>
+    const $ = (id) => document.getElementById(id);
+    const fmtMoney = (n) => "$" + Math.round(n).toLocaleString();
+    const fmtGb = (n) => n.toFixed(2) + " GB";
+
+    function getVal(id) {
+      return parseFloat($(id).value) || 0;
+    }
+    function getBool(id) {
+      return $(id).checked;
+    }
+    function setVal(id, value) {
+      $(id).value = value;
+    }
+
+    function snapshotPutOperations(snapshotsPerMonth) {
+      // Assume one LIST/PUT per snapshot, plus one GET per restore test; per-1000 pricing
+      return snapshotsPerMonth;
+    }
+
+    function calculate() {
+      const primaryId = $("primaryProvider").value;
+      const primary = providers[primaryId];
+      const replicationId = $("replicationProvider").value;
+      const replication = providers[replicationId];
+      const retentionMonths = getVal("retentionMonths");
+      const projectionMonths = getVal("projectionMonths");
+      const compression = getVal("compressionRatio") || 1;
+      const dedupe = getVal("dedupeRatio") || 1;
+      const replicationEnabled = getBool("replicationEnabled");
+      const testsPerMonth = getVal("recoveryTestsPerMonth");
+      const restoreGbPerTest = getVal("restoreGbPerTest");
+      const engHoursPerTest = getVal("recoveryEngHoursPerTest");
+      const engRate = getVal("recoveryEngHourlyRate");
+
+      let totalAssetFootprint = 0;
+      let totalSnapshotVolume = 0;
+      let totalPutOps = 0;
+
+      assetKeys.forEach((key) => {
+        const sizeGb = getVal(`asset_${key}_size_gb`);
+        const snapshots = getVal(`asset_${key}_snapshots_per_month`);
+        totalAssetFootprint += sizeGb;
+        totalSnapshotVolume += sizeGb * snapshots;
+        totalPutOps += snapshotPutOperations(snapshots);
+      });
+
+      // Effective stored volume = footprint * retention * compression * dedupe multiplier
+      // We model average stored as footprint * retention / 2 because snapshots accumulate over retention window
+      const monthlyIngestGb = totalSnapshotVolume;
+      const avgStoredGb = totalAssetFootprint * retentionMonths * dedupe * compression;
+
+      // Storage cost: keep all snapshots retained for retention period; simple approximation
+      const primaryStorageCost = avgStoredGb * primary.storage_cost_per_gb_month;
+      const replicationStorageCost = replicationEnabled ? avgStoredGb * replication.storage_cost_per_gb_month : 0;
+
+      // API operations cost (PUTs)
+      const primaryApiCost = (totalPutOps / 1000) * primary.put_cost_per_1000;
+      const replicationApiCost = replicationEnabled ? (totalPutOps / 1000) * replication.put_cost_per_1000 : 0;
+      const apiCost = primaryApiCost + replicationApiCost;
+
+      // Restore egress cost
+      const restoreEgressCost = testsPerMonth * restoreGbPerTest * primary.egress_cost_per_gb;
+
+      // Recovery labor cost
+      const recoveryLaborCost = testsPerMonth * engHoursPerTest * engRate;
+
+      const totalMonthly = primaryStorageCost + replicationStorageCost + apiCost + restoreEgressCost + recoveryLaborCost;
+      const projectedCost = totalMonthly * projectionMonths;
+
+      $("assetFootprintGb").textContent = fmtGb(totalAssetFootprint);
+      $("snapshotVolumeGb").textContent = fmtGb(monthlyIngestGb);
+      $("storedVolumeGb").textContent = fmtGb(avgStoredGb);
+      $("primaryStorageCost").textContent = fmtMoney(primaryStorageCost);
+      $("replicationStorageCost").textContent = fmtMoney(replicationStorageCost);
+      $("apiCost").textContent = fmtMoney(apiCost);
+      $("restoreEgressCost").textContent = fmtMoney(restoreEgressCost);
+      $("recoveryLaborCost").textContent = fmtMoney(recoveryLaborCost);
+      $("totalMonthly").textContent = fmtMoney(totalMonthly);
+      $("projectedCost").textContent = fmtMoney(projectedCost);
+
+      // Provider comparison table: same inputs, every provider as primary
+      const tbody = $("providerComparisonBody");
+      tbody.innerHTML = "";
+      Object.entries(providers).forEach(([pid, p]) => {
+        const pStorage = avgStoredGb * p.storage_cost_per_gb_month;
+        const pApi = (totalPutOps / 1000) * p.put_cost_per_1000;
+        const pRestore = testsPerMonth * restoreGbPerTest * p.egress_cost_per_gb;
+        const pTotal = pStorage + pApi + pRestore + recoveryLaborCost;
+        const row = document.createElement("tr");
+        row.className = "border-b border-neutral-800";
+        if (pid === primaryId) row.classList.add("text-cyan-400");
+        row.innerHTML = `
+          <td class="py-2">${p.label}${pid === primaryId ? " ★" : ""}</td>
+          <td class="py-2 text-right">${fmtMoney(pStorage)}</td>
+          <td class="py-2 text-right">${fmtMoney(pApi)}</td>
+          <td class="py-2 text-right">${fmtMoney(pRestore)}</td>
+          <td class="py-2 text-right font-medium">${fmtMoney(pTotal)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      let verdict = "Storage is the main cost driver — tune retention, compression, and snapshot frequency to lower the bill.";
+      if (recoveryLaborCost > totalMonthly * 0.35) {
+        verdict = "Recovery testing and engineering labor dominate — consider automated restore runbooks and infrastructure-as-code to reduce DR drill hours.";
+      } else if (replicationStorageCost > primaryStorageCost * 1.2) {
+        verdict = "Replication is more expensive than primary storage — pick a cheaper replication tier or reduce replicated data classes.";
+      } else if (avgStoredGb > 10000) {
+        verdict = "You are protecting 10+ TB of agent assets — investigate tiered snapshots, model weight versioning limits, and vector index incremental backups.";
+      } else if (restoreEgressCost > totalMonthly * 0.25) {
+        verdict = "Restore egress is costly — run recovery tests from a local cache or same-region copy when possible.";
+      }
+      $("verdict").textContent = verdict;
+    }
+
+    function applyScenario(id) {
+      const s = scenarioValues[id];
+      if (!s) return;
+      setVal("retentionMonths", s.retention_months);
+      setVal("projectionMonths", s.projection_months);
+      $("primaryProvider").value = s.primary_provider;
+      $("replicationEnabled").checked = s.replication_enabled;
+      if (s.replication_provider) $("replicationProvider").value = s.replication_provider;
+      setVal("recoveryTestsPerMonth", s.recovery_tests_per_month);
+      setVal("restoreGbPerTest", s.restore_gb_per_test);
+      setVal("recoveryEngHoursPerTest", s.recovery_engineering_hours_per_test);
+      assetKeys.forEach((key) => {
+        if (s[`asset_${key}_size_gb`] !== undefined) setVal(`asset_${key}_size_gb`, s[`asset_${key}_size_gb`]);
+        if (s[`asset_${key}_snapshots_per_month`] !== undefined) setVal(`asset_${key}_snapshots_per_month`, s[`asset_${key}_snapshots_per_month`]);
+      });
+      const descEl = $("scenario-description");
+      if (descEl) {
+        const scenarioNames = { mvp: "Minimal state, daily snapshots, no replication.", saas_default: "Production agent with replicated daily backups and monthly drills.", enterprise: "Large indexes, hourly state, quarterly DR exercises.", regulated: "Immutable logs, encrypted copies, frequent restore tests." };
+        descEl.textContent = scenarioNames[id] || "";
+      }
+      calculate();
+    }
+
+    document.querySelectorAll(".scenario-btn").forEach((btn) => {
+      btn.addEventListener("click", () => applyScenario(btn.dataset.scenario));
+    });
+
+    ["primaryProvider", "replicationProvider"].forEach((id) => {
+      $(id).addEventListener("change", calculate);
+    });
+    document.querySelectorAll("input").forEach((input) => {
+      input.addEventListener("input", calculate);
+    });
+
+    applyScenario("saas_default");
+  </script>
+</Layout>

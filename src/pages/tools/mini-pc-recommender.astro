@@ -86,6 +86,7 @@ const description = "Answer three questions and get a mini PC recommendation for
       }
 
       const winner = candidates[0].pc;
+      const goUrl = '/go/' + winner.slug + '/?url=' + encodeURIComponent(winner.source || '') + '&source=mini-pc-recommender';
       resultsEl.innerHTML = `
         <p class="text-sm text-gray-400 uppercase tracking-wider">Top pick</p>
         <h2 class="text-2xl font-bold mt-1">${winner.name}</h2>
@@ -96,7 +97,7 @@ const description = "Answer three questions and get a mini PC recommendation for
           <p><strong>Price:</strong> $${winner.price_usd}</p>
           <p class="text-sm text-gray-400 mt-4">${winner.notes}</p>
         </div>
-        <a href="/go/${winner.slug}/?url=${encodeURIComponent(winner.source)}&source=mini-pc-recommender" class="mt-6 inline-block text-cyan-400 underline hover:text-cyan-300">Check current price →</a>
+        <a href="${goUrl}" class="mt-6 inline-block text-cyan-400 underline hover:text-cyan-300">Check current price →</a>
       `;
     }
 

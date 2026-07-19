@@ -1,0 +1,314 @@
+{
+  "title": "AI Agent Backup & Disaster Recovery Cost Calculator",
+  "description": "Estimate monthly cost to back up and recover AI agent assets: model weights, vector indexes, agent state, conversation history, configs, and audit logs across object storage, cross-region replication, snapshots, and recovery testing.",
+  "route": "/tools/agent-backup-dr-cost-calculator/",
+  "asset_types": {
+    "model_weights": {
+      "label": "Model weights / checkpoints",
+      "default_size_gb": 40,
+      "change_rate_monthly_pct": 10,
+      "snapshot_frequency_options": ["daily", "weekly", "monthly", "on_change"]
+    },
+    "vector_indexes": {
+      "label": "Vector / embedding indexes",
+      "default_size_gb": 25,
+      "change_rate_monthly_pct": 30,
+      "snapshot_frequency_options": ["daily", "weekly", "monthly", "on_change"]
+    },
+    "agent_state": {
+      "label": "Agent state & checkpoints",
+      "default_size_gb": 5,
+      "change_rate_monthly_pct": 50,
+      "snapshot_frequency_options": ["hourly", "daily", "weekly", "monthly"]
+    },
+    "conversations": {
+      "label": "Conversation history",
+      "default_size_gb": 20,
+      "change_rate_monthly_pct": 100,
+      "snapshot_frequency_options": ["continuous", "hourly", "daily", "weekly"]
+    },
+    "configs": {
+      "label": "Config, prompts, code",
+      "default_size_gb": 1,
+      "change_rate_monthly_pct": 20,
+      "snapshot_frequency_options": ["continuous", "daily", "weekly", "monthly"]
+    },
+    "logs": {
+      "label": "Logs / audit telemetry",
+      "default_size_gb": 15,
+      "change_rate_monthly_pct": 100,
+      "snapshot_frequency_options": ["continuous", "hourly", "daily", "weekly"]
+    }
+  },
+  "storage_providers": {
+    "s3_standard": {
+      "label": "AWS S3 Standard",
+      "storage_cost_per_gb_month": 0.023,
+      "put_cost_per_1000": 0.005,
+      "get_cost_per_1000": 0.0004,
+      "egress_cost_per_gb": 0.09,
+      "cross_region_replication_cost_per_gb": 0.02,
+      "early_delete_months": 0
+    },
+    "s3_glacier": {
+      "label": "AWS S3 Glacier Instant Retrieval",
+      "storage_cost_per_gb_month": 0.004,
+      "put_cost_per_1000": 0.02,
+      "get_cost_per_1000": 0.01,
+      "egress_cost_per_gb": 0.09,
+      "cross_region_replication_cost_per_gb": 0.013,
+      "early_delete_months": 3
+    },
+    "gcs_standard": {
+      "label": "Google Cloud Storage Standard",
+      "storage_cost_per_gb_month": 0.02,
+      "put_cost_per_1000": 0.005,
+      "get_cost_per_1000": 0.0004,
+      "egress_cost_per_gb": 0.11,
+      "cross_region_replication_cost_per_gb": 0.02,
+      "early_delete_months": 0
+    },
+    "gcs_coldline": {
+      "label": "Google Cloud Storage Coldline",
+      "storage_cost_per_gb_month": 0.004,
+      "put_cost_per_1000": 0.01,
+      "get_cost_per_1000": 0.02,
+      "egress_cost_per_gb": 0.11,
+      "cross_region_replication_cost_per_gb": 0.01,
+      "early_delete_months": 3
+    },
+    "azure_hot": {
+      "label": "Azure Blob Hot",
+      "storage_cost_per_gb_month": 0.018,
+      "put_cost_per_1000": 0.005,
+      "get_cost_per_1000": 0.0004,
+      "egress_cost_per_gb": 0.087,
+      "cross_region_replication_cost_per_gb": 0.02,
+      "early_delete_months": 0
+    },
+    "azure_cool": {
+      "label": "Azure Blob Cool",
+      "storage_cost_per_gb_month": 0.01,
+      "put_cost_per_1000": 0.01,
+      "get_cost_per_1000": 0.01,
+      "egress_cost_per_gb": 0.087,
+      "cross_region_replication_cost_per_gb": 0.013,
+      "early_delete_months": 1
+    },
+    "cloudflare_r2": {
+      "label": "Cloudflare R2",
+      "storage_cost_per_gb_month": 0.015,
+      "put_cost_per_1000": 0.0045,
+      "get_cost_per_1000": 0.0,
+      "egress_cost_per_gb": 0.0,
+      "cross_region_replication_cost_per_gb": 0.015,
+      "early_delete_months": 0
+    },
+    "backblaze_b2": {
+      "label": "Backblaze B2",
+      "storage_cost_per_gb_month": 0.006,
+      "put_cost_per_1000": 0.005,
+      "get_cost_per_1000": 0.004,
+      "egress_cost_per_gb": 0.01,
+      "cross_region_replication_cost_per_gb": 0.005,
+      "early_delete_months": 0
+    },
+    "wasabi": {
+      "label": "Wasabi Hot Cloud Storage",
+      "storage_cost_per_gb_month": 0.0079,
+      "put_cost_per_1000": 0.0,
+      "get_cost_per_1000": 0.0,
+      "egress_cost_per_gb": 0.0,
+      "cross_region_replication_cost_per_gb": 0.0,
+      "early_delete_months": 3
+    },
+    "local_nas": {
+      "label": "Local NAS / self-hosted",
+      "storage_cost_per_gb_month": 0.012,
+      "put_cost_per_1000": 0.0,
+      "get_cost_per_1000": 0.0,
+      "egress_cost_per_gb": 0.0,
+      "cross_region_replication_cost_per_gb": 0.0,
+      "early_delete_months": 0
+    }
+  },
+  "recovery_testing": {
+    "tests_per_month_options": [0, 1, 2, 4],
+    "default_tests_per_month": 1,
+    "restore_gb_per_test_default": 50,
+    "engineering_hours_per_test_default": 4,
+    "engineering_hourly_rate_default": 150
+  },
+  "defaults": {
+    "retention_months": 12,
+    "primary_provider": "s3_standard",
+    "replication_enabled": true,
+    "replication_provider": "cloudflare_r2",
+    "compression_ratio": 1.0,
+    "dedupe_ratio": 1.0,
+    "recovery_tests_per_month": 1,
+    "restore_gb_per_test": 50,
+    "recovery_engineering_hours_per_test": 4,
+    "recovery_engineering_hourly_rate": 150,
+    "projection_months": 12,
+    "asset_model_weights_size_gb": 40,
+    "asset_model_weights_change_pct": 10,
+    "asset_model_weights_snapshots_per_month": 4,
+    "asset_vector_indexes_size_gb": 25,
+    "asset_vector_indexes_change_pct": 30,
+    "asset_vector_indexes_snapshots_per_month": 4,
+    "asset_agent_state_size_gb": 5,
+    "asset_agent_state_change_pct": 50,
+    "asset_agent_state_snapshots_per_month": 30,
+    "asset_conversations_size_gb": 20,
+    "asset_conversations_change_pct": 100,
+    "asset_conversations_snapshots_per_month": 30,
+    "asset_configs_size_gb": 1,
+    "asset_configs_change_pct": 20,
+    "asset_configs_snapshots_per_month": 30,
+    "asset_logs_size_gb": 15,
+    "asset_logs_change_pct": 100,
+    "asset_logs_snapshots_per_month": 30
+  },
+  "snapshot_frequency_map": {
+    "continuous": 720,
+    "hourly": 720,
+    "daily": 30,
+    "weekly": 4,
+    "monthly": 1,
+    "on_change": 1
+  },
+  "scenarios": [
+    {
+      "id": "mvp",
+      "name": "MVP / Side project",
+      "description": "Small agent with minimal state, daily snapshots, no replication, monthly recovery test."
+    },
+    {
+      "id": "saas_default",
+      "name": "AI Agent SaaS",
+      "description": "Production AI agent with model weights, vector DB, daily conversation/log backups, cross-region replication, monthly recovery drill."
+    },
+    {
+      "id": "enterprise",
+      "name": "Enterprise / SOC 2",
+      "description": "Multiple models, large vector indexes, hourly state and conversation snapshots, replicated backups, quarterly disaster-recovery exercises."
+    },
+    {
+      "id": "regulated",
+      "name": "Regulated / Finance / Healthcare",
+      "description": "Immutable audit logs, encrypted cross-region copies, frequent restore tests, long retention, compliance documentation."
+    }
+  ],
+  "scenario_values": {
+    "mvp": {
+      "asset_model_weights_size_gb": 10,
+      "asset_model_weights_snapshots_per_month": 4,
+      "asset_vector_indexes_size_gb": 5,
+      "asset_vector_indexes_snapshots_per_month": 4,
+      "asset_agent_state_size_gb": 1,
+      "asset_agent_state_snapshots_per_month": 4,
+      "asset_conversations_size_gb": 2,
+      "asset_conversations_snapshots_per_month": 4,
+      "asset_configs_size_gb": 0.5,
+      "asset_configs_snapshots_per_month": 4,
+      "asset_logs_size_gb": 2,
+      "asset_logs_snapshots_per_month": 4,
+      "retention_months": 6,
+      "primary_provider": "backblaze_b2",
+      "replication_enabled": false,
+      "recovery_tests_per_month": 1,
+      "restore_gb_per_test": 10,
+      "recovery_engineering_hours_per_test": 2,
+      "projection_months": 12
+    },
+    "saas_default": {
+      "asset_model_weights_size_gb": 40,
+      "asset_model_weights_snapshots_per_month": 4,
+      "asset_vector_indexes_size_gb": 25,
+      "asset_vector_indexes_snapshots_per_month": 4,
+      "asset_agent_state_size_gb": 5,
+      "asset_agent_state_snapshots_per_month": 30,
+      "asset_conversations_size_gb": 20,
+      "asset_conversations_snapshots_per_month": 30,
+      "asset_configs_size_gb": 1,
+      "asset_configs_snapshots_per_month": 30,
+      "asset_logs_size_gb": 15,
+      "asset_logs_snapshots_per_month": 30,
+      "retention_months": 12,
+      "primary_provider": "s3_standard",
+      "replication_enabled": true,
+      "replication_provider": "cloudflare_r2",
+      "recovery_tests_per_month": 1,
+      "restore_gb_per_test": 50,
+      "recovery_engineering_hours_per_test": 4,
+      "projection_months": 12
+    },
+    "enterprise": {
+      "asset_model_weights_size_gb": 120,
+      "asset_model_weights_snapshots_per_month": 8,
+      "asset_vector_indexes_size_gb": 100,
+      "asset_vector_indexes_snapshots_per_month": 8,
+      "asset_agent_state_size_gb": 20,
+      "asset_agent_state_snapshots_per_month": 720,
+      "asset_conversations_size_gb": 100,
+      "asset_conversations_snapshots_per_month": 720,
+      "asset_configs_size_gb": 2,
+      "asset_configs_snapshots_per_month": 720,
+      "asset_logs_size_gb": 50,
+      "asset_logs_snapshots_per_month": 720,
+      "retention_months": 24,
+      "primary_provider": "s3_standard",
+      "replication_enabled": true,
+      "replication_provider": "s3_glacier",
+      "recovery_tests_per_month": 1,
+      "restore_gb_per_test": 200,
+      "recovery_engineering_hours_per_test": 8,
+      "projection_months": 24
+    },
+    "regulated": {
+      "asset_model_weights_size_gb": 80,
+      "asset_model_weights_snapshots_per_month": 4,
+      "asset_vector_indexes_size_gb": 60,
+      "asset_vector_indexes_snapshots_per_month": 4,
+      "asset_agent_state_size_gb": 10,
+      "asset_agent_state_snapshots_per_month": 720,
+      "asset_conversations_size_gb": 80,
+      "asset_conversations_snapshots_per_month": 720,
+      "asset_configs_size_gb": 2,
+      "asset_configs_snapshots_per_month": 720,
+      "asset_logs_size_gb": 40,
+      "asset_logs_snapshots_per_month": 720,
+      "retention_months": 84,
+      "primary_provider": "s3_glacier",
+      "replication_enabled": true,
+      "replication_provider": "cloudflare_r2",
+      "recovery_tests_per_month": 2,
+      "restore_gb_per_test": 100,
+      "recovery_engineering_hours_per_test": 6,
+      "projection_months": 24
+    }
+  },
+  "faq": [
+    {
+      "question": "What does this calculator estimate?",
+      "answer": "The monthly and projected cost of backing up and being able to restore the critical assets behind an AI agent: model weights, vector/embedding indexes, agent state, conversation history, configuration, prompts, code, and logs. It includes primary storage, cross-region replication, API operations, restore egress, and recovery-testing labor."
+    },
+    {
+      "question": "Which assets matter most for an AI agent?",
+      "answer": "Model weights and vector indexes are large and change slowly. Conversation history and agent state change fast and must be recoverable to a recent point. Config, prompts, and code are small but critical — losing them can break behavior."
+    },
+    {
+      "question": "How should I pick snapshot frequency?",
+      "answer": "Match recovery-point objective (RPO). Hourly or continuous for state and conversations. Daily or weekly for model weights. Every commit or continuous for config and prompts."
+    },
+    {
+      "question": "Is cross-region replication worth the cost?",
+      "answer": "For production SaaS and regulated workloads, yes — it protects against regional outages and satisfies SOC 2 and HIPAA availability controls. For MVPs, a single region plus periodic export is usually enough."
+    },
+    {
+      "question": "What is not included?",
+      "answer": "Network transfer inside the same region, compute cost of the restore process, database transaction replay, and application-level reconciliation are excluded. Add those if your RTO requires seconds or minutes."
+    }
+  ]
+}

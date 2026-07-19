@@ -963,11 +963,19 @@ Audience: AI builders choosing between cloud GPU rental and a local GPU purchase
 |||- Cross-links: Prompt Injection Scanner, Security Audit Cost Calculator, Red Team Cost Calculator, AI Agent Compliance Checker.
 
 ## AI Agent Data Retention / Audit Log Cost Calculator
-|||- URL: https://hermesdispatch.dev/tools/agent-data-retention-cost-calculator/
-|||- Description: Estimate monthly cost to store, archive, query, and export AI agent audit logs, conversation history, PII/PHI logs, and compliance telemetry for retention rules like GDPR, SOC 2, HIPAA, and CCPA.
-|||- Inputs: monthly requests, events per request, event size (KB), conversation retention rate, conversation size (KB), hot/warm/archive months, queries per month, exports per month, export size (GB), PII/PHI rate, PII scan cost per 1K items, backup retention months, hot/warm/archive storage cost per GB/month, hot/warm/archive query cost, hot/warm/archive ingest cost per GB, object storage backup cost per GB/month, export egress cost per GB, compliance engineering hours per month, engineering hourly rate, projection months.
-|||- Outputs: monthly log volume, stored log volume, monthly conversation volume, stored conversation volume, hot/warm/archive storage cost, ingest cost, query cost, export cost, backup cost, PII scanning cost, compliance engineering cost, total monthly cost, projected period cost, verdict.
-|||- Audience: AI agent builders, operators, security, and compliance teams budgeting audit-log storage, retention, and retrieval.
-|||- Cross-links: AI Agent Privacy / Compliance Checker, AI Agent PII Detection & Data Classification Cost Calculator, AI Agent Memory / RAG Cost Calculator, AI Agent Observability Cost Calculator.
+||||- URL: https://hermesdispatch.dev/tools/agent-data-retention-cost-calculator/
+||||- Description: Estimate monthly cost to store, archive, query, and export AI agent audit logs, conversation history, PII/PHI logs, and compliance telemetry for retention rules like GDPR, SOC 2, HIPAA, and CCPA.
+||||- Inputs: monthly requests, events per request, event size (KB), conversation retention rate, conversation size (KB), hot/warm/archive months, queries per month, exports per month, export size (GB), PII/PHI rate, PII scan cost per 1K items, backup retention months, hot/warm/archive storage cost per GB/month, hot/warm/archive query cost, hot/warm/archive ingest cost per GB, object storage backup cost per GB/month, export egress cost per GB, compliance engineering hours per month, engineering hourly rate, projection months.
+||||- Outputs: monthly log volume, stored log volume, monthly conversation volume, stored conversation volume, hot/warm/archive storage cost, ingest cost, query cost, export cost, backup cost, PII scanning cost, compliance engineering cost, total monthly cost, projected period cost, verdict.
+||||- Audience: AI agent builders, operators, security, and compliance teams budgeting audit-log storage, retention, and retrieval.
+||||- Cross-links: AI Agent Privacy / Compliance Checker, AI Agent PII Detection & Data Classification Cost Calculator, AI Agent Memory / RAG Cost Calculator, AI Agent Observability Cost Calculator.
+
+## AI Agent Backup & Disaster Recovery Cost Calculator
+||||- URL: https://hermesdispatch.dev/tools/agent-backup-dr-cost-calculator/
+||||- Description: Estimate monthly cost to back up and recover AI agent assets: model weights, vector indexes, agent state, conversation history, config/prompts/code, and audit logs across object storage, cross-region replication, snapshots, and recovery testing.
+||||- Inputs: primary storage provider, retention months, projection months, compression ratio, deduplication ratio, cross-region replication toggle and provider, asset sizes and snapshots per month for model weights, vector indexes, agent state, conversation history, configs, and logs, recovery tests per month, restore GB per test, engineering hours per test, engineering hourly rate.
+||||- Outputs: protected asset footprint, monthly snapshot volume, effective stored volume, primary storage cost, replication storage cost, API operation cost, restore egress cost, recovery test labor cost, total monthly cost, provider comparison table, projected period cost, verdict.
+||||- Audience: AI agent builders, SREs, and compliance teams budgeting backup, disaster recovery, and business-continuity for agent infrastructure.
+||||- Cross-links: AI Agent Data Retention / Audit Log Cost Calculator, AI Agent PII Detection & Data Classification Cost Calculator, AI Agent Observability Cost Calculator, AI Agent Privacy / Compliance Checker.
 
 ## Hub Pages

@@ -81,7 +81,9 @@ const description = "Track AI hardware prices for local LLM builds. Know MSRP, t
                     {deal.check_urls.map((url, idx) => (
                       <a href={url} target="_blank" rel="noopener" class="text-brand-gold hover:underline">{idx === 0 ? 'Amazon' : 'Newegg'} →</a>
                     ))}
-                    <a href={`/go/${deal.affiliate_slug}/`} class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold text-xs hover:bg-brand-gold/20 transition-colors">Deals</a>
+                    {deal.check_urls && deal.check_urls[0] && (
+                      <a href={`/go/${deal.affiliate_slug}/?url=${encodeURIComponent(deal.check_urls[0])}&source=deal-tracker`} class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold text-xs hover:bg-brand-gold/20 transition-colors">Deals</a>
+                    )}
                   </div>
                 </td>
               </tr>

@@ -28,12 +28,12 @@ const faqSchema = {
   ]
 };
 
-// Recommended products map (slug → recommendation label)
-const productLinks: Record<string, { slug: string; label: string }> = {
-  'beelink-ser7': { slug: 'beelink-ser7', label: 'Beelink SER7 Pro' },
-  'geekom-a8': { slug: 'geekom-a8', label: 'Geekom A8' },
-  'rtx-4090': { slug: 'nvidia-rtx-4090', label: 'NVIDIA RTX 4090' },
-  'corsair-64gb': { slug: 'corsair-64gb-ddr5', label: 'Corsair 64GB DDR5' }
+// Recommended products map (slug → recommendation label + affiliate URL)
+const productLinks: Record<string, { slug: string; label: string; url: string }> = {
+  'beelink-ser7': { slug: 'beelink-ser7', label: 'Beelink SER7 Pro', url: 'https://www.amazon.com/dp/B0CCP7XRV4?tag=dare404-20' },
+  'geekom-a8': { slug: 'geekom-a8', label: 'Geekom A8', url: 'https://www.amazon.com/s?k=Geekom+A8+Ryzen+9+8945HS&ref=nb_sb_noss&tag=dare404-20' },
+  'nvidia-rtx-4090': { slug: 'nvidia-rtx-4090', label: 'NVIDIA RTX 4090', url: 'https://www.amazon.com/dp/B0GBL341F3?tag=dare404-20' },
+  'corsair-64gb-ddr5': { slug: 'corsair-64gb-ddr5', label: 'Corsair 64GB DDR5', url: 'https://www.amazon.com/dp/B0BSXH6DZZ?tag=dare404-20' }
 };
 ---
 
@@ -198,8 +198,8 @@ const productLinks: Record<string, { slug: string; label: string }> = {
             '</div>',
             '<div class="text-right md:text-right flex flex-row md:flex-col items-center md:items-end gap-3">',
             '<span class="text-lg font-mono text-brand-gold">' + item.price + '</span>',
-            '<a href="/go/' + item.slug + '/?url=' + encodeURIComponent('https://hermesdispatch.dev/directory#' + item.slug) + '&source=agent-hardware-sizer"',
-            'class="px-4 py-2 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-sm font-medium hover:bg-brand-gold/20 transition">View in Directory →</a>',
+            '<a href="/go/' + item.slug + '/?url=' + encodeURIComponent((productLinks[item.slug] && productLinks[item.slug].url) || ('https://hermesdispatch.dev/directory#' + item.slug)) + '&source=agent-hardware-sizer"',
+            'class="px-4 py-2 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-sm font-medium hover:bg-brand-gold/20 transition">' + ((productLinks[item.slug] && productLinks[item.slug].label) || 'View in Directory') + ' →</a>',
             '</div>',
             '</div>'
           ].join('');

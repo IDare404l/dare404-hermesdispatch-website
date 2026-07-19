@@ -34,6 +34,7 @@ const subcategories = ["all", ...new Set(entries.map(e => e.frontmatter.subcateg
 // Decode entries for the template
 const products = entries.map(e => ({
   ...e.frontmatter,
+  _slug: e.file?.split('/').pop()?.replace(/\.md$/, '') || '',
   Content: e.Content,
   rawContent: e.rawContent || ''
 }));
@@ -283,7 +284,7 @@ const allSchemas = [itemListSchema, ...productSchemas];
             return (
               <div class="space-y-2">
                 <a
-                  href={`/go/${product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/?url=${encodeURIComponent(ctaUrl)}&source=directory`}
+                  href={`/go/${product._slug || product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/?url=${encodeURIComponent(ctaUrl)}&source=directory`}
                   target="_blank"
                   rel="noopener noreferrer"
                   class="block w-full text-center py-2.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold font-medium hover:bg-brand-gold/20 transition"
