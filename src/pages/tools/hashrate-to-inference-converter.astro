@@ -1,316 +1,364 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import data from '../../data/hashrate_to_inference.json';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/hashrate_to_inference_converter.json';
 
-const title = "GPU Hashrate to LLM Inference Capacity Converter";
-const description = "Convert your GPU's crypto-mining hashrate into an estimated LLM inference capacity: tok/s, VRAM fit, and rough revenue potential.";
+const title = "GPU Hashrate to Inference Capacity Converter | Hermes Dispatch";
+const description = "Convert crypto-mining hashrate into estimated local LLM inference tokens per second. Compare mining power cost with potential inference value for miner pivots.";
 const algorithms = data.algorithms;
-const gpus = data.gpus;
-const models = data.models;
+const models = data.inference_models;
+const profiles = data.gpu_profiles;
+const scenarios = data.scenarios;
 const defaults = data.defaults;
-const eff = data.efficiency_help;
+
+const faqs = [
+  { q: "How does mining hashrate relate to LLM inference speed?", a: "Both depend on GPU memory bandwidth, compute, and power. A card that hashes faster on memory-bound algorithms usually also runs LLMs faster, but the correlation is rough because different algorithms stress different parts of the chip. This tool scales measured hashrate against known benchmarks to estimate tok/s." },
+  { q: "Which algorithm gives the best proxy for LLM inference?", a: "Memory-bound algorithms like Etchash, ZelHash, and Octopus are closer to LLM inference than compute-bound algorithms like KawPow. Use the algorithm you are actually mining for the most relevant pivot estimate." },
+  { q: "Can I use this for multi-GPU rigs?", a: "Yes. Enter the total measured hashrate of the whole rig and set the power draw and hours to match the full system. The converter scales linearly, so a rig with 2x the hashrate of a single card is estimated to deliver roughly 2x the tok/s." },
+  { q: "Why does the 70B model show zero tok/s for some cards?", a: "A 70B parameter model at 4-bit quantization needs roughly 40 GB of VRAM. Cards with 16 GB or less cannot run it without aggressive offloading, which is usually too slow to be useful, so the calculator marks them as unsupported." },
+  { q: "Is this a guarantee of actual inference revenue?", a: "No. The cloud-equivalent value is a benchmark, not a price you will automatically earn. Rental pricing, demand, downtime, and model quality all affect real hosting revenue. Use the Local LLM Hosting Revenue Estimator for a full business model." }
+];
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="GPU Hashrate to Inference Capacity Converter" description={description} url="https://hermesdispatch.dev/tools/hashrate-to-inference-converter/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Can a crypto mining GPU be used for local LLM inference?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes. GPUs that mined Ethereum Classic, Ravencoin, ERGO, or similar algorithms are the same NVIDIA/AMD cards used for local LLM inference. The limiting factors are VRAM size, FP16/FP8 compute, and memory bandwidth." }
-      },
-      {
-        "@type": "Question",
-        "name": "How do you convert GPU hashrate to LLM tokens per second?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Mining hashrate is not directly equivalent to inference throughput, but you can estimate FP16 compute using the algorithm's approximate efficiency and the card's known performance, then divide by a model's tokens-per-teraflop ratio to get a rough tok/s figure." }
-      },
-      {
-        "@type": "Question",
-        "name": "Which mining GPUs are best for local AI inference?",
-        "acceptedAnswer": { "@type": "Answer", "text": "RTX 3090/3090 Ti and RTX 4090 are popular because they combine high FP16 throughput with 24 GB VRAM, enough for a 70B parameter model at Q4 quantization." }
-      },
-      {
-        "@type": "Question",
-        "name": "Why does inference speed depend on more than teraflops?",
-        "acceptedAnswer": { "@type": "Answer", "text": "LLM token generation is memory-bandwidth bound for large models and compute-bound for small batches. Real tok/s also depends on quantization, context length, batch size, and software stack." }
-      }
-    ]
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
   })} />
 
-  <section class="relative pt-24 pb-12 overflow-hidden">
-    <div class="absolute inset-0 animated-gradient opacity-50"></div>
-    <div class="grid-overlay"></div>
-    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⛏️</div>
-        <h1 class="display-heading mb-4">Hashrate to Inference Converter</h1>
-        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
-          Turn your crypto-mining hashrate into an estimated local LLM inference capacity. See which models fit and how many tokens/sec you might generate.
-        </p>
-      </div>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⛏️</div>
+      <h1 class="display-heading mb-4">GPU Hashrate to Inference Capacity Converter</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Turn your crypto-mining hashrate into an estimated local LLM tok/s number. Compare electricity cost with cloud-equivalent inference value.</p>
+    </div>
 
-      <!-- GPU presets -->
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-        {gpus.map((gpu, i) => (
-          <button type="button" class="gpu-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
-            <div class="text-2xl mb-2">🖥️</div>
-            <h3 class="font-semibold text-sm">{gpu.name}</h3>
-            <p class="text-xs text-neutral-400 mt-1">~{gpu.typical_hashrate_mh_ethash} MH/s ethash • {gpu.vram_gb} GB</p>
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario preset</h2>
+      <div class="flex flex-wrap gap-3" id="scenario-buttons">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)} data-index={i}>
+            {s.name}
           </button>
         ))}
       </div>
+    </section>
 
-      <div class="grid lg:grid-cols-2 gap-6 mb-8">
-        <!-- Inputs -->
-        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-          <h2 class="text-xl font-bold mb-5 text-brand-gold">Mining setup</h2>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm text-neutral-400 mb-1">Hashrate</label>
-              <div class="flex gap-3">
-                <input id="hashrate" type="number" min="0" step="1" value={defaults.hashrate} class="flex-1 px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-                <select id="hashrateUnit" class="px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white text-sm">
-                  <option value="kh">KH/s</option>
-                  <option value="mh" selected>MH/s</option>
-                  <option value="gh">GH/s</option>
-                </select>
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm text-neutral-400 mb-1">Mining algorithm</label>
-              <select id="algorithm" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
-                {Object.entries(algorithms).map(([slug, a]) => (
-                  <option value={slug} selected={slug === defaults.algorithm}>{a.name}</option>
-                ))}
-              </select>
-              <p id="algoNote" class="text-xs text-neutral-500 mt-2">{algorithms[defaults.algorithm].note}</p>
-            </div>
-            <div class="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-sm text-neutral-400 mb-1">Power efficiency (J/MH)</label>
-                <input id="efficiency" type="number" min="0.05" step="0.01" value={defaults.efficiency_j_mh} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-                <p class="text-xs text-neutral-500 mt-1">Typical range: {eff.j_mh_min}-{eff.j_mh_max} J/MH</p>
-              </div>
-              <div>
-                <label class="block text-sm text-neutral-400 mb-1">Electricity ($/kWh)</label>
-                <input id="electricity" type="number" min="0" step="0.01" value={defaults.electricity_cost_per_kwh} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm text-neutral-400 mb-1">Inference utilization (% of peak compute)</label>
-              <input id="utilization" type="number" min="10" max="100" step="5" value={defaults.utilization_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-              <p class="text-xs text-neutral-500 mt-1">Real inference rarely uses 100% of peak FP16.</p>
-            </div>
-            <div>
-              <label class="block text-sm text-neutral-400 mb-1">Available VRAM (GB)</label>
-              <input id="vram" type="number" min="1" step="1" value={24} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Estimates -->
+    <section class="grid lg:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold flex items-center gap-2"><span>⛏️</span> Mining input</h2>
         <div class="space-y-4">
-          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
-            <p class="text-xs text-neutral-500 uppercase mb-1">Estimated peak FP16 compute</p>
-            <p id="tflops" class="text-3xl font-bold text-brand-gold">—</p>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
-              <p class="text-xs text-neutral-500 uppercase mb-1">Inference power</p>
-              <p id="inferenceWatts" class="text-2xl font-bold">—</p>
-            </div>
-            <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
-              <p class="text-xs text-neutral-500 uppercase mb-1">Power cost / month</p>
-              <p id="monthlyPowerCost" class="text-2xl font-bold text-red-400">—</p>
-            </div>
-          </div>
-          <div class="glass-card rounded-2xl p-5 text-center border border-emerald-500/20">
-            <p class="text-xs text-neutral-500 uppercase mb-1">Best-fit model</p>
-            <p id="bestModel" class="text-xl font-bold text-emerald-400">—</p>
-            <p id="bestModelSpeed" class="text-sm text-neutral-400 mt-1">—</p>
-          </div>
+          <label class="block"><span class="text-neutral-400 text-sm">GPU / rig profile</span>
+            <select id="gpuProfile" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {profiles.map(p => <option value={JSON.stringify(p)} selected={p.name === defaults.gpu}>{p.name} {p.vram_gb ? `(${p.vram_gb} GB)` : ''}</option>)}
+            </select>
+          </label>
+          <label class="block hidden" id="referenceGpuLabel"><span class="text-neutral-400 text-sm">Reference GPU for scaling</span>
+            <select id="referenceGpu" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {profiles.filter(p => !p.is_custom).map(p => <option value={JSON.stringify(p)} selected={p.name === (profiles.find(x => x.is_custom)?.reference_gpu || defaults.gpu)}>{p.name}</option>)}
+            </select>
+          </label>
+          <label class="block"><span class="text-neutral-400 text-sm">Algorithm</span>
+            <select id="algorithm" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {algorithms.map(a => <option value={a.id} selected={a.id === defaults.algorithm}>{a.name}</option>)}
+            </select>
+          </label>
+          <label class="block"><span class="text-neutral-400 text-sm">Measured hashrate (<span id="hashrateUnit">MH/s</span>)</span><input id="hashrate" type="number" min="0" step="0.1" value={defaults.hashrate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Inference model</span>
+            <select id="inferenceModel" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {models.map(m => <option value={m.id} selected={m.id === defaults.inference_model}>{m.name}</option>)}
+            </select>
+          </label>
+        </div>
+
+        <h2 class="text-xl font-bold mt-8 mb-6 text-brand-gold flex items-center gap-2"><span>⚡</span> Power & economics</h2>
+        <div class="space-y-4">
+          <label class="block"><span class="text-neutral-400 text-sm">Power draw (W)</span><input id="powerW" type="number" min="0" step="10" value={defaults.power_w} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Electricity rate ($/kWh)</span><input id="electricityRate" type="number" min="0" step="0.01" value={defaults.electricity_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Hours online / day</span><input id="hoursPerDay" type="number" min="0" max="24" step="0.5" value={defaults.hours_per_day} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Inference utilization (%)</span><input id="inferenceUtil" type="number" min="0" max="100" step="1" value={defaults.inference_utilization_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Cloud API price ($/1M tokens)</span><input id="apiPrice" type="number" min="0" step="0.1" value={defaults.api_price_per_1m_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
         </div>
       </div>
 
-      <!-- Model table -->
-      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
-        <h2 class="text-xl font-bold mb-4">Estimated tok/s by model</h2>
-        <p class="text-sm text-neutral-400 mb-4">Throughput depends on quantization, context length, and batch size. Treat these as rough directional estimates.</p>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="text-neutral-500 border-b border-neutral-800">
-              <tr>
-                <th class="text-left py-2">Model</th>
-                <th class="text-left py-2">VRAM needed</th>
-                <th class="text-right py-2">Est. tok/s</th>
-                <th class="text-left py-2 pl-4">Fit</th>
-              </tr>
-            </thead>
-            <tbody id="modelTable" class="divide-y divide-neutral-800">
-              {models.map(m => (
-                <tr data-model={m.name}>
-                  <td class="py-3">{m.name}<br><span class="text-xs text-neutral-500">{m.label}</span></td>
-                  <td class="py-3">{m.vram_gb} GB</td>
-                  <td class="py-3 text-right font-mono" id={`speed-${m.name.replace(/[^a-zA-Z0-9]/g, '-')}`}>—</td>
-                  <td class="py-3 pl-4" id={`fit-${m.name.replace(/[^a-zA-Z0-9]/g, '-')}`}>—</td>
+      <div class="space-y-6">
+        <section id="summary" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Estimated tok/s</p><p id="tokPerSec" class="text-2xl font-bold text-brand-gold">—</p><p id="modelSupport" class="text-sm text-neutral-400 mt-1">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Tokens / day</p><p id="tokPerDay" class="text-2xl font-bold text-white">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Tokens / month</p><p id="tokPerMonth" class="text-2xl font-bold text-white">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Electricity cost / mo</p><p id="powerCost" class="text-2xl font-bold text-white">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Cloud-equivalent value / mo</p><p id="cloudValue" class="text-2xl font-bold text-brand-gold">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Net value vs power</p><p id="netValue" class="text-2xl font-bold text-white">—</p></div>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">GPU comparison for this algorithm & model</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-neutral-500 border-b border-neutral-800">
+                  <th class="py-2 pr-2">GPU</th>
+                  <th class="py-2 pr-2 text-right">VRAM</th>
+                  <th class="py-2 pr-2 text-right">Hashrate</th>
+                  <th class="py-2 pr-2 text-right">Tok/s</th>
+                  <th class="py-2 text-right">Tokens/day</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              </thead>
+              <tbody id="comparisonTable" class="divide-y divide-neutral-800"></tbody>
+            </table>
+          </div>
+        </section>
 
-      <!-- Reality check -->
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="glass-card rounded-2xl p-6">
-          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
-          <ul class="space-y-2 text-neutral-300 text-sm">
-            <li><strong class="text-white">Hashrate → flops</strong>: we use the algorithm's approximate <span class="font-mono">MH/s : GFLOPS</span> ratio to back out compute.</li>
-            <li><strong class="text-white">Utilization</strong>: real inference uses 40-90% of peak FP16 depending on batch size and memory bandwidth.</li>
-            <li><strong class="text-white">VRAM fit</strong>: only models that fit in your available VRAM are marked green.</li>
-            <li><strong class="text-white">Power</strong>: inferred from efficiency and hashrate, then costed at your electricity rate.</li>
-          </ul>
-        </div>
-        <div class="glass-card rounded-2xl p-6">
-          <h2 class="text-xl font-bold mb-4 text-brand-gold">Reality checks</h2>
-          <ul class="space-y-2 text-neutral-300 text-sm">
-            <li>• Mining and inference stress different parts of the card. A mined card may have degraded memory.</li>
-            <li>• Large models are memory-bandwidth bound; teraflops alone overstate speed.</li>
-            <li>• Batch processing and prompt prefill can swing real tok/s by 2-5×.</li>
-            <li>• Always verify VRAM headroom; quantization tables are approximate.</li>
-          </ul>
-        </div>
-      </div>
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Sensitivity to hashrate</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-neutral-500 border-b border-neutral-800">
+                  <th class="py-2 pr-2">% of reference</th>
+                  <th class="py-2 pr-2 text-right">Hashrate</th>
+                  <th class="py-2 pr-2 text-right">Tok/s</th>
+                  <th class="py-2 text-right">Tokens / mo</th>
+                </tr>
+              </thead>
+              <tbody id="sensitivityTable" class="divide-y divide-neutral-800"></tbody>
+            </table>
+          </div>
+        </section>
 
-      <div class="mt-10 flex flex-wrap gap-3">
-        <a href="/tools/miner-pivot-calculator/" class="btn-primary text-sm">Miner Pivot Calculator →</a>
-        <a href="/tools/vram-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">VRAM Calculator →</a>
-        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Verdict</h2>
+          <p id="verdictText" class="text-neutral-300">—</p>
+        </section>
       </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">How the math works</h2>
+      <ul class="list-disc pl-5 text-neutral-300 space-y-2">
+        <li>The converter looks up the selected GPU's reference hashrate for the chosen algorithm and its reference tok/s for the chosen model.</li>
+        <li>It computes a ratio = your measured hashrate ÷ reference hashrate, then multiplies reference tok/s by that ratio.</li>
+        <li>For custom GPUs, the same ratio is applied using the reference GPU you select.</li>
+        <li>Monthly tokens assume the selected inference utilization % applied to the hours-per-day the rig is online.</li>
+        <li>Cloud-equivalent value = monthly tokens ÷ 1,000,000 × your chosen API price per 1M tokens. It shows what you would pay for the same output at that API rate.</li>
+      </ul>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.q}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="/tools/miner-pivot-calculator/" class="btn-primary text-sm">Miner Pivot Calculator →</a>
+      <a href="/tools/local-llm-roi-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Local LLM ROI Calculator →</a>
+      <a href="/tools/local-llm-hosting-revenue-estimator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Hosting Revenue Estimator →</a>
     </div>
-  </section>
 
-  <script define:vars={{ algorithms, gpus, models, defaults, eff }}>
-    const el = {
-      hashrate: document.getElementById('hashrate'),
-      hashrateUnit: document.getElementById('hashrateUnit'),
-      algorithm: document.getElementById('algorithm'),
-      algoNote: document.getElementById('algoNote'),
-      efficiency: document.getElementById('efficiency'),
-      electricity: document.getElementById('electricity'),
-      utilization: document.getElementById('utilization'),
-      vram: document.getElementById('vram'),
-      tflops: document.getElementById('tflops'),
-      inferenceWatts: document.getElementById('inferenceWatts'),
-      monthlyPowerCost: document.getElementById('monthlyPowerCost'),
-      bestModel: document.getElementById('bestModel'),
-      bestModelSpeed: document.getElementById('bestModelSpeed'),
-    };
+    <p id="note" class="text-neutral-500 text-sm mt-10">{data.note}</p>
+  </main>
 
-    const fmt = (n, d = 1) => new Intl.NumberFormat('en-US', { maximumFractionDigits: d }).format(n);
-    const fmtMoney = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+  <script is:inline define:vars={{ algorithms, models, profiles, scenarios, defaults }}>
+    function $(id) { return document.getElementById(id); }
+    function val(id) { return parseFloat($(id).value) || 0; }
+    function pct(id) { return Math.min(100, Math.max(0, val(id) / 100)); }
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+    const fmtInt = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
 
-    function toMh() {
-      const v = parseFloat(el.hashrate.value) || 0;
-      const unit = el.hashrateUnit.value;
-      if (unit === 'gh') return v * 1000;
-      if (unit === 'kh') return v / 1000;
-      return v;
+    function getSelectedProfile() { return JSON.parse($('gpuProfile').value); }
+    function getReferenceProfile() { return JSON.parse($('referenceGpu').value); }
+    function getAlgorithm() { return algorithms.find(a => a.id === $('algorithm').value); }
+    function getModel() { return models.find(m => m.id === $('inferenceModel').value); }
+
+    function referenceTpsAndHashrate(profile, algoId, modelId) {
+      const refHash = profile.hashrates[algoId] || 0;
+      const refTps = profile.inference_tps[modelId];
+      return { refHash, refTps };
     }
 
-    function getTflops() {
-      const mh = toMh();
-      const algo = algorithms[el.algorithm.value];
-      const tflopsRaw = mh * (algo.mh_per_ggflops || 0.02); // algo gives GFLOPS per MH/s -> multiply by 1/1000 for TF? Wait units check.
-      // mh_per_ggflops means 1 MH/s corresponds to X GFLOPS. So tflops = mh * X / 1000.
-      return (mh * (algo.mh_per_ggflops || 0.02)) / 1000;
+    function computeEstimates() {
+      const profile = getSelectedProfile();
+      const algo = getAlgorithm();
+      const model = getModel();
+      const hashrate = Math.max(0, val('hashrate'));
+      const powerW = Math.max(0, val('powerW'));
+      const rate = Math.max(0, val('electricityRate'));
+      const hours = Math.min(24, Math.max(0, val('hoursPerDay')));
+      const util = pct('inferenceUtil');
+      const apiPrice = Math.max(0, val('apiPrice'));
+
+      $('hashrateUnit').textContent = algo.unit;
+
+      const custom = !!profile.is_custom;
+      $('referenceGpuLabel').classList.toggle('hidden', !custom);
+
+      let refProfile = profile;
+      if (custom) refProfile = getReferenceProfile();
+
+      const { refHash, refTps } = referenceTpsAndHashrate(refProfile, algo.id, model.id);
+      const ratio = refHash > 0 ? hashrate / refHash : 0;
+      let tps = refTps === undefined ? 0 : (refTps * ratio);
+      const supported = refTps > 0;
+
+      const secondsPerDay = hours * 3600;
+      const tokensPerDay = supported ? tps * secondsPerDay * util : 0;
+      const tokensPerMonth = tokensPerDay * 30.44;
+      const kwhPerDay = (powerW / 1000) * hours;
+      const kwhPerMonth = kwhPerDay * 30.44;
+      const powerCost = kwhPerMonth * rate;
+      const cloudValue = (tokensPerMonth / 1000000) * apiPrice;
+      const netValue = cloudValue - powerCost;
+
+      return { tps, supported, tokensPerDay, tokensPerMonth, powerCost, cloudValue, netValue, ratio, refProfile, algo, model, util };
     }
 
-    function calc() {
-      const algo = algorithms[el.algorithm.value];
-      el.algoNote.textContent = algo.note;
+    function render() {
+      const est = computeEstimates();
+      const { tps, supported, tokensPerDay, tokensPerMonth, powerCost, cloudValue, netValue, ratio, refProfile, algo, model, util } = est;
 
-      const mh = toMh();
-      const tflopsRaw = getTflops();
-      const utilization = (parseFloat(el.utilization.value) || 0) / 100;
-      const tflopsUsable = tflopsRaw * utilization;
-      const efficiency = parseFloat(el.efficiency.value) || 0;
-      const electricity = parseFloat(el.electricity.value) || 0;
-      const watts = mh * efficiency; // W = MH/s * J/MH (because J/s = W, hash per sec * joules per hash)
-      const monthlyKwh = (watts * 24 * 30) / 1000;
-      const monthlyCost = monthlyKwh * electricity;
-      const vram = parseFloat(el.vram.value) || 0;
-
-      el.tflops.textContent = `${fmt(tflopsUsable, 1)} TFLOPS (peak ${fmt(tflopsRaw, 1)})`;
-      el.inferenceWatts.textContent = `${fmt(watts, 0)} W`;
-      el.monthlyPowerCost.textContent = fmtMoney(monthlyCost);
-
-      let best = null;
-      let bestSpeed = 0;
-
-      models.forEach(m => {
-        const speed = tflopsUsable * m.tokens_per_second_per_tflops;
-        const fits = vram >= m.vram_gb;
-        const safeId = m.name.replace(/[^a-zA-Z0-9]/g, '-');
-        const speedCell = document.getElementById(`speed-${safeId}`);
-        const fitCell = document.getElementById(`fit-${safeId}`);
-        if (speedCell) speedCell.textContent = `${fmt(speed, 1)} tok/s`;
-        if (fitCell) {
-          if (fits) {
-            fitCell.innerHTML = '<span class="status-badge status-active">Fits</span>';
-            if (speed > bestSpeed) {
-              best = m;
-              bestSpeed = speed;
-            }
-          } else {
-            fitCell.innerHTML = '<span class="status-badge bg-red-500/15 text-red-400 border border-red-500/30">Needs ' + m.vram_gb + ' GB</span>';
-          }
-        }
-      });
-
-      if (best) {
-        el.bestModel.textContent = best.name;
-        el.bestModelSpeed.textContent = `~${fmt(bestSpeed, 1)} tok/s with ${vram} GB VRAM`;
+      if (!supported) {
+        $('tokPerSec').textContent = 'N/A';
+        $('modelSupport').textContent = 'Model likely does not fit this GPU profile';
+        $('modelSupport').className = 'text-sm text-red-400 mt-1';
       } else {
-        el.bestModel.textContent = 'VRAM too small';
-        el.bestModelSpeed.textContent = 'Increase available VRAM to see a fit';
+        $('tokPerSec').textContent = fmtNum(tps) + ' tok/s';
+        $('modelSupport').textContent = `Scaled from ${refProfile.name} at ${util * 100}% utilization`;
+        $('modelSupport').className = 'text-sm text-neutral-400 mt-1';
       }
+      $('tokPerDay').textContent = fmtInt(tokensPerDay);
+      $('tokPerMonth').textContent = fmtInt(tokensPerMonth);
+      $('powerCost').textContent = fmtMoney(powerCost) + '/mo';
+      $('cloudValue').textContent = fmtMoney(cloudValue) + '/mo';
+      $('netValue').textContent = fmtMoney(netValue) + '/mo';
+      $('netValue').className = 'text-2xl font-bold ' + (netValue >= 0 ? 'text-emerald-400' : 'text-red-400');
+
+      // Comparison table
+      const tbody = $('comparisonTable');
+      tbody.innerHTML = '';
+      profiles.filter(p => !p.is_custom).forEach(p => {
+        const { refHash, refTps } = referenceTpsAndHashrate(p, algo.id, model.id);
+        const dayTokens = refTps > 0 ? refTps * 24 * 3600 : 0;
+        const selected = p.name === getSelectedProfile().name;
+        const tr = document.createElement('tr');
+        tr.className = selected ? 'text-brand-gold font-semibold' : 'text-neutral-300';
+        tr.innerHTML = `
+          <td class="py-2 pr-2">${p.name}</td>
+          <td class="py-2 pr-2 text-right">${p.vram_gb} GB</td>
+          <td class="py-2 pr-2 text-right">${refHash > 0 ? refHash + ' ' + algo.unit : '—'}</td>
+          <td class="py-2 pr-2 text-right">${refTps > 0 ? fmtNum(refTps) : 'N/A'}</td>
+          <td class="py-2 text-right">${dayTokens > 0 ? fmtInt(dayTokens) : '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Sensitivity table
+      const sens = $('sensitivityTable');
+      sens.innerHTML = '';
+      const profile = getSelectedProfile();
+      const ref = profile.is_custom ? getReferenceProfile() : profile;
+      const refHash = ref.hashrates[algo.id] || 1;
+      const refTps = ref.inference_tps[model.id] || 0;
+      [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0].forEach(mult => {
+        const h = refHash * mult;
+        const t = refTps * mult;
+        const mo = t * 24 * 3600 * 30.44;
+        const active = Math.abs(mult - ratio) < 0.05;
+        const tr = document.createElement('tr');
+        tr.className = active ? 'text-brand-gold font-semibold' : 'text-neutral-300';
+        tr.innerHTML = `
+          <td class="py-2 pr-2">${(mult * 100).toFixed(0)}%</td>
+          <td class="py-2 pr-2 text-right">${fmtNum(h)} ${algo.unit}</td>
+          <td class="py-2 pr-2 text-right">${refTps > 0 ? fmtNum(t) : 'N/A'}</td>
+          <td class="py-2 text-right">${refTps > 0 ? fmtInt(mo) : '—'}</td>
+        `;
+        sens.appendChild(tr);
+      });
+
+      // Verdict
+      let verdict = '';
+      if (!supported) {
+        verdict = `The selected model likely does not fit on ${getSelectedProfile().name} (${getSelectedProfile().vram_gb} GB VRAM). Pick a smaller model or a card with more memory to see throughput estimates.`;
+      } else {
+        verdict = `At ${fmtNum(est.tps)} tok/s, this rig could generate about ${fmtInt(tokensPerDay)} tokens per day and ${fmtInt(tokensPerMonth)} per month while running inference ${util * 100}% of the time. `;
+        if (netValue > 0) {
+          verdict += `That output would cost roughly ${fmtMoney(cloudValue)} at the chosen API price, leaving an estimated ${fmtMoney(netValue)} after ${fmtMoney(powerCost)} in electricity. `;
+        } else {
+          verdict += `The cloud-equivalent value is ${fmtMoney(cloudValue)}, which is below the ${fmtMoney(powerCost)} electricity cost at these assumptions. `;
+        }
+        if (tokensPerMonth > 100000000) {
+          verdict += 'This is serious inference capacity—consider load balancing, cooling headroom, and a hosting marketplace.';
+        } else if (tokensPerMonth > 10000000) {
+          verdict += 'This is solid hobby-to-small-SaaS capacity. Compare the numbers in the Local LLM ROI and Hosting Revenue calculators next.';
+        } else {
+          verdict += 'This is a modest inference node. It is best suited for personal agents, experiments, or low-traffic services.';
+        }
+      }
+      $('verdictText').textContent = verdict;
     }
 
-    Object.values(el).forEach(input => {
-      if (input && input.tagName === 'INPUT' || input.tagName === 'SELECT') {
-        input.addEventListener('input', calc);
+    function applyScenario(s) {
+      const profileMatch = Array.from($('gpuProfile').options).find(o => JSON.parse(o.value).name === s.gpu);
+      if (profileMatch) $('gpuProfile').value = profileMatch.value;
+      $('algorithm').value = s.algorithm;
+      $('hashrate').value = s.hashrate;
+      $('inferenceModel').value = s.inference_model;
+      $('powerW').value = s.power_w;
+      $('electricityRate').value = s.electricity_rate;
+      $('hoursPerDay').value = s.hours_per_day;
+      $('inferenceUtil').value = s.inference_utilization_pct;
+      $('apiPrice').value = s.api_price_per_1m_tokens;
+      render();
+    }
+
+    function setDefaultsFromProfile() {
+      const profile = getSelectedProfile();
+      const algo = getAlgorithm();
+      if (!profile.is_custom && profile.hashrates[algo.id]) {
+        $('hashrate').value = profile.hashrates[algo.id];
       }
-    });
+      $('powerW').value = profile.tdp_w;
+    }
 
-    document.querySelectorAll('.gpu-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const g = gpus[parseInt(btn.dataset.idx, 10)];
-        if (!g) return;
-        el.hashrate.value = g.typical_hashrate_mh_ethash;
-        el.hashrateUnit.value = 'mh';
-        el.efficiency.value = (g.watts / g.typical_hashrate_mh_ethash).toFixed(2);
-        el.vram.value = g.vram_gb;
-        el.algorithm.value = 'ethash';
-        calc();
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('bg-brand-gold', 'text-neutral-950', 'border-brand-gold'));
+          btn.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+          applyScenario(JSON.parse(btn.dataset.scenario));
+        });
       });
+
+      $('gpuProfile').addEventListener('change', () => {
+        setDefaultsFromProfile();
+        render();
+      });
+      $('algorithm').addEventListener('change', () => {
+        const profile = getSelectedProfile();
+        if (!profile.is_custom && profile.hashrates[$('algorithm').value]) {
+          $('hashrate').value = profile.hashrates[$('algorithm').value];
+        }
+        render();
+      });
+      $('referenceGpu').addEventListener('change', render);
+      ['inferenceModel','hashrate','powerW','electricityRate','hoursPerDay','inferenceUtil','apiPrice'].forEach(id => {
+        $(id).addEventListener('input', render);
+      });
+
+      setDefaultsFromProfile();
+      render();
     });
-
-    calc();
   </script>
-
-  
-
-  
-
-  <AgentCodeBlock
-    toolName="Hashrate To Inference Converter"
-    toolPath="/tools/hashrate-to-inference-converter/"
-    description="Copy-paste Hermes Agent script for hashrate to inference converter."
-    scriptPath="/hermes-tools/hashrate_to_inference_converter.py"
-    locked={false}
-  />
 </Layout>

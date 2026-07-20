@@ -1,0 +1,131 @@
+{
+  "last_updated": "2026-07-20",
+  "note": "This converter estimates local LLM inference capacity by scaling known GPU benchmarks with your measured crypto-mining hashrate. Hashrate and inference throughput are not perfectly correlated because different algorithms stress memory bandwidth, compute, and cache differently, but the ratio is a useful rule of thumb for pivot planning. Actual tok/s depends on quantization, context length, batching, and backend.",
+  "defaults": {
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "algorithm": "etchash",
+    "hashrate": 125,
+    "inference_model": "llama-3.1-8b",
+    "power_w": 450,
+    "electricity_rate": 0.12,
+    "hours_per_day": 24,
+    "inference_utilization_pct": 75,
+    "api_price_per_1m_tokens": 2.5
+  },
+  "algorithms": [
+    { "id": "etchash", "name": "Etchash (ETC)", "unit": "MH/s" },
+    { "id": "kawpow", "name": "KawPow (RVN)", "unit": "MH/s" },
+    { "id": "autolykos2", "name": "Autolykos v2 (ERG)", "unit": "MH/s" },
+    { "id": "octopus", "name": "Octopus (CFX)", "unit": "MH/s" },
+    { "id": "zelhash", "name": "ZelHash (FLUX)", "unit": "Sol/s" },
+    { "id": "ethash", "name": "Ethash (historical ETH)", "unit": "MH/s" }
+  ],
+  "inference_models": [
+    { "id": "llama-3.1-8b", "name": "Llama 3.1 8B" },
+    { "id": "llama-3.1-70b", "name": "Llama 3.1 70B" },
+    { "id": "qwen2.5-7b", "name": "Qwen 2.5 7B" }
+  ],
+  "gpu_profiles": [
+    {
+      "name": "NVIDIA GeForce RTX 4090",
+      "vram_gb": 24,
+      "tdp_w": 450,
+      "hashrates": { "etchash": 125, "kawpow": 48, "autolykos2": 260, "octopus": 105, "zelhash": 130, "ethash": 125 },
+      "inference_tps": { "llama-3.1-8b": 125, "llama-3.1-70b": 18, "qwen2.5-7b": 135 }
+    },
+    {
+      "name": "NVIDIA GeForce RTX 3090 Ti",
+      "vram_gb": 24,
+      "tdp_w": 450,
+      "hashrates": { "etchash": 130, "kawpow": 50, "autolykos2": 270, "octopus": 110, "zelhash": 135, "ethash": 130 },
+      "inference_tps": { "llama-3.1-8b": 98, "llama-3.1-70b": 15, "qwen2.5-7b": 108 }
+    },
+    {
+      "name": "NVIDIA GeForce RTX 3090",
+      "vram_gb": 24,
+      "tdp_w": 350,
+      "hashrates": { "etchash": 120, "kawpow": 46, "autolykos2": 250, "octopus": 100, "zelhash": 125, "ethash": 120 },
+      "inference_tps": { "llama-3.1-8b": 95, "llama-3.1-70b": 14, "qwen2.5-7b": 105 }
+    },
+    {
+      "name": "NVIDIA GeForce RTX 4080",
+      "vram_gb": 16,
+      "tdp_w": 320,
+      "hashrates": { "etchash": 80, "kawpow": 32, "autolykos2": 170, "octopus": 70, "zelhash": 85, "ethash": 80 },
+      "inference_tps": { "llama-3.1-8b": 105, "llama-3.1-70b": 0, "qwen2.5-7b": 115 }
+    },
+    {
+      "name": "NVIDIA GeForce RTX 4070 Ti",
+      "vram_gb": 12,
+      "tdp_w": 285,
+      "hashrates": { "etchash": 60, "kawpow": 24, "autolykos2": 130, "octopus": 55, "zelhash": 65, "ethash": 60 },
+      "inference_tps": { "llama-3.1-8b": 85, "llama-3.1-70b": 0, "qwen2.5-7b": 92 }
+    },
+    {
+      "name": "AMD Radeon RX 7900 XTX",
+      "vram_gb": 24,
+      "tdp_w": 330,
+      "hashrates": { "etchash": 115, "kawpow": 42, "autolykos2": 240, "octopus": 95, "zelhash": 120, "ethash": 115 },
+      "inference_tps": { "llama-3.1-8b": 75, "llama-3.1-70b": 11, "qwen2.5-7b": 82 }
+    },
+    {
+      "name": "Custom / unlisted GPU",
+      "vram_gb": 24,
+      "tdp_w": 350,
+      "hashrates": {},
+      "inference_tps": {},
+      "is_custom": true,
+      "reference_gpu": "NVIDIA GeForce RTX 4090"
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "RTX 4090 ETC miner pivot",
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "algorithm": "etchash",
+      "hashrate": 125,
+      "inference_model": "llama-3.1-8b",
+      "power_w": 450,
+      "electricity_rate": 0.12,
+      "hours_per_day": 24,
+      "inference_utilization_pct": 75,
+      "api_price_per_1m_tokens": 2.5
+    },
+    {
+      "name": "Dual RTX 3090 Etchash rig",
+      "gpu": "NVIDIA GeForce RTX 3090",
+      "algorithm": "etchash",
+      "hashrate": 240,
+      "inference_model": "llama-3.1-8b",
+      "power_w": 700,
+      "electricity_rate": 0.10,
+      "hours_per_day": 24,
+      "inference_utilization_pct": 80,
+      "api_price_per_1m_tokens": 2.5
+    },
+    {
+      "name": "RTX 4080 KawPow rig",
+      "gpu": "NVIDIA GeForce RTX 4080",
+      "algorithm": "kawpow",
+      "hashrate": 32,
+      "inference_model": "qwen2.5-7b",
+      "power_w": 320,
+      "electricity_rate": 0.13,
+      "hours_per_day": 20,
+      "inference_utilization_pct": 70,
+      "api_price_per_1m_tokens": 2.5
+    },
+    {
+      "name": "RX 7900 XTX Etchash rig",
+      "gpu": "AMD Radeon RX 7900 XTX",
+      "algorithm": "etchash",
+      "hashrate": 115,
+      "inference_model": "llama-3.1-8b",
+      "power_w": 330,
+      "electricity_rate": 0.11,
+      "hours_per_day": 24,
+      "inference_utilization_pct": 75,
+      "api_price_per_1m_tokens": 2.5
+    }
+  ]
+}
