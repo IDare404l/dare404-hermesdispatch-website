@@ -262,8 +262,8 @@ const faqs = [
       $('taxSavings').textContent = fmtMoney(taxSavings);
       $('stOffset').textContent = fmtMoney(stOffset);
       $('ltOffset').textContent = fmtMoney(ltOffset);
-      $('ordinaryOffset').textContent = fmtMoney(ordinaryOffset);
-      $('carryForward').textContent = fmtMoney(carryForward);
+      $('ordinaryOffset').textContent = fmtMoney(Math.max(0, ordinaryOffset));
+      $('carryForward').textContent = fmtMoney(Math.max(0, carryForward));
 
       let verdict = '';
       if (totalLoss <= 0) {
