@@ -1,0 +1,485 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/agent_staging_sandbox_cost.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+
+const title = "AI Agent Staging & Sandbox Cost Calculator";
+const description = "Estimate monthly and first-year cost for AI agent dev, staging, sandbox, QA, and demo environments. Compare managed vs self-hosted setups.";
+
+const { defaults, presets, notes, faq } = data;
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({
+      "@type": "Question",
+      "name": f.question,
+      "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+    }))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🧪</div>
+        <h1 class="display-heading mb-4">AI Agent Staging & Sandbox Cost Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate the hidden cost of dev, staging, sandbox, QA, and demo environments for AI agents: LLM calls, compute, storage, CI, egress, and maintenance.
+        </p>
+      </div>
+
+      <!-- Presets -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {presets.map((preset, i) => (
+          <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">{preset.icon}</div>
+            <h3 class="font-semibold text-sm">{preset.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">{preset.dev_envs} dev • {preset.staging_envs + preset.sandbox_envs} non-prod</p>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <!-- Inputs -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Environment fleet</h2>
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Dev</label>
+                <input id="devEnvs" type="number" min="0" step="1" value={defaults.dev_envs} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Staging</label>
+                <input id="stagingEnvs" type="number" min="0" step="1" value={defaults.staging_envs} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Sandbox</label>
+                <input id="sandboxEnvs" type="number" min="0" step="1" value={defaults.sandbox_envs} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">QA</label>
+                <input id="qaEnvs" type="number" min="0" step="1" value={defaults.qa_envs} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Demo</label>
+                <input id="demoEnvs" type="number" min="0" step="1" value={defaults.demo_envs} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Projection (mo)</label>
+                <input id="months" type="number" min="1" max="60" step="1" value={defaults.months} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+
+            <h3 class="text-lg font-semibold pt-2 text-white">LLM usage per environment</h3>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">LLM calls / env / day</label>
+                <input id="llmCalls" type="number" min="0" step="10" value={defaults.llm_calls_per_env_day} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Input tokens</label>
+                <input id="inputTokens" type="number" min="1" step="100" value={defaults.input_tokens} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Output tokens</label>
+                <input id="outputTokens" type="number" min="1" step="100" value={defaults.output_tokens} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Input $ / 1M tokens</label>
+                <input id="inputCost" type="number" min="0" step="0.1" value={defaults.model_input_cost_per_1m} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Output $ / 1M tokens</label>
+                <input id="outputCost" type="number" min="0" step="0.1" value={defaults.model_output_cost_per_1m} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+
+            <h3 class="text-lg font-semibold pt-2 text-white">Infrastructure per environment</h3>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Vector DB (GB)</label>
+                <input id="vectorDbGb" type="number" min="0" step="1" value={defaults.vector_db_gb_per_env} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Vector DB $ / GB / mo</label>
+                <input id="vectorDbCost" type="number" min="0" step="0.01" value={defaults.vector_db_cost_gb_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Compute hours / day</label>
+                <input id="computeHours" type="number" min="0" step="1" value={defaults.compute_hours_per_env_day} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Compute $ / hour</label>
+                <input id="computeCost" type="number" min="0" step="0.01" value={defaults.compute_cost_per_hour} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Relational DB (GB)</label>
+                <input id="dbGb" type="number" min="0" step="1" value={defaults.db_gb_per_env} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">DB $ / GB / mo</label>
+                <input id="dbCost" type="number" min="0" step="0.01" value={defaults.db_cost_gb_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">CI minutes / day</label>
+                <input id="ciMinutes" type="number" min="0" step="5" value={defaults.ci_minutes_per_env_day} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">CI $ / minute</label>
+                <input id="ciCost" type="number" min="0" step="0.001" value={defaults.ci_cost_per_min} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Seed data (GB)</label>
+                <input id="seedGb" type="number" min="0" step="1" value={defaults.seed_data_gb_per_env} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Object storage $ / GB / mo</label>
+                <input id="seedCost" type="number" min="0" step="0.001" value={defaults.seed_storage_cost_gb_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Egress (GB / day)</label>
+                <input id="egressGb" type="number" min="0" step="0.1" value={defaults.egress_gb_per_env_day} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Egress $ / GB</label>
+                <input id="egressCost" type="number" min="0" step="0.01" value={defaults.egress_cost_per_gb} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Observability $ / env / mo</label>
+                <input id="obsCost" type="number" min="0" step="5" value={defaults.observability_per_env_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Maintenance hours / env / mo</label>
+                <input id="maintHours" type="number" min="0" step="0.5" value={defaults.maint_hours_per_env_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Maintenance $ / hour</label>
+                <input id="maintRate" type="number" min="0" step="5" value={defaults.maint_hourly_rate} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm text-neutral-400 mb-2">Self-host / managed discount on infra (%)</label>
+              <input id="selfHostPct" type="range" min="0" max="100" step="5" value={defaults.self_host_pct} class="w-full accent-brand-gold" />
+              <div class="flex justify-between text-xs text-neutral-500 mt-1">
+                <span>0% managed</span>
+                <span id="selfHostLabel">{defaults.self_host_pct}% self-hosted</span>
+                <span>100% self-hosted</span>
+              </div>
+              <p class="text-xs text-neutral-500 mt-1">{notes.self_host}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="space-y-4">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Total projected cost</p>
+            <p id="outTotal" class="text-3xl font-bold text-brand-gold">—</p>
+            <p id="outPeriodLabel" class="text-xs text-neutral-400 mt-1">—</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Monthly total</p>
+              <p id="outMonthly" class="text-xl font-bold text-brand-gold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Total environments</p>
+              <p id="outEnvCount" class="text-xl font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">LLM / mo</p>
+              <p id="outLlm" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Compute / mo</p>
+              <p id="outCompute" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Storage / mo</p>
+              <p id="outStorage" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">CI / mo</p>
+              <p id="outCi" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Egress / mo</p>
+              <p id="outEgress" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Observability / mo</p>
+              <p id="outObs" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Maintenance / mo</p>
+              <p id="outMaint" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Cost per env / mo</p>
+              <p id="outPerEnv" class="text-lg font-bold">—</p>
+            </div>
+          </div>
+          <p class="text-xs text-neutral-500 text-center">Prices are directional. Update rates to match your cloud provider and LLM API contracts.</p>
+        </div>
+      </div>
+
+      <!-- Cost by environment type -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Cost by environment type</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Type</th>
+                <th class="text-right py-2">Count</th>
+                <th class="text-right py-2">LLM/mo</th>
+                <th class="text-right py-2">Compute/mo</th>
+                <th class="text-right py-2">Storage/mo</th>
+                <th class="text-right py-2">CI/mo</th>
+                <th class="text-right py-2">Egress/mo</th>
+                <th class="text-right py-2 font-semibold text-white">Total/mo</th>
+              </tr>
+            </thead>
+            <tbody id="breakdownTable" class="divide-y divide-neutral-800">
+              <tr data-type="dev"><td class="py-3">Dev</td><td class="py-3 text-right count-cell">—</td><td class="py-3 text-right llm-cell">—</td><td class="py-3 text-right compute-cell">—</td><td class="py-3 text-right storage-cell">—</td><td class="py-3 text-right ci-cell">—</td><td class="py-3 text-right egress-cell">—</td><td class="py-3 text-right total-cell font-semibold text-brand-gold">—</td></tr>
+              <tr data-type="staging"><td class="py-3">Staging</td><td class="py-3 text-right count-cell">—</td><td class="py-3 text-right llm-cell">—</td><td class="py-3 text-right compute-cell">—</td><td class="py-3 text-right storage-cell">—</td><td class="py-3 text-right ci-cell">—</td><td class="py-3 text-right egress-cell">—</td><td class="py-3 text-right total-cell font-semibold text-brand-gold">—</td></tr>
+              <tr data-type="sandbox"><td class="py-3">Sandbox</td><td class="py-3 text-right count-cell">—</td><td class="py-3 text-right llm-cell">—</td><td class="py-3 text-right compute-cell">—</td><td class="py-3 text-right storage-cell">—</td><td class="py-3 text-right ci-cell">—</td><td class="py-3 text-right egress-cell">—</td><td class="py-3 text-right total-cell font-semibold text-brand-gold">—</td></tr>
+              <tr data-type="qa"><td class="py-3">QA</td><td class="py-3 text-right count-cell">—</td><td class="py-3 text-right llm-cell">—</td><td class="py-3 text-right compute-cell">—</td><td class="py-3 text-right storage-cell">—</td><td class="py-3 text-right ci-cell">—</td><td class="py-3 text-right egress-cell">—</td><td class="py-3 text-right total-cell font-semibold text-brand-gold">—</td></tr>
+              <tr data-type="demo"><td class="py-3">Demo</td><td class="py-3 text-right count-cell">—</td><td class="py-3 text-right llm-cell">—</td><td class="py-3 text-right compute-cell">—</td><td class="py-3 text-right storage-cell">—</td><td class="py-3 text-right ci-cell">—</td><td class="py-3 text-right egress-cell">—</td><td class="py-3 text-right total-cell font-semibold text-brand-gold">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How it works / tips -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">What this estimates</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">LLM calls</strong>: per-environment daily calls × input/output tokens × API pricing.</li>
+            <li><strong class="text-white">Compute</strong>: hours each environment runs per day × hourly compute rate.</li>
+            <li><strong class="text-white">Storage</strong>: vector DB, relational DB, and seeded object storage for each environment.</li>
+            <li><strong class="text-white">CI</strong>: build and test minutes per environment per day.</li>
+            <li><strong class="text-white">Egress & observability</strong>: data transfer out and flat monitoring fees per environment.</li>
+            <li><strong class="text-white">Maintenance</strong>: human hours to keep environments running, seeded, and patched.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Where to cut costs</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• Auto-shutdown dev/sandbox environments outside work hours.</li>
+            <li>• Share a single vector DB with namespaces instead of full copies.</li>
+            <li>• Use local GPU boxes or spot instances for non-prod workloads.</li>
+            <li>• Cache LLM responses in regression tests to avoid repeat API calls.</li>
+            <li>• Compress seeded datasets and prune old snapshots.</li>
+            <li>• Run CI only on changed services, not the whole fleet.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/agent-hosting-cost-comparator/" class="btn-primary text-sm">Agent Hosting Cost Comparator →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+        <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Memory / RAG Cost →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, presets }}>
+    const el = {
+      devEnvs: document.getElementById('devEnvs'),
+      stagingEnvs: document.getElementById('stagingEnvs'),
+      sandboxEnvs: document.getElementById('sandboxEnvs'),
+      qaEnvs: document.getElementById('qaEnvs'),
+      demoEnvs: document.getElementById('demoEnvs'),
+      months: document.getElementById('months'),
+      llmCalls: document.getElementById('llmCalls'),
+      inputTokens: document.getElementById('inputTokens'),
+      outputTokens: document.getElementById('outputTokens'),
+      inputCost: document.getElementById('inputCost'),
+      outputCost: document.getElementById('outputCost'),
+      vectorDbGb: document.getElementById('vectorDbGb'),
+      vectorDbCost: document.getElementById('vectorDbCost'),
+      computeHours: document.getElementById('computeHours'),
+      computeCost: document.getElementById('computeCost'),
+      dbGb: document.getElementById('dbGb'),
+      dbCost: document.getElementById('dbCost'),
+      ciMinutes: document.getElementById('ciMinutes'),
+      ciCost: document.getElementById('ciCost'),
+      seedGb: document.getElementById('seedGb'),
+      seedCost: document.getElementById('seedCost'),
+      egressGb: document.getElementById('egressGb'),
+      egressCost: document.getElementById('egressCost'),
+      obsCost: document.getElementById('obsCost'),
+      maintHours: document.getElementById('maintHours'),
+      maintRate: document.getElementById('maintRate'),
+      selfHostPct: document.getElementById('selfHostPct'),
+      selfHostLabel: document.getElementById('selfHostLabel'),
+      outTotal: document.getElementById('outTotal'),
+      outPeriodLabel: document.getElementById('outPeriodLabel'),
+      outMonthly: document.getElementById('outMonthly'),
+      outEnvCount: document.getElementById('outEnvCount'),
+      outLlm: document.getElementById('outLlm'),
+      outCompute: document.getElementById('outCompute'),
+      outStorage: document.getElementById('outStorage'),
+      outCi: document.getElementById('outCi'),
+      outEgress: document.getElementById('outEgress'),
+      outObs: document.getElementById('outObs'),
+      outMaint: document.getElementById('outMaint'),
+      outPerEnv: document.getElementById('outPerEnv'),
+    };
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (n < 0.01) return '$' + n.toFixed(4);
+      if (n < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+    const fmtNum = (n) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const daysPerMonth = 30.4375;
+
+    function getInputs() {
+      return {
+        envs: {
+          dev: Math.max(0, parseInt(el.devEnvs.value, 10) || 0),
+          staging: Math.max(0, parseInt(el.stagingEnvs.value, 10) || 0),
+          sandbox: Math.max(0, parseInt(el.sandboxEnvs.value, 10) || 0),
+          qa: Math.max(0, parseInt(el.qaEnvs.value, 10) || 0),
+          demo: Math.max(0, parseInt(el.demoEnvs.value, 10) || 0),
+        },
+        months: Math.max(1, parseInt(el.months.value, 10) || 1),
+        llmCalls: Math.max(0, parseFloat(el.llmCalls.value) || 0),
+        inputTokens: Math.max(0, parseFloat(el.inputTokens.value) || 0),
+        outputTokens: Math.max(0, parseFloat(el.outputTokens.value) || 0),
+        inputCost: Math.max(0, parseFloat(el.inputCost.value) || 0),
+        outputCost: Math.max(0, parseFloat(el.outputCost.value) || 0),
+        vectorDbGb: Math.max(0, parseFloat(el.vectorDbGb.value) || 0),
+        vectorDbCost: Math.max(0, parseFloat(el.vectorDbCost.value) || 0),
+        computeHours: Math.max(0, parseFloat(el.computeHours.value) || 0),
+        computeCost: Math.max(0, parseFloat(el.computeCost.value) || 0),
+        dbGb: Math.max(0, parseFloat(el.dbGb.value) || 0),
+        dbCost: Math.max(0, parseFloat(el.dbCost.value) || 0),
+        ciMinutes: Math.max(0, parseFloat(el.ciMinutes.value) || 0),
+        ciCost: Math.max(0, parseFloat(el.ciCost.value) || 0),
+        seedGb: Math.max(0, parseFloat(el.seedGb.value) || 0),
+        seedCost: Math.max(0, parseFloat(el.seedCost.value) || 0),
+        egressGb: Math.max(0, parseFloat(el.egressGb.value) || 0),
+        egressCost: Math.max(0, parseFloat(el.egressCost.value) || 0),
+        obsCost: Math.max(0, parseFloat(el.obsCost.value) || 0),
+        maintHours: Math.max(0, parseFloat(el.maintHours.value) || 0),
+        maintRate: Math.max(0, parseFloat(el.maintRate.value) || 0),
+        selfHostPct: Math.max(0, Math.min(100, parseInt(el.selfHostPct.value, 10) || 0)),
+      };
+    }
+
+    function perEnvMonthly(i) {
+      const llmPerCall = (i.inputTokens / 1_000_000) * i.inputCost + (i.outputTokens / 1_000_000) * i.outputCost;
+      const llm = i.llmCalls * daysPerMonth * llmPerCall;
+      const compute = i.computeHours * daysPerMonth * i.computeCost;
+      const storage = (i.vectorDbGb * i.vectorDbCost) + (i.dbGb * i.dbCost) + (i.seedGb * i.seedCost);
+      const ci = i.ciMinutes * daysPerMonth * i.ciCost;
+      const egress = i.egressGb * daysPerMonth * i.egressCost;
+      const obs = i.obsCost;
+      const maint = i.maintHours * i.maintRate;
+      const infra = compute + storage;
+      const discount = infra * (i.selfHostPct / 100);
+      return { llm, compute, storage, ci, egress, obs, maint, infra, discount };
+    }
+
+    function calc() {
+      const i = getInputs();
+      el.selfHostLabel.textContent = i.selfHostPct + '% self-hosted';
+      const base = perEnvMonthly(i);
+      const perEnvTotal = base.llm + (base.compute + base.storage - base.discount) + base.ci + base.egress + base.obs + base.maint;
+      const totalEnvCount = i.envs.dev + i.envs.staging + i.envs.sandbox + i.envs.qa + i.envs.demo;
+
+      const byType = {};
+      for (const type of ['dev', 'staging', 'sandbox', 'qa', 'demo']) {
+        const count = i.envs[type];
+        byType[type] = {
+          count,
+          llm: base.llm * count,
+          compute: base.compute * count,
+          storage: base.storage * count,
+          ci: base.ci * count,
+          egress: base.egress * count,
+          total: perEnvTotal * count,
+        };
+      }
+
+      const monthlyLlm = base.llm * totalEnvCount;
+      const monthlyCompute = base.compute * totalEnvCount * (1 - i.selfHostPct / 100);
+      const monthlyStorage = base.storage * totalEnvCount * (1 - i.selfHostPct / 100);
+      const monthlyCi = base.ci * totalEnvCount;
+      const monthlyEgress = base.egress * totalEnvCount;
+      const monthlyObs = base.obs * totalEnvCount;
+      const monthlyMaint = base.maint * totalEnvCount;
+      const monthlyTotal = monthlyLlm + monthlyCompute + monthlyStorage + monthlyCi + monthlyEgress + monthlyObs + monthlyMaint;
+      const totalProjected = monthlyTotal * i.months;
+
+      el.outTotal.textContent = fmtMoney(totalProjected);
+      el.outPeriodLabel.textContent = `${i.months} month${i.months > 1 ? 's' : ''} of non-production environments`;
+      el.outMonthly.textContent = fmtMoney(monthlyTotal);
+      el.outEnvCount.textContent = fmtNum(totalEnvCount);
+      el.outLlm.textContent = fmtMoney(monthlyLlm);
+      el.outCompute.textContent = fmtMoney(monthlyCompute);
+      el.outStorage.textContent = fmtMoney(monthlyStorage);
+      el.outCi.textContent = fmtMoney(monthlyCi);
+      el.outEgress.textContent = fmtMoney(monthlyEgress);
+      el.outObs.textContent = fmtMoney(monthlyObs);
+      el.outMaint.textContent = fmtMoney(monthlyMaint);
+      el.outPerEnv.textContent = totalEnvCount > 0 ? fmtMoney(monthlyTotal / totalEnvCount) : '—';
+
+      document.querySelectorAll('#breakdownTable tr').forEach(row => {
+        const type = row.dataset.type;
+        const b = byType[type];
+        row.querySelector('.count-cell').textContent = fmtNum(b.count);
+        row.querySelector('.llm-cell').textContent = fmtMoney(b.llm);
+        row.querySelector('.compute-cell').textContent = fmtMoney(b.compute * (1 - i.selfHostPct / 100));
+        row.querySelector('.storage-cell').textContent = fmtMoney(b.storage * (1 - i.selfHostPct / 100));
+        row.querySelector('.ci-cell').textContent = fmtMoney(b.ci);
+        row.querySelector('.egress-cell').textContent = fmtMoney(b.egress);
+        row.querySelector('.total-cell').textContent = fmtMoney(b.total);
+      });
+    }
+
+    function applyPreset(idx) {
+      const p = presets[idx];
+      if (!p) return;
+      for (const key of Object.keys(p)) {
+        const id = key.replace(/_(.)/g, (_, c) => c.toUpperCase());
+        const input = document.getElementById(id);
+        if (input) input.value = p[key];
+      }
+      calc();
+    }
+
+    ['input', 'change'].forEach(evt => {
+      Object.values(el).forEach(input => {
+        if (input && (input.tagName === 'INPUT' || input.tagName === 'SELECT')) {
+          input.addEventListener(evt, calc);
+        }
+      });
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(parseInt(btn.dataset.idx, 10)));
+    });
+
+    calc();
+  </script>
+
+  <AgentCodeBlock
+    toolName="Agent Staging & Sandbox Cost Calculator"
+    toolPath="/tools/agent-staging-sandbox-cost-calculator/"
+    description="Copy-paste Hermes Agent script for agent staging and sandbox cost calculator."
+    scriptPath="/hermes-tools/agent_staging_sandbox_cost_calculator.py"
+    locked={false}
+  />
+</Layout>

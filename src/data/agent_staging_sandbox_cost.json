@@ -1,0 +1,146 @@
+{
+  "last_updated": "2026-07-19",
+  "defaults": {
+    "dev_envs": 3,
+    "staging_envs": 2,
+    "sandbox_envs": 1,
+    "qa_envs": 0,
+    "demo_envs": 0,
+    "llm_calls_per_env_day": 500,
+    "input_tokens": 2000,
+    "output_tokens": 800,
+    "model_input_cost_per_1m": 2.5,
+    "model_output_cost_per_1m": 10.0,
+    "vector_db_gb_per_env": 5,
+    "vector_db_cost_gb_month": 0.10,
+    "compute_hours_per_env_day": 8,
+    "compute_cost_per_hour": 0.50,
+    "db_gb_per_env": 10,
+    "db_cost_gb_month": 0.20,
+    "ci_minutes_per_env_day": 30,
+    "ci_cost_per_min": 0.008,
+    "seed_data_gb_per_env": 2,
+    "seed_storage_cost_gb_month": 0.023,
+    "egress_gb_per_env_day": 1,
+    "egress_cost_per_gb": 0.09,
+    "observability_per_env_month": 25,
+    "maint_hours_per_env_month": 2,
+    "maint_hourly_rate": 75,
+    "months": 12,
+    "self_host_pct": 0
+  },
+  "presets": [
+    {
+      "name": "Solo builder",
+      "icon": "🧑‍💻",
+      "dev_envs": 1,
+      "staging_envs": 1,
+      "sandbox_envs": 1,
+      "qa_envs": 0,
+      "demo_envs": 0,
+      "llm_calls_per_env_day": 200,
+      "input_tokens": 1500,
+      "output_tokens": 600,
+      "vector_db_gb_per_env": 2,
+      "compute_hours_per_env_day": 4,
+      "db_gb_per_env": 5,
+      "ci_minutes_per_env_day": 10,
+      "seed_data_gb_per_env": 1,
+      "egress_gb_per_env_day": 0.5,
+      "observability_per_env_month": 10,
+      "maint_hours_per_env_month": 1,
+      "self_host_pct": 0
+    },
+    {
+      "name": "Small team",
+      "icon": "👥",
+      "dev_envs": 3,
+      "staging_envs": 2,
+      "sandbox_envs": 1,
+      "qa_envs": 0,
+      "demo_envs": 1,
+      "llm_calls_per_env_day": 500,
+      "input_tokens": 2000,
+      "output_tokens": 800,
+      "vector_db_gb_per_env": 5,
+      "compute_hours_per_env_day": 8,
+      "db_gb_per_env": 10,
+      "ci_minutes_per_env_day": 30,
+      "seed_data_gb_per_env": 2,
+      "egress_gb_per_env_day": 1,
+      "observability_per_env_month": 25,
+      "maint_hours_per_env_month": 2,
+      "self_host_pct": 0
+    },
+    {
+      "name": "Growing team",
+      "icon": "🚀",
+      "dev_envs": 5,
+      "staging_envs": 3,
+      "sandbox_envs": 2,
+      "qa_envs": 1,
+      "demo_envs": 1,
+      "llm_calls_per_env_day": 1200,
+      "input_tokens": 2500,
+      "output_tokens": 1000,
+      "vector_db_gb_per_env": 12,
+      "compute_hours_per_env_day": 12,
+      "db_gb_per_env": 25,
+      "ci_minutes_per_env_day": 60,
+      "seed_data_gb_per_env": 5,
+      "egress_gb_per_env_day": 3,
+      "observability_per_env_month": 50,
+      "maint_hours_per_env_month": 3,
+      "self_host_pct": 25
+    },
+    {
+      "name": "Enterprise",
+      "icon": "🏢",
+      "dev_envs": 10,
+      "staging_envs": 5,
+      "sandbox_envs": 3,
+      "qa_envs": 3,
+      "demo_envs": 2,
+      "llm_calls_per_env_day": 3000,
+      "input_tokens": 3000,
+      "output_tokens": 1200,
+      "vector_db_gb_per_env": 30,
+      "compute_hours_per_env_day": 16,
+      "db_gb_per_env": 60,
+      "ci_minutes_per_env_day": 120,
+      "seed_data_gb_per_env": 10,
+      "egress_gb_per_env_day": 8,
+      "observability_per_env_month": 100,
+      "maint_hours_per_env_month": 4,
+      "self_host_pct": 50
+    }
+  ],
+  "notes": {
+    "llm": "LLM cost is directionally priced like GPT-4o-class APIs. Replace with your provider's input/output rates for precise numbers.",
+    "compute": "Compute covers always-on dev boxes, preview deployments, and sandboxes. Use spot or local hardware to cut this.",
+    "storage": "Vector DB, relational DB, and seeded object storage. Self-hosting can cut managed storage markup.",
+    "self_host": "Self-host percent is a coarse discount on managed vector DB, relational DB, and compute. 0% = fully managed; 100% = fully self-hosted."
+  },
+  "faq": [
+    {
+      "question": "Why do staging and sandbox environments cost so much?",
+      "answer": "They run continuously, store copies of production-like data, invoke LLMs during testing, and need observability and CI. This calculator surfaces those hidden costs so you can right-size environments."
+    },
+    {
+      "question": "How can I lower non-production environment costs?",
+      "answer": "Spin environments down outside work hours, use local hardware or spot instances, share one large vector DB with namespaces instead of copies per env, compress seeded data, and cache LLM responses in tests."
+    },
+    {
+      "question": "Does this include production costs?",
+      "answer": "No. This tool estimates dev, staging, sandbox, QA, and demo environments only. Use the AI Agent Hosting Cost Comparator or LLM Cost Calculator for production spend."
+    },
+    {
+      "question": "What is the self-host discount?",
+      "answer": "A coarse lever that reduces managed vector DB, relational DB, and compute costs. It does not affect LLM API spend, CI minutes, egress, or observability flat fees."
+    },
+    {
+      "question": "Should I count every developer laptop as a dev environment?",
+      "answer": "Only count shared or cloud-hosted dev environments that incur real spend. Local laptops are already sunk hardware cost unless you are allocating cloud dev boxes to each engineer."
+    }
+  ]
+}
