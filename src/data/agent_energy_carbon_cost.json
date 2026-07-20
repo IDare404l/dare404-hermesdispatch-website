@@ -1,0 +1,171 @@
+{
+  "last_updated": "2026-07-20",
+  "note": "Energy and carbon estimates are rough orders of magnitude. Cloud figures use provider-reported or MLCommons-style inference energy per 1k tokens and include PUE. Local figures use GPU/CPU TDP and assumed utilization. Real-world values vary with model size, quantization, batching, cooling, and hardware generation.",
+  "defaults": {
+    "mode": "cloud",
+    "monthly_requests": 100000,
+    "input_tokens": 2000,
+    "output_tokens": 500,
+    "cloud_provider": "OpenAI GPT-4o",
+    "local_hardware": "RTX 4090 workstation",
+    "tdp_w": 450,
+    "active_pct": 60,
+    "hours_per_day": 12,
+    "pue": 1.2,
+    "electricity_rate": 0.13,
+    "carbon_intensity_g_co2_per_kwh": 400,
+    "projection_months": 12,
+    "datacenter_size_kw": 100
+  },
+  "cloud_providers": [
+    {
+      "name": "OpenAI GPT-4o",
+      "kwh_per_1k_input_tokens": 0.0006,
+      "kwh_per_1k_output_tokens": 0.0025,
+      "pue_default": 1.2,
+      "notes": "High-quality frontier model; energy per token is higher due to dense attention and larger parameter count."
+    },
+    {
+      "name": "Anthropic Claude 3.5 Sonnet",
+      "kwh_per_1k_input_tokens": 0.0007,
+      "kwh_per_1k_output_tokens": 0.0028,
+      "pue_default": 1.2,
+      "notes": "Frontier model with strong reasoning; generation energy dominates for long outputs."
+    },
+    {
+      "name": "OpenAI GPT-4o-mini",
+      "kwh_per_1k_input_tokens": 0.0001,
+      "kwh_per_1k_output_tokens": 0.0004,
+      "pue_default": 1.2,
+      "notes": "Small, efficient model. Best carbon and cost profile for high-volume simple tasks."
+    },
+    {
+      "name": "Google Gemini 1.5 Flash",
+      "kwh_per_1k_input_tokens": 0.00015,
+      "kwh_per_1k_output_tokens": 0.0005,
+      "pue_default": 1.2,
+      "notes": "Flash tier optimized for throughput and lower per-token energy."
+    },
+    {
+      "name": "Local / self-hosted (general estimate)",
+      "kwh_per_1k_input_tokens": 0.0004,
+      "kwh_per_1k_output_tokens": 0.0015,
+      "pue_default": 1.15,
+      "notes": "Approximate for a 70B-class model on a single high-end GPU with good utilization."
+    }
+  ],
+  "local_hardware": [
+    {
+      "name": "RTX 4090 workstation",
+      "tdp_w": 450,
+      "idle_w": 80,
+      "notes": "Single RTX 4090 plus supporting CPU, RAM, and PSU losses."
+    },
+    {
+      "name": "RTX 5090 workstation",
+      "tdp_w": 575,
+      "idle_w": 95,
+      "notes": "Next-gen flagship; higher TDP but better perf-per-watt."
+    },
+    {
+      "name": "Mac Mini M4 Pro 24GB",
+      "tdp_w": 60,
+      "idle_w": 8,
+      "notes": "Compact ARM SoC; excellent perf-per-watt for small models."
+    },
+    {
+      "name": "Dual RTX 3090 rig",
+      "tdp_w": 700,
+      "idle_w": 120,
+      "notes": "Common miner/AI repurposed rig. High idle draw from multiple GPUs."
+    },
+    {
+      "name": "Cloud GPU rental (A100 80GB)",
+      "tdp_w": 400,
+      "idle_w": 60,
+      "notes": "Data-center A100; PUE and shared host overhead already included in provider footprint."
+    },
+    {
+      "name": "Cloud GPU rental (H100 80GB)",
+      "tdp_w": 700,
+      "idle_w": 80,
+      "notes": "Hopper generation; very fast inference but high TDP."
+    }
+  ],
+  "region_intensity": [
+    { "name": "US average", "g_co2_per_kwh": 400 },
+    { "name": "EU average", "g_co2_per_kwh": 275 },
+    { "name": "Nordics / hydro", "g_co2_per_kwh": 50 },
+    { "name": "India / coal-heavy", "g_co2_per_kwh": 700 },
+    { "name": "China average", "g_co2_per_kwh": 550 },
+    { "name": "California", "g_co2_per_kwh": 220 },
+    { "name": "Texas", "g_co2_per_kwh": 410 },
+    { "name": "Quebec / hydro", "g_co2_per_kwh": 30 }
+  ],
+  "scenarios": [
+    {
+      "name": "Small AI support agent (cloud)",
+      "mode": "cloud",
+      "monthly_requests": 50000,
+      "input_tokens": 1500,
+      "output_tokens": 300,
+      "cloud_provider": "OpenAI GPT-4o-mini",
+      "tdp_w": 0,
+      "active_pct": 0,
+      "hours_per_day": 0,
+      "pue": 1.2,
+      "electricity_rate": 0.13,
+      "carbon_intensity_g_co2_per_kwh": 400,
+      "projection_months": 12,
+      "datacenter_size_kw": 10
+    },
+    {
+      "name": "Mid-size SaaS agent (cloud)",
+      "mode": "cloud",
+      "monthly_requests": 500000,
+      "input_tokens": 2500,
+      "output_tokens": 600,
+      "cloud_provider": "OpenAI GPT-4o",
+      "tdp_w": 0,
+      "active_pct": 0,
+      "hours_per_day": 0,
+      "pue": 1.2,
+      "electricity_rate": 0.13,
+      "carbon_intensity_g_co2_per_kwh": 275,
+      "projection_months": 12,
+      "datacenter_size_kw": 50
+    },
+    {
+      "name": "Local LLM agent on RTX 4090",
+      "mode": "local",
+      "monthly_requests": 100000,
+      "input_tokens": 2000,
+      "output_tokens": 500,
+      "local_hardware": "RTX 4090 workstation",
+      "tdp_w": 450,
+      "active_pct": 60,
+      "hours_per_day": 12,
+      "pue": 1.15,
+      "electricity_rate": 0.13,
+      "carbon_intensity_g_co2_per_kwh": 400,
+      "projection_months": 12,
+      "datacenter_size_kw": 0
+    },
+    {
+      "name": "Miner-pivot inference rig (dual 3090s)",
+      "mode": "local",
+      "monthly_requests": 300000,
+      "input_tokens": 3000,
+      "output_tokens": 700,
+      "local_hardware": "Dual RTX 3090 rig",
+      "tdp_w": 700,
+      "active_pct": 80,
+      "hours_per_day": 24,
+      "pue": 1.15,
+      "electricity_rate": 0.10,
+      "carbon_intensity_g_co2_per_kwh": 410,
+      "projection_months": 12,
+      "datacenter_size_kw": 0
+    }
+  ]
+}

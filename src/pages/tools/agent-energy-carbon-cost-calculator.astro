@@ -1,0 +1,275 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_energy_carbon_cost.json';
+
+const title = "AI Agent Energy & Carbon Cost Calculator | Hermes Dispatch";
+const description = "Estimate electricity cost and carbon footprint for local and cloud AI agent inference. Compare cloud API energy per token against local GPU TDP, PUE, grid carbon intensity, and projection months.";
+const scenarios = data.scenarios;
+const cloudProviders = data.cloud_providers;
+const localHardware = data.local_hardware;
+const regions = data.region_intensity;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "How accurate is the energy estimate?", a: "These are order-of-magnitude estimates. Cloud values use per-token energy factors derived from public MLCommons-style datacenter inference benchmarks and include a PUE multiplier. Local values use hardware TDP and an assumed active utilization percentage; real draw depends on workload, batching, quantization, and cooling." },
+  { q: "Does cloud or local have a lower carbon footprint?", a: "It depends on scale, hardware efficiency, and your local grid. A small-volume agent on an efficient cloud model in a low-carbon region is usually cleaner than a high-TDP local GPU running 24/7 on coal-heavy power. For high volume, optimized local inference on efficient hardware in a clean grid can win." },
+  { q: "What is PUE?", a: "Power Usage Effectiveness (PUE) is total datacenter energy divided by IT equipment energy. A PUE of 1.2 means cooling, networking, and power delivery add 20% on top of the compute itself. Cloud providers typically report 1.1–1.3; home setups are closer to 1.0–1.15 for the machine itself." },
+  { q: "How can I reduce AI agent energy cost?", a: "Use smaller or quantized models, cache prompts and embeddings, batch requests, run on efficient hardware, choose a low-carbon grid or renewable energy, and compress context to reduce tokens per request." },
+  { q: "Why include carbon intensity?", a: "The same kilowatt-hour creates very different emissions depending on whether it comes from hydro, nuclear, gas, or coal. This calculator lets you model your actual grid or a target green region." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Energy & Carbon Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/agent-energy-carbon-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚡</div>
+      <h1 class="display-heading mb-4">AI Agent Energy & Carbon Cost Calculator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate electricity cost and carbon footprint for local and cloud AI agent inference. Compare cloud API energy per token against local GPU TDP, PUE, grid carbon intensity, and projection months.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario preset</h2>
+      <div class="flex flex-wrap gap-3" id="scenario-buttons">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)} data-index={i}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold flex items-center gap-2"><span>📊</span> Workload</h2>
+        <div class="space-y-4">
+          <label class="block"><span class="text-neutral-400 text-sm">Mode</span>
+            <select id="mode" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              <option value="cloud" selected={defaults.mode === 'cloud'}>Cloud API</option>
+              <option value="local" selected={defaults.mode === 'local'}>Local / self-hosted GPU</option>
+            </select>
+          </label>
+          <label class="block"><span class="text-neutral-400 text-sm">Monthly requests</span><input id="monthlyRequests" type="number" min="1" step="1000" value={defaults.monthly_requests} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Input tokens per request</span><input id="inputTokens" type="number" min="0" step="10" value={defaults.input_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Output tokens per request</span><input id="outputTokens" type="number" min="0" step="10" value={defaults.output_tokens} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block" id="cloudProviderLabel"><span class="text-neutral-400 text-sm">Cloud provider / model</span>
+            <select id="cloudProvider" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {cloudProviders.map(p => <option value={JSON.stringify(p)} selected={p.name === defaults.cloud_provider}>{p.name}</option>)}
+            </select>
+          </label>
+          <label class="block hidden" id="localHardwareLabel"><span class="text-neutral-400 text-sm">Local hardware</span>
+            <select id="localHardware" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {localHardware.map(h => <option value={JSON.stringify(h)} selected={h.name === defaults.local_hardware}>{h.name}</option>)}
+            </select>
+          </label>
+          <label class="block hidden" id="tdpLabel"><span class="text-neutral-400 text-sm">System TDP / active draw (W)</span><input id="tdpW" type="number" min="0" step="10" value={defaults.tdp_w} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block hidden" id="activePctLabel"><span class="text-neutral-400 text-sm">Active utilization (%)</span><input id="activePct" type="number" min="0" max="100" step="1" value={defaults.active_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block hidden" id="hoursLabel"><span class="text-neutral-400 text-sm">Hours online per day</span><input id="hoursPerDay" type="number" min="0" max="24" step="0.5" value={defaults.hours_per_day} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">PUE</span><input id="pue" type="number" min="1" step="0.05" value={defaults.pue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Electricity rate ($/kWh)</span><input id="electricityRate" type="number" min="0" step="0.01" value={defaults.electricity_rate} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Grid carbon intensity (g CO₂/kWh)</span>
+            <select id="carbonIntensity" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {regions.map(r => <option value={r.g_co2_per_kwh} selected={r.g_co2_per_kwh === defaults.carbon_intensity_g_co2_per_kwh}>{r.name} — {r.g_co2_per_kwh} g/kWh</option>)}
+            </select>
+          </label>
+          <label class="block"><span class="text-neutral-400 text-sm">Projection months</span><input id="projectionMonths" type="number" min="1" max="60" step="1" value={defaults.projection_months} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <section id="summary" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Energy / month</p><p id="kwhMonth" class="text-2xl font-bold text-white">—</p><p id="kwhProjection" class="text-sm text-neutral-400 mt-1">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Electricity cost / month</p><p id="costMonth" class="text-2xl font-bold text-brand-gold">—</p><p id="costProjection" class="text-sm text-neutral-400 mt-1">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Carbon / month</p><p id="co2Month" class="text-2xl font-bold text-white">—</p><p id="co2Projection" class="text-sm text-neutral-400 mt-1">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1k requests</p><p id="costPer1k" class="text-2xl font-bold text-brand-gold">—</p><p id="co2Per1k" class="text-sm text-neutral-400 mt-1">—</p></div>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Context</h2>
+          <ul class="space-y-3 text-neutral-300 text-sm">
+            <li class="flex justify-between"><span>Equivalent US homes / month</span><span id="homesEquivalent" class="font-mono text-white">—</span></li>
+            <li class="flex justify-between"><span>Equivalent car miles / month</span><span id="carMilesEquivalent" class="font-mono text-white">—</span></li>
+            <li class="flex justify-between"><span>Total tokens / month</span><span id="tokensMonth" class="font-mono text-white">—</span></li>
+            <li class="flex justify-between"><span>Energy per 1k output tokens</span><span id="kwhPer1kOut" class="font-mono text-white">—</span></li>
+          </ul>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Verdict</h2>
+          <p id="verdictText" class="text-neutral-300">—</p>
+        </section>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">How to use these numbers</h2>
+      <ul class="list-disc pl-5 text-neutral-300 space-y-2">
+        <li>Use cloud mode to estimate the hidden energy and carbon cost behind API calls, including datacenter overhead.</li>
+        <li>Use local mode to size PSU, cooling, and monthly electricity budget for a self-hosted inference rig.</li>
+        <li>Compare different regions or renewable offsets before committing to a hosting location or colo.</li>
+        <li>Track cost per 1k requests and kg CO₂ per 1k requests as KPIs alongside latency and accuracy.</li>
+      </ul>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.q}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <p id="note" class="text-neutral-500 text-sm mt-10">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ scenarios, cloudProviders, localHardware, regions, defaults }}>
+    function $(id) { return document.getElementById(id); }
+    function val(id) { return parseFloat($(id).value) || 0; }
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const fmtMoney0 = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    function showLocal(show) {
+      const localIds = ['localHardwareLabel', 'tdpLabel', 'activePctLabel', 'hoursLabel'];
+      const cloudIds = ['cloudProviderLabel'];
+      localIds.forEach(id => $(id).classList.toggle('hidden', !show));
+      cloudIds.forEach(id => $(id).classList.toggle('hidden', show));
+    }
+
+    function getProvider() {
+      return JSON.parse($('cloudProvider').value);
+    }
+
+    function getHardware() {
+      return JSON.parse($('localHardware').value);
+    }
+
+    function calc() {
+      const mode = $('mode').value;
+      showLocal(mode === 'local');
+      const monthlyRequests = Math.max(1, val('monthlyRequests'));
+      const inputTokens = Math.max(0, val('inputTokens'));
+      const outputTokens = Math.max(0, val('outputTokens'));
+      const totalTokens = monthlyRequests * (inputTokens + outputTokens);
+      const pue = Math.max(1, val('pue'));
+      const rate = Math.max(0, val('electricityRate'));
+      const carbonIntensity = Math.max(0, val('carbonIntensity'));
+      const months = Math.max(1, val('projectionMonths'));
+
+      let kwhMonth = 0;
+      let energyNote = '';
+
+      if (mode === 'cloud') {
+        const p = getProvider();
+        const inputKwh = (monthlyRequests * inputTokens / 1000) * p.kwh_per_1k_input_tokens;
+        const outputKwh = (monthlyRequests * outputTokens / 1000) * p.kwh_per_1k_output_tokens;
+        kwhMonth = (inputKwh + outputKwh) * pue;
+        energyNote = p.notes;
+      } else {
+        const h = getHardware();
+        const tdp = Math.max(0, val('tdpW'));
+        const activePct = Math.min(100, Math.max(0, val('activePct'))) / 100;
+        const hoursPerDay = Math.min(24, Math.max(0, val('hoursPerDay')));
+        const daysPerMonth = 30.44;
+        const avgW = h.idle_w + (tdp - h.idle_w) * activePct;
+        kwhMonth = (avgW / 1000) * hoursPerDay * daysPerMonth * pue;
+      }
+
+      const costMonth = kwhMonth * rate;
+      const kgCo2Month = (kwhMonth * carbonIntensity) / 1000;
+      const costPer1k = costMonth / (monthlyRequests / 1000);
+      const kgCo2Per1k = kgCo2Month / (monthlyRequests / 1000);
+      const kwhPer1kOut = outputTokens > 0 ? (kwhMonth / (monthlyRequests * outputTokens / 1000)) : 0;
+
+      $('kwhMonth').textContent = fmtNum(kwhMonth) + ' kWh';
+      $('kwhProjection').textContent = fmtNum(kwhMonth * months) + ' kWh over ' + months + ' mo';
+      $('costMonth').textContent = fmtMoney(costMonth) + '/mo';
+      $('costProjection').textContent = fmtMoney0(costMonth * months) + ' over ' + months + ' mo';
+      $('co2Month').textContent = fmtNum(kgCo2Month) + ' kg';
+      $('co2Projection').textContent = fmtNum(kgCo2Month * months) + ' kg over ' + months + ' mo';
+      $('costPer1k').textContent = fmtMoney(costPer1k);
+      $('co2Per1k').textContent = fmtNum(kgCo2Per1k) + ' kg CO₂/1k req';
+      $('tokensMonth').textContent = totalTokens.toLocaleString();
+      $('kwhPer1kOut').textContent = fmtNum(kwhPer1kOut) + ' kWh';
+
+      const homeKwhPerMonth = 886; // US avg
+      const milesPerKgCo2 = 0.404; // EPA avg passenger vehicle
+      $('homesEquivalent').textContent = (kwhMonth / homeKwhPerMonth).toFixed(2) + ' homes';
+      $('carMilesEquivalent').textContent = (kgCo2Month / milesPerKgCo2).toFixed(0) + ' mi';
+
+      let verdict = '';
+      if (mode === 'cloud') {
+        verdict = `Cloud inference on ${$('cloudProvider').selectedOptions[0].text.split(' — ')[0]} uses about ${fmtNum(kwhMonth)} kWh and ${fmtNum(kgCo2Month)} kg CO₂ this month. `;
+        if (kgCo2Per1k < 0.01) {
+          verdict += 'The per-request carbon cost is tiny—smaller than streaming a few seconds of video. ';
+        } else if (kgCo2Per1k < 0.05) {
+          verdict += 'The per-request carbon cost is modest; focus on token efficiency and cache hits for bigger savings. ';
+        } else {
+          verdict += 'The per-request carbon cost is material. Consider a smaller model, batching, or a cleaner grid. ';
+        }
+        verdict += energyNote;
+      } else {
+        verdict = `Local hardware draws roughly ${fmtNum(kwhMonth)} kWh and emits ${fmtNum(kgCo2Month)} kg CO₂ per month. At $${rate}/kWh that is ${fmtMoney(costMonth)}/mo in electricity. `;
+        if (costMonth > 200) {
+          verdict += 'Electricity is a significant operating cost—evaluate whether cloud spot/rental or a more efficient GPU improves TCO. ';
+        } else if (costMonth > 50) {
+          verdict += 'Electricity cost is moderate; cooling and utilization are the next levers. ';
+        } else {
+          verdict += 'Electricity cost is low, especially if the hardware is already amortized. ';
+        }
+      }
+      $('verdictText').textContent = verdict;
+    }
+
+    function setScenario(s) {
+      $('mode').value = s.mode;
+      $('monthlyRequests').value = s.monthly_requests;
+      $('inputTokens').value = s.input_tokens;
+      $('outputTokens').value = s.output_tokens;
+      if (s.cloud_provider) {
+        const match = Array.from($('cloudProvider').options).find(o => JSON.parse(o.value).name === s.cloud_provider);
+        if (match) $('cloudProvider').value = match.value;
+      }
+      if (s.local_hardware) {
+        const match = Array.from($('localHardware').options).find(o => JSON.parse(o.value).name === s.local_hardware);
+        if (match) $('localHardware').value = match.value;
+      }
+      $('tdpW').value = s.tdp_w;
+      $('activePct').value = s.active_pct;
+      $('hoursPerDay').value = s.hours_per_day;
+      $('pue').value = s.pue;
+      $('electricityRate').value = s.electricity_rate;
+      const riMatch = Array.from($('carbonIntensity').options).find(o => parseFloat(o.value) === s.carbon_intensity_g_co2_per_kwh);
+      if (riMatch) $('carbonIntensity').value = riMatch.value;
+      $('projectionMonths').value = s.projection_months;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setScenario(JSON.parse(btn.dataset.scenario));
+          calc();
+        });
+      });
+
+      ['mode','monthlyRequests','inputTokens','outputTokens','cloudProvider','localHardware','tdpW','activePct','hoursPerDay','pue','electricityRate','carbonIntensity','projectionMonths'].forEach(id => {
+        $(id).addEventListener('input', calc);
+      });
+
+      calc();
+    });
+  </script>
+</Layout>
