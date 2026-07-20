@@ -1,0 +1,90 @@
+{
+  "last_updated": "2026-07-20",
+  "note": "This calculator is for estimation and educational purposes only. Crypto tax rules vary by country and change often. In the US, crypto is currently treated as property and is not subject to the wash-sale rule, though proposed legislation could change that. Consult a tax professional before trading for tax purposes.",
+  "defaults": {
+    "realized_short_term_gains": 15000,
+    "realized_long_term_gains": 5000,
+    "federal_short_term_rate": 0.24,
+    "federal_long_term_rate": 0.15,
+    "state_rate": 0.05,
+    "nii_rate": 0.038,
+    "subject_to_nii": false,
+    "ordinary_income_offset_limit": 3000,
+    "plan_to_rebuy": false,
+    "holdings": [
+      { "symbol": "ETH", "quantity": 2.5, "cost_basis_per_unit": 3200, "current_price": 1800 },
+      { "symbol": "SOL", "quantity": 40, "cost_basis_per_unit": 185, "current_price": 95 },
+      { "symbol": "BTC", "quantity": 0.6, "cost_basis_per_unit": 62000, "current_price": 88000 },
+      { "symbol": "DOGE", "quantity": 8000, "cost_basis_per_unit": 0.18, "current_price": 0.11 },
+      { "symbol": "RENDER", "quantity": 150, "cost_basis_per_unit": 7.5, "current_price": 3.2 }
+    ]
+  },
+  "scenarios": [
+    {
+      "name": "Typical US trader",
+      "realized_short_term_gains": 15000,
+      "realized_long_term_gains": 5000,
+      "federal_short_term_rate": 0.24,
+      "federal_long_term_rate": 0.15,
+      "state_rate": 0.05,
+      "nii_rate": 0.038,
+      "subject_to_nii": false,
+      "plan_to_rebuy": false,
+      "holdings": [
+        { "symbol": "ETH", "quantity": 2.5, "cost_basis_per_unit": 3200, "current_price": 1800 },
+        { "symbol": "SOL", "quantity": 40, "cost_basis_per_unit": 185, "current_price": 95 },
+        { "symbol": "BTC", "quantity": 0.6, "cost_basis_per_unit": 62000, "current_price": 88000 },
+        { "symbol": "DOGE", "quantity": 8000, "cost_basis_per_unit": 0.18, "current_price": 0.11 },
+        { "symbol": "RENDER", "quantity": 150, "cost_basis_per_unit": 7.5, "current_price": 3.2 }
+      ]
+    },
+    {
+      "name": "High-income US trader",
+      "realized_short_term_gains": 85000,
+      "realized_long_term_gains": 25000,
+      "federal_short_term_rate": 0.37,
+      "federal_long_term_rate": 0.20,
+      "state_rate": 0.10,
+      "nii_rate": 0.038,
+      "subject_to_nii": true,
+      "plan_to_rebuy": false,
+      "holdings": [
+        { "symbol": "ETH", "quantity": 5, "cost_basis_per_unit": 3500, "current_price": 1800 },
+        { "symbol": "SOL", "quantity": 200, "cost_basis_per_unit": 210, "current_price": 95 },
+        { "symbol": "ARB", "quantity": 5000, "cost_basis_per_unit": 1.45, "current_price": 0.35 },
+        { "symbol": "OP", "quantity": 2500, "cost_basis_per_unit": 2.8, "current_price": 0.65 }
+      ]
+    },
+    {
+      "name": "No gains, only losses",
+      "realized_short_term_gains": 0,
+      "realized_long_term_gains": 0,
+      "federal_short_term_rate": 0.24,
+      "federal_long_term_rate": 0.15,
+      "state_rate": 0.05,
+      "nii_rate": 0.038,
+      "subject_to_nii": false,
+      "plan_to_rebuy": true,
+      "holdings": [
+        { "symbol": "SOL", "quantity": 50, "cost_basis_per_unit": 180, "current_price": 95 },
+        { "symbol": "ARB", "quantity": 3000, "cost_basis_per_unit": 1.4, "current_price": 0.35 }
+      ]
+    },
+    {
+      "name": "Miner pivot portfolio",
+      "realized_short_term_gains": 30000,
+      "realized_long_term_gains": 0,
+      "federal_short_term_rate": 0.32,
+      "federal_long_term_rate": 0.15,
+      "state_rate": 0.06,
+      "nii_rate": 0.038,
+      "subject_to_nii": false,
+      "plan_to_rebuy": true,
+      "holdings": [
+        { "symbol": "ETH", "quantity": 10, "cost_basis_per_unit": 2800, "current_price": 1800 },
+        { "symbol": "HNT", "quantity": 500, "cost_basis_per_unit": 8.5, "current_price": 2.1 },
+        { "symbol": "KAS", "quantity": 25000, "cost_basis_per_unit": 0.12, "current_price": 0.045 }
+      ]
+    }
+  ]
+}
