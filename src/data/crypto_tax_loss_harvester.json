@@ -33,7 +33,7 @@
       "holdings": [
         { "symbol": "ETH", "quantity": 2.5, "cost_basis_per_unit": 3200, "current_price": 1800 },
         { "symbol": "SOL", "quantity": 40, "cost_basis_per_unit": 185, "current_price": 95 },
-        { "symbol": "BTC", "quantity": 0.6, "cost_basis_per_unit": 62000, "current_price": 88000 },
+        { "symbol": "BTC", "quantity": 0.6, "cost_basis_per_unit": 92000, "current_price": 88000 },
         { "symbol": "DOGE", "quantity": 8000, "cost_basis_per_unit": 0.18, "current_price": 0.11 },
         { "symbol": "RENDER", "quantity": 150, "cost_basis_per_unit": 7.5, "current_price": 3.2 }
       ]

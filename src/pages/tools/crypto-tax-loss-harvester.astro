@@ -87,7 +87,7 @@ const faqs = [
                   <th class="py-2 pr-2">Qty</th>
                   <th class="py-2 pr-2">Cost basis</th>
                   <th class="py-2 pr-2">Price</th>
-                  <th class="py-2 pr-2 text-right">Unrealized loss</th>
+                  <th class="py-2 pr-2 text-right">Unrealized P/L</th>
                   <th class="py-2 pl-2 text-center">Harvest</th>
                   <th class="py-2 pl-2"></th>
                 </tr>
@@ -248,8 +248,8 @@ const faqs = [
       const ltOffset = longGains - Math.max(0, netLtGain);
       netLoss = -(Math.min(0, netStGain) + Math.min(0, netLtGain));
 
-      const ordinaryOffset = Math.min(netLoss, ordinaryLimit);
-      const carryForward = netLoss - ordinaryOffset;
+      const ordinaryOffset = Math.min(Math.max(0, netLoss), ordinaryLimit);
+      const carryForward = Math.max(0, netLoss - ordinaryOffset);
 
       // Tax savings = offset amounts * blended federal rate + state + nii if applicable.
       const blendedFederalRate = totalLoss > 0 ? ((stOffset * shortRate) + (ltOffset * longRate)) / totalLoss : 0;
