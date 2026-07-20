@@ -1,0 +1,101 @@
+{
+  "last_updated": "2026-07-20",
+  "note": "Prices and commission rates are directional estimates. Check each affiliate program's current terms before budgeting.",
+  "defaults": {
+    "monthly_visitors": 50000,
+    "ctr_pct": 2.5,
+    "conversion_pct": 1.2,
+    "aov": 250,
+    "commission_pct": 4.0,
+    "return_pct": 8.0,
+    "network_fee_pct": 0.0,
+    "use_cpa": false,
+    "cpa_amount": 25
+  },
+  "scenarios": [
+    {
+      "name": "Hardware blog",
+      "icon": "🖥️",
+      "monthly_visitors": 80000,
+      "ctr_pct": 3.0,
+      "conversion_pct": 1.5,
+      "aov": 450,
+      "commission_pct": 3.0,
+      "return_pct": 7.0,
+      "network_fee_pct": 0.0,
+      "use_cpa": false,
+      "cpa_amount": 25
+    },
+    {
+      "name": "AI agent directory",
+      "icon": "🤖",
+      "monthly_visitors": 30000,
+      "ctr_pct": 4.5,
+      "conversion_pct": 2.0,
+      "aov": 120,
+      "commission_pct": 30.0,
+      "return_pct": 5.0,
+      "network_fee_pct": 0.0,
+      "use_cpa": true,
+      "cpa_amount": 50
+    },
+    {
+      "name": "Crypto → AI pivot list",
+      "icon": "⛏️",
+      "monthly_visitors": 25000,
+      "ctr_pct": 2.8,
+      "conversion_pct": 1.0,
+      "aov": 800,
+      "commission_pct": 2.5,
+      "return_pct": 9.0,
+      "network_fee_pct": 0.0,
+      "use_cpa": false,
+      "cpa_amount": 25
+    },
+    {
+      "name": "Newsletter mention",
+      "icon": "📧",
+      "monthly_visitors": 5000,
+      "ctr_pct": 12.0,
+      "conversion_pct": 3.5,
+      "aov": 200,
+      "commission_pct": 20.0,
+      "return_pct": 3.0,
+      "network_fee_pct": 0.0,
+      "use_cpa": true,
+      "cpa_amount": 30
+    }
+  ],
+  "networks": [
+    { "name": "Amazon Associates", "typical_commission_pct": 1.0, "notes": "1-4% on most electronics; 1% on PCs and hardware." },
+    { "name": "Newegg", "typical_commission_pct": 1.0, "notes": "~1% on tech; higher on select categories." },
+    { "name": "B&H Photo", "typical_commission_pct": 2.0, "notes": "2-4% on cameras, computers, and pro AV." },
+    { "name": "Best Buy", "typical_commission_pct": 1.0, "notes": "Low payout but high conversion on familiar brands." },
+    { "name": "ShareASale / Awin", "typical_commission_pct": 10.0, "notes": "Marketplace with wide range; SaaS and DTC brands often 10-30%." },
+    { "name": "Impact", "typical_commission_pct": 15.0, "notes": "Popular for SaaS, AI tools, and hosting; 15-50% common." },
+    { "name": "PartnerStack / Rewardful", "typical_commission_pct": 20.0, "notes": "B2B SaaS referrals; recurring commissions possible." },
+    { "name": "Direct brand program", "typical_commission_pct": 10.0, "notes": "Negotiated rate; often best terms for high-volume publishers." }
+  ],
+  "faq": [
+    {
+      "question": "How accurate is this affiliate revenue estimate?",
+      "answer": "It is a directional model based on your traffic, click-through rate, conversion rate, average order value, commission rate, returns, and any network fees. Real revenue varies by niche, seasonality, audience intent, and merchant conversion rate."
+    },
+    {
+      "question": "What is a good conversion rate for affiliate links?",
+      "answer": "It depends heavily on intent. Broad content blogs often see 0.5-1.5%, product reviews and comparison pages 1.5-4%, and email newsletters with strong recommendations 3-10%."
+    },
+    {
+      "question": "Should I use commission percentage or CPA?",
+      "answer": "Use commission percentage when you earn a share of each sale. Use CPA (cost per acquisition) when the merchant pays a flat bounty per signup, trial, or lead. Some programs offer a hybrid."
+    },
+    {
+      "question": "How do returns affect affiliate revenue?",
+      "answer": "Most programs claw back commission on refunded orders. The estimator subtracts an estimated return percentage from gross commission to show net revenue."
+    },
+    {
+      "question": "What is RPM in affiliate marketing?",
+      "answer": "RPM is revenue per 1,000 visitors or sessions. It helps compare affiliate performance across pages with different traffic levels."
+    }
+  ]
+}
