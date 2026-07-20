@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-07-10",
+  "last_updated": "2026-07-19",
   "note": "Costs and limits are approximate market rates as of mid-2026. Always verify current provider pricing before committing. Self-hosted costs assume $0.03/GB object storage and $0.05/hr compute unless otherwise stated.",
   "deployment_modes": [
     { "id": "managed_cloud", "name": "Managed cloud (fully hosted)" },
