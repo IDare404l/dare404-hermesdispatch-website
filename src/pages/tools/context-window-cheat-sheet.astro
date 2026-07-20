@@ -1,219 +1,211 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import data from '../../data/context_window_models.json';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/context_window_cheat_sheet.json';
 
-const title = "AI Model Context Window Cheat Sheet — Compare Token Limits";
-const description = "Compare input and output context windows for OpenAI, Anthropic, Google, Meta, Mistral, DeepSeek, xAI, and local quantized models. Find which model fits your document, codebase, or transcript.";
-const families = data.families;
-const presets = data.contextPresets;
+const title = "AI Model Context Window Cheat Sheet | Hermes Dispatch";
+const description = "Compare LLM context windows and max output token limits across OpenAI, Anthropic, Google, DeepSeek, Meta, Qwen, Mistral, Cohere, and xAI models.";
+const { models, categories, faq, note, last_updated } = data;
+
+const categoriesBySlug = Object.fromEntries(categories.map(c => [c.slug, c]));
+const allCategories = categories.map(c => c.slug);
+
+function fmtTokens(n) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(0)}K`;
+  return n.toLocaleString();
+}
+function fmtPrice(n) {
+  if (n === 0) return "—";
+  return `$${n.toFixed(2)}`;
+}
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="AI Model Context Window Cheat Sheet" description={description} url="https://hermesdispatch.dev/tools/context-window-cheat-sheet/" applicationCategory="ReferenceApplication" operatingSystem="Any" />
+
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Which AI model has the largest context window?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Google Gemini 2.0 Pro/Flash advertises up to 2 million tokens, while Gemini 2.5 Pro and several OpenAI GPT-4.1 variants support 1 million tokens. Anthropic Claude, OpenAI o3, and many open models top out around 128K-200K tokens." }
-      },
-      {
-        "@type": "Question",
-        "name": "What counts against the context window?",
-        "acceptedAnswer": { "@type": "Answer", "text": "The context window includes your system prompt, user messages, uploaded documents, tool results, and the model's own output. Output tokens reduce the remaining room for input." }
-      },
-      {
-        "@type": "Question",
-        "name": "How much context do I need for a codebase or transcript?",
-        "acceptedAnswer": { "@type": "Answer", "text": "A short blog post is ~1,500 tokens, a research paper ~8,000 tokens, a book chapter ~25,000 tokens, a large codebase ~50,000-100,000 tokens, and a multi-hour transcript can exceed 100,000 tokens." }
-      },
-      {
-        "@type": "Question",
-        "name": "Does quantization reduce the context window?",
-        "acceptedAnswer": { "@type": "Answer", "text": "The model's published context limit does not change with quantization, but the practical context you can run locally is limited by available VRAM/RAM for the KV cache. Tools like llama.cpp allow context scaling via KV-cache quantization." }
-      }
-    ]
+    "mainEntity": faq.map(f => ({"@type": "Question", "name": f.question, "acceptedAnswer": {"@type": "Answer", "text": f.answer}}))
   })} />
 
-  <section class="relative pt-24 pb-12 overflow-hidden">
-    <div class="absolute inset-0 animated-gradient opacity-50"></div>
-    <div class="grid-overlay"></div>
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📜</div>
-        <h1 class="display-heading mb-4">AI Model Context Window Cheat Sheet</h1>
-        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
-          Compare how much text each model can ingest and return. Pick the right model for documents, codebases, transcripts, and agent memory.
-        </p>
-      </div>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📏</div>
+      <h1 class="display-heading mb-4">AI Model Context Window Cheat Sheet</h1>
+      <p class="text-xl text-neutral-400 max-w-3xl mx-auto">Compare input context limits and max output tokens across frontier, balanced, fast, reasoning, and open-weight LLMs.</p>
+    </div>
 
-      <!-- Matcher -->
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
-        <h2 class="text-xl font-bold mb-4">What fits your content?</h2>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2">Content type</label>
-            <select id="presetSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
-              {presets.map(p => <option value={p.tokens}>{p.label} (~{p.tokens.toLocaleString()} tokens)</option>)}
-              <option value="custom">Custom token count</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2">Custom tokens</label>
-            <input id="customTokens" type="number" value="1500" min="1" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none" />
-          </div>
-          <div class="flex items-end">
-            <button id="matchBtn" type="button" class="btn-primary w-full">Find matching models</button>
-          </div>
-        </div>
-
-        <div id="matchResults" class="hidden">
-          <p class="text-sm text-neutral-400 mb-3">Models whose total window covers your content plus a reasonable output buffer (~25%):</p>
-          <div id="matchGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-        </div>
-      </div>
-
-      <!-- Family filters -->
-      <div class="flex flex-wrap gap-2 mb-6">
-        <button type="button" data-filter="all" class="family-filter px-4 py-2 rounded-full text-sm border border-neutral-700 hover:bg-neutral-800 transition-colors bg-brand-gold/10 text-brand-gold border-brand-gold/30">All families</button>
-        {Object.entries(families).map(([slug, fam]) => (
-          <button type="button" data-filter={slug} class="family-filter px-4 py-2 rounded-full text-sm border border-neutral-700 hover:bg-neutral-800 transition-colors">{fam.name}</button>
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Filter by category</h2>
+      <div class="flex flex-wrap gap-3" id="category-buttons">
+        <button type="button" class="cat-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors bg-brand-gold/20 border-brand-gold/50 text-brand-gold" data-category="all">All</button>
+        {categories.map(c => (
+          <button type="button" class="cat-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-category={c.slug}>{c.name}</button>
         ))}
       </div>
+    </section>
 
-      <!-- Cards -->
-      <div id="modelGrid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {Object.entries(families).map(([slug, fam]) => (
-          <div class="family-group glass-card rounded-2xl p-5 border border-neutral-800" data-family={slug}>
-            <div class="flex items-center gap-3 mb-4">
-              <span class="text-3xl">{fam.icon}</span>
-              <h2 class="text-xl font-bold">{fam.name}</h2>
-            </div>
-            <div class="space-y-3">
-              {fam.models.map(m => (
-                <div class="p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50">
-                  <div class="flex justify-between items-start gap-2 mb-1">
-                    <h3 class="font-semibold text-white">{m.name}</h3>
-                  </div>
-                  <div class="flex flex-wrap gap-2 text-xs mb-2">
-                    <span class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold border border-brand-gold/20">Context {m.context.toLocaleString()}</span>
-                    <span class="px-2 py-1 rounded bg-neutral-700 text-neutral-300">Output {m.output.toLocaleString()}</span>
-                  </div>
-                  <p class="text-xs text-neutral-400">{m.notes}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20 overflow-x-auto">
+      <table class="w-full text-sm" id="model-table">
+        <thead>
+          <tr class="text-left text-neutral-500 border-b border-neutral-800">
+            <th class="py-3 pr-4 cursor-pointer select-none" data-sort="provider">Provider <span class="text-xs">⇅</span></th>
+            <th class="py-3 pr-4 cursor-pointer select-none" data-sort="name">Model <span class="text-xs">⇅</span></th>
+            <th class="py-3 pr-4 cursor-pointer select-none text-right" data-sort="context_tokens">Context <span class="text-xs">⇅</span></th>
+            <th class="py-3 pr-4 cursor-pointer select-none text-right" data-sort="max_output_tokens">Max output <span class="text-xs">⇅</span></th>
+            <th class="py-3 pr-4">Category</th>
+            <th class="py-3 pr-4 text-right cursor-pointer select-none" data-sort="api_pricing_per_1m_input_tokens">Input / 1M <span class="text-xs">⇅</span></th>
+            <th class="py-3 text-right cursor-pointer select-none" data-sort="api_pricing_per_1m_output_tokens">Output / 1M <span class="text-xs">⇅</span></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-neutral-800" id="model-tbody">
+          {models.map(m => (
+            <tr class="model-row" data-categories={JSON.stringify([m.category.toLowerCase().replace(/\s+/g, '-')])}>
+              <td class="py-3 pr-4 text-neutral-300">{m.provider}</td>
+              <td class="py-3 pr-4 font-semibold text-white">
+                {m.name}
+                {m.notes && <p class="text-xs text-neutral-500 font-normal mt-0.5">{m.notes}</p>}
+              </td>
+              <td class="py-3 pr-4 text-right tabular-nums">{fmtTokens(m.context_tokens)}</td>
+              <td class="py-3 pr-4 text-right tabular-nums">{fmtTokens(m.max_output_tokens)}</td>
+              <td class="py-3 pr-4"><span class="inline-flex px-2 py-1 rounded-md bg-neutral-800 text-neutral-300 text-xs">{m.category}</span></td>
+              <td class="py-3 pr-4 text-right tabular-nums">{fmtPrice(m.api_pricing_per_1m_input_tokens)}</td>
+              <td class="py-3 text-right tabular-nums">{fmtPrice(m.api_pricing_per_1m_output_tokens)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
 
-      <div class="mt-12 glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20">
-        <h2 class="text-xl font-bold mb-3">How to use this cheat sheet</h2>
-        <ul class="space-y-2 text-neutral-300 text-sm list-disc pl-5">
-          <li><strong>Context</strong> = total tokens the model can process (system + input + history + tools).</li>
-          <li><strong>Output</strong> = maximum tokens the model is allowed to generate in one response.</li>
-          <li>Local/quantized models are usually VRAM-limited; use the <a href="/tools/vram-calculator/" class="text-brand-gold hover:underline">VRAM calculator</a> to size the KV cache.</li>
-          <li>For agent memory that spans many turns, prefer models with high context and low API cost. Use the <a href="/tools/llm-cost-calculator/" class="text-brand-gold hover:underline">LLM cost calculator</a> to compare.</li>
+    <section class="grid md:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Key rules of thumb</h2>
+        <ul class="list-disc pl-5 text-neutral-300 space-y-2">
+          <li><strong>System prompt + tools + RAG + history</strong> must fit inside the context window. Reserve ~10-20% as a safety buffer.</li>
+          <li><strong>Max output tokens</strong> limits how long the model's response can be. Reasoning models often have larger output budgets.</li>
+          <li><strong>1M-token contexts</strong> (OpenAI GPT-4.1, Google Gemini 2.5) fit entire codebases, long documents, or multi-turn sessions.</li>
+          <li><strong>200K contexts</strong> (Claude 4) still cover most enterprise use cases with strong retrieval quality.</li>
+          <li><strong>Open-weight models</strong> (Llama 4, Qwen 3) are often limited by local GPU VRAM rather than the model's theoretical context.</li>
         </ul>
       </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Token budget planner</h2>
+        <div class="space-y-4">
+          <label class="block"><span class="text-neutral-400 text-sm">System prompt tokens</span><input id="sysTokens" type="number" min="0" step="10" value="500" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Tool definitions tokens</span><input id="toolTokens" type="number" min="0" step="10" value="1200" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">RAG / retrieved chunks tokens</span><input id="ragTokens" type="number" min="0" step="100" value="4000" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Conversation history tokens</span><input id="histTokens" type="number" min="0" step="100" value="2000" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Desired output tokens</span><input id="outTokens" type="number" min="0" step="100" value="2000" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+        </div>
+        <div class="mt-6 p-4 rounded-xl bg-neutral-900/50 border border-neutral-800">
+          <p class="text-sm text-neutral-400">Total required context</p>
+          <p id="totalBudget" class="text-2xl font-bold text-brand-gold tabular-nums">—</p>
+          <p id="budgetVerdict" class="text-sm text-neutral-400 mt-1">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faq.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+          </details>
+        ))}
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="/tools/context-window-budgeter/" class="btn-primary text-sm">AI Agent Context Window Budgeter →</a>
+      <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Memory / RAG Cost Calc →</a>
+      <a href="/tools/agent-benchmark-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Benchmark Selector →</a>
     </div>
-  </section>
 
-  <script define:vars={{ families, presets }}>
-    const filterBtns = document.querySelectorAll('.family-filter');
-    const groups = document.querySelectorAll('.family-group');
-    const presetSelect = document.getElementById('presetSelect');
-    const customInput = document.getElementById('customTokens');
-    const matchBtn = document.getElementById('matchBtn');
-    const matchResults = document.getElementById('matchResults');
-    const matchGrid = document.getElementById('matchGrid');
+    <p id="note" class="text-neutral-500 text-sm mt-10">{note}</p>
+  </main>
 
-    filterBtns.forEach(btn => {
+  <script is:inline define:vars={{ models: models.map(m => ({...m, categorySlug: m.category.toLowerCase().replace(/\s+/g, '-')})), fmtTokens }}>
+    const fmtNum = n => n.toLocaleString('en-US');
+
+    let currentCategory = 'all';
+    let sortKey = null;
+    let sortAsc = true;
+
+    function renderRows() {
+      const tbody = document.getElementById('model-tbody');
+      let rows = models.slice();
+      if (currentCategory !== 'all') {
+        rows = rows.filter(m => m.categorySlug === currentCategory);
+      }
+      if (sortKey) {
+        rows.sort((a, b) => {
+          const av = a[sortKey] ?? 0;
+          const bv = b[sortKey] ?? 0;
+          return sortAsc ? (av - bv) : (bv - av);
+        });
+      }
+      tbody.innerHTML = rows.map(m => `
+        <tr class="model-row">
+          <td class="py-3 pr-4 text-neutral-300">${m.provider}</td>
+          <td class="py-3 pr-4 font-semibold text-white">${m.name}${m.notes ? `<p class="text-xs text-neutral-500 font-normal mt-0.5">${m.notes}</p>` : ''}</td>
+          <td class="py-3 pr-4 text-right tabular-nums">${fmtTokens(m.context_tokens)}</td>
+          <td class="py-3 pr-4 text-right tabular-nums">${fmtTokens(m.max_output_tokens)}</td>
+          <td class="py-3 pr-4"><span class="inline-flex px-2 py-1 rounded-md bg-neutral-800 text-neutral-300 text-xs">${m.category}</span></td>
+          <td class="py-3 pr-4 text-right tabular-nums">${m.api_pricing_per_1m_input_tokens ? '$'+m.api_pricing_per_1m_input_tokens.toFixed(2) : '—'}</td>
+          <td class="py-3 text-right tabular-nums">${m.api_pricing_per_1m_output_tokens ? '$'+m.api_pricing_per_1m_output_tokens.toFixed(2) : '—'}</td>
+        </tr>
+      `).join('');
+    }
+
+    document.querySelectorAll('.cat-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        filterBtns.forEach(b => {
-          b.classList.remove('bg-brand-gold/10', 'text-brand-gold', 'border-brand-gold/30');
-          b.classList.add('border-neutral-700');
-        });
-        btn.classList.add('bg-brand-gold/10', 'text-brand-gold', 'border-brand-gold/30');
-        btn.classList.remove('border-neutral-700');
-
-        const filter = btn.dataset.filter;
-        groups.forEach(g => {
-          g.style.display = (filter === 'all' || g.dataset.family === filter) ? '' : 'none';
-        });
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('bg-brand-gold/20', 'border-brand-gold/50', 'text-brand-gold'));
+        btn.classList.add('bg-brand-gold/20', 'border-brand-gold/50', 'text-brand-gold');
+        currentCategory = btn.dataset.category;
+        renderRows();
       });
     });
 
-    function getInputTokens() {
-      const val = presetSelect.value;
-      if (val === 'custom') {
-        return Math.max(1, parseInt(customInput.value, 10) || 0);
-      }
-      return parseInt(val, 10);
-    }
-
-    presetSelect.addEventListener('change', () => {
-      customInput.disabled = presetSelect.value !== 'custom';
-      customInput.classList.toggle('opacity-50', customInput.disabled);
-    });
-    presetSelect.dispatchEvent(new Event('change'));
-
-    function formatContext(n) {
-      if (n >= 1_000_000) return (n / 1_000_000).toFixed(n % 1_000_000 ? 2 : 0) + 'M';
-      if (n >= 1_000) return (n / 1_000).toFixed(n % 1_000 ? 1 : 0) + 'K';
-      return n.toString();
-    }
-
-    matchBtn.addEventListener('click', () => {
-      const inputTokens = getInputTokens();
-      const buffer = Math.round(inputTokens * 0.25);
-      const required = inputTokens + buffer;
-      const matches = [];
-
-      Object.entries(families).forEach(([slug, fam]) => {
-        fam.models.forEach(m => {
-          if (m.context >= required) {
-            matches.push({ ...m, family: fam.name, icon: fam.icon, slug });
-          }
-        });
+    document.querySelectorAll('#model-table th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const key = th.dataset.sort;
+        if (sortKey === key) sortAsc = !sortAsc;
+        else { sortKey = key; sortAsc = true; }
+        renderRows();
       });
-
-      matches.sort((a, b) => a.context - b.context);
-
-      if (!matches.length) {
-        matchGrid.innerHTML = `<p class="col-span-full text-sm text-neutral-400">No model covers ~${required.toLocaleString()} tokens in its context window. Split your content or use retrieval.</p>`;
-      } else {
-        matchGrid.innerHTML = matches.map(m => `
-          <div class="p-3 rounded-xl bg-neutral-800/50 border border-brand-gold/20">
-            <div class="flex items-center gap-2 mb-1">
-              <span>${m.icon}</span>
-              <span class="font-semibold text-white text-sm">${m.name}</span>
-            </div>
-            <p class="text-xs text-neutral-400 mb-2">${m.family}</p>
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold border border-brand-gold/20">${formatContext(m.context)} ctx</span>
-              <span class="px-2 py-1 rounded bg-neutral-700 text-neutral-300">${formatContext(m.output)} out</span>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      matchResults.classList.remove('hidden');
-      matchResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+
+    function calcBudget() {
+      const inputs = ['sysTokens','toolTokens','ragTokens','histTokens','outTokens'];
+      const vals = inputs.map(id => parseFloat(document.getElementById(id).value) || 0);
+      const total = vals.reduce((a, b) => a + b, 0);
+      const buffer = Math.ceil(total * 0.2);
+      const needed = total + buffer;
+      const totalEl = document.getElementById('totalBudget');
+      const verdictEl = document.getElementById('budgetVerdict');
+      totalEl.textContent = `${fmtNum(total)} tokens (use ~${fmtNum(needed)} with 20% buffer)`;
+      const fits1M = needed <= 1000000;
+      const fits200K = needed <= 200000;
+      const fits128K = needed <= 128000;
+      const fits64K = needed <= 64000;
+      if (fits64K) verdictEl.textContent = 'Fits almost every major model, including fast/cheap options.';
+      else if (fits128K) verdictEl.textContent = 'Fits most frontier, balanced, and open-weight models. Some fast/cheap models may not fit.';
+      else if (fits200K) verdictEl.textContent = 'Fits Claude 4 (200K) and Gemini 2.5 / GPT-4.1 (1M). Many budget models will not fit.';
+      else if (fits1M) verdictEl.textContent = 'Requires a 1M-token model such as GPT-4.1 or Gemini 2.5.';
+      else verdictEl.textContent = 'Budget exceeds 1M tokens. You must truncate, chunk, or summarize inputs.';
+    }
+
+    ['sysTokens','toolTokens','ragTokens','histTokens','outTokens'].forEach(id => {
+      document.getElementById(id).addEventListener('input', calcBudget);
+    });
+
+    renderRows();
+    calcBudget();
   </script>
-
-  
-
-  
-
-  <AgentCodeBlock
-    toolName="Context Window Cheat Sheet"
-    toolPath="/tools/context-window-cheat-sheet/"
-    description="Copy-paste Hermes Agent script for context window cheat sheet."
-    scriptPath="/hermes-tools/context_window_lookup.py"
-    locked={false}
-  />
 </Layout>

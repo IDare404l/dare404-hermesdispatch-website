@@ -1,0 +1,266 @@
+{
+  "last_updated": "2026-07-20",
+  "note": "Context-window and output-token limits are based on public API documentation. Providers change limits, pricing, and model availability frequently; verify before building production agents.",
+  "models": [
+    {
+      "slug": "gpt-4.1",
+      "name": "OpenAI GPT-4.1",
+      "provider": "OpenAI",
+      "context_tokens": 1047576,
+      "max_output_tokens": 32768,
+      "category": "Frontier",
+      "api_pricing_per_1m_input_tokens": 2.0,
+      "api_pricing_per_1m_output_tokens": 8.0,
+      "notes": "1M context, strong long-context retrieval."
+    },
+    {
+      "slug": "gpt-4.1-mini",
+      "name": "OpenAI GPT-4.1 mini",
+      "provider": "OpenAI",
+      "context_tokens": 1047576,
+      "max_output_tokens": 32768,
+      "category": "Balanced",
+      "api_pricing_per_1m_input_tokens": 0.4,
+      "api_pricing_per_1m_output_tokens": 1.6,
+      "notes": "Same context window as GPT-4.1 at much lower cost."
+    },
+    {
+      "slug": "gpt-4.1-nano",
+      "name": "OpenAI GPT-4.1 nano",
+      "provider": "OpenAI",
+      "context_tokens": 1047576,
+      "max_output_tokens": 32768,
+      "category": "Fast / cheap",
+      "api_pricing_per_1m_input_tokens": 0.1,
+      "api_pricing_per_1m_output_tokens": 0.4,
+      "notes": "Smallest, cheapest, fastest; still 1M context."
+    },
+    {
+      "slug": "gpt-4o",
+      "name": "OpenAI GPT-4o",
+      "provider": "OpenAI",
+      "context_tokens": 128000,
+      "max_output_tokens": 16384,
+      "category": "Frontier",
+      "api_pricing_per_1m_input_tokens": 2.5,
+      "api_pricing_per_1m_output_tokens": 10.0,
+      "notes": "128K context, natively multimodal."
+    },
+    {
+      "slug": "o3-mini",
+      "name": "OpenAI o3-mini",
+      "provider": "OpenAI",
+      "context_tokens": 200000,
+      "max_output_tokens": 100000,
+      "category": "Reasoning",
+      "api_pricing_per_1m_input_tokens": 1.1,
+      "api_pricing_per_1m_output_tokens": 4.4,
+      "notes": "Reasoning model; high output budget, 200K context."
+    },
+    {
+      "slug": "o1",
+      "name": "OpenAI o1",
+      "provider": "OpenAI",
+      "context_tokens": 200000,
+      "max_output_tokens": 100000,
+      "category": "Reasoning",
+      "api_pricing_per_1m_input_tokens": 15.0,
+      "api_pricing_per_1m_output_tokens": 60.0,
+      "notes": "Deep reasoning; expensive but powerful for hard STEM."
+    },
+    {
+      "slug": "claude-4-sonnet",
+      "name": "Anthropic Claude 4 Sonnet",
+      "provider": "Anthropic",
+      "context_tokens": 200000,
+      "max_output_tokens": 8192,
+      "category": "Frontier",
+      "api_pricing_per_1m_input_tokens": 3.0,
+      "api_pricing_per_1m_output_tokens": 15.0,
+      "notes": "200K context; strong agentic coding and analysis."
+    },
+    {
+      "slug": "claude-4-opus",
+      "name": "Anthropic Claude 4 Opus",
+      "provider": "Anthropic",
+      "context_tokens": 200000,
+      "max_output_tokens": 8192,
+      "category": "Frontier",
+      "api_pricing_per_1m_input_tokens": 15.0,
+      "api_pricing_per_1m_output_tokens": 75.0,
+      "notes": "Highest-end Claude; 200K context."
+    },
+    {
+      "slug": "claude-4-haiku",
+      "name": "Anthropic Claude 4 Haiku",
+      "provider": "Anthropic",
+      "context_tokens": 200000,
+      "max_output_tokens": 8192,
+      "category": "Fast / cheap",
+      "api_pricing_per_1m_input_tokens": 0.25,
+      "api_pricing_per_1m_output_tokens": 1.25,
+      "notes": "Fast and cheap; same 200K window."
+    },
+    {
+      "slug": "gemini-2.5-pro",
+      "name": "Google Gemini 2.5 Pro",
+      "provider": "Google",
+      "context_tokens": 1048576,
+      "max_output_tokens": 65536,
+      "category": "Frontier",
+      "api_pricing_per_1m_input_tokens": 1.25,
+      "api_pricing_per_1m_output_tokens": 10.0,
+      "notes": "1M token context, very large output budget."
+    },
+    {
+      "slug": "gemini-2.5-flash",
+      "name": "Google Gemini 2.5 Flash",
+      "provider": "Google",
+      "context_tokens": 1048576,
+      "max_output_tokens": 65536,
+      "category": "Balanced",
+      "api_pricing_per_1m_input_tokens": 0.15,
+      "api_pricing_per_1m_output_tokens": 0.6,
+      "notes": "Fast, cheap, 1M context."
+    },
+    {
+      "slug": "gemini-2.0-flash",
+      "name": "Google Gemini 2.0 Flash",
+      "provider": "Google",
+      "context_tokens": 1048576,
+      "max_output_tokens": 8192,
+      "category": "Fast / cheap",
+      "api_pricing_per_1m_input_tokens": 0.1,
+      "api_pricing_per_1m_output_tokens": 0.4,
+      "notes": "1M context at very low cost."
+    },
+    {
+      "slug": "deepseek-v3",
+      "name": "DeepSeek-V3",
+      "provider": "DeepSeek",
+      "context_tokens": 64000,
+      "max_output_tokens": 8192,
+      "category": "Balanced",
+      "api_pricing_per_1m_input_tokens": 0.07,
+      "api_pricing_per_1m_output_tokens": 1.1,
+      "notes": "Low API cost; 64K context."
+    },
+    {
+      "slug": "deepseek-r1",
+      "name": "DeepSeek-R1",
+      "provider": "DeepSeek",
+      "context_tokens": 64000,
+      "max_output_tokens": 8192,
+      "category": "Reasoning",
+      "api_pricing_per_1m_input_tokens": 0.14,
+      "api_pricing_per_1m_output_tokens": 2.19,
+      "notes": "Open reasoning model; 64K context."
+    },
+    {
+      "slug": "llama-4-scout",
+      "name": "Meta Llama 4 Scout",
+      "provider": "Meta (open weights)",
+      "context_tokens": 131072,
+      "max_output_tokens": 8192,
+      "category": "Open weights",
+      "api_pricing_per_1m_input_tokens": 0,
+      "api_pricing_per_1m_output_tokens": 0,
+      "notes": "Open weights; 128K context, can run locally."
+    },
+    {
+      "slug": "llama-4-maverick",
+      "name": "Meta Llama 4 Maverick",
+      "provider": "Meta (open weights)",
+      "context_tokens": 131072,
+      "max_output_tokens": 8192,
+      "category": "Open weights",
+      "api_pricing_per_1m_input_tokens": 0,
+      "api_pricing_per_1m_output_tokens": 0,
+      "notes": "Open weights; larger variant, 128K context."
+    },
+    {
+      "slug": "qwen3-235b-a22b",
+      "name": "Alibaba Qwen3-235B-A22B",
+      "provider": "Alibaba Cloud",
+      "context_tokens": 128000,
+      "max_output_tokens": 8192,
+      "category": "Frontier",
+      "api_pricing_per_1m_input_tokens": 0.5,
+      "api_pricing_per_1m_output_tokens": 2.0,
+      "notes": "Mixture-of-experts; 128K context."
+    },
+    {
+      "slug": "qwen3-32b",
+      "name": "Alibaba Qwen3-32B",
+      "provider": "Alibaba Cloud",
+      "context_tokens": 128000,
+      "max_output_tokens": 8192,
+      "category": "Balanced",
+      "api_pricing_per_1m_input_tokens": 0.1,
+      "api_pricing_per_1m_output_tokens": 0.3,
+      "notes": "Strong smaller model; 128K context."
+    },
+    {
+      "slug": "mistral-large-2",
+      "name": "Mistral Large 2",
+      "provider": "Mistral AI",
+      "context_tokens": 128000,
+      "max_output_tokens": 8192,
+      "category": "Frontier",
+      "api_pricing_per_1m_input_tokens": 2.0,
+      "api_pricing_per_1m_output_tokens": 6.0,
+      "notes": "128K context, strong multilingual and coding."
+    },
+    {
+      "slug": "command-r-plus",
+      "name": "Cohere Command R+",
+      "provider": "Cohere",
+      "context_tokens": 128000,
+      "max_output_tokens": 8192,
+      "category": "Balanced",
+      "api_pricing_per_1m_input_tokens": 2.5,
+      "api_pricing_per_1m_output_tokens": 10.0,
+      "notes": "128K context; built for RAG and enterprise."
+    },
+    {
+      "slug": "grok-3",
+      "name": "xAI Grok 3",
+      "provider": "xAI",
+      "context_tokens": 128000,
+      "max_output_tokens": 8192,
+      "category": "Frontier",
+      "api_pricing_per_1m_input_tokens": 5.0,
+      "api_pricing_per_1m_output_tokens": 25.0,
+      "notes": "128K context; reasoning and coding focused."
+    }
+  ],
+  "categories": [
+    { "slug": "frontier", "name": "Frontier", "description": "Best capability, higher price, 128K-1M context." },
+    { "slug": "balanced", "name": "Balanced", "description": "Good capability and cost with 64K-1M context." },
+    { "slug": "fast-cheap", "name": "Fast / cheap", "description": "Low latency and price; ideal for high-volume tasks." },
+    { "slug": "reasoning", "name": "Reasoning", "description": "Chain-of-thought / deep reasoning models." },
+    { "slug": "open-weights", "name": "Open weights", "description": "Self-hostable models with no per-token API cost." }
+  ],
+  "faq": [
+    {
+      "question": "What is a context window in an LLM?",
+      "answer": "The context window is the maximum number of input tokens a model can process in one request. It includes the system prompt, user messages, few-shot examples, retrieved RAG chunks, tool outputs, and conversation history."
+    },
+    {
+      "question": "What is the difference between context tokens and max output tokens?",
+      "answer": "Context tokens are the total tokens the model can read. Max output tokens are the tokens it is allowed to generate in its response. Both consume inference time and cost, but providers usually price them separately."
+    },
+    {
+      "question": "Which model has the largest context window?",
+      "answer": "As of mid-2026, OpenAI GPT-4.1 series and Google Gemini 2.5 series support roughly 1 million context tokens. Anthropic Claude 4 series supports 200K tokens. Always check the provider's latest docs."
+    },
+    {
+      "question": "Do larger context windows always mean better retrieval?",
+      "answer": "Not necessarily. A model can read a long context, but retrieval quality, needle-in-haystack performance, and cost vary. Long-context models work best when the relevant information is clearly formatted and placed."
+    },
+    {
+      "question": "How do I choose a context window for my agent?",
+      "answer": "Estimate your system prompt + tool definitions + RAG chunks + user history + desired output reserve. Add a 20% safety buffer. If you plan to ingest full documents or long conversations, prioritize 128K+ models."
+    }
+  ]
+}
