@@ -1,288 +1,399 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import data from '../../data/ai_agent_compliance.json';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/ai_agent_compliance_checker.json';
 
-const title = "AI Agent Privacy & Compliance Checker";
-const description = "Check which privacy and compliance requirements apply to your AI agent. Covers GDPR, SOC 2, CCPA/CPRA, EU AI Act, HIPAA, DORA, PIPEDA, and more.";
-const regions = data.regions;
-const useCases = data.use_cases;
-const dataTypes = data.data_types;
-const checklist = data.checklist;
-const readiness = data.readiness;
+const title = "AI Agent Privacy / Compliance Checker | Hermes Dispatch";
+const description = "Check which privacy, security, and AI regulations apply to your AI agent based on jurisdiction, data types, industry, and features. Get a risk score, framework list, and action checklist.";
+
+const faqs = [
+  { q: "Is this a substitute for legal advice?", a: "No. This tool is a directional self-assessment. Laws are interpreted by regulators and courts, and your exact data flows matter. Consult qualified privacy or compliance counsel before making commitments." },
+  { q: "Which frameworks does it cover?", a: "GDPR, UK DPA, EU AI Act, CCPA/CPRA, US state privacy laws, HIPAA, FERPA, GLBA, COPPA, PCI DSS, FTC guidance, PIPEDA, LGPD, Singapore PDPA, Japan APPI, South Korea PIPA, India DPDPA, UAE and Saudi PDPL, Australia Privacy Act, SOC 2, ISO 27701, and several national AI governance codes." },
+  { q: "What makes an AI agent 'high-risk' under the EU AI Act?", a: "High-risk use cases include biometric identification, credit scoring, employment and education decisions, law-enforcement risk assessments, and certain critical infrastructure. The tool flags automated decisions with significant effects and certain sensitive data types." },
+  { q: "Do I need a Data Protection Officer?", a: "GDPR and several other laws require a DPO if your core activities involve large-scale, systematic monitoring of individuals or processing sensitive data on a large scale. The tool lists this as a P1 control when those frameworks apply." },
+  { q: "How accurate is the cost estimate?", a: "Costs are directional monthly estimates combining framework program overhead and amortized audit spend. Actual costs depend on team size, lawyer rates, tooling, and whether you already have ISO 27001 or SOC 2 infrastructure." }
+];
+
+const fmtMoney = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Privacy / Compliance Checker" description={description} url="https://hermesdispatch.dev/tools/ai-agent-compliance-checker/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Which compliance frameworks apply to an AI agent?",
-        "acceptedAnswer": { "@type": "Answer", "text": "At minimum, AI agents processing personal data usually need to consider GDPR (EU/UK), SOC 2 (security trust), and CCPA/CPRA (California). High-risk use cases may also trigger HIPAA, DORA, the EU AI Act, NIS2, or sector-specific financial and employment regulations." }
-      },
-      {
-        "@type": "Question",
-        "name": "Is an AI chatbot required to disclose that it is not human?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Yes under the EU AI Act and under most consumer transparency laws. California, Colorado, and several platform terms also require clear AI disclosure in customer-facing contexts." }
-      },
-      {
-        "@type": "Question",
-        "name": "Do I need a Data Processing Addendum with my LLM vendor?",
-        "acceptedAnswer": { "@type": "Answer", "text": "If you send personal data of EU/UK/CA/AU users to an LLM provider, you generally need a DPA or equivalent contract terms covering subprocessing, security, and restricted use for training." }
-      },
-      {
-        "@type": "Question",
-        "name": "What makes an AI system high-risk under the EU AI Act?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Use cases like credit scoring, recruitment, medical diagnosis support, biometric identification, and systems that affect safety or fundamental rights are generally classified as high-risk and require risk management, data governance, human oversight, and CE marking." }
-      }
-    ]
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
   })} />
 
-  <section class="relative pt-24 pb-12 overflow-hidden">
-    <div class="absolute inset-0 animated-gradient opacity-50"></div>
-    <div class="grid-overlay"></div>
-    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🛡️</div>
-        <h1 class="display-heading mb-4">AI Agent Privacy & Compliance Checker</h1>
-        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
-          Pick your region, use case, and data types to see which privacy and compliance checklist items apply to your AI agent.
-        </p>
-      </div>
-
-      <!-- Configuration -->
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
-        <h2 class="text-xl font-bold mb-6">1. Configure your agent</h2>
-        <div class="grid md:grid-cols-3 gap-6 mb-6">
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2">Primary region</label>
-            <select id="regionSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
-              {regions.map(r => <option value={r.slug}>{r.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2">Use case</label>
-            <select id="useCaseSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
-              {useCases.map(u => <option value={u.slug}>{u.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2">Highest-risk data handled</label>
-            <select id="dataTypeSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-4 py-3 text-white focus:border-brand-gold focus:outline-none">
-              <option value="">General / no special data</option>
-              {dataTypes.map(d => <option value={d.slug}>{d.name}</option>)}
-            </select>
-          </div>
-        </div>
-
-        <div class="p-4 rounded-xl bg-neutral-800/50 border border-brand-gold/10 mb-6">
-          <p class="text-sm text-neutral-400 mb-1">Likely frameworks to consider</p>
-          <div id="frameworkList" class="flex flex-wrap gap-2"></div>
-        </div>
-
-        <div class="flex flex-wrap gap-3">
-          <button id="checkBtn" type="button" class="btn-primary">Generate checklist</button>
-          <button id="resetBtn" type="button" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Reset</button>
-        </div>
-      </div>
-
-      <!-- Results -->
-      <div id="results" class="hidden mb-10">
-        <div class="grid lg:grid-cols-3 gap-6 mb-8">
-          <div class="lg:col-span-2">
-            <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
-              <h2 class="text-xl font-bold mb-4">Applicable checklist items</h2>
-              <p class="text-sm text-neutral-400 mb-4">Check the items you have already implemented. The readiness score updates in real time.</p>
-              <div id="checklistContainer" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
-              <p class="text-xs text-neutral-500 uppercase mb-1">Readiness score</p>
-              <p id="scoreValue" class="text-4xl font-bold text-brand-gold">0%</p>
-              <p id="scoreLabel" class="text-sm text-neutral-400 mt-1">—</p>
-            </div>
-            <div class="glass-card rounded-2xl p-5 border border-emerald-500/20">
-              <p class="text-xs text-neutral-500 uppercase mb-1">Estimated time to audit-ready</p>
-              <p id="timeEstimate" class="text-lg font-bold text-emerald-400">—</p>
-            </div>
-            <div class="glass-card rounded-2xl p-5 border border-red-500/20">
-              <p class="text-xs text-neutral-500 uppercase mb-1">Open P0 items</p>
-              <p id="openP0" class="text-2xl font-bold text-red-400">—</p>
-            </div>
-            <div class="glass-card rounded-2xl p-5 border border-brand-gold/20">
-              <p class="text-xs text-neutral-500 uppercase mb-1">Total applicable items</p>
-              <p id="totalItems" class="text-2xl font-bold">—</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Explanations -->
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="glass-card rounded-2xl p-6">
-          <h2 class="text-xl font-bold mb-4 text-brand-gold">How this checker works</h2>
-          <ul class="space-y-2 text-neutral-300 text-sm">
-            <li><strong class="text-white">Region</strong> determines which privacy laws, AI acts, and sector rules are in scope.</li>
-            <li><strong class="text-white">Use case</strong> drives the EU AI Act risk class and default framework set.</li>
-            <li><strong class="text-white">Data type</strong> adds extra safeguards for health, financial, biometric, or children's data.</li>
-            <li><strong class="text-white">Checklist</strong> is filtered by applicability, not a generic one-size-fits-all list.</li>
-          </ul>
-        </div>
-        <div class="glass-card rounded-2xl p-6">
-          <h2 class="text-xl font-bold mb-4 text-brand-gold">Next steps after the check</h2>
-          <ul class="space-y-2 text-neutral-300 text-sm">
-            <li>• Export the open items into a Jira/Linear project or Notion tracker.</li>
-            <li>• Engage a privacy lawyer for high-risk use cases (healthcare, finance, hiring).</li>
-            <li>• Pair this with the <a href="/tools/agent-stack-builder/" class="text-brand-gold hover:underline">Agent Stack Builder</a> to pick security-first vendors.</li>
-            <li>• Re-run the checker whenever your region, use case, or vendor stack changes.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="mt-10 flex flex-wrap gap-3">
-        <a href="/tools/agent-stack-builder/" class="btn-primary text-sm">Agent Stack Builder →</a>
-        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
-      </div>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔒</div>
+      <h1 class="display-heading mb-4">AI Agent Privacy / Compliance Checker</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Check which privacy, security, and AI regulations apply to your agent. Pick a scenario, select your data and features, and get a risk score, framework list, and action checklist.</p>
     </div>
-  </section>
 
-  <script define:vars={{ regions, useCases, dataTypes, checklist, readiness }}>
-    const regionSelect = document.getElementById('regionSelect');
-    const useCaseSelect = document.getElementById('useCaseSelect');
-    const dataTypeSelect = document.getElementById('dataTypeSelect');
-    const frameworkList = document.getElementById('frameworkList');
-    const results = document.getElementById('results');
-    const checklistContainer = document.getElementById('checklistContainer');
-    const scoreValue = document.getElementById('scoreValue');
-    const scoreLabel = document.getElementById('scoreLabel');
-    const timeEstimate = document.getElementById('timeEstimate');
-    const openP0 = document.getElementById('openP0');
-    const totalItems = document.getElementById('totalItems');
-    const checkBtn = document.getElementById('checkBtn');
-    const resetBtn = document.getElementById('resetBtn');
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Start with a scenario</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4" id="scenario-buttons">
+        {data.scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-scenario={i}>
+            <h3 class="font-semibold text-white mb-1">{s.name}</h3>
+            <p class="text-xs text-neutral-400">{s.description}</p>
+          </button>
+        ))}
+      </div>
+    </section>
 
-    const regionMap = Object.fromEntries(regions.map(r => [r.slug, r]));
-    const useCaseMap = Object.fromEntries(useCases.map(u => [u.slug, u]));
-    const dataTypeMap = Object.fromEntries(dataTypes.map(d => [d.slug, d]));
+    <!-- Wizard inputs -->
+    <section class="grid lg:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">1. Where will you operate?</h2>
+        <p class="text-sm text-neutral-400 mb-4">Select every jurisdiction where users or their data may be located.</p>
+        <div class="space-y-2 max-h-64 overflow-y-auto pr-2">
+          {data.jurisdictions.map(j => (
+            <label class="flex items-start gap-3 p-2 rounded-lg hover:bg-neutral-800/50 cursor-pointer transition-colors">
+              <input type="checkbox" class="jurisdiction-check w-4 h-4 mt-1 accent-brand-gold" value={j.id} />
+              <span class="text-sm text-neutral-200">{j.name}</span>
+            </label>
+          ))}
+        </div>
 
-    function getFrameworks() {
-      const r = regionMap[regionSelect.value];
-      const u = useCaseMap[useCaseSelect.value];
-      const d = dataTypeMap[dataTypeSelect.value];
-      const set = new Set([...(r?.frameworks || []), ...(u?.default_frameworks || [])]);
-      if (d?.high_risk) {
-        if (d.slug === 'health') set.add('HIPAA');
-        if (d.slug === 'financial') set.add('GLBA / PCI-DSS');
-        if (d.slug === 'children') set.add('COPPA / GDPR child rules');
-        if (d.slug === 'biometric') set.add('BIPA / GDPR special category');
-      }
-      return [...set];
-    }
+        <h2 class="text-xl font-bold mt-8 mb-4 text-brand-gold">2. What data does the agent touch?</h2>
+        <p class="text-sm text-neutral-400 mb-4">Select all data types the agent processes, stores, or embeds.</p>
+        <div class="space-y-2 max-h-72 overflow-y-auto pr-2">
+          {data.data_types.map(d => (
+            <label class="flex items-start gap-3 p-2 rounded-lg hover:bg-neutral-800/50 cursor-pointer transition-colors">
+              <input type="checkbox" class="data-type-check w-4 h-4 mt-1 accent-brand-gold" value={d.id} data-risk={d.risk_weight} />
+              <span class="text-sm text-neutral-200">{d.name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
 
-    function updateFrameworks() {
-      const frameworks = getFrameworks();
-      frameworkList.innerHTML = frameworks.map(f => `
-        <span class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold border border-brand-gold/20 text-xs font-medium">${f}</span>
-      `).join('');
-    }
-
-    function applicable(item) {
-      const r = regionMap[regionSelect.value];
-      const u = useCaseMap[useCaseSelect.value];
-      const d = dataTypeMap[dataTypeSelect.value];
-      if (!item.regions.includes(regionSelect.value) && !item.regions.includes('global')) return false;
-      if (u?.risk_level === 'high' && item.priority === 'P2') return false;
-      if (d?.high_risk) return true;
-      if (item.id === 'ai-act-risk' && regionSelect.value !== 'eu' && !item.regions.includes(regionSelect.value)) return false;
-      return true;
-    }
-
-    function renderChecklist() {
-      const items = checklist.filter(applicable);
-      checklistContainer.innerHTML = items.map((item, i) => `
-        <label class="flex items-start gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 hover:border-brand-gold/30 transition-colors cursor-pointer">
-          <input type="checkbox" class="check-item mt-1 w-4 h-4 accent-brand-gold" data-idx="${i}" data-priority="${item.priority}">
-          <div class="flex-1">
-            <div class="flex flex-wrap items-center gap-2 mb-1">
-              <span class="text-xs px-2 py-0.5 rounded border ${priorityClass(item.priority)}">${item.priority}</span>
-              <span class="text-xs text-neutral-500">${item.category}</span>
-            </div>
-            <p class="text-sm text-neutral-200">${item.text}</p>
-            <p class="text-xs text-neutral-500 mt-1">${item.frameworks.join(' • ')}</p>
-          </div>
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">3. Industry & deployment</h2>
+        <label class="block mb-4">
+          <span class="text-neutral-400 text-sm">Industry</span>
+          <select id="industry" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {data.industries.map(ind => (
+              <option value={ind.id}>{ind.name}</option>
+            ))}
+          </select>
         </label>
-      `).join('');
+        <label class="block mb-4">
+          <span class="text-neutral-400 text-sm">Deployment model</span>
+          <select id="deployment" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {data.deployment_models.map(dm => (
+              <option value={dm.id} data-risk={dm.risk_mod}>{dm.name}</option>
+            ))}
+          </select>
+        </label>
+        <p id="deploymentNote" class="text-sm text-neutral-400 mb-4">—</p>
 
-      totalItems.textContent = items.length;
-      updateScore();
+        <h2 class="text-xl font-bold mt-6 mb-4 text-brand-gold">4. Agent features</h2>
+        <p class="text-sm text-neutral-400 mb-4">Select the capabilities that increase compliance surface area.</p>
+        <div class="space-y-2 max-h-80 overflow-y-auto pr-2">
+          {data.features.map(f => (
+            <label class="flex items-start gap-3 p-2 rounded-lg hover:bg-neutral-800/50 cursor-pointer transition-colors">
+              <input type="checkbox" class="feature-check w-4 h-4 mt-1 accent-brand-gold" value={f.id} data-risk={f.risk_weight} />
+              <div>
+                <span class="text-sm text-neutral-200">{f.name}</span>
+                <span class="text-xs text-neutral-500 block">Risk +{f.risk_weight}</span>
+              </div>
+            </label>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section id="results" class="hidden mb-12">
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Risk score</p>
+          <p id="riskValue" class="text-5xl font-bold text-brand-gold">0%</p>
+          <p id="riskLabel" class="text-lg font-medium mt-2">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Applicable frameworks</p>
+          <p id="frameworkCount" class="text-5xl font-bold text-white">0</p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Est. monthly compliance cost</p>
+          <p id="costValue" class="text-4xl font-bold text-brand-gold">—</p>
+          <p class="text-xs text-neutral-500 mt-2">Includes amortized annual audit</p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Applicable frameworks</h2>
+          <div id="frameworkList" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
+        </div>
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Required controls</h2>
+          <p class="text-sm text-neutral-400 mb-4">P0 items are launch blockers. P1 items are high priority. Check them off as you implement them.</p>
+          <div id="controlsList" class="space-y-2 max-h-[600px] overflow-y-auto pr-2"></div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+        <p id="verdictText" class="text-lg text-neutral-200">—</p>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">How this checker works</h2>
+      <ul class="list-disc pl-5 text-neutral-300 space-y-2">
+        <li>Frameworks are triggered by the jurisdictions you serve, the data types you process, and your industry.</li>
+        <li>Risk score adds base exposure, data-type risk, feature risk, and deployment-model complexity, then is capped at 100.</li>
+        <li>Cost estimate sums monthly framework program overhead and amortizes annual audit/assessment costs over 12 months.</li>
+        <li>Controls are filtered to those required by the frameworks that apply to you, plus controls tied to features you selected.</li>
+      </ul>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.q}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/agent-pii-detection-cost-calculator/" class="btn-primary text-sm">PII Detection Cost Calc →</a>
+      <a href="/tools/agent-deployment-scorecard/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Deployment Readiness Scorecard →</a>
+      <a href="/tools/agent-redteam-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Red Team Cost Calc →</a>
+      <a href="/tools/agent-security-audit-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Security Audit Cost Calc →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ dataJson: JSON.stringify(data), fmtMoneyStr: fmtMoney.format(1234) }}>
+    const data = JSON.parse(dataJson);
+    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+
+    function $q(sel) { return document.querySelectorAll(sel); }
+    function $(sel) { return document.querySelector(sel); }
+    function getCheckedValues(sel) { return Array.from($q(sel + ':checked')).map(el => el.value); }
+    function getSelectedOption(sel) { return $(sel).selectedOptions[0]; }
+    function getSelectedValue(sel) { return $(sel).value; }
+
+    function compute() {
+      const scenarioIndex = parseInt(document.querySelector('.scenario-btn.active')?.dataset.scenario ?? '0');
+      const scenario = data.scenarios[scenarioIndex] || data.scenarios[0];
+      const jurisdictions = getCheckedValues('.jurisdiction-check');
+      const dataTypes = getCheckedValues('.data-type-check');
+      const industryId = getSelectedValue('#industry');
+      const deploymentId = getSelectedValue('#deployment');
+      const features = getCheckedValues('.feature-check');
+
+      // Build applicable frameworks
+      const frameworkIds = new Set();
+      jurisdictions.forEach(jid => {
+        const j = data.jurisdictions.find(x => x.id === jid);
+        if (j) j.frameworks.forEach(f => frameworkIds.add(f));
+      });
+      dataTypes.forEach(did => {
+        const d = data.data_types.find(x => x.id === did);
+        if (d) d.frameworks.forEach(f => frameworkIds.add(f));
+      });
+      const industry = data.industries.find(x => x.id === industryId);
+      if (industry) industry.frameworks.forEach(f => frameworkIds.add(f));
+
+      const deployment = data.deployment_models.find(x => x.id === deploymentId);
+
+      // Risk score
+      let risk = 10 + scenario.risk_offset;
+      dataTypes.forEach(did => {
+        const d = data.data_types.find(x => x.id === did);
+        risk += (d?.risk_weight || 0);
+      });
+      features.forEach(fid => {
+        const f = data.features.find(x => x.id === fid);
+        risk += (f?.risk_weight || 0);
+      });
+      risk += (deployment?.risk_mod || 0);
+      risk = Math.max(0, Math.min(100, risk));
+
+      // Cost estimate
+      const applicableFrameworks = data.frameworks.filter(f => frameworkIds.has(f.id));
+      let monthly = 0;
+      applicableFrameworks.forEach(f => monthly += (f.base_cost_monthly || 0));
+      applicableFrameworks.forEach(f => monthly += ((f.audit_cost || 0) / 12));
+      // Feature-driven controls rough incremental cost
+      features.forEach(fid => {
+        const f = data.features.find(x => x.id === fid);
+        if (f) monthly += f.risk_weight * 150;
+      });
+
+      // Controls
+      const featureRequiredControls = new Set();
+      features.forEach(fid => {
+        const f = data.features.find(x => x.id === fid);
+        if (f && f.required_controls) f.required_controls.forEach(c => featureRequiredControls.add(c));
+      });
+      const applicableControls = data.controls.filter(c => {
+        const frameworkMatch = c.frameworks.some(f => frameworkIds.has(f));
+        const featureMatch = featureRequiredControls.has(c.id);
+        return frameworkMatch || featureMatch;
+      }).sort((a, b) => {
+        const pa = a.priority === 'P0' ? 0 : 1;
+        const pb = b.priority === 'P0' ? 0 : 1;
+        return pa - pb || a.text.localeCompare(b.text);
+      });
+
+      return { scenario, frameworkIds, risk, monthly, applicableFrameworks, applicableControls, deployment, featureRequiredControls };
     }
 
-    function priorityClass(p) {
-      if (p === 'P0') return 'bg-red-500/10 text-red-400 border-red-500/20';
-      if (p === 'P1') return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
-      return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+    function render() {
+      const result = compute();
+      const resultsSection = $('#results');
+      resultsSection.classList.remove('hidden');
+
+      const riskValue = $('#riskValue');
+      const riskLabel = $('#riskLabel');
+      riskValue.textContent = result.risk + '%';
+      let label = 'Low risk';
+      let labelClass = 'text-emerald-400';
+      if (result.risk >= 75) { label = 'Critical risk'; labelClass = 'text-red-400'; }
+      else if (result.risk >= 55) { label = 'High risk'; labelClass = 'text-amber-400'; }
+      else if (result.risk >= 35) { label = 'Medium risk'; labelClass = 'text-yellow-400'; }
+      riskLabel.textContent = label;
+      riskLabel.className = 'text-lg font-medium mt-2 ' + labelClass;
+
+      $('#frameworkCount').textContent = result.applicableFrameworks.length;
+      $('#costValue').textContent = fmt.format(result.monthly);
+
+      const frameworkList = $('#frameworkList');
+      if (result.applicableFrameworks.length === 0) {
+        frameworkList.innerHTML = '<p class="text-neutral-400 text-sm">No frameworks triggered yet. Select a jurisdiction and data type to see requirements.</p>';
+      } else {
+        frameworkList.innerHTML = result.applicableFrameworks.map(f => `
+          <div class="p-4 rounded-xl bg-neutral-900/50 border border-neutral-800">
+            <div class="flex items-center justify-between mb-1">
+              <h3 class="font-semibold text-white">${f.name}</h3>
+              <span class="text-xs px-2 py-0.5 rounded border ${f.risk_tier === 'critical' ? 'bg-red-500/10 text-red-400 border-red-500/20' : f.risk_tier === 'high' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}">${f.risk_tier}</span>
+            </div>
+            <p class="text-xs text-neutral-500 mb-2">${f.full_name}</p>
+            <p class="text-sm text-neutral-300">${f.summary}</p>
+            <p class="text-xs text-neutral-500 mt-2">Est. ${fmt.format(f.base_cost_monthly || 0)}/mo program + ${fmt.format((f.audit_cost || 0) / 12)}/mo amortized audit</p>
+          </div>
+        `).join('');
+      }
+
+      const controlsList = $('#controlsList');
+      if (result.applicableControls.length === 0) {
+        controlsList.innerHTML = '<p class="text-neutral-400 text-sm">No controls triggered yet.</p>';
+      } else {
+        controlsList.innerHTML = result.applicableControls.map(c => `
+          <label class="flex items-start gap-3 p-3 rounded-xl bg-neutral-800/50 border border-neutral-700/50 hover:border-brand-gold/30 transition-colors cursor-pointer">
+            <input type="checkbox" class="control-check mt-1 w-4 h-4 accent-brand-gold">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs px-2 py-0.5 rounded border ${c.priority === 'P0' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}">${c.priority}</span>
+              </div>
+              <p class="text-sm text-neutral-200">${c.text}</p>
+            </div>
+          </label>
+        `).join('');
+      }
+
+      const verdict = $('#verdictText');
+      if (result.applicableFrameworks.length === 0) {
+        verdict.textContent = 'Select at least one jurisdiction and data type to generate a compliance verdict.';
+      } else if (result.risk >= 75) {
+        verdict.textContent = `Critical exposure: ${result.applicableFrameworks.length} framework(s) apply. Close all P0 controls before launch and engage specialized counsel.`;
+      } else if (result.risk >= 55) {
+        verdict.textContent = `High exposure: ${result.applicableFrameworks.length} framework(s) apply. Prioritize P0 controls and plan a DPIA or equivalent risk assessment.`;
+      } else if (result.risk >= 35) {
+        verdict.textContent = `Medium exposure: ${result.applicableFrameworks.length} framework(s) apply. Implement P0 controls and document your lawful basis and data flows.`;
+      } else {
+        verdict.textContent = `Lower exposure: ${result.applicableFrameworks.length} framework(s) apply. Maintain a privacy policy, DPA, and basic security controls. Re-check as you add features or markets.`;
+      }
     }
 
-    function updateScore() {
-      const items = checklist.filter(applicable);
-      const checked = [...document.querySelectorAll('.check-item:checked')];
-      const totalWeight = items.reduce((sum, it) => sum + (it.priority === 'P0' ? 3 : it.priority === 'P1' ? 2 : 1), 0);
-      const checkedWeight = items.reduce((sum, it, i) => {
-        const cb = document.querySelector(`.check-item[data-idx="${i}"]`);
-        return sum + (cb?.checked ? (it.priority === 'P0' ? 3 : it.priority === 'P1' ? 2 : 1) : 0);
-      }, 0);
-      const score = totalWeight > 0 ? Math.round((checkedWeight / totalWeight) * 100) : 0;
-      scoreValue.textContent = `${score}%`;
-
-      let band = readiness.high_risk;
-      if (score >= readiness.excellent.min) band = readiness.excellent;
-      else if (score >= readiness.good.min) band = readiness.good;
-      else if (score >= readiness.needs_work.min) band = readiness.needs_work;
-
-      scoreLabel.textContent = band.label;
-      timeEstimate.textContent = band.weeks;
-
-      const open = items.filter((it, i) => {
-        const cb = document.querySelector(`.check-item[data-idx="${i}"]`);
-        return it.priority === 'P0' && !cb?.checked;
-      }).length;
-      openP0.textContent = open;
+    function setScenario(index) {
+      const scenario = data.scenarios[index];
+      document.querySelectorAll('.scenario-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+        btn.classList.toggle('border-brand-gold', i === index);
+        btn.classList.toggle('bg-neutral-800', i === index);
+      });
+      // Reset checkboxes
+      $q('.jurisdiction-check').forEach(el => el.checked = false);
+      $q('.data-type-check').forEach(el => el.checked = false);
+      $q('.feature-check').forEach(el => el.checked = false);
+      // Apply defaults based on scenario
+      if (scenario.id === 'b2b') {
+        document.querySelector('.jurisdiction-check[value="us"]').checked = true;
+        document.querySelector('.jurisdiction-check[value="eu_uk"]').checked = true;
+        document.querySelector('.data-type-check[value="pii"]').checked = true;
+        document.querySelector('.data-type-check[value="sensitive_pii"]').checked = true;
+        document.querySelector('.feature-check[value="rag_memory"]').checked = true;
+        document.querySelector('.feature-check[value="third_party_apis"]').checked = true;
+        document.querySelector('.feature-check[value="cross_border"]').checked = true;
+        $('#industry').value = 'b2b_saas';
+        $('#deployment').value = 'saas_multi';
+      } else if (scenario.id === 'consumer') {
+        document.querySelector('.jurisdiction-check[value="us"]').checked = true;
+        document.querySelector('.jurisdiction-check[value="eu_uk"]').checked = true;
+        document.querySelector('.data-type-check[value="pii"]').checked = true;
+        document.querySelector('.feature-check[value="public_facing"]').checked = true;
+        document.querySelector('.feature-check[value="chat_history"]').checked = true;
+        document.querySelector('.feature-check[value="logged_outputs"]').checked = true;
+        $('#industry').value = 'consumer';
+        $('#deployment').value = 'saas_multi';
+      } else if (scenario.id === 'high_risk') {
+        document.querySelector('.jurisdiction-check[value="us"]').checked = true;
+        document.querySelector('.jurisdiction-check[value="eu_uk"]').checked = true;
+        document.querySelector('.data-type-check[value="pii"]').checked = true;
+        document.querySelector('.data-type-check[value="sensitive_pii"]').checked = true;
+        document.querySelector('.data-type-check[value="phi"]').checked = true;
+        document.querySelector('.feature-check[value="automated_decisions"]').checked = true;
+        document.querySelector('.feature-check[value="pii_extraction"]').checked = true;
+        document.querySelector('.feature-check[value="human_review"]').checked = true;
+        $('#industry').value = 'healthcare';
+        $('#deployment').value = 'saas_multi';
+      } else {
+        // mvp default
+        document.querySelector('.jurisdiction-check[value="us"]').checked = true;
+        document.querySelector('.data-type-check[value="pii"]').checked = true;
+        document.querySelector('.feature-check[value="chat_history"]').checked = true;
+        $('#industry').value = 'b2b_saas';
+        $('#deployment').value = 'self_hosted';
+      }
+      updateDeploymentNote();
+      render();
     }
 
-    function generate() {
-      updateFrameworks();
-      renderChecklist();
-      results.classList.remove('hidden');
-      results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    function updateDeploymentNote() {
+      const dm = data.deployment_models.find(x => x.id === $('#deployment').value);
+      $('#deploymentNote').textContent = dm ? dm.notes : '—';
     }
 
-    [regionSelect, useCaseSelect, dataTypeSelect].forEach(el => el.addEventListener('change', updateFrameworks));
-    checklistContainer.addEventListener('change', updateScore);
-    checkBtn.addEventListener('click', generate);
-    resetBtn.addEventListener('click', () => {
-      regionSelect.value = 'us';
-      useCaseSelect.value = 'customer-support';
-      dataTypeSelect.value = '';
-      updateFrameworks();
-      results.classList.add('hidden');
+    document.querySelectorAll('.scenario-btn').forEach((btn, i) => {
+      btn.addEventListener('click', () => setScenario(i));
     });
 
-    updateFrameworks();
+    document.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('change', () => { updateDeploymentNote(); render(); });
+      if (el.type === 'checkbox') el.addEventListener('click', () => { updateDeploymentNote(); render(); });
+    });
+
+    // Initialize with first scenario
+    setScenario(0);
   </script>
-
-  
-
-  
-
-  <AgentCodeBlock
-    toolName="Ai Agent Compliance Checker"
-    toolPath="/tools/ai-agent-compliance-checker/"
-    description="Copy-paste Hermes Agent script for ai agent compliance checker."
-    scriptPath="/hermes-tools/ai_agent_compliance_checker.py"
-    locked={false}
-  />
 </Layout>
