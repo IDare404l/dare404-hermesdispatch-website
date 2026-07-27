@@ -67,6 +67,13 @@ const faqs = [
         <label for="requireVision" class="text-neutral-300 text-sm">Only show models with native vision support</label>
       </div>
       <p class="text-neutral-500 text-sm mt-6">Estimates are directional. Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    
+      <div class="mt-10 p-6 rounded-xl bg-gradient-to-br from-brand-gold/10 to-brand-amber/10 border border-brand-gold/20 text-center">
+        <h3 class="text-lg font-semibold mb-2">Found a model? Check if it fits your GPU.</h3>
+        <p class="text-neutral-400 mb-4 max-w-2xl mx-auto">Use the VRAM Calculator, then shop the GPU or mini PC that can run it.</p>
+        <a href="/tools/vram-calculator/" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-brand-gold hover:bg-brand-amber text-[#0d0d1a] font-bold transition mr-3">VRAM Calculator →</a>
+        <a href="/go/rtx-4090/" class="inline-flex items-center px-5 py-2.5 rounded-lg border border-neutral-700 hover:bg-neutral-800 transition">Shop RTX 4090 →</a>
+      </div>
     </section>
 
     <!-- Results -->
@@ -118,8 +125,8 @@ const faqs = [
     <div class="flex flex-wrap gap-3 mb-8">
       <a href="/tools/vram-calculator/" class="btn-primary text-sm">VRAM Calculator →</a>
       <a href="/tools/inference-engine-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Inference Engine Selector →</a>
-      <a href="/tools/agent-api-pricing-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
-      <a href="/tools/agent-benchmark-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Benchmark Selector →</a>
+      <a href="/tools/agent-hosting-cost-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">API Pricing Comparator →</a>
+      <a href="/tools/open-source-llm-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Benchmark Selector →</a>
     </div>
 
     <p id="note" class="text-neutral-500 text-sm">{data.note}</p>

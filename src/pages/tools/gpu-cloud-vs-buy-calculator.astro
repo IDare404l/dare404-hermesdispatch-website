@@ -257,12 +257,19 @@ const utilHelp = data.utilization_help;
 
       <div class="mt-10 flex flex-wrap gap-3">
         <a href="/tools/local-llm-roi-calculator/" class="btn-primary text-sm">Local LLM ROI Calc →</a>
-        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
-        <a href="/tools/ai-pc-build-configurator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI PC Configurator →</a>
+        <a href="/tools/vram-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+        <a href="/tools/agent-hardware-sizer/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI PC Configurator →</a>
         <a href="/compare/gpus/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">GPU Comparison →</a>
       </div>
     </div>
-  </section>
+  
+      <div class="mt-10 p-6 rounded-xl bg-gradient-to-br from-brand-gold/10 to-brand-amber/10 border border-brand-gold/20 text-center">
+        <h3 class="text-lg font-semibold mb-2">Buying usually wins if you run daily.</h3>
+        <p class="text-neutral-400 mb-4 max-w-2xl mx-auto">See current prices on RTX 4090, RX 7900 XTX, DDR5 kits, and SSDs to build your own inference box.</p>
+        <a href="/go/rtx-4090/" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-brand-gold hover:bg-brand-amber text-[#0d0d1a] font-bold transition mr-3">Shop RTX 4090 →</a>
+        <a href="/compare/gpus/" class="inline-flex items-center px-5 py-2.5 rounded-lg border border-neutral-700 hover:bg-neutral-800 transition">GPU Comparison →</a>
+      </div>
+    </section>
 
   <script define:vars={{ instances, localGpus, defaults }}>
     const fmt = (n, d = 0) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: d }).format(n || 0);

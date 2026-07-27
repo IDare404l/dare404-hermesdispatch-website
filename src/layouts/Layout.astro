@@ -93,7 +93,6 @@ const fullCommit = versionData?.commit || 'local';
           <div class="hidden md:flex items-center gap-1">
             <a href="/" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Home</a>
             <a href="/newsletter" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Newsletter</a>
-            <a href="/podcast" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Podcast</a>
             <a href="/directory" class="px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm">Directory</a>
 
             <!-- Tools dropdown -->
@@ -104,117 +103,27 @@ const fullCommit = versionData?.commit || 'local';
               </button>
               <div class="absolute left-0 top-full mt-0 w-64 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
                 <a href="/tools" class="block px-4 py-2 text-sm hover:bg-neutral-800 first:rounded-t-lg font-medium text-cyan-400">All Tools</a>
-                <a href="/tools/agent-toolkit" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-purple-400">🤖 Agent Toolkit</a>
-                <a href="/tools/request" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-brand-gold">🛠️ Request a Tool</a>
-                <div class="border-t border-neutral-800 my-1"></div>
-                <a href="/tools/#ai-tools" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-gray-300">🤖 AI Tools</a>
-                <a href="/tools/#crypto-tools" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-gray-300">⛏️ Crypto Tools</a>
-                <a href="/tools/#investing-tools" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-gray-300">💰 Investing Tools</a>
-                <a href="/directory" class="block px-4 py-2 text-sm hover:bg-neutral-800 font-medium text-gray-300">📁 Directory</a>
-                <div class="border-t border-neutral-800 my-1"></div>
+                <a href="/tools/agent-hardware-sizer" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent Hardware Sizer</a>
+                <a href="/tools/vram-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">VRAM Calculator</a>
+                <a href="/tools/mini-pc-recommender" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Mini PC Recommender</a>
+                <a href="/tools/gpu-cloud-vs-buy-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">GPU Cloud vs Buy Calc</a>
+                <a href="/tools/local-llm-roi-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Local LLM ROI Calc</a>
+                <a href="/tools/tokens-per-watt-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Tokens-per-Watt Calc</a>
+                <a href="/tools/quantization-advisor" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Quantization Advisor</a>
+                <a href="/tools/inference-engine-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Inference Engine Selector</a>
+                <a href="/tools/open-source-llm-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Open Source LLM Selector</a>
+                <a href="/tools/agent-hosting-cost-comparator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent Hosting Comparator</a>
+                <a href="/tools/no-code-agent-builder-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">No-Code Builder Selector</a>
+                <a href="/tools/gpu-power-cooling-sizer" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">GPU Power & Cooling Sizer</a>
+                <a href="/tools/hardware-resale-estimator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Hardware Resale Estimator</a>
+                <a href="/tools/hashrate-to-inference-converter" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Hashrate → Inference</a>
+                <a href="/tools/miner-pivot-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Miner Pivot Calc</a>
+                <a href="/tools/crypto-staking-vs-inference-yield" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Staking vs Inference Yield</a>
+                <a href="/tools/crypto-tax-loss-harvester" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🌾 Crypto Tax Loss Harvester</a>
+                <a href="/tools/ai-hardware-deal-tracker" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Hardware Deal Tracker</a>
                 <a href="/compare/gpus" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">GPU Comparison</a>
                 <a href="/compare/mini-pcs" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Mini PC Comparison</a>
                 <a href="/compare/recommend" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">GPU Recommender</a>
-                <a href="/tools/agent-benchmark-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent Benchmark Selector</a>
-                <a href="/tools/crypto-tax-loss-harvester" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🌾 Crypto Tax Loss Harvesting Calculator</a>
-                <a href="/tools/affiliate-revenue-estimator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">💰 Affiliate Link Revenue Estimator</a>
-                <a href="/tools/context-window-cheat-sheet" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">📏 AI Model Context Window Cheat Sheet</a>
-                <a href="/tools/hashrate-to-inference-converter" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">⛏️ GPU Hashrate → Inference Converter</a>
-                <a href="/tools/ai-agent-compliance-checker" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🔒 AI Agent Privacy / Compliance Checker</a>
-                <a href="/tools/newsletter-prompt-generator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">✍️ Daily Newsletter Prompt Generator</a>
-                <a href="/tools/startup-runway-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🛫 Startup Runway Calculator</a>
-                <a href="/tools/agent-marketplace-fee-comparator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🏪 AI Agent Marketplace Fee Comparator</a>
-                <a href="/tools/agent-memory-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🧠 AI Agent Memory / RAG Cost Calculator</a>
-                <a href="/tools/agent-energy-carbon-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">⚡ AI Agent Energy & Carbon Cost Calculator</a>
-                <a href="/tools/agent-system-prompt-generator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🛠️ AI Agent System Prompt Generator</a>
-                <a href="/tools/agent-billing-metering-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">💰 AI Agent Billing & Usage Metering Cost Calculator</a>
-                <a href="/tools/ai-account-setup-assistant" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Account Setup Assistant</a>
-                <a href="/tools/prompt-tokenizer-pricing-estimator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Prompt Tokenizer & Pricing Estimator</a>
-                <a href="/tools/local-llm-hosting-revenue-estimator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Local LLM Hosting Revenue Estimator</a>
-                <a href="/tools/agent-observability-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent Observability Cost Calculator</a>
-                <a href="/tools/agent-latency-budget-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent Latency Budget Calculator</a>
-                <a href="/tools/agent-sla-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent SLA / Uptime Calculator</a>
-                <a href="/tools/agent-hosting-cost-comparator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent Hosting Cost Comparator</a>
-                <a href="/tools/ai-voice-agent-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Voice Agent Cost Calculator</a>
-                <a href="/tools/voice-transcription-cost-comparator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Voice-to-Text Cost Comparator</a>
-                <a href="/tools/prompt-cache-savings-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Prompt Cache Savings Calculator</a>
-                <a href="/tools/context-window-budgeter" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Context Window Budgeter</a>
-                <a href="/tools/llm-fine-tuning-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">LLM Fine-Tuning Cost Calculator</a>
-                <a href="/tools/fine-tuning-vs-rag-cost-comparator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">Fine-Tuning vs RAG Cost Comparator</a>
-                <a href="/tools/inference-engine-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Local LLM Inference Engine Selector</a>
-                <a href="/tools/quantization-advisor" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Local LLM Quantization Advisor</a>
-                <a href="/tools/agent-deployment-scorecard" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent Deployment Readiness Scorecard</a>
-                <a href="/tools/agent-evaluation-planner" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Evaluation Planner</a>
-                <a href="/tools/agent-redteam-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Red Team Cost Calculator</a>
-                <a href="/tools/agent-workflow-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Multi-Step Workflow Cost Calculator</a>
-                <a href="/tools/agent-concurrency-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">Concurrency & Queue Cost Calculator</a>
-                <a href="/tools/agent-workforce-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent Workforce Cost Calculator</a>
-                <a href="/tools/agent-webhook-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent Webhook / Event-Driven Cost Calculator</a>
-                <a href="/tools/agent-prompt-injection-scanner" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Prompt Injection & Security Risk Scanner</a>
-                <a href="/tools/agent-security-audit-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Security Audit Cost Calculator</a>
-                <a href="/tools/agent-escalation-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Human Escalation Cost Calculator</a>
-                <a href="/tools/agent-output-value-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent Output Value Calculator</a>
-                <a href="/tools/agent-newsletter-production-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent Newsletter Production Cost Calculator</a>
-                <a href="/tools/newsletter-revenue-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Newsletter Revenue & Growth Calculator</a>
-                <a href="/tools/newsletter-sponsorship-roi" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Newsletter Sponsorship ROI Calculator</a>
-                <a href="/tools/agent-task-fit-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Task Fit Selector</a>
-                <a href="/tools/agent-deployment-scorecard" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Agent Deployment Readiness Scorecard</a>
-                <a href="/tools/no-code-agent-builder-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">No-Code AI Agent Builder Selector</a>
-                <a href="/tools/agent-vs-hire-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent vs Human Hire Calculator</a>
-                <a href="/tools/agent-build-vs-buy-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🏗️ AI Agent Build vs Buy Calculator</a>
-                <a href="/tools/agent-model-router-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🚦 AI Agent Model Router / Fallback Cost Calculator</a>
-                <a href="/tools/agent-outage-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Outage Cost Calculator</a>
-                <a href="/tools/agent-incident-response-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🚨 AI Agent Incident Response Cost Calculator</a>
-                <a href="/tools/agent-deflection-roi-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Support Deflection ROI Calculator</a>
-                <a href="/tools/agent-document-processing-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Document Processing Cost Calculator</a>
-                <a href="/tools/agent-data-labeling-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Data Labeling Cost Calculator</a>
-                <a href="/tools/agent-prompt-cost-forecaster" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Prompt Cost Forecaster</a>
-                <a href="/tools/agent-outreach-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Outreach Campaign Cost Calculator</a>
-                <a href="/tools/agent-knowledge-graph-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Knowledge Graph / Ontology Cost Calculator</a>
-                <a href="/tools/gpu-power-cooling-sizer" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">GPU Power Supply & Cooling Sizer</a>
-                <a href="/tools/agent-tool-call-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Tool Call Cost Calculator</a>
-                <a href="/tools/agent-llm-router-benchmarker" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent LLM Router Benchmarker</a>
-                <a href="/tools/agent-multimodal-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Multi-Modal Cost Calculator</a>
-                <a href="/tools/agent-mcp-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent MCP Cost Calculator</a>
-                <a href="/tools/open-source-llm-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Open Source LLM Selector for Agents</a>
-                <a href="/tools/hardware-resale-estimator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Hardware Resale Value Estimator</a>
-                <a href="/tools/agent-inference-capacity-planner" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Inference Capacity Planner</a>
-                <a href="/tools/agent-rate-limit-planner" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">⏱️ AI Agent Rate Limit & Quota Planner</a>
-                <a href="/tools/agent-per-user-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Per-User Cost Calculator</a>
-                <a href="/tools/agent-prompt-testing-budget" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Prompt Testing Budget Calculator</a>
-                <a href="/tools/agent-browser-scraping-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Browser / Web Scraping Cost Calculator</a>
-                <a href="/tools/agent-batch-vs-realtime-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Batch vs Real-Time Cost Calculator</a>
-                <a href="/tools/agent-batch-job-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent Batch Job / Offline Workload Cost Calculator</a>
-                <a href="/tools/agent-code-review-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Code Review Cost Calculator</a>
-                <a href="/tools/agent-synthetic-data-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Synthetic Data Generator Cost Calculator</a>
-                <a href="/tools/agent-shadow-ab-test-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Shadow / A-B Test Cost Calculator</a>
-                <a href="/tools/agent-rollout-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent Rollout / Canary Cost Calculator</a>
-                <a href="/tools/agent-translation-localization-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent Translation / Localization Cost Calculator</a>
-                <a href="/tools/agent-retention-churn-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent Retention & Churn Cost Calculator</a>
-                <a href="/tools/agent-email-deliverability-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">AI Agent Email Deliverability Cost Calculator</a>
-                <a href="/tools/agent-cost-per-failure-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🚨 AI Agent Cost Per Failure / Resolution Cost Calculator</a>
-                <a href="/tools/agent-ecommerce-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent E-commerce / Shopping Cost Calculator</a>
-                <a href="/tools/crypto-staking-vs-inference-yield" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-gray-400">Crypto Staking vs AI Inference Yield</a>
-                <a href="/tools/prompt-compression-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent Prompt Compression / Token Optimization Cost Calculator</a>
-                <a href="/tools/agent-reasoning-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-purple-400">🧠 AI Agent Reasoning / CoT Cost Calculator</a>
-                <a href="/tools/agent-video-generation-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🎬 AI Agent Video Generation Cost Calculator</a>
-                <a href="/tools/agent-image-generation-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🖼️ AI Agent Image Generation Cost Calculator</a>
-                <a href="/tools/agent-data-integration-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">AI Agent Data Integration / ETL Cost Calculator</a>
-                <a href="/tools/agent-api-commitment-roi" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">💳 AI Agent API Commitment / Prepaid Credit ROI Calculator</a>
-                <a href="/tools/agent-rollout-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🚀 AI Agent Rollout / Canary Cost Calculator</a>
-                <a href="/tools/agent-hallucination-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🌀 AI Agent Hallucination Cost Calculator</a>
-                <a href="/tools/agent-multi-tenant-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🏢 AI Agent Multi-Tenant SaaS Cost Calculator</a>
-                <a href="/tools/agent-bug-bounty-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-red-400">🐞 AI Agent Bug Bounty Cost Calculator</a>
-                <a href="/tools/agent-data-retention-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🗄️ AI Agent Data Retention / Audit Log Cost Calculator</a>
-                <a href="/tools/agent-backup-dr-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">☁️ AI Agent Backup &amp; Disaster Recovery Cost Calculator</a>
-                <a href="/tools/vector-db-selector" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🗂️ AI Agent Vector Database Selector</a>
-                <a href="/tools/agent-dependency-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🔗 AI Agent Dependency / Third-Party API Cost Calculator</a>
-                <a href="/tools/agent-pii-detection-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🔒 AI Agent PII Detection & Data Classification Cost Calculator</a>
-                <a href="/tools/agent-cost-allocation-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">📊 AI Agent Cost Allocation & Chargeback Calculator</a>
-                <a href="/tools/agent-staging-sandbox-cost-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🧪 AI Agent Staging & Sandbox Cost Calculator</a>
-                <a href="/tools/agent-cac-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">🎯 AI Agent Customer Acquisition Cost (CAC) Calculator</a>
-                <a href="/tools/agent-api-cost-spike-forecaster" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">📈 AI Agent API Cost Spike / Overrun Forecaster</a>
-                <a href="/tools/agent-gross-margin-calculator" class="block px-4 py-2 text-sm hover:bg-neutral-800 text-brand-gold">📊 AI Agent Gross Margin & Unit Economics Calculator</a>
               </div>
             </div>
 
@@ -232,143 +141,51 @@ const fullCommit = versionData?.commit || 'local';
 
     <!-- Mobile nav menu -->
     <div id="mobile-menu" class="fixed inset-0 z-[60] bg-neutral-950 hidden">
-      <div class="flex items-center justify-between h-16 px-4 border-b border-neutral-800">
-        <span class="font-semibold">Menu</span>
-        <button id="mobile-menu-close" type="button" class="p-2 rounded-lg hover:bg-neutral-800" aria-label="Close menu">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <div class="px-4 py-6 space-y-1 overflow-y-auto">
-        <a href="/" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Home</a>
-        <a href="/newsletter" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Newsletter</a>
-        <a href="/podcast" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Podcast</a>
-        <a href="/directory" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Directory</a>
+        <div class="flex items-center justify-between h-16 px-4 border-b border-neutral-800">
+          <span class="font-semibold">Menu</span>
+          <button id="mobile-menu-close" type="button" class="p-2 rounded-lg hover:bg-neutral-800" aria-label="Close menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="px-4 py-6 space-y-1 overflow-y-auto">
+          <a href="/" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Home</a>
+          <a href="/newsletter" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Newsletter</a>
+          <a href="/directory" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Directory</a>
+          <a href="/answers" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Answers</a>
 
-        <p class="px-4 py-2 text-xs uppercase text-neutral-500">Tools</p>
-        <a href="/tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">All Tools</a>
-        <a href="/tools/agent-toolkit" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">🤖 Agent Toolkit</a>
-        <a href="/tools/request" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🛠️ Request a Tool</a>
-        <div class="border-t border-neutral-800 my-2 mx-4"></div>
-        <a href="/tools/#ai-tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">🤖 AI Tools</a>
-        <a href="/tools/#crypto-tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">⛏️ Crypto Tools</a>
-        <a href="/tools/#investing-tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">💰 Investing Tools</a>
-        <a href="/directory" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">📁 Directory</a>
-        <div class="border-t border-neutral-800 my-2 mx-4"></div>
-        <a href="/compare/gpus" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Comparison</a>
-        <a href="/compare/mini-pcs" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Mini PC Comparison</a>
-        <a href="/compare/recommend" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Recommender</a>
-        <a href="/tools/agent-benchmark-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Benchmark Selector</a>
-        <a href="/tools/crypto-tax-loss-harvester" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🌾 Crypto Tax Loss Harvesting Calculator</a>
-        <a href="/tools/affiliate-revenue-estimator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">💰 Affiliate Link Revenue Estimator</a>
-        <a href="/tools/context-window-cheat-sheet" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">📏 AI Model Context Window Cheat Sheet</a>
-        <a href="/tools/hashrate-to-inference-converter" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">⛏️ GPU Hashrate → Inference Converter</a>
-        <a href="/tools/ai-agent-compliance-checker" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🔒 AI Agent Privacy / Compliance Checker</a>
-        <a href="/tools/newsletter-prompt-generator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">✍️ Daily Newsletter Prompt Generator</a>
-        <a href="/tools/startup-runway-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🛫 Startup Runway Calculator</a>
-        <a href="/tools/agent-marketplace-fee-comparator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🏪 AI Agent Marketplace Fee Comparator</a>
-        <a href="/tools/agent-memory-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🧠 AI Agent Memory / RAG Cost Calculator</a>
-        <a href="/tools/agent-energy-carbon-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">⚡ AI Agent Energy & Carbon Cost Calculator</a>
-        <a href="/tools/agent-system-prompt-generator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🛠️ AI Agent System Prompt Generator</a>
-        <a href="/tools/agent-billing-metering-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">💰 AI Agent Billing & Usage Metering Cost Calculator</a>
-        <a href="/tools/ai-account-setup-assistant" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Account Setup Assistant</a>
-        <a href="/tools/prompt-tokenizer-pricing-estimator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Prompt Tokenizer & Pricing Estimator</a>
-        <a href="/tools/local-llm-hosting-revenue-estimator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Local LLM Hosting Revenue Estimator</a>
-        <a href="/tools/agent-observability-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Observability Cost Calculator</a>
-        <a href="/tools/agent-latency-budget-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Latency Budget Calculator</a>
-        <a href="/tools/agent-sla-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent SLA / Uptime Calculator</a>
-        <a href="/tools/agent-hosting-cost-comparator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Hosting Cost Comparator</a>
-        <a href="/tools/ai-voice-agent-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Voice Agent Cost Calculator</a>
-        <a href="/tools/voice-transcription-cost-comparator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Voice-to-Text Cost Comparator</a>
-        <a href="/tools/prompt-cache-savings-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Prompt Cache Savings Calculator</a>
-        <a href="/tools/context-window-budgeter" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Context Window Budgeter</a>
-        <a href="/tools/llm-fine-tuning-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">LLM Fine-Tuning Cost Calculator</a>
-        <a href="/tools/fine-tuning-vs-rag-cost-comparator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">Fine-Tuning vs RAG Cost Comparator</a>
-        <a href="/tools/inference-engine-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Local LLM Inference Engine Selector</a>
-        <a href="/tools/quantization-advisor" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Local LLM Quantization Advisor</a>
-        <a href="/tools/agent-deployment-scorecard" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Deployment Readiness Scorecard</a>
-        <a href="/tools/agent-evaluation-planner" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Evaluation Planner</a>
-        <a href="/tools/agent-redteam-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Red Team Cost Calculator</a>
-        <a href="/tools/agent-workflow-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Multi-Step Workflow Cost Calculator</a>
-        <a href="/tools/agent-concurrency-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Concurrency & Queue Cost Calculator</a>
-        <a href="/tools/agent-workforce-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Workforce Cost Calculator</a>
-        <a href="/tools/agent-webhook-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Webhook / Event-Driven Cost Calculator</a>
-        <a href="/tools/agent-prompt-injection-scanner" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Prompt Injection & Security Risk Scanner</a>
-        <a href="/tools/agent-security-audit-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Security Audit Cost Calculator</a>
-        <a href="/tools/agent-escalation-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Human Escalation Cost Calculator</a>
-        <a href="/tools/agent-output-value-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Output Value Calculator</a>
-        <a href="/tools/agent-newsletter-production-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">AI Agent Newsletter Production Cost Calculator</a>
-        <a href="/tools/newsletter-revenue-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Newsletter Revenue & Growth Calculator</a>
-        <a href="/tools/newsletter-sponsorship-roi" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Newsletter Sponsorship ROI Calculator</a>
-        <a href="/tools/agent-task-fit-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Task Fit Selector</a>
-        <a href="/tools/agent-deployment-scorecard" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Deployment Readiness Scorecard</a>
-        <a href="/tools/no-code-agent-builder-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">No-Code AI Agent Builder Selector</a>
-        <a href="/tools/agent-vs-hire-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent vs Human Hire Calculator</a>
-        <a href="/tools/agent-build-vs-buy-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🏗️ AI Agent Build vs Buy Calculator</a>
-        <a href="/tools/agent-model-router-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🚦 AI Agent Model Router / Fallback Cost Calculator</a>
-        <a href="/tools/agent-outage-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Outage Cost Calculator</a>
-        <a href="/tools/agent-incident-response-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🚨 AI Agent Incident Response Cost Calculator</a>
-        <a href="/tools/agent-deflection-roi-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Support Deflection ROI Calculator</a>
-        <a href="/tools/agent-document-processing-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Document Processing Cost Calculator</a>
-        <a href="/tools/agent-data-labeling-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Data Labeling Cost Calculator</a>
-        <a href="/tools/agent-prompt-cost-forecaster" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Prompt Cost Forecaster</a>
-        <a href="/tools/agent-outreach-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Outreach Campaign Cost Calculator</a>
-        <a href="/tools/agent-knowledge-graph-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Knowledge Graph / Ontology Cost Calculator</a>
-        <a href="/tools/gpu-power-cooling-sizer" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Power Supply & Cooling Sizer</a>
-        <a href="/tools/agent-tool-call-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Tool Call Cost Calculator</a>
-        <a href="/tools/agent-llm-router-benchmarker" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent LLM Router Benchmarker</a>
-        <a href="/tools/agent-multimodal-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Multi-Modal Cost Calculator</a>
-        <a href="/tools/agent-mcp-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent MCP Cost Calculator</a>
-        <a href="/tools/open-source-llm-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Open Source LLM Selector for Agents</a>
-        <a href="/tools/hardware-resale-estimator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Hardware Resale Value Estimator</a>
-        <a href="/tools/agent-inference-capacity-planner" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Inference Capacity Planner</a>
-        <a href="/tools/agent-rate-limit-planner" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">⏱️ AI Agent Rate Limit & Quota Planner</a>
-        <a href="/tools/agent-per-user-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Per-User Cost Calculator</a>
-        <a href="/tools/agent-prompt-testing-budget" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Prompt Testing Budget Calculator</a>
-        <a href="/tools/agent-browser-scraping-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Browser / Web Scraping Cost Calculator</a>
-        <a href="/tools/agent-batch-vs-realtime-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Batch vs Real-Time Cost Calculator</a>
-        <a href="/tools/agent-batch-job-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">AI Agent Batch Job / Offline Workload Cost Calculator</a>
-        <a href="/tools/agent-code-review-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Code Review Cost Calculator</a>
-        <a href="/tools/agent-synthetic-data-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Synthetic Data Generator Cost Calculator</a>
-        <a href="/tools/agent-shadow-ab-test-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-gray-400">AI Agent Shadow / A-B Test Cost Calculator</a>
-        <a href="/tools/agent-rollout-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">AI Agent Rollout / Canary Cost Calculator</a>
-        <a href="/tools/agent-translation-localization-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">AI Agent Translation / Localization Cost Calculator</a>
-        <a href="/tools/agent-retention-churn-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">AI Agent Retention & Churn Cost Calculator</a>
-        <a href="/tools/agent-email-deliverability-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Agent Email Deliverability Cost Calculator</a>
-        <a href="/tools/agent-cost-per-failure-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🚨 AI Agent Cost Per Failure / Resolution Cost Calculator</a>
-        <a href="/tools/agent-ecommerce-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">AI Agent E-commerce / Shopping Cost Calculator</a>
-        <a href="/tools/crypto-staking-vs-inference-yield" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Crypto Staking vs AI Inference Yield</a>
-        <a href="/tools/prompt-compression-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">AI Agent Prompt Compression / Token Optimization Cost Calculator</a>
-        <a href="/tools/agent-reasoning-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-purple-400">🧠 AI Agent Reasoning / CoT Cost Calculator</a>
-        <a href="/tools/agent-video-generation-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🎬 AI Agent Video Generation Cost Calculator</a>
-        <a href="/tools/agent-image-generation-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🖼️ AI Agent Image Generation Cost Calculator</a>
-        <a href="/tools/agent-data-integration-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">AI Agent Data Integration / ETL Cost Calculator</a>
-        <a href="/tools/agent-api-commitment-roi" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">💳 AI Agent API Commitment / Prepaid Credit ROI Calculator</a>
-        <a href="/tools/agent-rollout-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🚀 AI Agent Rollout / Canary Cost Calculator</a>
-        <a href="/tools/agent-hallucination-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🌀 AI Agent Hallucination Cost Calculator</a>
-        <a href="/tools/agent-multi-tenant-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🏢 AI Agent Multi-Tenant SaaS Cost Calculator</a>
-        <a href="/tools/agent-bug-bounty-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-red-400">🐞 AI Agent Bug Bounty Cost Calculator</a>
-        <a href="/tools/agent-data-retention-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🗄️ AI Agent Data Retention / Audit Log Cost Calculator</a>
-        <a href="/tools/agent-backup-dr-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">☁️ AI Agent Backup &amp; Disaster Recovery Cost Calculator</a>
-        <a href="/tools/agent-hosting-region-cost-comparator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🌐 AI Agent Hosting Region / Latency Cost Comparator</a>
-        <a href="/tools/vector-db-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🗂️ AI Agent Vector Database Selector</a>
-        <a href="/tools/agent-dependency-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🔗 AI Agent Dependency / Third-Party API Cost Calculator</a>
-        <a href="/tools/agent-pii-detection-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🔒 AI Agent PII Detection & Data Classification Cost Calculator</a>
-        <a href="/tools/agent-cost-allocation-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">📊 AI Agent Cost Allocation & Chargeback Calculator</a>
-        <a href="/tools/agent-staging-sandbox-cost-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🧪 AI Agent Staging & Sandbox Cost Calculator</a>
-        <a href="/tools/agent-cac-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🎯 AI Agent Customer Acquisition Cost (CAC) Calculator</a>
-        <a href="/tools/agent-api-cost-spike-forecaster" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">📈 AI Agent API Cost Spike / Overrun Forecaster</a>
-        <a href="/tools/agent-gross-margin-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">📊 AI Agent Gross Margin & Unit Economics Calculator</a>
+          <p class="px-4 py-2 text-xs uppercase text-neutral-500">Tools</p>
+          <a href="/tools" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">All Tools</a>
+          <a href="/tools/agent-hardware-sizer" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Hardware Sizer</a>
+          <a href="/tools/vram-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">VRAM Calculator</a>
+          <a href="/tools/mini-pc-recommender" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Mini PC Recommender</a>
+          <a href="/tools/gpu-cloud-vs-buy-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Cloud vs Buy Calc</a>
+          <a href="/tools/local-llm-roi-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Local LLM ROI Calc</a>
+          <a href="/tools/tokens-per-watt-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Tokens-per-Watt Calc</a>
+          <a href="/tools/quantization-advisor" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Quantization Advisor</a>
+          <a href="/tools/inference-engine-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Inference Engine Selector</a>
+          <a href="/tools/open-source-llm-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Open Source LLM Selector</a>
+          <a href="/tools/agent-hosting-cost-comparator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Agent Hosting Comparator</a>
+          <a href="/tools/no-code-agent-builder-selector" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">No-Code Builder Selector</a>
+          <a href="/tools/gpu-power-cooling-sizer" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Power & Cooling Sizer</a>
+          <a href="/tools/hardware-resale-estimator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Hardware Resale Estimator</a>
+          <a href="/tools/hashrate-to-inference-converter" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Hashrate → Inference</a>
+          <a href="/tools/miner-pivot-calculator" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Miner Pivot Calc</a>
+          <a href="/tools/crypto-staking-vs-inference-yield" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Staking vs Inference Yield</a>
+          <a href="/tools/crypto-tax-loss-harvester" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800 text-brand-gold">🌾 Crypto Tax Loss Harvester</a>
+          <a href="/tools/ai-hardware-deal-tracker" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">AI Hardware Deal Tracker</a>
+          <a href="/compare/gpus" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Comparison</a>
+          <a href="/compare/mini-pcs" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">Mini PC Comparison</a>
+          <a href="/compare/recommend" class="block px-4 py-3 pl-8 rounded-lg hover:bg-neutral-800">GPU Recommender</a>
 
-        <div class="border-t border-neutral-800 my-4"></div>
-        <a href="/answers" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Answers</a>
-        <a href="/guides" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Guides</a>
-        <a href="/reviews" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Reviews</a>
-        <a href="/advertise" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Advertise</a>
-        <a href="/dashboard" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Dashboard</a>
+          <div class="border-t border-neutral-800 my-4"></div>
+          <a href="/guides" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Guides</a>
+          <a href="/reviews" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Reviews</a>
+          <a href="/advertise" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Advertise</a>
+          <a href="/dashboard" class="block px-4 py-3 rounded-lg hover:bg-neutral-800">Dashboard</a>
+        </div>
       </div>
-    </div>
     
     <!-- Sticky Mobile Subscribe CTA -->
     <div id="mobile-cta" class="fixed bottom-0 left-0 right-0 z-50 bg-neutral-900/95 border-t border-neutral-700 backdrop-blur-sm md:hidden translate-y-full transition-transform duration-300">
@@ -475,133 +292,32 @@ const fullCommit = versionData?.commit || 'local';
               <li><a href="/about-dare404" class="hover:text-neutral-200 transition-colors">About dare404</a></li>
             </ul>
           </div>
-          <div>
+                    <div>
             <h4 class="font-semibold mb-4">Tools</h4>
             <ul class="space-y-2 text-sm text-neutral-400">
+              <li><a href="/tools/agent-hardware-sizer" class="hover:text-neutral-200 transition-colors">Agent Hardware Sizer</a></li>
               <li><a href="/tools/vram-calculator" class="hover:text-neutral-200 transition-colors">VRAM Calculator</a></li>
               <li><a href="/tools/mini-pc-recommender" class="hover:text-neutral-200 transition-colors">Mini PC Recommender</a></li>
-              <li><a href="/tools/agent-hardware-sizer" class="hover:text-neutral-200 transition-colors">Agent Hardware Sizer</a></li>
-              <li><a href="/tools/miner-pivot-calculator" class="hover:text-neutral-200 transition-colors">Miner Pivot Calc</a></li>
               <li><a href="/tools/gpu-cloud-vs-buy-calculator" class="hover:text-neutral-200 transition-colors">GPU Cloud vs Buy Calc</a></li>
-              <li><a href="/tools/hashrate-to-inference-converter" class="hover:text-neutral-200 transition-colors">Hashrate → Inference Converter</a></li>
-              <li><a href="/tools/llm-cost-calculator" class="hover:text-neutral-200 transition-colors">LLM Cost Calc</a></li>
               <li><a href="/tools/local-llm-roi-calculator" class="hover:text-neutral-200 transition-colors">Local LLM ROI Calc</a></li>
-              <li><a href="/tools/agent-stack-builder" class="hover:text-neutral-200 transition-colors">Agent Stack Builder</a></li>
-              <li><a href="/tools/agent-memory-cost-calculator" class="hover:text-neutral-200 transition-colors">Agent Memory / RAG Cost Calc</a></li>
+              <li><a href="/tools/tokens-per-watt-calculator" class="hover:text-neutral-200 transition-colors">Tokens-per-Watt Calc</a></li>
+              <li><a href="/tools/quantization-advisor" class="hover:text-neutral-200 transition-colors">Quantization Advisor</a></li>
+              <li><a href="/tools/inference-engine-selector" class="hover:text-neutral-200 transition-colors">Inference Engine Selector</a></li>
+              <li><a href="/tools/open-source-llm-selector" class="hover:text-neutral-200 transition-colors">Open Source LLM Selector</a></li>
+              <li><a href="/tools/agent-hosting-cost-comparator" class="hover:text-neutral-200 transition-colors">Agent Hosting Comparator</a></li>
+              <li><a href="/tools/no-code-agent-builder-selector" class="hover:text-neutral-200 transition-colors">No-Code Builder Selector</a></li>
+              <li><a href="/tools/gpu-power-cooling-sizer" class="hover:text-neutral-200 transition-colors">GPU Power & Cooling Sizer</a></li>
+              <li><a href="/tools/hardware-resale-estimator" class="hover:text-neutral-200 transition-colors">Hardware Resale Estimator</a></li>
+              <li><a href="/tools/hashrate-to-inference-converter" class="hover:text-neutral-200 transition-colors">Hashrate → Inference</a></li>
+              <li><a href="/tools/miner-pivot-calculator" class="hover:text-neutral-200 transition-colors">Miner Pivot Calc</a></li>
+              <li><a href="/tools/crypto-staking-vs-inference-yield" class="hover:text-neutral-200 transition-colors">Staking vs Inference Yield</a></li>
               <li><a href="/tools/crypto-tax-loss-harvester" class="hover:text-neutral-200 transition-colors text-brand-gold">🌾 Crypto Tax Loss Harvester</a></li>
-              <li><a href="/tools/agent-benchmark-selector" class="hover:text-neutral-200 transition-colors">Agent Benchmark Selector</a></li>
-              <li><a href="/tools/agent-energy-carbon-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Energy & Carbon Cost Calc</a></li>
-              <li><a href="/tools/agent-system-prompt-generator" class="hover:text-neutral-200 transition-colors">AI Agent System Prompt Generator</a></li>
-              <li><a href="/tools/ai-agent-compliance-checker" class="hover:text-neutral-200 transition-colors">AI Agent Compliance Checker</a></li>
-              <li><a href="/tools/agent-marketplace-fee-comparator" class="hover:text-neutral-200 transition-colors">AI Agent Marketplace Fee Comparator</a></li>
-              <li><a href="/tools/ai-startup-cost-calculator" class="hover:text-neutral-200 transition-colors">Startup Cost Calc</a></li>
-              <li><a href="/tools/startup-runway-calculator" class="hover:text-neutral-200 transition-colors">Startup Runway Calculator</a></li>
-              <li><a href="/tools/affiliate-revenue-estimator" class="hover:text-neutral-200 transition-colors">Affiliate Revenue Estimator</a></li>
-              <li><a href="/tools/ai-pc-build-configurator" class="hover:text-neutral-200 transition-colors">AI PC Configurator</a></li>
-              <li><a href="/tools/rig-repurposing-guide" class="hover:text-neutral-200 transition-colors">Rig Repurposing Guide</a></li>
-              <li><a href="/tools/ai-hardware-deal-tracker" class="hover:text-neutral-200 transition-colors">AI Hardware Deals</a></li>
-              <li><a href="/tools/context-window-cheat-sheet" class="hover:text-neutral-200 transition-colors">Context Window Cheat Sheet</a></li>
-              <li><a href="/tools/newsletter-topic-finder" class="hover:text-neutral-200 transition-colors">Newsletter Topic Finder</a></li>
-              <li><a href="/tools/newsletter-prompt-generator" class="hover:text-neutral-200 transition-colors">Newsletter Prompt Generator</a></li>
-              <li><a href="/tools/newsletter-revenue-calculator" class="hover:text-neutral-200 transition-colors">Newsletter Revenue & Growth Calculator</a></li>
-              <li><a href="/tools/newsletter-sponsorship-roi" class="hover:text-neutral-200 transition-colors">Newsletter Sponsorship ROI Calculator</a></li>
-              <li><a href="/tools/agent-task-fit-selector" class="hover:text-neutral-200 transition-colors">AI Agent Task Fit Selector</a></li>
-              <li><a href="/tools/answer-engine-citation-tracker" class="hover:text-neutral-200 transition-colors">Citation Tracker</a></li>
-              <li><a href="/tools/prompt-reliability-checker" class="hover:text-neutral-200 transition-colors">Prompt Reliability Checker</a></li>
-              <li><a href="/tools/claim-verifier" class="hover:text-neutral-200 transition-colors">Claim Verifier</a></li>
-              <li><a href="/tools/crypto-tax-loss-harvester" class="hover:text-neutral-200 transition-colors">Crypto Tax Loss Harvester</a></li>
+              <li><a href="/tools/ai-hardware-deal-tracker" class="hover:text-neutral-200 transition-colors">AI Hardware Deal Tracker</a></li>
+              <li><a href="/compare/gpus" class="hover:text-neutral-200 transition-colors">GPU Comparison</a></li>
+              <li><a href="/compare/mini-pcs" class="hover:text-neutral-200 transition-colors">Mini PC Comparison</a></li>
               <li><a href="/compare/recommend" class="hover:text-neutral-200 transition-colors">GPU Recommender</a></li>
-              <li><a href="/tools/ai-account-setup-assistant" class="hover:text-neutral-200 transition-colors">Account Setup Assistant</a></li>
-              <li><a href="/tools/agent-billing-metering-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">💰 AI Agent Billing & Usage Metering Cost Calculator</a></li>
-              <li><a href="/tools/prompt-tokenizer-pricing-estimator" class="hover:text-neutral-200 transition-colors">Prompt Tokenizer & Pricing Estimator</a></li>
-              <li><a href="/tools/local-llm-hosting-revenue-estimator" class="hover:text-neutral-200 transition-colors">Local LLM Hosting Revenue Estimator</a></li>
-              <li><a href="/tools/agent-observability-cost-calculator" class="hover:text-neutral-200 transition-colors">Agent Observability Cost Calculator</a></li>
-              <li><a href="/tools/agent-latency-budget-calculator" class="hover:text-neutral-200 transition-colors">Agent Latency Budget Calculator</a></li>
-              <li><a href="/tools/agent-sla-calculator" class="hover:text-neutral-200 transition-colors">Agent SLA / Uptime Calculator</a></li>
-              <li><a href="/tools/agent-hosting-cost-comparator" class="hover:text-neutral-200 transition-colors">Agent Hosting Cost Comparator</a></li>
-              <li><a href="/tools/ai-voice-agent-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Voice Agent Cost Calculator</a></li>
-              <li><a href="/tools/voice-transcription-cost-comparator" class="hover:text-neutral-200 transition-colors">Voice-to-Text Cost Comparator</a></li>
-              <li><a href="/tools/prompt-cache-savings-calculator" class="hover:text-neutral-200 transition-colors">Prompt Cache Savings Calculator</a></li>
-              <li><a href="/tools/context-window-budgeter" class="hover:text-neutral-200 transition-colors">AI Agent Context Window Budgeter</a></li>
-              <li><a href="/tools/llm-fine-tuning-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">LLM Fine-Tuning Cost Calculator</a></li>
-              <li><a href="/tools/fine-tuning-vs-rag-cost-comparator" class="hover:text-neutral-200 transition-colors text-brand-gold">Fine-Tuning vs RAG Cost Comparator</a></li>
-              <li><a href="/tools/inference-engine-selector" class="hover:text-neutral-200 transition-colors">Local LLM Inference Engine Selector</a></li>
-              <li><a href="/tools/quantization-advisor" class="hover:text-neutral-200 transition-colors">Local LLM Quantization Advisor</a></li>
-              <li><a href="/tools/agent-deployment-scorecard" class="hover:text-neutral-200 transition-colors">Agent Deployment Readiness Scorecard</a></li>
-              <li><a href="/tools/agent-evaluation-planner" class="hover:text-neutral-200 transition-colors">AI Agent Evaluation Planner</a></li>
-              <li><a href="/tools/agent-redteam-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Red Team Cost Calculator</a></li>
-              <li><a href="/tools/agent-workflow-cost-calculator" class="hover:text-neutral-200 transition-colors">Multi-Step Workflow Cost Calculator</a></li>
-              <li><a href="/tools/agent-concurrency-cost-calculator" class="hover:text-neutral-200 transition-colors">Concurrency & Queue Cost Calculator</a></li>
-              <li><a href="/tools/agent-workforce-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent Workforce Cost Calculator</a></li>
-              <li><a href="/tools/agent-webhook-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent Webhook / Event-Driven Cost Calculator</a></li>
-              <li><a href="/tools/agent-prompt-injection-scanner" class="hover:text-neutral-200 transition-colors">Prompt Injection & Security Risk Scanner</a></li>
-              <li><a href="/tools/agent-security-audit-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Security Audit Cost Calculator</a></li>
-              <li><a href="/tools/agent-escalation-cost-calculator" class="hover:text-neutral-200 transition-colors">Human Escalation Cost Calculator</a></li>
-              <li><a href="/tools/agent-output-value-calculator" class="hover:text-neutral-200 transition-colors">Agent Output Value Calculator</a></li>
-              <li><a href="/tools/agent-newsletter-production-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent Newsletter Production Cost Calculator</a></li>
-              <li><a href="/tools/newsletter-revenue-calculator" class="hover:text-neutral-200 transition-colors">Newsletter Revenue & Growth Calculator</a></li>
-              <li><a href="/tools/agent-task-fit-selector" class="hover:text-neutral-200 transition-colors">AI Agent Task Fit Selector</a></li>
-              <li><a href="/tools/agent-deployment-scorecard" class="hover:text-neutral-200 transition-colors">Agent Deployment Readiness Scorecard</a></li>
-              <li><a href="/tools/no-code-agent-builder-selector" class="hover:text-neutral-200 transition-colors">No-Code AI Agent Builder Selector</a></li>
-              <li><a href="/tools/agent-vs-hire-calculator" class="hover:text-neutral-200 transition-colors">AI Agent vs Human Hire Calculator</a></li>
-              <li><a href="/tools/agent-build-vs-buy-calculator" class="hover:text-neutral-200 transition-colors">🏗️ AI Agent Build vs Buy Calculator</a></li>
-              <li><a href="/tools/agent-model-router-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🚦 AI Agent Model Router / Fallback Cost Calculator</a></li>
-              <li><a href="/tools/agent-outage-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Outage Cost Calculator</a></li>
-              <li><a href="/tools/agent-incident-response-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🚨 AI Agent Incident Response Cost Calculator</a></li>
-              <li><a href="/tools/agent-deflection-roi-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Support Deflection ROI Calculator</a></li>
-              <li><a href="/tools/agent-document-processing-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Document Processing Cost Calculator</a></li>
-              <li><a href="/tools/agent-data-labeling-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Data Labeling Cost Calculator</a></li>
-              <li><a href="/tools/agent-prompt-cost-forecaster" class="hover:text-neutral-200 transition-colors">AI Agent Prompt Cost Forecaster</a></li>
-              <li><a href="/tools/agent-outreach-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Outreach Campaign Cost Calculator</a></li>
-              <li><a href="/tools/agent-knowledge-graph-cost-calculator" class="hover:text-neutral-200 transition-colors">Knowledge Graph / Ontology Cost Calculator</a></li>
-              <li><a href="/tools/gpu-power-cooling-sizer" class="hover:text-neutral-200 transition-colors">GPU Power Supply & Cooling Sizer</a></li>
-              <li><a href="/tools/agent-tool-call-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Tool Call Cost Calculator</a></li>
-              <li><a href="/tools/agent-llm-router-benchmarker" class="hover:text-neutral-200 transition-colors">AI Agent LLM Router Benchmarker</a></li>
-              <li><a href="/tools/agent-multimodal-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Multi-Modal Cost Calculator</a></li>
-              <li><a href="/tools/agent-mcp-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent MCP Cost Calculator</a></li>
-              <li><a href="/tools/open-source-llm-selector" class="hover:text-neutral-200 transition-colors">Open Source LLM Selector for Agents</a></li>
-              <li><a href="/tools/hardware-resale-estimator" class="hover:text-neutral-200 transition-colors">AI Hardware Resale Value Estimator</a></li>
-              <li><a href="/tools/agent-inference-capacity-planner" class="hover:text-neutral-200 transition-colors">AI Agent Inference Capacity Planner</a></li>
-              <li><a href="/tools/agent-rate-limit-planner" class="hover:text-neutral-200 transition-colors text-brand-gold">⏱️ AI Agent Rate Limit & Quota Planner</a></li>
-              <li><a href="/tools/agent-per-user-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Per-User Cost Calculator</a></li>
-              <li><a href="/tools/agent-prompt-testing-budget" class="hover:text-neutral-200 transition-colors">AI Agent Prompt Testing Budget Calculator</a></li>
-              <li><a href="/tools/agent-browser-scraping-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Browser / Web Scraping Cost Calculator</a></li>
-              <li><a href="/tools/agent-batch-vs-realtime-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Batch vs Real-Time Cost Calculator</a></li>
-              <li><a href="/tools/agent-batch-job-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent Batch Job / Offline Workload Cost Calculator</a></li>
-              <li><a href="/tools/agent-code-review-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Code Review Cost Calculator</a></li>
-              <li><a href="/tools/agent-synthetic-data-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Synthetic Data Generator Cost Calculator</a></li>
-              <li><a href="/tools/agent-shadow-ab-test-cost-calculator" class="hover:text-neutral-200 transition-colors text-gray-400">AI Agent Shadow / A-B Test Cost Calculator</a></li>
-              <li><a href="/tools/agent-rollout-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent Rollout / Canary Cost Calculator</a></li>
-              <li><a href="/tools/agent-translation-localization-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent Translation / Localization Cost Calculator</a></li>
-              <li><a href="/tools/agent-retention-churn-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent Retention & Churn Cost Calculator</a></li>
-              <li><a href="/tools/agent-email-deliverability-cost-calculator" class="hover:text-neutral-200 transition-colors">AI Agent Email Deliverability Cost Calculator</a></li>
-              <li><a href="/tools/agent-cost-per-failure-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🚨 AI Agent Cost Per Failure / Resolution Cost Calculator</a></li>
-              <li><a href="/tools/agent-ecommerce-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent E-commerce / Shopping Cost Calculator</a></li>
-              <li><a href="/tools/crypto-staking-vs-inference-yield" class="hover:text-neutral-200 transition-colors">Crypto Staking vs AI Inference Yield</a></li>
-              <li><a href="/tools/prompt-compression-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent Prompt Compression / Token Optimization Cost Calculator</a></li>
-              <li><a href="/tools/agent-reasoning-cost-calculator" class="hover:text-neutral-200 transition-colors">🧠 AI Agent Reasoning / CoT Cost Calculator</a></li>
-              <li><a href="/tools/agent-video-generation-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🎬 AI Agent Video Generation Cost Calculator</a></li>
-              <li><a href="/tools/agent-image-generation-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🖼️ AI Agent Image Generation Cost Calculator</a></li>
-              <li><a href="/tools/agent-data-integration-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">AI Agent Data Integration / ETL Cost Calculator</a></li>
-              <li><a href="/tools/agent-api-commitment-roi" class="hover:text-neutral-200 transition-colors text-brand-gold">💳 AI Agent API Commitment / Prepaid Credit ROI Calculator</a></li>
-              <li><a href="/tools/agent-rollout-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🚀 AI Agent Rollout / Canary Cost Calculator</a></li>
-              <li><a href="/tools/agent-hallucination-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🌀 AI Agent Hallucination Cost Calculator</a></li>
-              <li><a href="/tools/agent-multi-tenant-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🏢 AI Agent Multi-Tenant SaaS Cost Calculator</a></li>
-              <li><a href="/tools/agent-bug-bounty-cost-calculator" class="hover:text-neutral-200 transition-colors text-red-400">🐞 AI Agent Bug Bounty Cost Calculator</a></li>
-              <li><a href="/tools/agent-data-retention-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🗄️ AI Agent Data Retention / Audit Log Cost Calculator</a></li>
-              <li><a href="/tools/agent-backup-dr-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">☁️ AI Agent Backup &amp; Disaster Recovery Cost Calculator</a></li>
-              <li><a href="/tools/agent-hosting-region-cost-comparator" class="hover:text-neutral-200 transition-colors text-brand-gold">🌐 AI Agent Hosting Region / Latency Cost Comparator</a></li>
-              <li><a href="/tools/vector-db-selector" class="hover:text-neutral-200 transition-colors text-brand-gold">🗂️ AI Agent Vector Database Selector</a></li>
-              <li><a href="/tools/agent-dependency-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🔗 AI Agent Dependency / Third-Party API Cost Calculator</a></li>
-              <li><a href="/tools/agent-pii-detection-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🔒 AI Agent PII Detection & Data Classification Cost Calculator</a></li>
-              <li><a href="/tools/agent-cost-allocation-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">📊 AI Agent Cost Allocation & Chargeback Calculator</a></li>
-              <li><a href="/tools/agent-staging-sandbox-cost-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🧪 AI Agent Staging & Sandbox Cost Calculator</a></li>
-              <li><a href="/tools/agent-cac-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">🎯 AI Agent Customer Acquisition Cost (CAC) Calculator</a></li>
-              <li><a href="/tools/agent-api-cost-spike-forecaster" class="hover:text-neutral-200 transition-colors text-brand-gold">📈 AI Agent API Cost Spike / Overrun Forecaster</a></li>
-              <li><a href="/tools/agent-gross-margin-calculator" class="hover:text-neutral-200 transition-colors text-brand-gold">📊 AI Agent Gross Margin & Unit Economics Calculator</a></li>
               <li><a href="/tools" class="hover:text-neutral-200 transition-colors">All Tools</a></li>
               <li><a href="/llms.txt" class="hover:text-neutral-200 transition-colors">Tools for Agents (llms.txt)</a></li>
-              <li><a href="/api-access" class="hover:text-neutral-200 transition-colors">Data API Access</a></li>
             </ul>
           </div>
           <div>
@@ -610,7 +326,6 @@ const fullCommit = versionData?.commit || 'local';
               <li><a href="/answers" class="hover:text-neutral-200 transition-colors">Answers</a></li>
               <li><a href="/guides" class="hover:text-neutral-200 transition-colors">Guides</a></li>
               <li><a href="/reviews" class="hover:text-neutral-200 transition-colors">Reviews</a></li>
-              <li><a href="/podcast" class="hover:text-neutral-200 transition-colors">Podcast</a></li>
             </ul>
           </div>
           <div>

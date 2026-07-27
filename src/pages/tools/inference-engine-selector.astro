@@ -101,7 +101,14 @@ const description = "Choose the right local LLM inference engine for your model,
 
       <div id="results" class="space-y-4"></div>
     </div>
-  </section>
+  
+      <div class="mt-10 p-6 rounded-xl bg-gradient-to-br from-brand-gold/10 to-brand-amber/10 border border-brand-gold/20 text-center">
+        <h3 class="text-lg font-semibold mb-2">Picked an engine? Now pick the hardware.</h3>
+        <p class="text-neutral-400 mb-4 max-w-2xl mx-auto">Ollama, llama.cpp, and vLLM all perform differently by GPU. Compare cards and find a mini PC or desktop GPU.</p>
+        <a href="/compare/gpus/" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-brand-gold hover:bg-brand-amber text-[#0d0d1a] font-bold transition mr-3">GPU Comparison →</a>
+        <a href="/tools/mini-pc-recommender/" class="inline-flex items-center px-5 py-2.5 rounded-lg border border-neutral-700 hover:bg-neutral-800 transition">Mini PC Recommender →</a>
+      </div>
+    </section>
 
   <script define:vars={{ categories, platforms, engines, speedHints }}>
     const useCaseEl = document.getElementById('useCase');
@@ -254,8 +261,8 @@ const description = "Choose the right local LLM inference engine for your model,
 
     <div class="mt-10 flex flex-wrap gap-3">
       <a href="/tools/vram-calculator/" class="btn-primary text-sm">Check VRAM needs →</a>
-      <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compare API vs local cost →</a>
-      <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Build your agent stack →</a>
+      <a href="/tools/vram-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compare API vs local cost →</a>
+      <a href="/tools/no-code-agent-builder-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Build your agent stack →</a>
     </div>
   </section>
 </Layout>

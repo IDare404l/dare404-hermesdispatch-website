@@ -146,6 +146,16 @@ const quantizations = [
       <h3>Can I run a 70B model on 24 GB VRAM?</h3>
       <p>No for the full model. You would need aggressive offloading to system RAM or CPU, which kills tokens/sec. Use a smaller model (8B-13B) or a GPU with 40 GB+ VRAM for usable 70B performance.</p>
     </section>
+  
+    <div class="mt-12 p-6 rounded-xl bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border border-cyan-500/20">
+      <h3 class="text-lg font-semibold mb-2">Need a GPU that fits this VRAM?</h3>
+      <p class="text-neutral-400 mb-4">Compare specs and shop current prices for RTX 4090, RX 7900 XTX, and mini PCs.</p>
+      <div class="flex flex-wrap gap-3">
+        <a href="/compare/gpus/" class="px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-[#0d0d1a] font-semibold transition">Compare GPUs</a>
+        <a href="/tools/mini-pc-recommender/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 transition">Mini PC Recommender</a>
+      </div>
+    </div>
+
   </article>
 
   <script>

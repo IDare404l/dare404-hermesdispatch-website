@@ -3,75 +3,48 @@ import type { APIContext } from 'astro';
 export async function GET(context: APIContext) {
   const site = context.site?.toString() || 'https://hermesdispatch.dev';
 
-  // Static pages
-  const staticPages = [
+  const pages = [
     { path: '/', changefreq: 'daily', priority: 1.0 },
+    { path: '/newsletter/', changefreq: 'daily', priority: 0.9 },
     { path: '/directory/', changefreq: 'daily', priority: 0.9 },
-    { path: '/hardware/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/hardware/compare/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/crypto/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/crypto/roi/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/invest/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/invest/compare/', changefreq: 'weekly', priority: 0.8 },
     { path: '/answers/', changefreq: 'daily', priority: 0.9 },
     { path: '/guides/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/guides/build-local-llm-rig/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/guides/start-crypto-mining/', changefreq: 'weekly', priority: 0.8 },
     { path: '/reviews/', changefreq: 'weekly', priority: 0.7 },
-    { path: '/podcast/', changefreq: 'daily', priority: 0.8 },
-    { path: '/podcast/interview-with-igor/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/podcast/guest/', changefreq: 'monthly', priority: 0.5 },
-    { path: '/go/', changefreq: 'always', priority: 0.1 },
     { path: '/advertise/', changefreq: 'monthly', priority: 0.7 },
-    { path: '/about/', changefreq: 'monthly', priority: 0.7 },
-    { path: '/methodology/', changefreq: 'monthly', priority: 0.7 },
-    { path: '/newsletter/', changefreq: 'daily', priority: 0.9 },
     { path: '/dashboard/', changefreq: 'daily', priority: 0.8 },
     { path: '/subscribe/', changefreq: 'monthly', priority: 0.6 },
+    { path: '/about-dare404/', changefreq: 'monthly', priority: 0.6 },
+    { path: '/about-igor/', changefreq: 'monthly', priority: 0.6 },
     { path: '/privacy/', changefreq: 'monthly', priority: 0.5 },
-    { path: '/team/', changefreq: 'monthly', priority: 0.5 },
-    { path: '/skills/', changefreq: 'monthly', priority: 0.5 },
-    { path: '/timeline/', changefreq: 'monthly', priority: 0.5 },
-    { path: '/agents/', changefreq: 'monthly', priority: 0.5 },
     { path: '/tools/', changefreq: 'daily', priority: 0.9 },
     { path: '/llms.txt', changefreq: 'daily', priority: 0.7 },
-    { path: '/tools/vram-calculator/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/mini-pc-recommender/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/miner-pivot-calculator/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/llm-cost-calculator/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/agent-stack-builder/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/ai-startup-cost-calculator/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/local-llm-roi-calculator/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/answer-engine-citation-tracker/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/ai-account-setup-assistant/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/ai-pc-build-configurator/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/rig-repurposing-guide/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/ai-hardware-deal-tracker/', changefreq: 'daily', priority: 0.8 },
-    { path: '/tools/newsletter-topic-finder/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/tools/agent-api-pricing-comparator/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/api-access/', changefreq: 'monthly', priority: 0.7 },
-    { path: '/advertise/', changefreq: 'monthly', priority: 0.7 },
     { path: '/compare/gpus/', changefreq: 'weekly', priority: 0.8 },
     { path: '/compare/mini-pcs/', changefreq: 'weekly', priority: 0.8 },
     { path: '/compare/recommend/', changefreq: 'weekly', priority: 0.8 },
+    // 18 remaining tools
+    { path: '/tools/agent-hardware-sizer/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/agent-hosting-cost-comparator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/ai-hardware-deal-tracker/', changefreq: 'daily', priority: 0.8 },
+    { path: '/tools/crypto-staking-vs-inference-yield/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/crypto-tax-loss-harvester/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/gpu-cloud-vs-buy-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/gpu-power-cooling-sizer/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/hardware-resale-estimator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/hashrate-to-inference-converter/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/inference-engine-selector/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/local-llm-roi-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/miner-pivot-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/mini-pc-recommender/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/no-code-agent-builder-selector/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/open-source-llm-selector/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/quantization-advisor/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/tokens-per-watt-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/vram-calculator/', changefreq: 'weekly', priority: 0.8 },
   ];
-
-  // Directory entry anchors
-  const dirFiles = Object.keys(import.meta.glob('../content/directory/*.md', { eager: true }));
-  const entryUrls = dirFiles.map((path: string) => {
-    const slug = path.replace(/^.*\//, '').replace(/\.md$/, '');
-    return {
-      path: `/directory/#${slug}`,
-      changefreq: 'weekly',
-      priority: 0.6
-    };
-  });
-
-  const allUrls = [...staticPages, ...entryUrls];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${allUrls.map((url: any) => `  <url>
+${pages.map((url: any) => `  <url>
     <loc>${site}${url.path}</loc>
     <changefreq>${url.changefreq}</changefreq>
     <priority>${url.priority.toFixed(1)}</priority>
