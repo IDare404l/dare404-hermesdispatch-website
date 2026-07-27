@@ -1,0 +1,165 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+
+const title = "Local LLM Tokens-per-Watt Efficiency Calculator | Hermes Dispatch";
+const description = "Compare GPU and mini-PC efficiency for local LLM inference. Calculate tokens per kWh, power cost per 1M tokens, and break-even against cloud APIs.";
+
+const hardware = [
+  { name: "RTX 4090", tdp: 450, tok_s_8b: 140, tok_s_70b_q4: 28, price: 1600, note: "Fastest consumer local inference" },
+  { name: "RTX 3090", tdp: 350, tok_s_8b: 110, tok_s_70b_q4: 22, price: 900, note: "High VRAM budget option" },
+  { name: "RTX 4080 Super", tdp: 320, tok_s_8b: 120, tok_s_70b_q4: 24, price: 1000, note: "Efficient high-end" },
+  { name: "RTX 4070 Ti Super", tdp: 285, tok_s_8b: 95, tok_s_70b_q4: 19, price: 800, note: "Strong price/performance" },
+  { name: "Mac Mini M4 Pro 24GB", tdp: 65, tok_s_8b: 75, tok_s_70b_q4: 14, price: 1600, note: "Quiet, low power, unified memory" },
+  { name: "Mac Studio M2 Ultra 192GB", tdp: 185, tok_s_8b: 130, tok_s_70b_q4: 30, price: 4500, note: "Workstation-grade unified memory" },
+  { name: "RX 7900 XTX", tdp: 355, tok_s_8b: 100, tok_s_70b_q4: 18, price: 900, note: "ROCm / Linux native" },
+  { name: "Cloud API (GPT-4o)", tdp: 0, tok_s_8b: 0, tok_s_70b_q4: 0, price: 0, note: "$10.00 / 1M output tokens baseline" },
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is tokens-per-watt efficiency for LLMs?", "acceptedAnswer": { "@type": "Answer", "text": "Tokens-per-watt measures how many tokens a GPU generates per kilowatt-hour of electricity. Higher is more efficient. It combines inference speed (tokens/sec) and power draw (TDP/watts)." } },
+    { "@type": "Question", "name": "Is local LLM inference cheaper than cloud APIs?", "acceptedAnswer": { "@type": "Answer", "text": "For high volume and smaller models, local hardware can beat API pricing when you factor in hardware depreciation and electricity. This calculator shows the exact break-even per million tokens." } }
+  ]
+};
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Local LLM Tokens-per-Watt Efficiency Calculator" description={description} url="https://hermesdispatch.dev/tools/tokens-per-watt-calculator/" />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚡</div>
+        <h1 class="display-heading mb-4">Local LLM Tokens-per-Watt Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Find the most efficient GPU or mini PC for local LLM inference. Compare electricity cost per 1M tokens and break-even against cloud APIs.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Electricity cost ($/kWh)</label>
+          <input id="electricityRate" type="number" step="0.01" value="0.13" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Model size</label>
+          <select id="modelSize" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+            <option value="8b">8B (fast / assistant)</option>
+            <option value="70b_q4" selected>70B Q4 (reasoning)</option>
+          </select>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Tokens per month (M)</label>
+          <input id="monthlyTokens" type="number" step="0.1" value="10" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+          <label class="block text-sm text-neutral-400 mb-1">Amortize hardware over (years)</label>
+          <input id="amortizeYears" type="number" step="0.5" value="3" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 mb-8 overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-neutral-500 border-b border-neutral-800">
+              <th class="pb-3">Hardware</th>
+              <th class="pb-3">TDP (W)</th>
+              <th class="pb-3">tok/s</th>
+              <th class="pb-3">Tokens / kWh</th>
+              <th class="pb-3">Power cost / 1M tokens</th>
+              <th class="pb-3">Total cost / 1M tokens</th>
+              <th class="pb-3">Note</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody">
+            <!-- populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 mb-8">
+        <h2 class="text-xl font-bold mb-3">How to read this</h2>
+        <p class="text-neutral-400 mb-2">
+          <strong>Tokens / kWh</strong> tells you how much inference you get from one kilowatt-hour of electricity. Higher is better for off-grid, solar, or high-cost energy regions.
+        </p>
+        <p class="text-neutral-400 mb-2">
+          <strong>Total cost / 1M tokens</strong> includes hardware amortization + electricity. Compare it to cloud API output-token pricing (e.g., GPT-4o at $10/1M tokens).
+        </p>
+        <p class="text-neutral-400">
+          This tool assumes continuous inference at 80% load. Real workloads vary by quantization, batching, and memory bandwidth.
+        </p>
+      </div>
+
+      <AgentCodeBlock
+        toolName="Local LLM Tokens-per-Watt Calculator"
+        toolPath="/tools/tokens-per-watt-calculator/"
+        description="Compare GPU and mini-PC efficiency for local LLM inference"
+        scriptPath="/hermes-tools/local_llm_tokens_per_watt.py"
+      />
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ hardware }}>
+    const rateInput = document.getElementById('electricityRate');
+    const modelInput = document.getElementById('modelSize');
+    const tokenInput = document.getElementById('monthlyTokens');
+    const yearInput = document.getElementById('amortizeYears');
+    const tbody = document.getElementById('resultsBody');
+
+    function fmt(n) {
+      if (n === 0) return '-';
+      if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+      return n.toFixed(1);
+    }
+
+    function fmt$(n) {
+      if (n <= 0) return '-';
+      return '$' + n.toFixed(3);
+    }
+
+    function render() {
+      const rate = parseFloat(rateInput.value) || 0.13;
+      const model = modelInput.value;
+      const monthlyM = parseFloat(tokenInput.value) || 10;
+      const years = parseFloat(yearInput.value) || 3;
+      const months = years * 12;
+
+      const rows = hardware.map(h => {
+        const tok_s = model === '8b' ? h.tok_s_8b : h.tok_s_70b_q4;
+        if (h.tdp === 0) {
+          return { ...h, tok_s, tokensPerKwh: 0, powerCostPerM: 0, totalPerM: 10.0 };
+        }
+        const secondsPerHour = 3600;
+        const tokensPerKwh = tok_s * secondsPerHour / (h.tdp / 1000);
+        const kwhPerM = 1000000 / tokensPerKwh;
+        const powerCostPerM = kwhPerM * rate;
+        const hardwareCostPerM = h.price / (monthlyM * months);
+        const totalPerM = powerCostPerM + hardwareCostPerM;
+        return { ...h, tok_s, tokensPerKwh, powerCostPerM, totalPerM };
+      }).sort((a, b) => a.totalPerM - b.totalPerM);
+
+      tbody.innerHTML = rows.map(r => `
+        <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30">
+          <td class="py-3 font-medium text-white">${r.name}</td>
+          <td class="py-3 text-neutral-400">${r.tdp}</td>
+          <td class="py-3 text-neutral-400">${r.tok_s}</td>
+          <td class="py-3 text-emerald-400">${fmt(r.tokensPerKwh)}</td>
+          <td class="py-3 text-neutral-300">${fmt$(r.powerCostPerM)}</td>
+          <td class="py-3 font-bold ${r.totalPerM < 5 ? 'text-emerald-400' : 'text-brand-gold'}">${fmt$(r.totalPerM)}</td>
+          <td class="py-3 text-neutral-500 text-xs max-w-xs">${r.note}</td>
+        </tr>
+      `).join('');
+    }
+
+    [rateInput, modelInput, tokenInput, yearInput].forEach(el => el.addEventListener('input', render));
+    render();
+  </script>
+</Layout>
