@@ -6,7 +6,7 @@ Keep only tools directly relevant to the three newsletter topics:
 - **The Mine** — crypto/mining, inference-yield, hardware pivoting
 - **The Ledger** — cost/pricing intelligence for AI builders
 
-## Removed: 89 tools → kept 32
+## Removed: 103 tools → kept 18
 
 ### Removed categories
 1. Generic SaaS/business finance (CAC, gross margin, runway, build-vs-buy, vs-hire)
@@ -17,14 +17,20 @@ Keep only tools directly relevant to the three newsletter topics:
 6. Overlapping agent-cost micro-calculators
 7. Security scanners, audit tools, RAG/vector DB dev tools (not newsletter topics)
 8. Form pages (request)
+9. Reference/cheat-sheet pages with no affiliate or transaction path
+10. API pricing / pure cost calculators with no clear affiliate CTA
 
-### Kept 32 tools
-- Local LLM / GPU / mini-PC: local-llm-roi-calculator, gpu-cloud-vs-buy-calculator, mini-pc-recommender, gpu-power-cooling-sizer, vram-calculator, tokens-per-watt-calculator, hashrate-to-inference-converter, hardware-resale-estimator, ai-hardware-deal-tracker
-- Model selection / sizing: open-source-llm-selector, inference-engine-selector, quantization-advisor, context-window-budgeter, context-window-cheat-sheet
-- Cost / pricing: llm-cost-calculator, llm-fine-tuning-cost-calculator, prompt-tokenizer-pricing-estimator, prompt-cache-savings-calculator, agent-api-pricing-comparator
-- Agent infrastructure: agent-hardware-sizer, agent-hosting-cost-comparator, agent-concurrency-cost-calculator, agent-latency-budget-calculator, agent-llm-router-benchmarker, agent-observability-cost-calculator, agent-stack-builder, agent-system-prompt-generator, agent-toolkit
-- Crypto / mining: crypto-staking-vs-inference-yield, crypto-tax-loss-harvester, miner-pivot-calculator
-- Agent builders: no-code-agent-builder-selector
+### Kept 18 tools (newsletter topics + affiliate path)
+- **The Rig (AI hardware / local LLM)** — local-llm-roi-calculator, gpu-cloud-vs-buy-calculator, mini-pc-recommender, gpu-power-cooling-sizer, vram-calculator, tokens-per-watt-calculator, hashrate-to-inference-converter, hardware-resale-estimator, ai-hardware-deal-tracker, agent-hardware-sizer
+- **The Mine (crypto / mining)** — crypto-staking-vs-inference-yield, crypto-tax-loss-harvester, miner-pivot-calculator
+- **The Ledger (AI builder cost decisions)** — agent-hosting-cost-comparator, inference-engine-selector, open-source-llm-selector, quantization-advisor, no-code-agent-builder-selector
+
+### Affiliate fit
+Each remaining tool can naturally link to:
+- GPUs, mini-PCs, and AI hardware (Amazon Associates)
+- Crypto hardware wallets / exchanges (Ledger, exchange referral programs)
+- Cloud GPU / hosting providers (referral/affiliate programs)
+- No-code agent platforms and open-source LLM services
 
 ## Next step
-After 30 days of Cloudflare KV usage data, review bottom-used tools and either improve or archive them.
+After 30 days of Cloudflare KV usage data, review bottom-used tools and either improve CTAs or archive them.
