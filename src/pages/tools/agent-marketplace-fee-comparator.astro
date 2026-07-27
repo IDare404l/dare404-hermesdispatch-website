@@ -1,281 +1,261 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import data from '../../data/agent_marketplace_fees.json';
-import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_marketplace_fee_comparator.json';
 
-const title = "AI Agent Marketplace Fee Comparator — Platform Take Rates & Revenue";
-const description = "Compare fees, revenue share, and take rates across AI agent marketplaces: OpenAI GPT Store, Anthropic Claude Marketplace, Poe, Salesforce Agentforce, Pickaxe, Relevance AI, GitHub, AWS, and Stripe.";
-const marketplaces = data.marketplaces;
-const defaults = data.defaults;
+const title = "AI Agent Marketplace Fee Comparator | Hermes Dispatch";
+const description = "Compare take rates, revenue share, payment fees, and net payout across AI agent marketplaces. Estimate net revenue for your subscription price and subscriber count.";
+const { defaults, scenarios, marketplaces, categories, faq, note, last_updated } = data;
+
+const marketplaceList = marketplaces.map(m => ({
+  ...m,
+  categoryName: categories[m.category].name,
+  categoryIcon: categories[m.category].icon
+}));
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Marketplace Fee Comparator" description={description} url="https://hermesdispatch.dev/tools/agent-marketplace-fee-comparator/" applicationCategory="FinanceApplication" operatingSystem="Any" />
+
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Which AI agent marketplace has the lowest fees?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Anthropic's Claude Marketplace currently takes 0% commission, letting partners keep 100% of revenue. GitHub Marketplace paid extensions and AWS Marketplace SaaS listings are also low, typically 3-5%." }
-      },
-      {
-        "@type": "Question",
-        "name": "How much does OpenAI's GPT Store pay creators?",
-        "acceptedAnswer": { "@type": "Answer", "text": "OpenAI shares a portion of ChatGPT Plus and Pro subscription revenue with GPT Store creators based on usage, but the exact payout formula is not public." }
-      },
-      {
-        "@type": "Question",
-        "name": "What is a typical platform take rate for AI agent marketplaces?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Marketplace take rates range from 0% on the Claude Marketplace and 3-5% on developer/cloud stores to roughly 15% on Salesforce AppExchange and 20-30%+ on no-code agent platforms." }
-      },
-      {
-        "@type": "Question",
-        "name": "Should I build my own billing or use a marketplace?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Marketplaces offer distribution but take a cut and control customer relationships. Direct billing keeps 100% of revenue but requires your own marketing, support, and compliance infrastructure." }
-      }
-    ]
+    "mainEntity": faq.map(f => ({"@type": "Question", "name": f.question, "acceptedAnswer": {"@type": "Answer", "text": f.answer}}))
   })} />
 
-  <section class="relative pt-24 pb-12 overflow-hidden">
-    <div class="absolute inset-0 animated-gradient opacity-50"></div>
-    <div class="grid-overlay"></div>
-    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🏪</div>
-        <h1 class="display-heading mb-4">AI Agent Marketplace Fee Comparator</h1>
-        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
-          Compare platform take rates, revenue share models, and audience fit across the main AI agent marketplaces.
-        </p>
-      </div>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🏪</div>
+      <h1 class="display-heading mb-4">AI Agent Marketplace Fee Comparator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Compare take rates, payment fees, and net payout across AI agent marketplaces. Model your subscription revenue after platform cuts and support costs.</p>
+    </div>
 
-      <!-- Comparison table -->
-      <div class="overflow-x-auto mb-8">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-left text-neutral-500 border-b border-neutral-800">
-              <th class="pb-3">Marketplace</th>
-              <th class="pb-3">Model</th>
-              <th class="pb-3">Take / Fee</th>
-              <th class="pb-3">Audience</th>
-              <th class="pb-3">Best for</th>
-            </tr>
-          </thead>
-          <tbody>
-            {marketplaces.map(m => (
-              <tr class="border-b border-neutral-800/50 hover:bg-neutral-800/30">
-                <td class="py-4 font-medium">
-                  <a href={m.source_url} target="_blank" rel="noopener" class="text-brand-gold hover:underline">{m.name}</a>
-                </td>
-                <td class="py-4 text-neutral-300">{m.model}</td>
-                <td class="py-4 font-semibold">{m.typical_take_pct}</td>
-                <td class="py-4 text-neutral-400">{m.audience}</td>
-                <td class="py-4 text-neutral-400 max-w-xs">{m.best_for}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Detail cards -->
-      <div class="grid md:grid-cols-2 gap-6 mb-10">
-        {marketplaces.map(m => (
-          <div class="glass-card rounded-2xl p-5 border border-brand-gold/10 hover:border-brand-gold/30 transition">
-            <div class="flex items-start justify-between mb-3">
-              <h2 class="text-lg font-bold">{m.name}</h2>
-              <span class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold text-xs font-semibold">{m.typical_take_pct}</span>
-            </div>
-            <p class="text-sm text-neutral-400 mb-3">{m.revenue_share_note}</p>
-            <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
-              <div>
-                <p class="text-xs text-neutral-500">Pros</p>
-                <ul class="list-disc list-inside text-neutral-300">
-                  {m.pros.map(p => <li>{p}</li>)}
-                </ul>
-              </div>
-              <div>
-                <p class="text-xs text-neutral-500">Cons</p>
-                <ul class="list-disc list-inside text-neutral-400">
-                  {m.cons.map(c => <li>{c}</li>)}
-                </ul>
-              </div>
-            </div>
-            <p class="text-xs text-neutral-500">Best for: <span class="text-neutral-300">{m.best_for}</span></p>
-          </div>
+    <!-- Scenarios -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario preset</h2>
+      <div class="flex flex-wrap gap-3" id="scenario-buttons">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)} data-index={i}>
+            <span class="mr-1">{s.icon}</span>{s.name}
+          </button>
         ))}
       </div>
+    </section>
 
-      <!-- Revenue estimator -->
-      <div class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
-        <h2 class="text-2xl font-bold mb-4 text-brand-gold">Marketplace revenue estimator</h2>
-        <p class="text-sm text-neutral-400 mb-6">Estimate monthly net revenue after platform take rate and variable costs.</p>
-
-        <div class="grid md:grid-cols-2 gap-6 mb-6">
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm text-neutral-400 mb-1">Monthly active users</label>
-              <input id="mau" type="number" min="0" step="100" value={defaults.monthly_active_users} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-            </div>
-            <div>
-              <label class="block text-sm text-neutral-400 mb-1">Conversion to paid (%)</label>
-              <input id="conversion" type="number" min="0" max="100" step="0.1" value={defaults.conversion_to_paid_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-            </div>
-            <div>
-              <label class="block text-sm text-neutral-400 mb-1">Price per paid user ($/mo)</label>
-              <input id="price" type="number" min="0" step="1" value={defaults.price_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-            </div>
-            <div>
-              <label class="block text-sm text-neutral-400 mb-1">Platform take rate (%)</label>
-              <input id="takeRate" type="number" min="0" max="100" step="0.1" value={defaults.take_rate_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-            </div>
-            <div>
-              <label class="block text-sm text-neutral-400 mb-1">Variable cost (% of revenue)</label>
-              <input id="variableCost" type="number" min="0" max="100" step="0.1" value={defaults.variable_cost_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
-              <p class="text-xs text-neutral-500 mt-1">LLM tokens, hosting, support.</p>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
-                <p class="text-xs text-neutral-500 uppercase mb-1">Paid users</p>
-                <p id="paidUsers" class="text-2xl font-bold">—</p>
-              </div>
-              <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
-                <p class="text-xs text-neutral-500 uppercase mb-1">Gross revenue</p>
-                <p id="grossRevenue" class="text-2xl font-bold text-brand-gold">—</p>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="glass-card rounded-2xl p-4 text-center border border-red-500/20">
-                <p class="text-xs text-neutral-500 uppercase mb-1">Platform fee</p>
-                <p id="platformFee" class="text-2xl font-bold text-red-400">—</p>
-              </div>
-              <div class="glass-card rounded-2xl p-4 text-center border border-red-500/20">
-                <p class="text-xs text-neutral-500 uppercase mb-1">Variable costs</p>
-                <p id="variableCosts" class="text-2xl font-bold text-red-400">—</p>
-              </div>
-            </div>
-            <div class="glass-card rounded-2xl p-5 text-center border border-emerald-500/20">
-              <p class="text-xs text-neutral-500 uppercase mb-1">Net monthly revenue</p>
-              <p id="netRevenue" class="text-3xl font-bold text-emerald-400">—</p>
-            </div>
-            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
-              <p class="text-xs text-neutral-500 uppercase mb-1">Net per paid user</p>
-              <p id="netPerUser" class="text-2xl font-bold">—</p>
-            </div>
-          </div>
+    <section class="grid lg:grid-cols-3 gap-6 mb-10">
+      <!-- Inputs -->
+      <div class="lg:col-span-1 glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold flex items-center gap-2"><span>💰</span> Your product</h2>
+        <div class="space-y-4">
+          <label class="block"><span class="text-neutral-400 text-sm">Monthly price per subscriber ($)</span><input id="price" type="number" min="0" step="1" value={defaults.monthly_price} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Monthly subscribers</span><input id="subscribers" type="number" min="0" step="1" value={defaults.monthly_subscribers} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Support hours per subscriber / month</span><input id="supportHours" type="number" min="0" step="0.01" value={defaults.avg_support_hours_per_subscriber} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Support cost per hour ($)</span><input id="supportCost" type="number" min="0" step="1" value={defaults.support_hourly_cost} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Ad spend (% of gross revenue)</span><input id="adSpend" type="number" min="0" max="100" step="1" value={defaults.ad_spend_pct_of_revenue} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
         </div>
 
-        <!-- Preset buttons -->
-        <div class="flex flex-wrap gap-2">
-          {marketplaces.map(m => (
-            <button type="button" class="marketplace-preset px-3 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm" data-take={m.typical_take_pct}>
-              {m.name}
-            </button>
-          ))}
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button id="calcBtn" type="button" class="btn-primary">Compare fees</button>
+          <button id="resetBtn" type="button" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Reset</button>
         </div>
       </div>
 
-      <div class="grid md:grid-cols-2 gap-6">
-        <div class="glass-card rounded-2xl p-6">
-          <h2 class="text-xl font-bold mb-4 text-brand-gold">Pricing models that work</h2>
-          <ul class="space-y-3 text-sm text-neutral-300">
-            {data.pricing_models.map(pm => (
-              <li><strong class="text-white">{pm.name}</strong> — {pm.note}</li>
+      <!-- Outputs -->
+      <div class="lg:col-span-2 space-y-6">
+        <section id="summary" class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Gross monthly revenue</p><p id="grossRevenue" class="text-2xl font-bold text-white">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Best net payout</p><p id="bestNet" class="text-2xl font-bold text-emerald-400">—</p><p id="bestMarketplace" class="text-xs text-neutral-400 mt-1">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Worst net payout</p><p id="worstNet" class="text-2xl font-bold text-red-400">—</p><p id="worstMarketplace" class="text-xs text-neutral-400 mt-1">—</p></div>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Net payout comparison</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-neutral-500 border-b border-neutral-800">
+                  <th class="py-2 pr-2">Marketplace</th>
+                  <th class="py-2 pr-2 text-right">Take rate</th>
+                  <th class="py-2 pr-2 text-right">Processing</th>
+                  <th class="py-2 pr-2 text-right">After fees</th>
+                  <th class="py-2 pr-2 text-right">Support cost</th>
+                  <th class="py-2 pr-2 text-right">Ads</th>
+                  <th class="py-2 text-right">Net payout</th>
+                </tr>
+              </thead>
+              <tbody id="comparisonTable" class="divide-y divide-neutral-800"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Marketplace details</h2>
+          <div id="cardsGrid" class="grid md:grid-cols-2 gap-6">
+            {marketplaceList.map(m => (
+              <article class="marketplace-card glass-card rounded-2xl p-6 border border-neutral-800 hover:border-brand-gold/40 transition-colors" data-slug={m.slug}>
+                <div class="flex items-start justify-between mb-3">
+                  <div>
+                    <span class="text-xs font-medium text-brand-gold uppercase tracking-wide">{m.categoryIcon} {m.categoryName}</span>
+                    <h3 class="text-xl font-bold mt-1 flex items-center gap-2"><span>{m.icon}</span> {m.name}</h3>
+                  </div>
+                </div>
+                <p class="text-neutral-300 text-sm mb-3">{m.audience}</p>
+                <div class="flex flex-wrap gap-2 text-xs mb-3">
+                  <span class="bg-neutral-900 text-neutral-300 px-2 py-1 rounded">Take rate: {m.take_rate_pct}%</span>
+                  <span class="bg-neutral-900 text-neutral-300 px-2 py-1 rounded">Processing: {m.payment_processing_pct}%</span>
+                  <span class="bg-neutral-900 text-neutral-300 px-2 py-1 rounded">Listing: {m.listing_fee}</span>
+                </div>
+                <p class="text-neutral-400 text-sm mb-2"><span class="text-brand-gold">Model:</span> {m.revenue_model}</p>
+                <p class="text-neutral-400 text-sm mb-2"><span class="text-brand-gold">Typical price:</span> {m.typical_price_range}</p>
+                <p class="text-neutral-400 text-sm mb-3"><span class="text-brand-gold">Payout:</span> {m.payout_schedule}</p>
+                <a href={m.url} target="_blank" rel="noopener" class="text-cyan-400 text-sm underline break-all">{m.url.replace(/^https?:\/\//, '')}</a>
+              </article>
             ))}
-          </ul>
-        </div>
-        <div class="glass-card rounded-2xl p-6">
-          <h2 class="text-xl font-bold mb-4 text-brand-gold">How to choose a marketplace</h2>
-          <ul class="space-y-2 text-sm text-neutral-300">
-            <li>• Prioritize <strong class="text-white">distribution fit</strong> over take rate. 70% of a big audience can beat 100% of none.</li>
-            <li>• <strong class="text-white">Enterprise marketplaces</strong> (Claude, Salesforce, AWS) have longer sales cycles but higher contract values.</li>
-            <li>• <strong class="text-white">No-code marketplaces</strong> (Pickaxe, Relevance AI) speed up launch but cap differentiation.</li>
-            <li>• <strong class="text-white">Developer/cloud stores</strong> (GitHub, AWS, Stripe) are best for agents with technical integrations.</li>
-            <li>• Consider <strong class="text-white">billing ownership</strong>: direct billing gives you customer data and higher margins.</li>
-          </ul>
-        </div>
+          </div>
+        </section>
       </div>
+    </section>
 
-      <div class="mt-10 flex flex-wrap gap-3">
-        <a href="/tools/affiliate-revenue-estimator/" class="btn-primary text-sm">Affiliate Revenue Estimator →</a>
-        <a href="/tools/ai-startup-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI Startup Cost Calculator →</a>
-        <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+    <section class="grid md:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">How the comparison works</h2>
+        <ul class="list-disc pl-5 text-neutral-300 space-y-2 text-sm">
+          <li><strong>Gross revenue</strong> = monthly price × subscribers.</li>
+          <li><strong>Platform take rate</strong> = gross × marketplace cut %.</li>
+          <li><strong>Payment processing</strong> = gross × processing % (only for platforms that charge it directly).</li>
+          <li><strong>Ad spend</strong> = gross × your ad spend %.</li>
+          <li><strong>Support cost</strong> = subscribers × support hours/subscriber × hourly support cost.</li>
+          <li><strong>Net payout</strong> = gross − take rate − processing − ad spend − support cost.</li>
+        </ul>
       </div>
+      <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">What to do next</h2>
+        <ul class="list-disc pl-5 text-neutral-300 space-y-2 text-sm">
+          <li>Pair with the <a href="/tools/agent-build-vs-buy-calculator/" class="text-brand-gold hover:underline">AI Agent Build vs Buy Calculator</a> to model your full cost stack.</li>
+          <li>Use the <a href="/tools/affiliate-revenue-estimator/" class="text-brand-gold hover:underline">Affiliate Link Revenue Estimator</a> if you plan to monetize through referrals.</li>
+          <li>Confirm current marketplace terms before committing to pricing.</li>
+          <li>Consider a hybrid model: list on a marketplace for discovery, then migrate buyers to direct billing.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faq.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+          </details>
+        ))}
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/affiliate-revenue-estimator/" class="btn-primary text-sm">Affiliate Revenue Estimator →</a>
+      <a href="/tools/agent-build-vs-buy-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Build vs Buy Calc →</a>
+      <a href="/tools/agent-cac-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">CAC Calculator →</a>
     </div>
-  </section>
 
-  <script define:vars={{ marketplaces, defaults }}>
-    const inputs = {
-      mau: document.getElementById('mau'),
-      conversion: document.getElementById('conversion'),
-      price: document.getElementById('price'),
-      takeRate: document.getElementById('takeRate'),
-      variableCost: document.getElementById('variableCost'),
-    };
-    const outputs = {
-      paidUsers: document.getElementById('paidUsers'),
-      grossRevenue: document.getElementById('grossRevenue'),
-      platformFee: document.getElementById('platformFee'),
-      variableCosts: document.getElementById('variableCosts'),
-      netRevenue: document.getElementById('netRevenue'),
-      netPerUser: document.getElementById('netPerUser'),
-    };
+    <p id="note" class="text-neutral-500 text-sm">{note}</p>
+  </main>
 
-    function parseTakeRate(str) {
-      if (!str) return defaults.take_rate_pct;
-      const match = str.toString().match(/[\d.]+/);
-      return match ? parseFloat(match[0]) : defaults.take_rate_pct;
+  <script is:inline define:vars={{ defaults, scenarios, marketplacesJson: JSON.stringify(marketplaceList) }}>
+    const marketplaces = JSON.parse(marketplacesJson);
+
+    function $(id) { return document.getElementById(id); }
+    function val(id) { return parseFloat($(id).value) || 0; }
+    function pct(id) { return Math.min(100, Math.max(0, val(id) / 100)); }
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtPct = n => n.toFixed(1) + '%';
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    const scenarioBtns = document.querySelectorAll('.scenario-btn');
+
+    function applyScenario(s) {
+      $('price').value = s.monthly_price;
+      $('subscribers').value = s.monthly_subscribers;
+      $('supportHours').value = s.avg_support_hours_per_subscriber;
+      $('supportCost').value = s.support_hourly_cost;
+      $('adSpend').value = s.ad_spend_pct_of_revenue;
+      calc();
     }
 
-    function fmtCurrency(n) {
-      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n || 0);
-    }
+    scenarioBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        scenarioBtns.forEach(b => b.classList.remove('bg-brand-gold/20', 'border-brand-gold/50', 'text-brand-gold'));
+        btn.classList.add('bg-brand-gold/20', 'border-brand-gold/50', 'text-brand-gold');
+        applyScenario(JSON.parse(btn.dataset.scenario));
+      });
+    });
 
     function calc() {
-      const mau = parseFloat(inputs.mau.value) || 0;
-      const conversion = (parseFloat(inputs.conversion.value) || 0) / 100;
-      const price = parseFloat(inputs.price.value) || 0;
-      const takeRate = (parseFloat(inputs.takeRate.value) || 0) / 100;
-      const variableCost = (parseFloat(inputs.variableCost.value) || 0) / 100;
+      const price = Math.max(0, val('price'));
+      const subscribers = Math.max(0, val('subscribers'));
+      const supportHours = Math.max(0, val('supportHours'));
+      const supportCost = Math.max(0, val('supportCost'));
+      const adSpendPct = pct('adSpend');
+      const gross = price * subscribers;
+      const totalSupportCost = subscribers * supportHours * supportCost;
+      const adSpend = gross * adSpendPct;
 
-      const paidUsers = mau * conversion;
-      const grossRevenue = paidUsers * price;
-      const platformFee = grossRevenue * takeRate;
-      const variableCosts = grossRevenue * variableCost;
-      const netRevenue = Math.max(0, grossRevenue - platformFee - variableCosts);
-      const netPerUser = paidUsers > 0 ? netRevenue / paidUsers : 0;
+      $('grossRevenue').textContent = fmtMoney(gross);
 
-      outputs.paidUsers.textContent = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(paidUsers);
-      outputs.grossRevenue.textContent = fmtCurrency(grossRevenue);
-      outputs.platformFee.textContent = fmtCurrency(platformFee);
-      outputs.variableCosts.textContent = fmtCurrency(variableCosts);
-      outputs.netRevenue.textContent = fmtCurrency(netRevenue);
-      outputs.netPerUser.textContent = fmtCurrency(netPerUser);
+      const results = marketplaces.map(m => {
+        const takeRateFee = gross * (m.take_rate_pct / 100);
+        const processingFee = gross * (m.payment_processing_pct / 100);
+        const afterFees = gross - takeRateFee - processingFee;
+        const net = Math.max(0, afterFees - adSpend - totalSupportCost);
+        return { ...m, takeRateFee, processingFee, afterFees, totalSupportCost, adSpend, net };
+      }).sort((a, b) => b.net - a.net);
+
+      if (results.length) {
+        $('bestNet').textContent = fmtMoney(results[0].net);
+        $('bestMarketplace').textContent = results[0].name;
+        $('worstNet').textContent = fmtMoney(results[results.length - 1].net);
+        $('worstMarketplace').textContent = results[results.length - 1].name;
+      }
+
+      const tbody = $('comparisonTable');
+      tbody.innerHTML = results.map((r, i) => `
+        <tr class="${i === 0 ? 'text-emerald-400' : i === results.length - 1 ? 'text-red-400' : 'text-neutral-300'} hover:bg-neutral-800/30">
+          <td class="py-2 pr-2 font-medium">${r.icon} ${r.name}</td>
+          <td class="py-2 pr-2 text-right">${fmtPct(r.take_rate_pct)}</td>
+          <td class="py-2 pr-2 text-right">${fmtPct(r.payment_processing_pct)}</td>
+          <td class="py-2 pr-2 text-right">${fmtMoney(r.afterFees)}</td>
+          <td class="py-2 pr-2 text-right">${fmtMoney(r.totalSupportCost)}</td>
+          <td class="py-2 pr-2 text-right">${fmtMoney(r.adSpend)}</td>
+          <td class="py-2 text-right font-bold">${fmtMoney(r.net)}</td>
+        </tr>
+      `).join('');
+
+      // Highlight matching card
+      document.querySelectorAll('.marketplace-card').forEach(card => {
+        card.classList.remove('ring-2', 'ring-brand-gold/40', 'bg-brand-gold/5');
+      });
+      const topSlug = results[0]?.slug;
+      if (topSlug) {
+        const topCard = document.querySelector(`.marketplace-card[data-slug="${topSlug}"]`);
+        if (topCard) topCard.classList.add('ring-2', 'ring-brand-gold/40', 'bg-brand-gold/5');
+      }
     }
 
-    Object.values(inputs).forEach(el => el.addEventListener('input', calc));
+    ['price','subscribers','supportHours','supportCost','adSpend'].forEach(id => {
+      $(id).addEventListener('input', calc);
+    });
 
-    document.querySelectorAll('.marketplace-preset').forEach(btn => {
-      btn.addEventListener('click', () => {
-        inputs.takeRate.value = parseTakeRate(btn.dataset.take);
-        calc();
-      });
+    $('calcBtn').addEventListener('click', calc);
+    $('resetBtn').addEventListener('click', () => {
+      scenarioBtns.forEach(b => b.classList.remove('bg-brand-gold/20', 'border-brand-gold/50', 'text-brand-gold'));
+      $('price').value = defaults.monthly_price;
+      $('subscribers').value = defaults.monthly_subscribers;
+      $('supportHours').value = defaults.avg_support_hours_per_subscriber;
+      $('supportCost').value = defaults.support_hourly_cost;
+      $('adSpend').value = defaults.ad_spend_pct_of_revenue;
+      calc();
     });
 
     calc();
   </script>
-
-  
-
-  
-
-  <AgentCodeBlock
-    toolName="Agent Marketplace Fee Comparator"
-    toolPath="/tools/agent-marketplace-fee-comparator/"
-    description="Copy-paste Hermes Agent script for agent marketplace fee comparator."
-    scriptPath="/hermes-tools/agent_marketplace_fee_comparator.py"
-    locked={false}
-  />
 </Layout>

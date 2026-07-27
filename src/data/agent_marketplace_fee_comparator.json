@@ -1,0 +1,244 @@
+{
+  "last_updated": "2026-07-27",
+  "note": "Marketplace fees change frequently and may include hidden processing or withdrawal charges. Treat these as directional estimates and confirm current terms before pricing products.",
+  "defaults": {
+    "monthly_price": 49,
+    "monthly_subscribers": 100,
+    "avg_support_hours_per_subscriber": 0.2,
+    "support_hourly_cost": 50,
+    "ad_spend_pct_of_revenue": 0,
+    "payout_fee_pct": 0
+  },
+  "scenarios": [
+    {
+      "name": "Solo agent builder",
+      "icon": "🧑‍💻",
+      "monthly_price": 29,
+      "monthly_subscribers": 50,
+      "avg_support_hours_per_subscriber": 0.1,
+      "support_hourly_cost": 50,
+      "ad_spend_pct_of_revenue": 10,
+      "payout_fee_pct": 0
+    },
+    {
+      "name": "Small AI agency",
+      "icon": "🏢",
+      "monthly_price": 99,
+      "monthly_subscribers": 200,
+      "avg_support_hours_per_subscriber": 0.15,
+      "support_hourly_cost": 60,
+      "ad_spend_pct_of_revenue": 15,
+      "payout_fee_pct": 0
+    },
+    {
+      "name": "Viral consumer agent",
+      "icon": "🚀",
+      "monthly_price": 19,
+      "monthly_subscribers": 1000,
+      "avg_support_hours_per_subscriber": 0.05,
+      "support_hourly_cost": 40,
+      "ad_spend_pct_of_revenue": 20,
+      "payout_fee_pct": 0
+    },
+    {
+      "name": "Enterprise template",
+      "icon": "🏗️",
+      "monthly_price": 499,
+      "monthly_subscribers": 30,
+      "avg_support_hours_per_subscriber": 0.5,
+      "support_hourly_cost": 80,
+      "ad_spend_pct_of_revenue": 5,
+      "payout_fee_pct": 0
+    }
+  ],
+  "marketplaces": [
+    {
+      "slug": "openai-gpt-store",
+      "name": "OpenAI GPT Store",
+      "icon": "🛒",
+      "category": "consumer",
+      "audience": "ChatGPT users; consumer and productivity",
+      "revenue_model": "Subscription revenue share via ChatGPT Plus / Pro / Team usage credits",
+      "take_rate_pct": 20,
+      "listing_fee": "$0",
+      "payment_processing_pct": 0,
+      "payout_schedule": "Usage-based pool; no direct per-seat billing",
+      "typical_price_range": "$0–$20/mo equivalent",
+      "pros": ["Massive ChatGPT user base", "Built-in discovery", "No hosting or billing setup"],
+      "cons": ["Opaque revenue-share pool", "Limited pricing control", "Only works inside ChatGPT"],
+      "url": "https://chatgpt.com/gpts"
+    },
+    {
+      "slug": "poe",
+      "name": "Poe",
+      "icon": "🤖",
+      "category": "consumer",
+      "audience": "Power users and early adopters; bot creators",
+      "revenue_model": "Creator monetization: per-message price points or subscriptions",
+      "take_rate_pct": 20,
+      "listing_fee": "$0",
+      "payment_processing_pct": 0,
+      "payout_schedule": "Monthly after platform minimum",
+      "typical_price_range": "$5–$50/mo or per-message",
+      "pros": ["Strong discovery for bots", "Per-message pricing supported", "Fast to deploy"],
+      "cons": ["Platform keeps significant share", "Competitive bot marketplace", "Brand is Poe, not yours"],
+      "url": "https://poe.com"
+    },
+    {
+      "slug": "gumloop",
+      "name": "Gumloop",
+      "icon": "🍬",
+      "category": "workflow",
+      "audience": "No-code automation builders and SMBs",
+      "revenue_model": "Gumloop charges platform subscription; marketplace templates earn via affiliate or partner revenue share",
+      "take_rate_pct": 0,
+      "listing_fee": "$0",
+      "payment_processing_pct": 0,
+      "payout_schedule": "Partner-dependent",
+      "typical_price_range": "$19–$99/mo per seat",
+      "pros": ["Visual workflow builder", "Good for automation templates", "Growing B2B audience"],
+      "cons": ["Indirect monetization", "Revenue share not standardized", "Niche user base"],
+      "url": "https://gumloop.com"
+    },
+    {
+      "slug": "relevance-ai",
+      "name": "Relevance AI",
+      "icon": "🎯",
+      "category": "b2b",
+      "audience": "Enterprise sales, marketing, and ops teams",
+      "revenue_model": "Template / agent sales on Relevance platform; revenue share",
+      "take_rate_pct": 20,
+      "listing_fee": "$0",
+      "payment_processing_pct": 0,
+      "payout_schedule": "Monthly",
+      "typical_price_range": "$50–$500/mo",
+      "pros": ["Enterprise buyer intent", "Sales/marketing use cases", "Built-in tools and integrations"],
+      "cons": ["Smaller audience than OpenAI", "Take rate can be high", "Limited customization"],
+      "url": "https://relevanceai.com"
+    },
+    {
+      "slug": "agent-ai",
+      "name": "Agent.ai",
+      "icon": "🤵",
+      "category": "b2b",
+      "audience": "SMBs seeking ready-made agents",
+      "revenue_model": "Agent subscription listings; marketplace revenue share",
+      "take_rate_pct": 15,
+      "listing_fee": "$0",
+      "payment_processing_pct": 0,
+      "payout_schedule": "Monthly",
+      "typical_price_range": "$29–$299/mo",
+      "pros": ["Agent-focused branding", "Direct subscriptions", "B2B buyer traffic"],
+      "cons": ["Newer platform with smaller reach", "Revenue terms vary by tier", "Less tooling flexibility"],
+      "url": "https://agent.ai"
+    },
+    {
+      "slug": "n8n-community",
+      "name": "n8n Community / Template Hub",
+      "icon": "⚙️",
+      "category": "workflow",
+      "audience": "Automation engineers and n8n users",
+      "revenue_model": "Free templates plus paid consulting or affiliate referrals",
+      "take_rate_pct": 0,
+      "listing_fee": "$0",
+      "payment_processing_pct": 0,
+      "payout_schedule": "None for templates; consulting separately",
+      "typical_price_range": "$0 (templates) or custom consulting",
+      "pros": ["Large open-source community", "Great for lead generation", "No platform cut"],
+      "cons": ["Hard to monetize directly", "Users expect free templates", "Manual billing for services"],
+      "url": "https://n8n.io/workflows"
+    },
+    {
+      "slug": "dify-marketplace",
+      "name": "Dify Marketplace",
+      "icon": "🧩",
+      "category": "b2b",
+      "audience": "Developers building LLM apps and agents",
+      "revenue_model": "Plugins, agents, and templates; revenue share",
+      "take_rate_pct": 15,
+      "listing_fee": "$0",
+      "payment_processing_pct": 0,
+      "payout_schedule": "Monthly",
+      "typical_price_range": "$0–$99/mo",
+      "pros": ["Developer-first audience", "Open-source ecosystem", "Growing international reach"],
+      "cons": ["Smaller buyer pool", "Requires Dify hosting familiarity", "Variable monetization"],
+      "url": "https://dify.ai"
+    },
+    {
+      "slug": "flowise-marketplace",
+      "name": "Flowise Marketplace",
+      "icon": "🌊",
+      "category": "workflow",
+      "audience": "Low-code AI builders and dev agencies",
+      "revenue_model": "Template sales and custom flows; marketplace fee",
+      "take_rate_pct": 15,
+      "listing_fee": "$0",
+      "payment_processing_pct": 0,
+      "payout_schedule": "Monthly",
+      "typical_price_range": "$19–$199 one-time or subscription",
+      "pros": ["Visual flow builder users", "Good for agencies", "Direct template sales"],
+      "cons": ["Smaller ecosystem", "Revenue share terms can vary", "Less brand recognition"],
+      "url": "https://flowiseai.com"
+    },
+    {
+      "slug": "gumroad",
+      "name": "Gumroad",
+      "icon": "🛍️",
+      "category": "direct",
+      "audience": "Indie creators and small digital-product sellers",
+      "revenue_model": "Direct sales; platform + payment processing fee",
+      "take_rate_pct": 10,
+      "listing_fee": "$0",
+      "payment_processing_pct": 3.5,
+      "payout_schedule": "Weekly or monthly",
+      "typical_price_range": "$10–$200 one-time or subscription",
+      "pros": ["Instant payouts", "Simple setup", "Email list built-in"],
+      "cons": ["Not agent-specific", "High payment fees at low volume", "You handle delivery"],
+      "url": "https://gumroad.com"
+    },
+    {
+      "slug": "stripe-billing-self-hosted",
+      "name": "Stripe Billing (self-hosted)",
+      "icon": "💳",
+      "category": "direct",
+      "audience": "Your own website audience",
+      "revenue_model": "Direct SaaS billing; payment processing only",
+      "take_rate_pct": 0,
+      "listing_fee": "$0",
+      "payment_processing_pct": 2.9,
+      "payout_schedule": "2-day rolling for established accounts",
+      "typical_price_range": "$0+ (you set it)",
+      "pros": ["Full pricing control", "Own customer relationship", "No marketplace take rate"],
+      "cons": ["No built-in discovery", "You do marketing and support", "Chargebacks and fraud risk"],
+      "url": "https://stripe.com/billing"
+    }
+  ],
+  "categories": {
+    "consumer": { "name": "Consumer marketplaces", "icon": "👥" },
+    "b2b": { "name": "B2B / enterprise", "icon": "🏢" },
+    "workflow": { "name": "Workflow / no-code", "icon": "🧩" },
+    "direct": { "name": "Direct / self-hosted", "icon": "💳" }
+  },
+  "faq": [
+    {
+      "question": "What is a marketplace take rate?",
+      "answer": "The percentage of each sale the platform keeps before paying you. A 20% take rate means you net 80% of gross revenue."
+    },
+    {
+      "question": "Should I list on a marketplace or sell directly?",
+      "answer": "Marketplaces offer discovery and built-in billing but take a revenue cut. Direct sales keep more margin but require your own traffic, support, and payment stack. Many builders do both."
+    },
+    {
+      "question": "What fees are not shown in the take rate?",
+      "answer": "Payment processing (usually 2.9% + 30¢), payout fees, chargebacks, refunds, ads, and the cost of customer support. This calculator estimates net after take rate, processing, ads, and support."
+    },
+    {
+      "question": "Which marketplace is best for AI agents?",
+      "answer": "OpenAI GPT Store and Poe have the largest consumer reach. Relevance AI and Agent.ai target B2B buyers. Dify and Flowise are better for developer and agency audiences."
+    },
+    {
+      "question": "Can I charge subscription pricing on these marketplaces?",
+      "answer": "Some platforms support subscriptions (Poe, Relevance, Gumroad, Stripe Billing). Others rely on usage-based pools (OpenAI GPT Store) or one-time template sales."
+    }
+  ]
+}
