@@ -1,0 +1,249 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/newsletter_prompt_generator.json';
+
+const title = "Daily Newsletter Prompt Generator | Hermes Dispatch";
+const description = "Generate a DOC-id ready newsletter prompt draft for Hermes Dispatch. Pick a category, tone, and topic, then copy the prompt into your AI writer.";
+const tones = data.tones;
+const categories = data.categories;
+const sections = data.sections;
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Daily Newsletter Prompt Generator" description={description} url="https://hermesdispatch.dev/tools/newsletter-prompt-generator/" applicationCategory="WebApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type": "Question", "name": "What is a DOC-id prompt?", "acceptedAnswer": {"@type": "Answer", "text": "A DOC-id prompt is a structured daily newsletter prompt used by Hermes Dispatch. It includes a clear persona, audience, category, tone, word count, required sections, and links to site tools so the AI output is consistent and citable."}},
+      {"@type": "Question", "name": "How do I use this prompt generator?", "acceptedAnswer": {"@type": "Answer", "text": "Choose a category and tone, enter a topic, then click Copy Prompt. Paste the generated prompt into your preferred AI writer, fill in the day's specific number or benchmark, and edit the final draft."}},
+      {"@type": "Question", "name": "What makes a newsletter issue answer-engine friendly?", "acceptedAnswer": {"@type": "Answer", "text": "Each issue should have one concrete insight, one number or benchmark, one tool or resource link with a short verdict, one counter-argument or gotcha, and a clear actionable takeaway. This structure is easy for AI search engines to cite."}},
+      {"@type": "Question", "name": "Which tone works best for AI hardware topics?", "acceptedAnswer": {"@type": "Answer", "text": "Data-driven or fast and direct tones work best for hardware because readers want specs, prices, and buy-or-skip verdicts without filler."}}
+    ]
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">✍️</div>
+      <h1 class="display-heading mb-4">Daily Newsletter Prompt Generator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Generate a DOC-id ready prompt for today's Hermes Dispatch issue. Pick a category, tone, and topic, then copy the structured prompt into your AI writer.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Category preset</h2>
+      <div class="flex flex-wrap gap-3" id="category-buttons">
+        {categories.map((c, i) => (
+          <button type="button" class="category-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors text-left" data-category={JSON.stringify(c)} data-index={i}>
+            <span class="mr-1">{c.icon}</span>{c.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold flex items-center gap-2"><span>🎛️</span> Issue settings</h2>
+
+        <div class="space-y-4">
+          <label class="block"><span class="text-neutral-400 text-sm">Topic or headline idea</span><input id="topic" type="text" value="Best GPU for Llama 3 70B under $2,000" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Target audience</span><input id="audience" type="text" value={data.audience} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Word count</span><input id="wordCount" type="number" min="100" step="50" value={data.default_word_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+
+          <div>
+            <span class="text-neutral-400 text-sm block mb-2">Tone</span>
+            <div class="flex flex-wrap gap-2" id="tone-buttons">
+              {tones.map((t, i) => (
+                <button type="button" class="tone-btn px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-xs transition-colors" data-tone={JSON.stringify(t)} data-index={i}>
+                  {t.name}
+                </button>
+              ))}
+            </div>
+            <p id="toneDescription" class="text-neutral-500 text-sm mt-2">{tones[0].description}</p>
+          </div>
+
+          <label class="flex items-center gap-2 cursor-pointer mt-2">
+            <input id="includeMustInclude" type="checkbox" checked class="w-4 h-4 rounded bg-neutral-900 border-neutral-700 text-brand-gold" />
+            <span class="text-neutral-400 text-sm">Include category-specific must-include checklist</span>
+          </label>
+        </div>
+
+        <h2 class="text-xl font-bold mt-8 mb-4 text-brand-gold flex items-center gap-2"><span>💡</span> Sample angles & topics</h2>
+        <div id="sampleTopics" class="space-y-3">
+          <p class="text-neutral-400 text-sm">Pick a category above to see sample topics and angles.</p>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-brand-gold flex items-center gap-2"><span>📋</span> Generated prompt</h2>
+            <button id="copyBtn" type="button" class="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors">Copy prompt</button>
+          </div>
+          <textarea id="promptOutput" rows="22" readonly class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white text-sm font-mono resize-y"></textarea>
+          <p id="copyFeedback" class="text-brand-gold text-sm mt-2 hidden">Copied to clipboard.</p>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">DOC-id issue structure</h2>
+          <ol class="list-decimal pl-5 text-neutral-300 space-y-1 text-sm">
+            {sections.map(s => <li>{s}</li>)}
+          </ol>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How to use it</h2>
+          <ul class="list-disc pl-5 text-neutral-300 space-y-2 text-sm">
+            <li>Choose a category to load sample topics and must-include rules.</li>
+            <li>Pick a tone that matches the day's story: data-driven, tutorial, skeptical, etc.</li>
+            <li>Enter a specific topic and keep the word count realistic (300-800 words works best).</li>
+            <li>Copy the prompt, paste it into Claude / ChatGPT / your AI writer, then edit the draft.</li>
+            <li>Always add one concrete number, one tool link, and one clear next step.</li>
+          </ul>
+          <p class="text-neutral-500 text-sm mt-4">Last updated: {data.last_updated}.</p>
+        </section>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+          <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">What is a DOC-id prompt?<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+          <p class="p-4 pt-0 text-neutral-400">A DOC-id prompt is a structured daily newsletter prompt used by Hermes Dispatch. It includes a clear persona, audience, category, tone, word count, required sections, and links to site tools so the AI output is consistent and citable.</p>
+        </details>
+        <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+          <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">How do I use this prompt generator?<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+          <p class="p-4 pt-0 text-neutral-400">Choose a category and tone, enter a topic, then click Copy Prompt. Paste the generated prompt into your preferred AI writer, fill in the day's specific number or benchmark, and edit the final draft.</p>
+        </details>
+        <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+          <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">What makes a newsletter issue answer-engine friendly?<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+          <p class="p-4 pt-0 text-neutral-400">Each issue should have one concrete insight, one number or benchmark, one tool or resource link with a short verdict, one counter-argument or gotcha, and a clear actionable takeaway. This structure is easy for AI search engines to cite.</p>
+        </details>
+        <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+          <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">Which tone works best for AI hardware topics?<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+          <p class="p-4 pt-0 text-neutral-400">Data-driven or fast and direct tones work best for hardware because readers want specs, prices, and buy-or-skip verdicts without filler.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ data, tones, categories, sections }}>
+    function $(id) { return document.getElementById(id); }
+    let currentCategory = categories[0];
+    let currentTone = tones[0];
+
+    function updateToneDescription() {
+      $('toneDescription').textContent = currentTone.description;
+    }
+
+    function renderSampleTopics() {
+      const container = $('sampleTopics');
+      const c = currentCategory;
+      let html = '';
+      if (c.sample_topics && c.sample_topics.length) {
+        html += '<p class="text-brand-gold text-sm font-medium mb-1">Sample topics</p><ul class="list-disc pl-5 text-neutral-300 text-sm space-y-1">';
+        c.sample_topics.forEach(t => html += '<li>' + t + '</li>');
+        html += '</ul>';
+      }
+      if (c.angles && c.angles.length) {
+        html += '<p class="text-brand-gold text-sm font-medium mt-3 mb-1">Angles</p><ul class="list-disc pl-5 text-neutral-300 text-sm space-y-1">';
+        c.angles.forEach(a => html += '<li>' + a + '</li>');
+        html += '</ul>';
+      }
+      if (c.must_include && c.must_include.length) {
+        html += '<p class="text-brand-gold text-sm font-medium mt-3 mb-1">Must include</p><ul class="list-disc pl-5 text-neutral-300 text-sm space-y-1">';
+        c.must_include.forEach(m => html += '<li>' + m + '</li>');
+        html += '</ul>';
+      }
+      container.innerHTML = html || '<p class="text-neutral-400 text-sm">No samples for this category.</p>';
+    }
+
+    function generatePrompt() {
+      const topic = $('topic').value.trim() || currentCategory.sample_topics[0] || 'today AI topic';
+      const audience = $('audience').value.trim() || data.audience;
+      const wordCount = Math.max(100, parseInt($('wordCount').value, 10) || data.default_word_count);
+      const includeMust = $('includeMustInclude').checked;
+
+      let prompt = `You are ${data.persona}\n\n`;
+      prompt += `Write a Hermes Dispatch daily newsletter issue for this audience: ${audience}.\n`;
+      prompt += `Category: ${currentCategory.name} ${currentCategory.icon}\n`;
+      prompt += `Topic: ${topic}\n`;
+      prompt += `Tone: ${currentTone.name} — ${currentTone.description}\n`;
+      prompt += `Target word count: ${wordCount} words.\n\n`;
+      prompt += `Use this exact DOC-id structure and label each section:\n`;
+      sections.forEach((s, i) => prompt += `${i + 1}. ${s}\n`);
+      prompt += '\n';
+
+      if (currentCategory.audience) {
+        prompt += `Audience angle: ${currentCategory.audience}\n\n`;
+      }
+
+      if (includeMust && currentCategory.must_include && currentCategory.must_include.length) {
+        prompt += `Must-include checklist for this category:\n`;
+        currentCategory.must_include.forEach(m => prompt += `- ${m}\n`);
+        prompt += '\n';
+      }
+
+      prompt += `Rules:\n`;
+      prompt += `- Lead with the most important insight, not background.\n`;
+      prompt += `- Include one concrete number, benchmark, or price.\n`;
+      prompt += `- Cite one Hermes Dispatch tool or comparison page when relevant.\n`;
+      prompt += `- Add one counter-argument, gotcha, or caveat.\n`;
+      prompt += `- End with one clear action the reader can take today.\n`;
+      prompt += `- Keep paragraphs short and scannable.\n`;
+      if (currentTone.slug === 'data') prompt += '- Open with the number and keep every claim tied to a metric.\n';
+      if (currentTone.slug === 'skeptical') prompt += '- Call out the hype first, then deliver the practical fix.\n';
+      if (currentTone.slug === 'tutorial') prompt += '- Write step-by-step so the reader can follow along.\n';
+      if (currentTone.slug === 'opinion') prompt += '- Take a clear side, name names, and defend with proof.\n';
+      if (currentTone.slug === 'curator') prompt += '- Focus on one great find and why it matters.\n';
+      if (currentTone.slug === 'fast') prompt += '- No filler. Short paragraphs. Bullet takeaways.\n';
+
+      $('promptOutput').value = prompt;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCategory = JSON.parse(btn.dataset.category);
+          document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('bg-brand-gold', 'text-neutral-950', 'border-brand-gold'));
+          btn.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+          renderSampleTopics();
+          generatePrompt();
+        });
+      });
+
+      document.querySelectorAll('.tone-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentTone = JSON.parse(btn.dataset.tone);
+          document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('bg-brand-gold', 'text-neutral-950', 'border-brand-gold'));
+          btn.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+          updateToneDescription();
+          generatePrompt();
+        });
+      });
+
+      ['topic', 'audience', 'wordCount', 'includeMustInclude'].forEach(id => {
+        $(id).addEventListener('input', generatePrompt);
+      });
+
+      $('copyBtn').addEventListener('click', () => {
+        $('promptOutput').select();
+        document.execCommand('copy');
+        const fb = $('copyFeedback');
+        fb.classList.remove('hidden');
+        setTimeout(() => fb.classList.add('hidden'), 2000);
+      });
+
+      // Highlight first category and tone
+      const firstCat = document.querySelector('.category-btn');
+      if (firstCat) firstCat.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+      const firstTone = document.querySelector('.tone-btn');
+      if (firstTone) firstTone.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+
+      renderSampleTopics();
+      generatePrompt();
+    });
+  </script>
+</Layout>
