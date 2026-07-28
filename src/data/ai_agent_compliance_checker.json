@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-07-27",
+  "last_updated": "2026-07-28",
   "note": "This is a directional self-assessment, not legal advice. Requirements vary by jurisdiction, interpretation, and your specific data flows. Engage qualified counsel before making compliance commitments.",
   "jurisdictions": [
     { "id": "us", "name": "United States", "frameworks": ["ccpa", "state_privacy", "ftc", "sector_hipaa", "sector_ferpa", "sector_glb", "sector_soc2"] },
