@@ -1,0 +1,376 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import data from '../../data/agent_marketplace_fee_comparator.json';
+
+const title = "AI Agent Marketplace Fee Comparator";
+const description = "Compare take rates, payment fees, payout schedules, and net revenue across AI agent marketplaces. Estimate earnings after platform cuts and support costs.";
+
+const { defaults, scenarios, marketplaces, categories, faq } = data;
+const categoryList = Object.entries(categories).map(([slug, info]) => ({ slug, ...info }));
+---
+
+<Layout title={title} description={description}>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({
+      "@type": "Question",
+      "name": f.question,
+      "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+    }))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🏪</div>
+        <h1 class="display-heading mb-4">AI Agent Marketplace Fee Comparator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Compare platform take rates, payment fees, and net payout across consumer, B2B, workflow, and direct sales channels. Estimate real earnings after ads, support, and processing.
+        </p>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">{s.icon}</div>
+            <h3 class="font-semibold text-sm">{s.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">${s.monthly_price}/mo • {s.monthly_subscribers.toLocaleString()} subs</p>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <!-- Inputs -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Product economics</h2>
+          <div class="space-y-4">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Monthly price ($)</label>
+                <input id="monthlyPrice" type="number" min="0" step="1" value={defaults.monthly_price} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Monthly subscribers</label>
+                <input id="monthlySubscribers" type="number" min="0" step="1" value={defaults.monthly_subscribers} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Support hours / subscriber / mo</label>
+                <input id="supportHours" type="number" min="0" step="0.05" value={defaults.avg_support_hours_per_subscriber} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Support hourly cost ($)</label>
+                <input id="supportCost" type="number" min="0" step="1" value={defaults.support_hourly_cost} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Ad spend (% of revenue)</label>
+                <input id="adSpendPct" type="number" min="0" max="100" step="1" value={defaults.ad_spend_pct_of_revenue} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Payout / withdrawal fee (%)</label>
+                <input id="payoutFeePct" type="number" min="0" max="100" step="0.1" value={defaults.payout_fee_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+          </div>
+
+          <h2 class="text-xl font-bold mt-8 mb-4 text-brand-gold">Filter marketplaces</h2>
+          <div class="flex flex-wrap gap-2" id="categoryFilters">
+            <button type="button" class="filter-btn px-3 py-1 rounded-full text-xs border border-neutral-700 bg-brand-gold text-brand-dark font-semibold" data-category="all">All</button>
+            {categoryList.map(c => (
+              <button type="button" class="filter-btn px-3 py-1 rounded-full text-xs border border-neutral-700 bg-neutral-800 text-neutral-300 hover:border-brand-gold/50" data-category={c.slug}>{c.icon} {c.name}</button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="space-y-4">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Gross monthly revenue</p>
+            <p id="grossRevenue" class="text-3xl font-bold text-brand-gold">—</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Best net payout</p>
+              <p id="bestPayout" class="text-xl font-bold text-emerald-400">—</p>
+              <p id="bestPayoutName" class="text-xs text-neutral-400 mt-1">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Lowest total fees</p>
+              <p id="lowestFees" class="text-xl font-bold text-emerald-400">—</p>
+              <p id="lowestFeesName" class="text-xs text-neutral-400 mt-1">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Support cost / mo</p>
+              <p id="supportMonthly" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Ad spend / mo</p>
+              <p id="adMonthly" class="text-lg font-bold">—</p>
+            </div>
+          </div>
+          <p class="text-xs text-neutral-500 text-center">Take rates and fees change frequently. Confirm current terms before pricing products.</p>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Marketplace comparison</h2>
+        <p class="text-sm text-neutral-400 mb-4">Net payout = gross revenue minus take rate, payment processing, payout fee, ad spend, and support cost.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Marketplace</th>
+                <th class="text-right py-2">Take rate</th>
+                <th class="text-right py-2">Processing</th>
+                <th class="text-right py-2">Payout fee</th>
+                <th class="text-right py-2">Total fees</th>
+                <th class="text-right py-2 font-semibold text-white">Net payout / mo</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTable" class="divide-y divide-neutral-800">
+              {marketplaces.map(m => (
+                <tr data-slug={m.slug} data-category={m.category} class="hover:bg-neutral-800/30">
+                  <td class="py-3">
+                    <div class="font-medium text-white">{m.icon} {m.name}</div>
+                    <div class="text-xs text-neutral-500">{categories[m.category].name}</div>
+                  </td>
+                  <td class="py-3 text-right take-rate">{m.take_rate_pct}%</td>
+                  <td class="py-3 text-right processing">{m.payment_processing_pct}%</td>
+                  <td class="py-3 text-right payout-fee">{m.payout_fee_pct ?? 0}%</td>
+                  <td class="py-3 text-right total-fees font-medium">—</td>
+                  <td class="py-3 text-right net-payout font-semibold text-brand-gold">—</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Marketplace cards -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8" id="marketplaceCards">
+        {marketplaces.map(m => (
+          <div class="marketplace-card glass-card rounded-2xl p-6 border border-brand-gold/10" data-slug={m.slug} data-category={m.category}>
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="text-lg font-bold text-white">{m.icon} {m.name}</h3>
+                <p class="text-xs text-neutral-500">{categories[m.category].name}</p>
+              </div>
+              <span class="text-2xl font-bold text-brand-gold take-rate-badge">{m.take_rate_pct}%</span>
+            </div>
+            <p class="text-sm text-neutral-400 mb-3">{m.audience}</p>
+            <div class="text-sm text-neutral-300 space-y-1 mb-4">
+              <p><strong class="text-white">Revenue model:</strong> {m.revenue_model}</p>
+              <p><strong class="text-white">Typical price:</strong> {m.typical_price_range}</p>
+              <p><strong class="text-white">Payout:</strong> {m.payout_schedule}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-4">
+              <div class="bg-neutral-800/50 rounded-lg p-2">
+                <p class="text-neutral-500">Pros</p>
+                <ul class="list-disc pl-4 text-neutral-300 mt-1 space-y-0.5">
+                  {m.pros.slice(0, 2).map(p => <li>{p}</li>)}
+                </ul>
+              </div>
+              <div class="bg-neutral-800/50 rounded-lg p-2">
+                <p class="text-neutral-500">Cons</p>
+                <ul class="list-disc pl-4 text-neutral-300 mt-1 space-y-0.5">
+                  {m.cons.slice(0, 2).map(c => <li>{c}</li>)}
+                </ul>
+              </div>
+            </div>
+            <p class="text-right font-semibold text-brand-gold net-payout-card">—</p>
+          </div>
+        ))}
+      </div>
+
+      <!-- How it works / FAQ -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Gross revenue</strong> = monthly price × subscribers.</li>
+            <li><strong class="text-white">Platform cut</strong> = gross revenue × take rate.</li>
+            <li><strong class="text-white">Payment processing</strong> = gross revenue × processing %.</li>
+            <li><strong class="text-white">Support cost</strong> = subscribers × support hours × hourly cost.</li>
+            <li><strong class="text-white">Ad spend</strong> = gross revenue × ad spend %.</li>
+            <li><strong class="text-white">Net payout</strong> = gross revenue minus all of the above.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">When to choose which channel</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• <strong>Consumer marketplaces</strong> for discovery and low-friction distribution.</li>
+            <li>• <strong>B2B marketplaces</strong> when buyers expect managed, work-ready agents.</li>
+            <li>• <strong>Workflow/no-code hubs</strong> to monetize templates and integrations.</li>
+            <li>• <strong>Direct/self-hosted</strong> to keep margin and own the customer relationship.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/affiliate-revenue-estimator/" class="btn-primary text-sm">Affiliate Revenue Estimator →</a>
+        <a href="/tools/ai-startup-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI Startup Cost Calculator →</a>
+      </div>
+
+      <p class="text-neutral-500 text-sm mt-10">{data.note} Last updated: {data.last_updated}.</p>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, scenarios, marketplaces, categories }}>
+    const els = {
+      monthlyPrice: document.getElementById('monthlyPrice'),
+      monthlySubscribers: document.getElementById('monthlySubscribers'),
+      supportHours: document.getElementById('supportHours'),
+      supportCost: document.getElementById('supportCost'),
+      adSpendPct: document.getElementById('adSpendPct'),
+      payoutFeePct: document.getElementById('payoutFeePct'),
+      grossRevenue: document.getElementById('grossRevenue'),
+      bestPayout: document.getElementById('bestPayout'),
+      bestPayoutName: document.getElementById('bestPayoutName'),
+      lowestFees: document.getElementById('lowestFees'),
+      lowestFeesName: document.getElementById('lowestFeesName'),
+      supportMonthly: document.getElementById('supportMonthly'),
+      adMonthly: document.getElementById('adMonthly'),
+    };
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (Math.abs(n) < 0.01) return '$' + n.toFixed(4);
+      if (Math.abs(n) < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+
+    function getInputs() {
+      return {
+        price: Math.max(0, parseFloat(els.monthlyPrice.value) || 0),
+        subscribers: Math.max(0, parseFloat(els.monthlySubscribers.value) || 0),
+        supportHours: Math.max(0, parseFloat(els.supportHours.value) || 0),
+        supportCost: Math.max(0, parseFloat(els.supportCost.value) || 0),
+        adSpendPct: Math.max(0, Math.min(100, parseFloat(els.adSpendPct.value) || 0)) / 100,
+        payoutFeePct: Math.max(0, Math.min(100, parseFloat(els.payoutFeePct.value) || 0)) / 100,
+      };
+    }
+
+    function computeMarketplace(m, inputs) {
+      const gross = inputs.price * inputs.subscribers;
+      const platformCut = gross * (m.take_rate_pct / 100);
+      const processing = gross * (m.payment_processing_pct / 100);
+      const payoutFee = gross * ((m.payout_fee_pct ?? 0) / 100 + inputs.payoutFeePct);
+      const supportMonthly = inputs.subscribers * inputs.supportHours * inputs.supportCost;
+      const adMonthly = gross * inputs.adSpendPct;
+      const totalFees = platformCut + processing + payoutFee + supportMonthly + adMonthly;
+      const net = gross - totalFees;
+      return { gross, platformCut, processing, payoutFee, supportMonthly, adMonthly, totalFees, net };
+    }
+
+    let activeCategory = 'all';
+
+    function calc() {
+      const inputs = getInputs();
+      const gross = inputs.price * inputs.subscribers;
+      const supportMonthly = inputs.subscribers * inputs.supportHours * inputs.supportCost;
+      const adMonthly = gross * inputs.adSpendPct;
+
+      els.grossRevenue.textContent = fmtMoney(gross) + '/mo';
+      els.supportMonthly.textContent = fmtMoney(supportMonthly) + '/mo';
+      els.adMonthly.textContent = fmtMoney(adMonthly) + '/mo';
+
+      const results = marketplaces.map(m => ({ m, ...computeMarketplace(m, inputs) }));
+
+      const best = results.reduce((a, b) => (a.net > b.net ? a : b), results[0]);
+      const cheapest = results.reduce((a, b) => (a.totalFees < b.totalFees ? a : b), results[0]);
+
+      els.bestPayout.textContent = fmtMoney(best.net) + '/mo';
+      els.bestPayoutName.textContent = best.m.name;
+      els.lowestFees.textContent = fmtMoney(cheapest.totalFees) + '/mo';
+      els.lowestFeesName.textContent = cheapest.m.name;
+
+      document.querySelectorAll('#comparisonTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const res = results.find(r => r.m.slug === slug);
+        if (!res) return;
+        row.querySelector('.total-fees').textContent = fmtMoney(res.totalFees);
+        row.querySelector('.net-payout').textContent = fmtMoney(res.net);
+        row.querySelector('.take-rate').textContent = res.m.take_rate_pct + '%';
+        row.querySelector('.processing').textContent = res.m.payment_processing_pct + '%';
+        row.querySelector('.payout-fee').textContent = (res.m.payout_fee_pct ?? 0) + '%';
+        if (res.m.slug === best.m.slug) {
+          row.classList.add('bg-brand-gold/10');
+        } else {
+          row.classList.remove('bg-brand-gold/10');
+        }
+      });
+
+      document.querySelectorAll('.marketplace-card').forEach(card => {
+        const slug = card.dataset.slug;
+        const res = results.find(r => r.m.slug === slug);
+        if (!res) return;
+        card.querySelector('.net-payout-card').textContent = 'Net: ' + fmtMoney(res.net) + '/mo';
+        card.querySelector('.take-rate-badge').textContent = res.m.take_rate_pct + '%';
+      });
+
+      filterVisibility();
+    }
+
+    function filterVisibility() {
+      document.querySelectorAll('#comparisonTable tr, .marketplace-card').forEach(el => {
+        const cat = el.dataset.category;
+        const visible = activeCategory === 'all' || cat === activeCategory;
+        el.classList.toggle('hidden', !visible);
+      });
+    }
+
+    function applyScenario(idx) {
+      const s = scenarios[idx];
+      if (!s) return;
+      els.monthlyPrice.value = s.monthly_price;
+      els.monthlySubscribers.value = s.monthly_subscribers;
+      els.supportHours.value = s.avg_support_hours_per_subscriber;
+      els.supportCost.value = s.support_hourly_cost;
+      els.adSpendPct.value = s.ad_spend_pct_of_revenue;
+      els.payoutFeePct.value = s.payout_fee_pct;
+      calc();
+    }
+
+    ['input', 'change'].forEach(evt => {
+      Object.values(els).forEach(input => {
+        if (input && (input.tagName === 'INPUT' || input.tagName === 'SELECT')) {
+          input.addEventListener(evt, calc);
+        }
+      });
+    });
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.scenario-btn').forEach(b => {
+          b.classList.remove('border-brand-gold', 'bg-brand-gold/20');
+          b.classList.add('border-brand-gold/10');
+        });
+        btn.classList.add('border-brand-gold', 'bg-brand-gold/20');
+        applyScenario(parseInt(btn.dataset.idx, 10));
+      });
+    });
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.remove('bg-brand-gold', 'text-brand-dark', 'font-semibold');
+          b.classList.add('bg-neutral-800', 'text-neutral-300');
+        });
+        btn.classList.remove('bg-neutral-800', 'text-neutral-300');
+        btn.classList.add('bg-brand-gold', 'text-brand-dark', 'font-semibold');
+        activeCategory = btn.dataset.category;
+        filterVisibility();
+      });
+    });
+
+    calc();
+  </script>
+</Layout>
