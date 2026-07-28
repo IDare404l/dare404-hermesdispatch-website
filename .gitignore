@@ -31,3 +31,8 @@ Thumbs.db
 
 # Wrangler local dev cache
 .wrangler/
+
+# Local archive + old copies
+public/
+src/layouts/*.old
+src/pages/.archive/
