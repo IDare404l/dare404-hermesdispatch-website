@@ -1,0 +1,241 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_benchmarks.json';
+
+const title = "AI Agent Performance Benchmark Selector | Hermes Dispatch";
+const description = "Pick the right benchmark for your AI agent: coding, reasoning, web, desktop, multi-agent, and domain-specific evals including SWE-bench, HumanEval, GAIA, WebArena, OSWorld, and more.";
+const categories = Object.values(data.categories);
+const benchmarks = data.benchmarks;
+
+const faqs = [
+  { q: "Which benchmark should I start with for a coding agent?", a: "Start with HumanEval or MBPP for a quick, cheap signal on function-level coding. Move to SWE-bench once you need repo-level, real-world software engineering validation." },
+  { q: "What is the best general-purpose agent benchmark?", a: "GAIA is currently the most respected general-purpose benchmark because it requires multi-step reasoning, tool use, and web search. It is expensive to run, so pair it with cheaper MMLU or LiveBench checks for faster iteration." },
+  { q: "How do I benchmark a browser or desktop automation agent?", a: "Use WebArena, Mind2Web, or WebVoyager for browser agents. For desktop/OS agents, use OSWorld (Ubuntu) or Windows Agent Arena. These require sandboxed environments and are the most expensive to run." },
+  { q: "Why not just use MMLU for everything?", a: "MMLU measures static multiple-choice knowledge, not agentic behavior. It is a useful model-selection filter but tells you almost nothing about tool use, planning, or long-horizon task completion." },
+  { q: "How much should I budget for evaluation infrastructure?", a: "Cheap benchmarks like HumanEval, MBPP, MMLU, and GSM8K cost under $100 per run. Realistic benchmarks like SWE-bench, GAIA, and WebArena range from $300–$5,000 per run. OS-level evals like OSWorld can exceed $1,000–$10,000 per run depending on sample size and VM infrastructure." }
+];
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Performance Benchmark Selector" description={description} url="https://hermesdispatch.dev/tools/agent-benchmark-selector/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">📊</div>
+      <h1 class="display-heading mb-4">AI Agent Performance Benchmark Selector</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Pick the right eval for your agent type, budget, and risk tolerance. Compare 16+ benchmarks across coding, reasoning, web, desktop, multi-agent, and domain tasks.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">What kind of agent are you building?</h2>
+      <div class="flex flex-wrap gap-3" id="category-buttons">
+        <button type="button" class="cat-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors active" data-category="all">All</button>
+        {categories.map(c => (
+          <button type="button" class="cat-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-category={c.slug}>
+            {c.icon} {c.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-3 gap-6 mb-10">
+      <div class="lg:col-span-1 space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-6 text-brand-gold">Your constraints</h2>
+          <div class="space-y-4">
+            <label class="block"><span class="text-neutral-400 text-sm">Agent focus</span>
+              <select id="focus" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+                <option value="coding">Code generation / PR bot</option>
+                <option value="reasoning">General reasoning & knowledge</option>
+                <option value="web">Web browser agent</option>
+                <option value="desktop">Desktop / OS automation</option>
+                <option value="multi-agent">Multi-agent system</option>
+                <option value="domain">Domain-specific (math, science, security)</option>
+              </select>
+            </label>
+            <label class="block"><span class="text-neutral-400 text-sm">Max effort to set up</span>
+              <select id="effort" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+                <option value="Low">Low — ready in hours</option>
+                <option value="Medium">Medium — a day or two</option>
+                <option value="High">High — sandbox + infra needed</option>
+                <option value="Very High">Very High — full eval pipeline</option>
+              </select>
+            </label>
+            <label class="block"><span class="text-neutral-400 text-sm">Evaluation budget per run</span>
+              <select id="budget" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+                <option value="low">Under $100</option>
+                <option value="medium">$100 – $1,000</option>
+                <option value="high">$1,000 – $5,000</option>
+                <option value="unlimited">$5,000+</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Top pick</h2>
+          <div id="topPick" class="text-center">
+            <p class="text-sm text-neutral-500 uppercase mb-2">Recommended benchmark</p>
+            <p id="topPickName" class="text-2xl font-bold text-brand-gold mb-2">—</p>
+            <p id="topPickWhy" class="text-sm text-neutral-400">Select your agent focus, effort, and budget to see a recommendation.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-2">
+        <div id="benchmark-grid" class="grid md:grid-cols-2 gap-5">
+          {benchmarks.map(b => (
+            <article class="benchmark-card glass-card rounded-2xl p-6 border border-neutral-800 transition-all" data-category={b.category} data-slug={b.slug} data-effort={b.effort} data-cost={b.cost}>
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-lg font-bold text-white">{b.name}</h3>
+                <span class="text-xs px-2 py-1 rounded bg-neutral-800 text-neutral-300 border border-neutral-700">{categories.find(c => c.slug === b.category)?.icon} {categories.find(c => c.slug === b.category)?.name}</span>
+              </div>
+              <p class="text-sm text-neutral-400 mb-4">{b.tests}</p>
+              <div class="space-y-2 text-sm mb-4">
+                <p><span class="text-emerald-400 font-medium">Pros:</span> <span class="text-neutral-300">{b.pros}</span></p>
+                <p><span class="text-red-400 font-medium">Cons:</span> <span class="text-neutral-300">{b.cons}</span></p>
+                <p><span class="text-cyan-400 font-medium">Best fit:</span> <span class="text-neutral-300">{b.fit}</span></p>
+              </div>
+              <div class="flex flex-wrap gap-2 text-xs mb-4">
+                <span class="px-2 py-1 rounded bg-neutral-800 text-neutral-300 border border-neutral-700">Effort: {b.effort}</span>
+                <span class="px-2 py-1 rounded bg-neutral-800 text-neutral-300 border border-neutral-700">Cost: {b.cost}</span>
+              </div>
+              {b.url && <a href={b.url} target="_blank" rel="noopener noreferrer" class="text-sm text-cyan-400 hover:underline">View benchmark →</a>}
+            </article>
+          ))}
+        </div>
+        <p id="no-results" class="hidden text-neutral-400 text-center py-12">No benchmarks match those filters. Try widening your effort or budget.</p>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">How to use this selector</h2>
+      <ul class="list-disc pl-5 text-neutral-300 space-y-2">
+        <li>Start by filtering by agent category to see the relevant evals for your use case.</li>
+        <li>Set your realistic setup effort and per-run budget to narrow the list further.</li>
+        <li>Use the “Top pick” as a starting point, but plan to run at least one cheap benchmark plus one realistic benchmark before claiming performance.</li>
+        <li>Click through to the official benchmark pages for task definitions, submission formats, and leaderboards.</li>
+      </ul>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.q}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="/tools/agent-hosting-cost-comparator/" class="btn-primary text-sm">Agent Hosting Comparator →</a>
+      <a href="/tools/open-source-llm-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Open Source LLM Selector →</a>
+      <a href="/tools/no-code-agent-builder-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">No-Code Builder Selector →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm mt-10">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ categories, benchmarks }}>
+    function $(id) { return document.getElementById(id); }
+
+    const effortRank = { 'Low': 1, 'Medium': 2, 'High': 3, 'Very High': 4 };
+    const budgetRank = { 'low': 1, 'medium': 2, 'high': 3, 'unlimited': 4 };
+
+    function parseCost(costStr) {
+      const lower = (costStr || '').toLowerCase();
+      if (lower.includes('10,000')) return 4;
+      if (lower.includes('5,000')) return 3;
+      if (lower.includes('2,000') || lower.includes('2,500') || lower.includes('3,000') || lower.includes('4,000') || lower.includes('1,500') || lower.includes('1,000')) return 2;
+      return 1;
+    }
+
+    function getFilters() {
+      return {
+        category: document.querySelector('.cat-btn.active')?.dataset.category || 'all',
+        focus: $('focus').value,
+        effort: $('effort').value,
+        budget: $('budget').value
+      };
+    }
+
+    function updateCards() {
+      const { category } = getFilters();
+      let visible = 0;
+      document.querySelectorAll('.benchmark-card').forEach(card => {
+        const match = category === 'all' || card.dataset.category === category;
+        card.classList.toggle('hidden', !match);
+        if (match) visible++;
+      });
+      $('no-results').classList.toggle('hidden', visible > 0);
+    }
+
+    function recommend() {
+      const { focus, effort, budget } = getFilters();
+      const effortCap = effortRank[effort] || 4;
+      const budgetCap = budgetRank[budget] || 4;
+
+      let candidates = benchmarks.filter(b => b.category === focus);
+      candidates = candidates.filter(b => effortRank[b.effort] <= effortCap && parseCost(b.cost) <= budgetCap);
+
+      if (candidates.length === 0) {
+        // fall back to same category ignoring budget
+        candidates = benchmarks.filter(b => b.category === focus && effortRank[b.effort] <= effortCap);
+      }
+      if (candidates.length === 0) {
+        candidates = benchmarks.filter(b => b.category === focus);
+      }
+
+      // prefer lower effort/cost for quick wins, then realistic
+      candidates.sort((a, b) => {
+        const aScore = effortRank[a.effort] + parseCost(a.cost);
+        const bScore = effortRank[b.effort] + parseCost(b.cost);
+        return aScore - bScore;
+      });
+
+      const top = candidates[0];
+      if (top) {
+        $('topPickName').textContent = top.name;
+        $('topPickWhy').textContent = `${top.name} fits a ${focus.replace('-', ' ')} agent with ${effort.toLowerCase()} setup effort and a ${budget.replace('low', 'small').replace('unlimited', 'large')} budget. ${top.fit}`;
+        document.querySelectorAll('.benchmark-card').forEach(c => c.classList.remove('border-brand-gold', 'shadow-lg', 'shadow-brand-gold/10'));
+        const topCard = document.querySelector(`.benchmark-card[data-slug="${top.slug}"]`);
+        if (topCard) {
+          topCard.classList.add('border-brand-gold', 'shadow-lg', 'shadow-brand-gold/10');
+          topCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      } else {
+        $('topPickName').textContent = '—';
+        $('topPickWhy').textContent = 'No benchmark matches those constraints. Try widening effort or budget.';
+      }
+    }
+
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active', 'bg-brand-gold', 'text-[#0d0d1a]', 'border-brand-gold'));
+        btn.classList.add('active', 'bg-brand-gold', 'text-[#0d0d1a]', 'border-brand-gold');
+        updateCards();
+      });
+    });
+
+    ['focus', 'effort', 'budget'].forEach(id => {
+      $(id).addEventListener('change', () => { updateCards(); recommend(); });
+    });
+
+    // Initialize active state styling
+    const allBtn = document.querySelector('.cat-btn[data-category="all"]');
+    if (allBtn) allBtn.classList.add('bg-brand-gold', 'text-[#0d0d1a]', 'border-brand-gold');
+    updateCards();
+    recommend();
+  </script>
+</Layout>
