@@ -1,0 +1,241 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/affiliate_revenue_estimator.json';
+
+const title = "Affiliate Link Revenue Estimator | Hermes Dispatch";
+const description = "Estimate affiliate revenue from clicks, CTR, conversion rate, AOV, commission rate, returns, and network fees. Model CPA vs revenue share.";
+const defaults = data.defaults;
+const scenarios = data.scenarios;
+const networks = data.networks;
+const faqs = data.faq;
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Affiliate Link Revenue Estimator" description={description} url="https://hermesdispatch.dev/tools/affiliate-revenue-estimator/" applicationCategory="FinanceApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.question, "acceptedAnswer": {"@type": "Answer", "text": f.answer}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">💵</div>
+      <h1 class="display-heading mb-4">Affiliate Link Revenue Estimator</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Estimate affiliate revenue from traffic, CTR, conversion rate, AOV, commission rate, returns, and network fees. Switch between revenue share and CPA models.</p>
+    </div>
+
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario preset</h2>
+      <div class="flex flex-wrap gap-3" id="scenario-buttons">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)} data-index={i}>
+            <span class="mr-1">{s.icon}</span>{s.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold flex items-center gap-2"><span>👁️</span> Traffic & clicks</h2>
+        <div class="space-y-4">
+          <label class="block"><span class="text-neutral-400 text-sm">Monthly visitors / impressions</span><input id="visitors" type="number" min="0" step="100" value={defaults.monthly_visitors} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Click-through rate (CTR) (%)</span><input id="ctr" type="number" min="0" max="100" step="0.1" value={defaults.ctr_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Monthly clicks</span><input id="clicks" type="number" min="0" step="10" value={Math.round(defaults.monthly_visitors * defaults.ctr_pct / 100)} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+        </div>
+
+        <h2 class="text-xl font-bold mt-8 mb-6 text-brand-gold flex items-center gap-2"><span>🛒</span> Conversion & order value</h2>
+        <div class="space-y-4">
+          <label class="block"><span class="text-neutral-400 text-sm">Conversion rate (%)</span><input id="conversion" type="number" min="0" max="100" step="0.1" value={defaults.conversion_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Average order value ($)</span><input id="aov" type="number" min="0" step="1" value={defaults.aov} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Return / refund rate (%)</span><input id="returns" type="number" min="0" max="100" step="0.1" value={defaults.return_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+        </div>
+
+        <h2 class="text-xl font-bold mt-8 mb-6 text-brand-gold flex items-center gap-2"><span>💰</span> Commission model</h2>
+        <div class="space-y-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input id="useCpa" type="checkbox" checked={defaults.use_cpa} class="w-4 h-4 rounded bg-neutral-900 border-neutral-700 text-brand-gold" />
+            <span class="text-neutral-400 text-sm">Use flat CPA instead of % commission</span>
+          </label>
+          <label class="block" id="commissionWrap"><span class="text-neutral-400 text-sm">Commission rate (%)</span><input id="commission" type="number" min="0" max="100" step="0.1" value={defaults.commission_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block hidden" id="cpaWrap"><span class="text-neutral-400 text-sm">CPA payout ($ per conversion)</span><input id="cpa" type="number" min="0" step="1" value={defaults.cpa_amount} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+          <label class="block"><span class="text-neutral-400 text-sm">Network / platform fee (%)</span><input id="networkFee" type="number" min="0" max="100" step="0.1" value={defaults.network_fee_pct} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" /></label>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <section id="summary" class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Monthly clicks</p><p id="outClicks" class="text-2xl font-bold text-white">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Monthly conversions</p><p id="outConversions" class="text-2xl font-bold text-white">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Gross revenue</p><p id="outGross" class="text-2xl font-bold text-white">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Net affiliate revenue</p><p id="outNet" class="text-2xl font-bold text-brand-gold">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Revenue per click (RPC)</p><p id="outRpc" class="text-2xl font-bold text-white">—</p></div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20"><p class="text-xs text-neutral-500 uppercase mb-1">Revenue per 1k visitors (RPM)</p><p id="outRpm" class="text-2xl font-bold text-white">—</p></div>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Verdict</h2>
+          <p id="verdictText" class="text-neutral-300">—</p>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Network benchmarks</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-neutral-500 border-b border-neutral-800">
+                  <th class="py-2 pr-2">Network / program</th>
+                  <th class="py-2 pr-2">Typical commission</th>
+                  <th class="py-2 pl-2">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {networks.map(n => (
+                  <tr class="border-b border-neutral-800/50 text-neutral-300">
+                    <td class="py-2 pr-2 font-medium">{n.name}</td>
+                    <td class="py-2 pr-2">{n.typical_commission_pct}%</td>
+                    <td class="py-2 pl-2 text-neutral-400">{n.notes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">How the math works</h2>
+      <ul class="list-disc pl-5 text-neutral-300 space-y-2">
+        <li><strong>Clicks</strong> = visitors × CTR. Edit clicks directly and the calculator keeps it in sync.</li>
+        <li><strong>Conversions</strong> = clicks × conversion rate.</li>
+        <li><strong>Gross revenue (revenue share)</strong> = conversions × AOV × commission rate.</li>
+        <li><strong>Gross revenue (CPA)</strong> = conversions × flat CPA amount.</li>
+        <li><strong>Net revenue</strong> = gross revenue minus estimated returns and platform/network fees.</li>
+        <li><strong>RPC</strong> = net revenue ÷ clicks. <strong>RPM</strong> = net revenue ÷ visitors × 1,000.</li>
+      </ul>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. {data.note}</p>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ defaults, scenarios }}>
+    function $(id) { return document.getElementById(id); }
+    function val(id) { return parseFloat($(id).value) || 0; }
+    function pct(id) { return Math.min(100, Math.max(0, val(id) / 100)); }
+    function checked(id) { return $(id).checked; }
+    const fmtMoney = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    function setCpaMode(enabled) {
+      $('useCpa').checked = enabled;
+      $('commissionWrap').classList.toggle('hidden', enabled);
+      $('cpaWrap').classList.toggle('hidden', !enabled);
+    }
+
+    function calc() {
+      const visitors = Math.max(0, val('visitors'));
+      const ctr = pct('ctr');
+      let clicks = Math.max(0, val('clicks'));
+      const conversion = pct('conversion');
+      const aov = Math.max(0, val('aov'));
+      const returns = pct('returns');
+      const networkFee = pct('networkFee');
+      const useCpa = checked('useCpa');
+      const commission = pct('commission');
+      const cpa = Math.max(0, val('cpa'));
+
+      // If visitors/ctr changed since last edit, recompute clicks; if clicks edited directly, back-compute ctr.
+      const clickSource = document.activeElement && document.activeElement.id === 'clicks' ? 'clicks' : 'visitors';
+      if (clickSource === 'visitors') {
+        clicks = Math.round(visitors * ctr);
+        $('clicks').value = clicks;
+      } else {
+        const derivedCtr = visitors > 0 ? clicks / visitors : 0;
+        $('ctr').value = (derivedCtr * 100).toFixed(2);
+      }
+
+      const conversions = clicks * conversion;
+      const grossRevenue = useCpa ? conversions * cpa : conversions * aov * commission;
+      const afterReturns = grossRevenue * (1 - returns);
+      const netRevenue = afterReturns * (1 - networkFee);
+      const rpc = clicks > 0 ? netRevenue / clicks : 0;
+      const rpm = visitors > 0 ? netRevenue / visitors * 1000 : 0;
+
+      $('outClicks').textContent = fmtNum(clicks);
+      $('outConversions').textContent = fmtNum(conversions);
+      $('outGross').textContent = fmtMoney(grossRevenue);
+      $('outNet').textContent = fmtMoney(netRevenue);
+      $('outRpc').textContent = fmtMoney2(rpc);
+      $('outRpm').textContent = fmtMoney2(rpm);
+
+      let verdict = '';
+      if (clicks <= 0) {
+        verdict = 'Enter traffic and a click-through rate to estimate monthly affiliate revenue.';
+      } else if (conversions <= 0) {
+        verdict = `With ${fmtNum(clicks)} clicks, a ${(conversion*100).toFixed(1)}% conversion rate produces no conversions. Try improving CTR or conversion rate, or increase traffic.`;
+      } else {
+        verdict = `At ${fmtNum(clicks)} clicks and ${(conversion*100).toFixed(1)}% conversion, you would drive ~${fmtNum(conversions)} ${useCpa ? 'actions' : 'orders'} per month. Estimated net affiliate revenue is ${fmtMoney(netRevenue)} (${fmtMoney2(rpc)} per click, ${fmtMoney2(rpm)} per 1,000 visitors).`;
+        if (returns > 0) verdict += ` Returns/refunds shave off roughly ${(returns*100).toFixed(0)}% of gross commission.`;
+        if (networkFee > 0) verdict += ` Network fees take another ${(networkFee*100).toFixed(1)}%.`;
+      }
+      $('verdictText').textContent = verdict;
+    }
+
+    function fmtMoney2(n) {
+      return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 });
+    }
+
+    function applyScenario(s) {
+      $('visitors').value = s.monthly_visitors;
+      $('ctr').value = s.ctr_pct;
+      $('conversion').value = s.conversion_pct;
+      $('aov').value = s.aov;
+      $('returns').value = s.return_pct;
+      $('networkFee').value = s.network_fee_pct;
+      setCpaMode(s.use_cpa);
+      $('commission').value = s.commission_pct;
+      $('cpa').value = s.cpa_amount;
+      calc();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyScenario(JSON.parse(btn.dataset.scenario));
+          document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('bg-brand-gold', 'text-neutral-950', 'border-brand-gold'));
+          btn.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+        });
+      });
+
+      $('useCpa').addEventListener('change', () => {
+        setCpaMode($('useCpa').checked);
+        calc();
+      });
+
+      ['visitors','ctr','clicks','conversion','aov','returns','commission','cpa','networkFee'].forEach(id => {
+        $(id).addEventListener('input', calc);
+      });
+
+      // Highlight first scenario if it matches defaults roughly
+      const firstBtn = document.querySelector('.scenario-btn');
+      if (firstBtn) firstBtn.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+      setCpaMode(defaults.use_cpa);
+      calc();
+    });
+  </script>
+</Layout>
