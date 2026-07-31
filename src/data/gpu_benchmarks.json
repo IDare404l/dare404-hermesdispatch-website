@@ -147,7 +147,7 @@
       "notes": "Budget mini PC for local LLM experiments."
     }
   },
-  "last_updated": "2026-07-31T17:02:20.220073Z",
+  "last_updated": "2026-07-31T17:02:27.917808Z",
   "source": "curated public spec sheets + community Ollama/vLLM benchmarks",
   "methodology": "All token/sec numbers are 4-bit quantized inference at ~4096 context, averaged from community Ollama and vLLM runs."
 }
