@@ -6,7 +6,7 @@ image: https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80
 name_full: TradingView
 price: Free; paid from $14.95/mo
 source: https://www.tradingview.com
-referral_link: ''
+referral_link: https://www.tradingview.com/?aff_id=167461
 why_use: Best-in-class charting, Pine Script strategy development, and social trading
   community.
 affiliate_tags:

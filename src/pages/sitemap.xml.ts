@@ -1,12 +1,15 @@
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
-  const site = context.site?.toString() || 'https://hermesdispatch.dev';
+  const site = (context.site?.toString() || 'https://hermesdispatch.dev').replace(/\/$/, '');
 
   const pages = [
     { path: '/', changefreq: 'daily', priority: 1.0 },
     { path: '/newsletter/', changefreq: 'daily', priority: 0.9 },
     { path: '/directory/', changefreq: 'daily', priority: 0.9 },
+    { path: '/hardware/', changefreq: 'weekly', priority: 0.9 },
+    { path: '/crypto/', changefreq: 'weekly', priority: 0.9 },
+    { path: '/invest/', changefreq: 'weekly', priority: 0.9 },
     { path: '/answers/', changefreq: 'daily', priority: 0.9 },
     { path: '/guides/', changefreq: 'weekly', priority: 0.8 },
     { path: '/reviews/', changefreq: 'weekly', priority: 0.7 },

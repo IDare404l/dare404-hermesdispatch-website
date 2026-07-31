@@ -33,6 +33,9 @@ Thumbs.db
 .wrangler/
 
 # Local archive + old copies
-public/
 src/layouts/*.old
 src/pages/.archive/
+# Ignore untracked local WIP pages that are not ready for deploy
+src/pages/boise-real-estate-leads.astro
+src/pages/contact.astro
+src/pages/services.astro
