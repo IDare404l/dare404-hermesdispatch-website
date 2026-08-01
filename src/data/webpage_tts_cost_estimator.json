@@ -156,6 +156,24 @@
       "chars_per_minute": 150,
       "quality": "Good",
       "notes": "Local compute cost only; no per-character API fee."
+    },
+    {
+      "slug": "google-standard",
+      "name": "Google Cloud TTS Standard",
+      "tier": "Standard",
+      "cost_per_1m_chars_usd": 4.0,
+      "chars_per_minute": 150,
+      "quality": "Good",
+      "notes": "Cheapest Google tier; basic WaveNet/Standard voices."
+    },
+    {
+      "slug": "amazon-polly-standard",
+      "name": "Amazon Polly Standard",
+      "tier": "Standard",
+      "cost_per_1m_chars_usd": 4.0,
+      "chars_per_minute": 150,
+      "quality": "Good",
+      "notes": "Lowest-cost Polly tier; 5M chars/mo free for first 12 months."
     }
   ],
   "speed_presets": [
