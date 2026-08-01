@@ -1,0 +1,350 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/webpage_tts_cost_estimator.json';
+
+const title = "Webpage to Audio Converter / TTS Cost Estimator";
+const description = "Estimate the cost and audio duration of turning any webpage or article into speech with TTS providers like OpenAI, ElevenLabs, Google Cloud, Amazon Polly, and Azure.";
+
+const { defaults, providers, speed_presets, page_presets, faq } = data;
+const providerMap = Object.fromEntries(providers.map(p => [p.slug, p]));
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name={title} description={description} url="https://hermesdispatch.dev/tools/webpage-tts-cost-estimator/" applicationCategory="WebApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({
+      "@type": "Question",
+      "name": f.question,
+      "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+    }))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔊</div>
+        <h1 class="display-heading mb-4">Webpage to Audio Cost Estimator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate cost and audio duration for turning a webpage into speech. Compare TTS providers, speeds, and monthly budgets.
+        </p>
+      </div>
+
+      <!-- Page presets -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+        {page_presets.map((preset, i) => (
+          <button type="button" class="preset-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-sm font-semibold">{preset.name}</div>
+            <div class="text-xs text-neutral-400 mt-1">{preset.words.toLocaleString()} words</div>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <!-- Inputs -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Page & voice settings</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Webpage URL (for reference)</label>
+              <input id="pageUrl" type="url" value={defaults.url} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">Used as a label; we don't fetch the live page.</p>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Word count</label>
+                <input id="wordCount" type="number" min="1" step="50" value={defaults.word_count} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Speech speed (wpm)</label>
+                <input id="speechWpm" type="number" min="50" max="300" step="10" value={defaults.speech_speed_wpm} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <span class="text-sm text-neutral-400 block mb-2">Speed preset</span>
+              <div class="flex flex-wrap gap-2" id="speed-buttons">
+                {speed_presets.map((preset, i) => (
+                  <button type="button" class="speed-btn px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-xs transition-colors" data-wpm={preset.wpm} data-index={i}>
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">TTS provider</label>
+              <select id="provider" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {providers.map(p => <option value={p.slug} selected={p.slug === defaults.provider}>{p.name} — ${p.cost_per_1m_chars_usd.toFixed(2)}/1M chars</option>)}
+              </select>
+              <p id="providerNote" class="text-xs text-neutral-500 mt-1">{providerMap[defaults.provider].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Price markup or margin (%)</label>
+              <input id="markupPct" type="number" min="0" step="5" value={defaults.markup_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">Add a margin if you resell audio or include hosting/transcription overhead.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <input id="includePrepCost" type="checkbox" class="w-4 h-4 accent-brand-gold" checked={defaults.include_prep_cost} />
+              <label for="includePrepCost" class="text-sm text-neutral-300">Add prep/post cost per article</label>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Prep / editing cost per article ($)</label>
+              <input id="prepCost" type="number" min="0" step="1" value={defaults.prep_cost_usd} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">Editing, cleanup, hosting, or distribution cost per webpage.</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Articles per month</label>
+              <input id="monthlyArticles" type="number" min="1" step="1" value={defaults.monthly_articles} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="space-y-4">
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Estimated audio duration</p>
+            <p id="outDuration" class="text-3xl font-bold text-brand-gold">—</p>
+            <p id="outDurationDetail" class="text-xs text-neutral-400 mt-1">minutes : seconds</p>
+          </div>
+          <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+            <p class="text-xs text-neutral-500 uppercase mb-1">One-page TTS cost</p>
+            <p id="outCostPerPage" class="text-3xl font-bold text-brand-gold">—</p>
+            <p id="outCostPerPageDetail" class="text-xs text-neutral-400 mt-1">TTS only</p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Characters</p>
+              <p id="outChars" class="text-xl font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center border border-brand-gold/20">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Cost per minute</p>
+              <p id="outCostPerMinute" class="text-xl font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Monthly TTS cost</p>
+              <p id="outMonthlyTts" class="text-lg font-bold">—</p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+              <p class="text-xs text-neutral-500 uppercase mb-1">Monthly total</p>
+              <p id="outMonthlyTotal" class="text-lg font-bold text-brand-gold">—</p>
+            </div>
+          </div>
+          <p class="text-xs text-neutral-500 text-center">{data.note}</p>
+        </div>
+      </div>
+
+      <!-- Provider comparison -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Provider comparison for this page</h2>
+        <p class="text-sm text-neutral-400 mb-4">Same word count and speed across all providers. Sorted by estimated cost per page.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Provider</th>
+                <th class="text-left py-2">Tier</th>
+                <th class="text-right py-2">Cost / 1M chars</th>
+                <th class="text-right py-2">Page cost</th>
+                <th class="text-right py-2">Monthly TTS</th>
+                <th class="text-left py-2">Quality</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTable" class="divide-y divide-neutral-800">
+              {providers.map(p => (
+                <tr data-slug={p.slug} class="hover:bg-neutral-800/30">
+                  <td class="py-3">{p.name}</td>
+                  <td class="py-3 text-neutral-400">{p.tier}</td>
+                  <td class="py-3 text-right cost-rate">—</td>
+                  <td class="py-3 text-right cost-page font-semibold text-brand-gold">—</td>
+                  <td class="py-3 text-right cost-monthly">—</td>
+                  <td class="py-3 text-neutral-400">{p.quality}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How it works / FAQ -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Characters</strong>: word count × 5.5 chars/word including spaces and punctuation.</li>
+            <li><strong class="text-white">Duration</strong>: word count ÷ words-per-minute, converted to minutes and seconds.</li>
+            <li><strong class="text-white">TTS cost</strong>: characters ÷ 1,000,000 × provider price per 1M characters.</li>
+            <li><strong class="text-white">Monthly cost</strong>: per-page TTS cost × articles per month + prep cost per article.</li>
+            <li><strong class="text-white">Margin</strong>: optional markup applied on top of TTS cost before monthly totals.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Ways to cut cost</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• Use self-hosted Kokoro or Piper for batch content with no per-character fee.</li>
+            <li>• Choose Polly Standard, Google WaveNet, or Speechmatics for cheap neural quality.</li>
+            <li>• Strip HTML, ads, and navigation before counting words.</li>
+            <li>• Cache generated audio; most pages don't change often.</li>
+            <li>• Use 150 wpm unless your audience needs slower narration.</li>
+          </ul>
+        </div>
+      </div>
+
+      <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faq.map((f, i) => (
+            <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+              <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+              <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/llm-cost-calculator/" class="btn-primary text-sm">LLM Cost Calculator →</a>
+        <a href="/tools/agent-memory-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Memory / RAG Cost →</a>
+        <a href="/tools/newsletter-prompt-generator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Newsletter Prompt Generator →</a>
+      </div>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, providers, speed_presets, page_presets }}>
+    const el = {
+      pageUrl: document.getElementById('pageUrl'),
+      wordCount: document.getElementById('wordCount'),
+      speechWpm: document.getElementById('speechWpm'),
+      provider: document.getElementById('provider'),
+      providerNote: document.getElementById('providerNote'),
+      markupPct: document.getElementById('markupPct'),
+      includePrepCost: document.getElementById('includePrepCost'),
+      prepCost: document.getElementById('prepCost'),
+      monthlyArticles: document.getElementById('monthlyArticles'),
+      outDuration: document.getElementById('outDuration'),
+      outDurationDetail: document.getElementById('outDurationDetail'),
+      outCostPerPage: document.getElementById('outCostPerPage'),
+      outCostPerPageDetail: document.getElementById('outCostPerPageDetail'),
+      outChars: document.getElementById('outChars'),
+      outCostPerMinute: document.getElementById('outCostPerMinute'),
+      outMonthlyTts: document.getElementById('outMonthlyTts'),
+      outMonthlyTotal: document.getElementById('outMonthlyTotal'),
+    };
+
+    const providerMap = Object.fromEntries(providers.map(p => [p.slug, p]));
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (n < 0.01) return '$' + n.toFixed(4);
+      if (n < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+    };
+    const fmtNum = (n) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function formatDuration(words, wpm) {
+      const totalSeconds = (words / wpm) * 60;
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = Math.round(totalSeconds % 60);
+      return { text: `${minutes}:${seconds.toString().padStart(2, '0')}`, detail: `${Math.round(totalSeconds)} seconds total` };
+    }
+
+    function getInputs() {
+      const words = Math.max(1, parseFloat(el.wordCount.value) || 1);
+      const wpm = Math.max(50, parseFloat(el.speechWpm.value) || 150);
+      const markup = Math.max(0, parseFloat(el.markupPct.value) || 0);
+      const includePrep = el.includePrepCost.checked;
+      const prepCost = includePrep ? Math.max(0, parseFloat(el.prepCost.value) || 0) : 0;
+      const monthlyArticles = Math.max(1, parseFloat(el.monthlyArticles.value) || 1);
+      return { words, wpm, markup, prepCost, monthlyArticles };
+    }
+
+    function compute(providerSlug, inputs) {
+      const provider = providerMap[providerSlug] || providers[0];
+      const chars = Math.round(inputs.words * 5.5);
+      const ttsCost = (chars / 1_000_000) * provider.cost_per_1m_chars_usd;
+      const markedUpTts = ttsCost * (1 + inputs.markup / 100);
+      const totalPageCost = markedUpTts + inputs.prepCost;
+      const monthlyTts = markedUpTts * inputs.monthlyArticles;
+      const monthlyTotal = totalPageCost * inputs.monthlyArticles;
+      const duration = (inputs.words / inputs.wpm) * 60;
+      const costPerMinute = duration > 0 ? totalPageCost / (duration / 60) : 0;
+      return { provider, chars, ttsCost, markedUpTts, totalPageCost, monthlyTts, monthlyTotal, duration, costPerMinute };
+    }
+
+    function updateProviderNote() {
+      const provider = providerMap[el.provider.value];
+      if (provider && el.providerNote) el.providerNote.textContent = provider.notes;
+    }
+
+    function calc() {
+      updateProviderNote();
+      const inputs = getInputs();
+      const selected = compute(el.provider.value, inputs);
+
+      const dur = formatDuration(inputs.words, inputs.wpm);
+      el.outDuration.textContent = dur.text;
+      el.outDurationDetail.textContent = dur.detail;
+
+      el.outCostPerPage.textContent = fmtMoney(selected.totalPageCost);
+      el.outCostPerPageDetail.textContent = selected.prepCost > 0
+        ? `${fmtMoney(selected.markedUpTts)} TTS + ${fmtMoney(selected.prepCost)} prep`
+        : 'TTS only';
+
+      el.outChars.textContent = fmtNum(selected.chars);
+      el.outCostPerMinute.textContent = selected.duration > 0 ? fmtMoney(selected.costPerMinute) : '—';
+      el.outMonthlyTts.textContent = fmtMoney(selected.monthlyTts);
+      el.outMonthlyTotal.textContent = fmtMoney(selected.monthlyTotal);
+
+      document.querySelectorAll('#comparisonTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const res = compute(slug, inputs);
+        row.querySelector('.cost-rate').textContent = fmtMoney(res.provider.cost_per_1m_chars_usd) + ' / 1M';
+        row.querySelector('.cost-page').textContent = fmtMoney(res.totalPageCost);
+        row.querySelector('.cost-monthly').textContent = fmtMoney(res.monthlyTotal);
+        if (slug === el.provider.value) {
+          row.classList.add('bg-brand-gold/10');
+        } else {
+          row.classList.remove('bg-brand-gold/10');
+        }
+      });
+    }
+
+    function applyPagePreset(idx) {
+      const p = page_presets[idx];
+      if (!p) return;
+      el.wordCount.value = p.words;
+      calc();
+    }
+
+    function applySpeedPreset(wpm) {
+      el.speechWpm.value = wpm;
+      calc();
+    }
+
+    ['input', 'change'].forEach(evt => {
+      Object.values(el).forEach(input => {
+        if (input && (input.tagName === 'INPUT' || input.tagName === 'SELECT')) {
+          input.addEventListener(evt, calc);
+        }
+      });
+      el.includePrepCost.addEventListener(evt, calc);
+    });
+
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyPagePreset(parseInt(btn.dataset.idx, 10)));
+    });
+
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => applySpeedPreset(parseInt(btn.dataset.wpm, 10)));
+    });
+
+    // Highlight first speed button
+    const firstSpeed = document.querySelector('.speed-btn');
+    if (firstSpeed) firstSpeed.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+
+    calc();
+  </script>
+</Layout>

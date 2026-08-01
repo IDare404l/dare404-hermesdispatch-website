@@ -1,0 +1,196 @@
+{
+  "last_updated": "2026-08-01",
+  "currency": "USD",
+  "note": "Prices are directional estimates based on public per-character or per-token TTS pricing. Provider rates change frequently; confirm current pricing before budgeting. Audio duration assumes clean article text with no markup, code blocks, or ads.",
+  "defaults": {
+    "url": "https://hermesdispatch.dev/tools/",
+    "word_count": 2500,
+    "speech_speed_wpm": 150,
+    "provider": "openai-tts-1",
+    "include_prep_cost": false,
+    "prep_cost_usd": 5.0,
+    "monthly_articles": 30,
+    "markup_pct": 0
+  },
+  "providers": [
+    {
+      "slug": "openai-tts-1",
+      "name": "OpenAI tts-1",
+      "tier": "Standard",
+      "cost_per_1m_chars_usd": 15.0,
+      "chars_per_minute": 150,
+      "quality": "High",
+      "notes": "Six preset voices. Simple API. Billed per character."
+    },
+    {
+      "slug": "openai-tts-1-hd",
+      "name": "OpenAI tts-1-hd",
+      "tier": "High Definition",
+      "cost_per_1m_chars_usd": 30.0,
+      "chars_per_minute": 150,
+      "quality": "Very high",
+      "notes": "Higher-quality variant of tts-1 at 2× the price."
+    },
+    {
+      "slug": "elevenlabs-flash",
+      "name": "ElevenLabs Flash v2.5",
+      "tier": "Fast / real-time",
+      "cost_per_1m_chars_usd": 50.0,
+      "chars_per_minute": 150,
+      "quality": "High",
+      "notes": "Low-latency, 32 languages, good for agents."
+    },
+    {
+      "slug": "elevenlabs-multilingual",
+      "name": "ElevenLabs Multilingual v2",
+      "tier": "Premium",
+      "cost_per_1m_chars_usd": 100.0,
+      "chars_per_minute": 150,
+      "quality": "Very high",
+      "notes": "Voice cloning and emotional range; higher price."
+    },
+    {
+      "slug": "google-neural2",
+      "name": "Google Cloud TTS Neural2 / WaveNet",
+      "tier": "Neural",
+      "cost_per_1m_chars_usd": 16.0,
+      "chars_per_minute": 150,
+      "quality": "High",
+      "notes": "50+ languages, ~300 voices. Free tier included."
+    },
+    {
+      "slug": "google-chirp3-hd",
+      "name": "Google Cloud TTS Chirp 3 HD",
+      "tier": "Studio HD",
+      "cost_per_1m_chars_usd": 30.0,
+      "chars_per_minute": 150,
+      "quality": "Very high",
+      "notes": "Premium studio-quality voices."
+    },
+    {
+      "slug": "amazon-polly-neural",
+      "name": "Amazon Polly Neural",
+      "tier": "Neural",
+      "cost_per_1m_chars_usd": 16.0,
+      "chars_per_minute": 150,
+      "quality": "High",
+      "notes": "AWS-native; free tier for first 12 months."
+    },
+    {
+      "slug": "amazon-polly-generative",
+      "name": "Amazon Polly Generative",
+      "tier": "Premium",
+      "cost_per_1m_chars_usd": 30.0,
+      "chars_per_minute": 150,
+      "quality": "Very high",
+      "notes": "Most expressive Polly voices."
+    },
+    {
+      "slug": "azure-neural",
+      "name": "Microsoft Azure Neural TTS",
+      "tier": "Neural",
+      "cost_per_1m_chars_usd": 16.0,
+      "chars_per_minute": 150,
+      "quality": "High",
+      "notes": "140+ languages, enterprise SSML."
+    },
+    {
+      "slug": "azure-neural-hd",
+      "name": "Microsoft Azure Neural HD",
+      "tier": "HD",
+      "cost_per_1m_chars_usd": 22.0,
+      "chars_per_minute": 150,
+      "quality": "Very high",
+      "notes": "HD voices, reduced from $30/1M in early 2026."
+    },
+    {
+      "slug": "speechmatics",
+      "name": "Speechmatics TTS",
+      "tier": "Economy",
+      "cost_per_1m_chars_usd": 11.0,
+      "chars_per_minute": 150,
+      "quality": "High",
+      "notes": "$0.011 per 1k chars; low latency."
+    },
+    {
+      "slug": "fish-audio",
+      "name": "Fish Audio",
+      "tier": "Budget",
+      "cost_per_1m_chars_usd": 15.0,
+      "chars_per_minute": 150,
+      "quality": "High",
+      "notes": "Open-source option, community voices, cloning."
+    },
+    {
+      "slug": "cartesia",
+      "name": "Cartesia Sonic",
+      "tier": "Real-time",
+      "cost_per_1m_chars_usd": 30.0,
+      "chars_per_minute": 150,
+      "quality": "High",
+      "notes": "Low-latency streaming for voice agents."
+    },
+    {
+      "slug": "unrealspeech",
+      "name": "Unreal Speech",
+      "tier": "Budget",
+      "cost_per_1m_chars_usd": 16.33,
+      "chars_per_minute": 150,
+      "quality": "High",
+      "notes": "Subscription bundles available."
+    },
+    {
+      "slug": "minimax",
+      "name": "MiniMax Speech-02",
+      "tier": "Premium",
+      "cost_per_1m_chars_usd": 50.0,
+      "chars_per_minute": 150,
+      "quality": "Very high",
+      "notes": "Long-text mode, strong multilingual support."
+    },
+    {
+      "slug": "self-hosted-kokoro",
+      "name": "Self-hosted Kokoro / Piper",
+      "tier": "Self-hosted",
+      "cost_per_1m_chars_usd": 0.0,
+      "chars_per_minute": 150,
+      "quality": "Good",
+      "notes": "Local compute cost only; no per-character API fee."
+    }
+  ],
+  "speed_presets": [
+    { "name": "Slow and clear", "wpm": 120 },
+    { "name": "Conversational", "wpm": 150 },
+    { "name": "Podcast pace", "wpm": 160 },
+    { "name": "Fast narrator", "wpm": 180 }
+  ],
+  "page_presets": [
+    { "name": "Short blog post", "words": 800 },
+    { "name": "Medium article", "words": 1500 },
+    { "name": "Long-form post", "words": 2500 },
+    { "name": "Newsletter issue", "words": 3500 },
+    { "name": "Guide / essay", "words": 5000 }
+  ],
+  "faq": [
+    {
+      "question": "How does the Webpage to Audio cost estimator work?",
+      "answer": "It converts a webpage's word count into characters, then multiplies by a TTS provider's per-character price. It also estimates audio duration using your chosen words-per-minute speech rate and shows monthly cost if you convert articles on a recurring schedule."
+    },
+    {
+      "question": "How accurate is the word-to-character conversion?",
+      "answer": "We use 5.5 characters per word including spaces and punctuation, which is typical for clean English prose. Actual HTML pages include navigation, ads, and markup, so paste the clean article text or use a readability extractor for better accuracy."
+    },
+    {
+      "question": "What speech speed should I pick?",
+      "answer": "Use 120 wpm for slow, accessible narration; 150 wpm for conversational content; 160 wpm for podcasts; and 180 wpm for fast narrators or speed-listening."
+    },
+    {
+      "question": "Why do costs vary so much between providers?",
+      "answer": "TTS pricing ranges from free self-hosted models to premium cloned voices. Hyperscalers like Google, Amazon, and Azure charge roughly $16/1M characters for neural voices. ElevenLabs and premium tiers can be 3-6× more per character."
+    },
+    {
+      "question": "Can I use this for newsletters or answer-engine content?",
+      "answer": "Yes. The tool is ideal for estimating the cost of turning blog posts, newsletter issues, and answer summaries into audio so you can budget for audio distribution or voice agents."
+    }
+  ]
+}
