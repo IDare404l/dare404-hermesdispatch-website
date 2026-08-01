@@ -213,14 +213,14 @@ export const partners: Record<string, Partner> = {
   "ledger-nano-x": {
     "slug": "ledger-nano-x",
     "label": "Ledger Nano X",
-    "url": "https://shop.ledger.com/products/ledger-nano-x?r=dare404",
+    "url": "https://shop.ledger.com/products/ledger-nano-x?r=ca1b30139f19",
     "vertical": "ledger",
     "note": "mine"
   },
   "ledger-nano-s-plus": {
     "slug": "ledger-nano-s-plus",
     "label": "Ledger Nano S Plus",
-    "url": "https://shop.ledger.com/products/ledger-nano-s-plus?r=dare404",
+    "url": "https://shop.ledger.com/products/ledger-nano-s-plus?r=ca1b30139f19",
     "vertical": "ledger",
     "note": "mine"
   },
@@ -241,7 +241,7 @@ export const partners: Record<string, Partner> = {
   "tradingview": {
     "slug": "tradingview",
     "label": "TradingView Pro",
-    "url": "https://www.tradingview.com/gopro/?share_your_legend=dare404",
+    "url": "https://www.tradingview.com/?aff_id=167461",
     "vertical": "ledger",
     "note": "mine"
   },

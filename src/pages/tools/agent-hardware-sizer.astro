@@ -33,7 +33,8 @@ const productLinks: Record<string, { slug: string; label: string; url: string }>
   'beelink-ser7': { slug: 'beelink-ser7', label: 'Beelink SER7 Pro', url: 'https://www.amazon.com/dp/B0CQT9N951?tag=dare404-20' },
   'geekom-a8': { slug: 'geekom-a8', label: 'Geekom A8', url: 'https://www.amazon.com/s?k=Geekom+A8+Ryzen+9+8945HS&ref=nb_sb_noss&tag=dare404-20' },
   'nvidia-rtx-4090': { slug: 'nvidia-rtx-4090', label: 'NVIDIA RTX 4090', url: 'https://www.amazon.com/dp/B0BH8MK76C?tag=dare404-20' },
-  'corsair-64gb-ddr5': { slug: 'corsair-64gb-ddr5', label: 'Corsair 64GB DDR5', url: 'https://www.amazon.com/dp/B09WN2H42Y?tag=dare404-20' }
+  'corsair-64gb-ddr5': { slug: 'corsair-64gb-ddr5', label: 'Corsair 64GB DDR5', url: 'https://www.amazon.com/dp/B09WN2H42Y?tag=dare404-20' },
+  'amd-rx-7900-xtx': { slug: 'amd-rx-7900-xtx', label: 'AMD Radeon RX 7900 XTX', url: 'https://www.amazon.com/dp/B0BTPK5J68?tag=dare404-20' }
 };
 ---
 
@@ -172,6 +173,7 @@ const productLinks: Record<string, { slug: string; label: string; url: string }>
         } else if (size === '30B' || (size === '13B' && q === 'Q8') || speed === 'fast') {
           build = [
             { type: 'GPU', name: 'NVIDIA RTX 4090 24GB', slug: 'nvidia-rtx-4090', note: 'Handles 13B/30B models at high speed.', price: '$1,599' },
+            { type: 'GPU', name: 'AMD Radeon RX 7900 XTX 24GB', slug: 'amd-rx-7900-xtx', note: 'Open-stack alternative with 24GB VRAM for ROCm/Vulkan inference.', price: '$999' },
             { type: 'RAM', name: 'Corsair Vengeance 64GB DDR5', slug: 'corsair-64gb-ddr5', note: 'Headroom for offloading and orchestration.', price: '$189' }
           ];
         } else if (size === '13B' || speed === 'comfortable') {
