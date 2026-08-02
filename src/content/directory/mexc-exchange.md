@@ -28,7 +28,7 @@ faq_schema:
 review: null
 verdict: A solid altcoin exchange option where available, especially for newer token
   access.
-last_verified: 2026-06-27
+last_verified: '2026-08-02'
 referral_link: https://www.mexc.com/register?inviteCode=mexc-AF-HERMES
 attribution: Public exchange terms
 ollama_score: N/A (enabler)

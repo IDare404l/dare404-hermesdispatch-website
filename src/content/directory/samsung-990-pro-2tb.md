@@ -31,7 +31,7 @@ faq_schema:
   answer: Yes, if the mini PC has an M.2 2280 slot that supports NVMe.
 review: null
 verdict: Fast NVMe storage that reduces model load times for local inference.
-last_verified: 2026-06-21
+last_verified: '2026-08-02'
 attribution: Based on manufacturer specs
 ollama_score: N/A (enabler)
 ---

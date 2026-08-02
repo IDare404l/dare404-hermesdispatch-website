@@ -38,7 +38,7 @@ faq_schema:
     24GB.
 review: null
 verdict: The next flagship for local LLM inference if 32GB VRAM and supply stabilize.
-last_verified: 2026-06-27
+last_verified: '2026-08-02'
 attribution: Based on announced specs and early community benchmarks
 ---
 

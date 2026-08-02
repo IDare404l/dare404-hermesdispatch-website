@@ -31,7 +31,7 @@ faq_schema:
     models, look at 64GB+ RAM systems or a dedicated GPU.
 review: null
 verdict: Strong mid-range mini PC with good balance of CPU, RAM, and price.
-last_verified: 2026-06-21
+last_verified: '2026-08-02'
 attribution: Based on community benchmarks
 ---
 

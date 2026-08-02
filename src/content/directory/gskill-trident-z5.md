@@ -15,7 +15,7 @@ affiliate_tags:
 - llm
 verdict: Fast, reliable DDR5 kit for LLM rigs that need high memory bandwidth and
   capacity.
-last_verified: '2026-06-21'
+last_verified: '2026-08-02'
 applicationCategory: Hardware
 operatingSystem: ''
 softwareVersion: ''

@@ -36,7 +36,7 @@ faq_schema:
     \ GPUs or upgrade over a 3\u20135 year lifecycle."
 review: null
 verdict: The most repairable, upgradeable compact desktop for local AI agents.
-last_verified: 2026-06-27
+last_verified: '2026-08-02'
 attribution: Based on Framework announced specs
 ---
 

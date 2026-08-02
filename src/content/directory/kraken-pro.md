@@ -14,7 +14,7 @@ affiliate_tags:
 - exchange
 - trading
 verdict: Best secure advanced exchange for US and international crypto traders.
-last_verified: '2026-06-21'
+last_verified: '2026-08-02'
 applicationCategory: BusinessApplication
 operatingSystem: Web, iOS, Android
 softwareVersion: ''

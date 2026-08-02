@@ -15,7 +15,7 @@ affiliate_tags:
 - server
 verdict: Best compact x86 host for agents and services when you do not need a discrete
   GPU.
-last_verified: '2026-06-21'
+last_verified: '2026-08-02'
 applicationCategory: Hardware
 operatingSystem: ''
 softwareVersion: ''

@@ -14,7 +14,7 @@ affiliate_tags:
 - storage
 - llm
 verdict: Fast, affordable 2TB NVMe SSD for model storage and fast boot times.
-last_verified: '2026-06-21'
+last_verified: '2026-08-02'
 applicationCategory: Hardware
 operatingSystem: ''
 softwareVersion: ''

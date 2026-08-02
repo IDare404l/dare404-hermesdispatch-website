@@ -15,7 +15,7 @@ affiliate_tags:
 - bitcoin
 verdict: Good used-market ASIC if you have cheap electricity and want lower upfront
   cost than the S21.
-last_verified: '2026-06-21'
+last_verified: '2026-08-02'
 applicationCategory: Hardware
 operatingSystem: ''
 softwareVersion: ''

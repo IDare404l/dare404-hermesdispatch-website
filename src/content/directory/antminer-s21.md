@@ -28,7 +28,7 @@ faq_schema:
     fees. Use the mining ROI calculator at /crypto/roi before buying.
 review: null
 verdict: Industrial Bitcoin miner for miners with cheap power and scale.
-last_verified: 2026-06-21
+last_verified: '2026-08-02'
 attribution: Based on manufacturer specs
 ollama_score: N/A (enabler)
 ---

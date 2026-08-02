@@ -12,7 +12,7 @@ agent_score: 85
 tags: [mini pc, amd, mid-range, local llm]
 source: "https://www.minisforum.com/"
 attribution: "Based on public specs and community Ollama benchmarks."
-last_verified: "2026-06-27"
+last_verified: '2026-08-02'
 ---
 
 ## What it is
