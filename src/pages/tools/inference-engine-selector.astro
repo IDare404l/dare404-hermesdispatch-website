@@ -1,268 +1,336 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
 import data from '../../data/inference_engines.json';
 
-const { categories, platforms, engines, speedHints } = data;
-const title = "Local LLM Inference Engine Selector — Pick the Best Backend";
-const description = "Choose the right local LLM inference engine for your model, hardware, and use case: Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, and more.";
+const title = "Local LLM Inference Engine Selector | Hermes Dispatch";
+const description = "Pick the best local LLM inference backend for your model, hardware, OS, and use case: Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, and more.";
+
+const engines = data.engines;
+const useCases = data.use_cases;
+const hardwareOptions = data.hardware_options;
+const osOptions = data.os_options;
+const priorities = data.priorities;
+const defaults = data.defaults;
+
+const faqs = [
+  { q: "Which inference engine is easiest for beginners?", a: "Ollama is the fastest path: one command installs it, downloads models, and exposes an OpenAI-compatible API. KoboldCpp and text-generation-webui are also friendly if you want a built-in chat UI." },
+  { q: "What is the fastest engine for high-throughput serving?", a: "vLLM and SGLang lead for multi-user throughput on NVIDIA GPUs thanks to continuous batching and PagedAttention. TensorRT-LLM can extract even more performance on NVIDIA if you compile engines ahead of time." },
+  { q: "What should I use on an Apple Silicon Mac?", a: "Use Ollama or llama.cpp for GGUF models, or MLX for native Apple Silicon performance with Safetensors/MLX-formatted weights. MLX usually gives the best tokens-per-watt on M-series chips." },
+  { q: "Can I run LLMs on a CPU-only machine?", a: "Yes. llama.cpp, Ollama, and llamafile all run on CPU with reasonable latency for small models (1B–3B, or 7B–8B at slower speeds). Use Q4_K_M or smaller quantizations to keep memory and compute low." },
+  { q: "Which engine supports the most model formats?", a: "Hugging Face Transformers supports the widest range natively. text-generation-webui also loads GGUF, GPTQ, AWQ, and EXL2 through different backends, but is heavier to set up." }
+];
+
+const easeRank = { 'Very Easy': 1, 'Easy': 2, 'Medium': 3, 'Hard': 4, 'Very Hard': 5 };
+const speedRank = { 'Low': 1, 'Medium': 2, 'High': 3, 'Very High': 4 };
 ---
 
 <Layout title={title} description={description}>
+  <ToolSchema name="Local LLM Inference Engine Selector" description={description} url="https://hermesdispatch.dev/tools/inference-engine-selector/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
   <script type="application/ld+json" is:inline set:html={JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Which inference engine is best for Apple Silicon?",
-        "acceptedAnswer": { "@type": "Answer", "text": "MLX or llama.cpp are the fastest on Apple Silicon. Ollama is the easiest to install." }
-      },
-      {
-        "@type": "Question",
-        "name": "What is the best local LLM inference server for high throughput?",
-        "acceptedAnswer": { "@type": "Answer", "text": "vLLM, TensorRT-LLM, and SGLang offer the highest throughput on NVIDIA GPUs thanks to PagedAttention, KV-cache optimizations, and continuous batching." }
-      },
-      {
-        "@type": "Question",
-        "name": "Should I use Ollama or llama.cpp?",
-        "acceptedAnswer": { "@type": "Answer", "text": "Use Ollama for quick local experimentation and a built-in model library. Use llama.cpp when you need lower-level control, speculative decoding, or custom backends." }
-      }
-    ]
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
   })} />
 
-  <section class="relative pt-24 pb-12 overflow-hidden">
-    <div class="absolute inset-0 animated-gradient opacity-50"></div>
-    <div class="grid-overlay"></div>
-    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚙️</div>
-        <h1 class="display-heading mb-4">Local LLM Inference Engine Selector</h1>
-        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
-          Pick the best backend for your model, hardware, and use case. Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, TGI, TabbyAPI, Aphrodite, and more.
-        </p>
-      </div>
-
-      <div class="glass-card rounded-2xl p-6 md:p-8 border border-brand-gold/20 mb-10">
-        <div class="grid md:grid-cols-3 gap-4 mb-6">
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2" for="useCase">Use case</label>
-            <select id="useCase" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
-              {Object.entries(categories).map(([slug, cat]) => (
-                <option value={slug}>{cat.icon} {cat.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2" for="platform">Hardware platform</label>
-            <select id="platform" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
-              {Object.entries(platforms).map(([slug, plat]) => (
-                <option value={slug}>{plat.name}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2" for="os">Operating system</label>
-            <select id="os" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
-              <option value="macOS">macOS</option>
-              <option value="Linux" selected>Linux</option>
-              <option value="Windows">Windows</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-4 mb-6">
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2" for="quant">Preferred quantization</label>
-            <select id="quant" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
-              <option value="any">Any / unsure</option>
-              <option value="GGUF">GGUF (llama.cpp / Ollama)</option>
-              <option value="AWQ">AWQ</option>
-              <option value="GPTQ">GPTQ</option>
-              <option value="FP8">FP8</option>
-              <option value="FP16">FP16 / BF16</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm text-neutral-400 mb-2" for="priority">Top priority</label>
-            <select id="priority" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:border-brand-gold focus:outline-none">
-              <option value="balanced">Balanced</option>
-              <option value="throughput">Highest throughput</option>
-              <option value="latency">Lowest latency</option>
-              <option value="ease">Easiest setup</option>
-            </select>
-          </div>
-          <div class="flex items-end">
-            <button id="resetBtn" type="button" class="w-full px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Reset</button>
-          </div>
-        </div>
-
-        <p id="summary" class="text-sm text-neutral-400"></p>
-      </div>
-
-      <div id="results" class="space-y-4"></div>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚙️</div>
+      <h1 class="display-heading mb-4">Local LLM Inference Engine Selector</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Pick the right backend for your hardware, OS, and use case. Compare Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, and more.</p>
     </div>
-  
+
+    <!-- Use-case presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Use-case presets</h2>
+      <div class="flex flex-wrap gap-3">
+        {useCases.map(u => (
+          <button type="button" class="usecase-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-usecase={u.id} data-icon={u.icon}>
+            {u.icon} {u.name}
+          </button>
+        ))}
+      </div>
+
       <div class="mt-10 p-6 rounded-xl bg-gradient-to-br from-brand-gold/10 to-brand-amber/10 border border-brand-gold/20 text-center">
-        <h3 class="text-lg font-semibold mb-2">Picked an engine? Now pick the hardware.</h3>
-        <p class="text-neutral-400 mb-4 max-w-2xl mx-auto">Ollama, llama.cpp, and vLLM all perform differently by GPU. Compare cards and find a mini PC or desktop GPU.</p>
-        <a href="/compare/gpus/" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-brand-gold hover:bg-brand-amber text-[#0d0d1a] font-bold transition mr-3">GPU Comparison →</a>
-        <a href="/tools/mini-pc-recommender/" class="inline-flex items-center px-5 py-2.5 rounded-lg border border-neutral-700 hover:bg-neutral-800 transition">Mini PC Recommender →</a>
+        <h3 class="text-lg font-semibold mb-2">Not sure how much VRAM you need?</h3>
+        <p class="text-neutral-400 mb-4 max-w-2xl mx-auto">Size your model and quantization first, then match the engine to the format.</p>
+        <a href="/tools/vram-calculator/" class="inline-flex items-center px-5 py-2.5 rounded-lg bg-brand-gold hover:bg-brand-amber text-[#0d0d1a] font-bold transition mr-3">VRAM Calculator →</a>
+        <a href="/tools/quantization-advisor/" class="inline-flex items-center px-5 py-2.5 rounded-lg border border-neutral-700 hover:bg-neutral-800 transition">Quantization Advisor →</a>
       </div>
     </section>
 
-  <script define:vars={{ categories, platforms, engines, speedHints }}>
-    const useCaseEl = document.getElementById('useCase');
-    const platformEl = document.getElementById('platform');
-    const osEl = document.getElementById('os');
-    const quantEl = document.getElementById('quant');
-    const priorityEl = document.getElementById('priority');
-    const resultsEl = document.getElementById('results');
-    const summaryEl = document.getElementById('summary');
-    const resetBtn = document.getElementById('resetBtn');
+    <!-- Inputs -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Your setup</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Primary use case</span>
+          <select id="useCaseSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {useCases.map(u => <option value={u.id} selected={u.id === defaults.use_case}>{u.icon} {u.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Hardware</span>
+          <select id="hardwareSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {hardwareOptions.map(h => <option value={h.id} selected={h.id === defaults.hardware}>{h.icon} {h.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Operating system</span>
+          <select id="osSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {osOptions.map(o => <option value={o.id} selected={o.id === defaults.os}>{o.name}</option>)}
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-neutral-400 text-sm">Priority</span>
+          <select id="prioritySelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+            {priorities.map(p => <option value={p.id} selected={p.id === defaults.priority}>{p.name}</option>)}
+          </select>
+        </label>
+      </div>
+      <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+    </section>
 
-    const quantMap = {
-      any: [],
-      GGUF: ['Q4_0', 'Q4_K_M', 'Q5_K_M', 'Q6_K', 'Q8_0', 'FP16'],
-      AWQ: ['AWQ'],
-      GPTQ: ['GPTQ'],
-      FP8: ['FP8'],
-      FP16: ['FP16', 'BF16', 'FP32']
-    };
+    <!-- Top recommendation -->
+    <section id="topRecommendation" class="hidden mb-10">
+      <div class="glass-card rounded-2xl p-8 border-2 border-brand-gold/40 glow-gold">
+        <div class="flex flex-col md:flex-row md:items-start gap-6">
+          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber flex items-center justify-center text-3xl flex-shrink-0">🏆</div>
+          <div class="flex-1">
+            <h2 class="text-2xl font-bold text-brand-gold mb-2">Top recommendation: <span id="recName"></span></h2>
+            <p id="recBestFor" class="text-neutral-300 mb-4"></p>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Ease</p>
+                <p id="recEase" class="text-xl font-bold text-white">—</p>
+              </div>
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Throughput</p>
+                <p id="recThroughput" class="text-xl font-bold text-white">—</p>
+              </div>
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">Formats</p>
+                <p id="recFormats" class="text-xl font-bold text-white">—</p>
+              </div>
+              <div class="bg-neutral-900 rounded-xl p-4 text-center">
+                <p class="text-xs text-neutral-500 uppercase">License</p>
+                <p id="recLicense" class="text-xl font-bold text-white">—</p>
+              </div>
+            </div>
+            <p id="recWhy" class="text-sm text-neutral-400 mt-3"></p>
+            <div class="flex flex-wrap gap-3 mt-5">
+              <a id="recLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary text-sm">Official site →</a>
+              <a href="/tools/quantization-advisor/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Quantization Advisor →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    function complexityBadge(level) {
-      const colors = {
-        'Low': 'bg-green-500/10 text-green-400 border-green-500/20',
-        'Medium': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-        'High': 'bg-red-500/10 text-red-400 border-red-500/20'
+    <!-- Comparison table -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Engine comparison</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 text-sm uppercase tracking-wide">
+            <th class="py-3 pr-4">Engine</th>
+            <th class="py-3 pr-4">Ease</th>
+            <th class="py-3 pr-4">Speed</th>
+            <th class="py-3 pr-4">Formats</th>
+            <th class="py-3 pr-4">Platforms</th>
+            <th class="py-3 pr-4">Multi-GPU</th>
+            <th class="py-3 pr-4">Best for</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody" class="text-neutral-200">
+          {engines.map(e => (
+            <tr class="border-b border-neutral-800/50" data-engine={e.id}>
+              <td class="py-3 pr-4 font-medium text-white">{e.name}</td>
+              <td class="py-3 pr-4"><span class="text-xs px-2 py-0.5 rounded border bg-neutral-800 text-neutral-300 border-neutral-700 ease-cell">{e.ease}</span></td>
+              <td class="py-3 pr-4"><span class="text-xs px-2 py-0.5 rounded border bg-neutral-800 text-neutral-300 border-neutral-700 speed-cell">{e.speed}</span></td>
+              <td class="py-3 pr-4 text-sm formats-cell">{e.formats.join(', ')}</td>
+              <td class="py-3 pr-4 text-sm platforms-cell">{e.platforms.join(', ')}</td>
+              <td class="py-3 pr-4 multi-cell">{e.multi_gpu ? '✅' : '—'}</td>
+              <td class="py-3 pr-4 text-sm text-neutral-400 bestfor-cell">{e.best_for}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Verdict -->
+    <section id="verdict" class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-2 text-brand-gold">Verdict</h2>
+      <p id="verdictText" class="text-lg text-neutral-200">Select your use case, hardware, OS, and priority to see a recommendation.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.q}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/quantization-advisor/" class="btn-primary text-sm">Quantization Advisor →</a>
+      <a href="/tools/vram-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">VRAM Calculator →</a>
+      <a href="/tools/open-source-llm-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Open-Source LLM Selector →</a>
+      <a href="/compare/gpus/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">GPU Comparison →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{ enginesJson: JSON.stringify(engines), useCasesJson: JSON.stringify(useCases), prioritiesJson: JSON.stringify(priorities) }}>
+    const engines = JSON.parse(enginesJson);
+    const useCases = JSON.parse(useCasesJson);
+    const priorities = JSON.parse(prioritiesJson);
+
+    const easeRank = { 'Very Easy': 1, 'Easy': 2, 'Medium': 3, 'Hard': 4, 'Very Hard': 5 };
+    const speedRank = { 'Low': 1, 'Medium': 2, 'High': 3, 'Very High': 4 };
+
+    function getInputs() {
+      return {
+        use_case: document.getElementById('useCaseSelect').value,
+        hardware: document.getElementById('hardwareSelect').value,
+        os: document.getElementById('osSelect').value,
+        priority: document.getElementById('prioritySelect').value
       };
-      return colors[level] || colors['Medium'];
     }
 
-    function supportsOs(engineKey, os) {
-      const plat = platforms[platformEl.value];
-      return plat && plat.os.includes(os);
+    function isCompatible(e, inps) {
+      const hardwareMatch = e.hardware.some(h => {
+        if (inps.hardware === 'nvidia') return h.includes('NVIDIA');
+        if (inps.hardware === 'amd') return h.includes('AMD') || h.includes('ROCm');
+        if (inps.hardware === 'apple') return h.includes('Apple Silicon');
+        if (inps.hardware === 'intel') return h.includes('Intel');
+        if (inps.hardware === 'cpu') return h.includes('CPU');
+        return false;
+      });
+      const osMatch = e.platforms.some(p => p.toLowerCase().includes(inps.os));
+      return hardwareMatch && osMatch;
     }
 
-    function supportsQuant(engineKey, quant) {
-      if (quant === 'any') return true;
-      const supported = engines[engineKey].quantization;
-      return quantMap[quant].some(q => supported.includes(q));
-    }
+    function scoreEngine(e, inps) {
+      if (!isCompatible(e, inps)) return -Infinity;
 
-    function scoreEngine(key) {
-      const e = engines[key];
-      const platform = platformEl.value;
-      const useCase = useCaseEl.value;
-      const priority = priorityEl.value;
       let score = 0;
 
-      if (!e.platforms.includes(platform)) return -1;
-      if (!supportsOs(key, osEl.value)) return -1;
-      if (!supportsQuant(key, quantEl.value)) return -1;
-      if (!e.best_for.includes(useCase)) score -= 10;
+      // Use-case match
+      const useCaseBoost = {
+        'experiment': e.ease === 'Very Easy' || e.ease === 'Easy' ? 20 : 0,
+        'chat': e.ease === 'Very Easy' || e.ease === 'Easy' ? 15 : 0,
+        'api': (e.batching === 'Continuous' || e.id === 'ollama' || e.id === 'llamacpp') ? 20 : 0,
+        'production': e.batching === 'Continuous' && e.multi_gpu ? 25 : 0,
+        'multi_gpu': e.multi_gpu && e.batching === 'Continuous' ? 25 : 0,
+        'mac': e.hardware.some(h => h.includes('Apple Silicon')) ? 25 : 0,
+        'edge': e.hardware.some(h => h.includes('ARM') || h.includes('Apple Silicon') || h.includes('Qualcomm')) ? 25 : 0,
+        'roleplay': (e.id === 'koboldcpp' || e.id === 'textgenerationwebui' || e.id === 'aphrodite') ? 20 : 0,
+        'agent': (e.batching === 'Continuous' || e.id === 'sglang' || e.id === 'vllm' || e.id === 'ollama') ? 20 : 0,
+        'nvidia_max': (e.hardware.some(h => h.includes('NVIDIA')) && e.speed === 'Very High') ? 25 : 0
+      };
+      score += useCaseBoost[inps.use_case] || 0;
 
-      const speed = speedHints[platform][key] || 0.5;
-      score += speed * 40;
+      // Priority
+      if (inps.priority === 'easy') score += (6 - easeRank[e.ease]) * 8;
+      if (inps.priority === 'fast') score += speedRank[e.throughput] * 10;
+      if (inps.priority === 'compatible') score += (e.platforms.length + e.hardware.length) * 2;
+      if (inps.priority === 'balanced') {
+        score += (6 - easeRank[e.ease]) * 4 + speedRank[e.throughput] * 4;
+      }
 
-      if (priority === 'throughput') score += e.throughput === 'Very High' ? 30 : e.throughput === 'High' ? 20 : 0;
-      if (priority === 'latency') score += e.latency === 'Low' ? 25 : 0;
-      if (priority === 'ease') score += e.complexity === 'Low' ? 30 : e.complexity === 'Medium' ? 10 : 0;
-      if (e.best_for.includes(useCase)) score += 20;
+      // General quality signals
+      score += e.popularity * 2;
+      if (e.formats.includes('GGUF')) score += 3;
+      if (e.multi_gpu) score += 2;
 
       return score;
     }
 
-    function render() {
-      const entries = Object.entries(engines)
-        .map(([key, e]) => ({ key, e, score: scoreEngine(key) }))
-        .filter(x => x.score >= 0)
-        .sort((a, b) => b.score - a.score);
-
-      if (entries.length === 0) {
-        resultsEl.innerHTML = `
-          <div class="glass-card rounded-2xl p-6 text-center border border-red-500/20">
-            <p class="text-red-400">No engine matches the selected platform, OS, and quantization. Try a different combination.</p>
-          </div>`;
-        summaryEl.textContent = '';
-        return;
-      }
-
-      const selectedCat = categories[useCaseEl.value];
-      summaryEl.textContent = `For ${selectedCat.name.toLowerCase()} on ${platforms[platformEl.value].name} (${osEl.value}), ${entries.length} engine${entries.length !== 1 ? 's' : ''} match your filters.`;
-
-      resultsEl.innerHTML = entries.map((x, i) => {
-        const e = x.e;
-        const tags = [e.throughput + ' throughput', e.latency + ' latency', e.serving];
-        const matchNote = e.best_for.includes(useCaseEl.value)
-          ? '<span class="text-brand-gold">★ Strong use-case fit</span>'
-          : '<span class="text-neutral-500">Use-case possible but not primary</span>';
-        return `
-          <div class="glass-card rounded-2xl p-5 border ${i === 0 ? 'border-brand-gold/40' : 'border-neutral-700/50'} hover:border-brand-gold/30 transition-colors">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-              <div class="flex items-center gap-3">
-                <div class="text-3xl">${e.icon}</div>
-                <div>
-                  <h3 class="text-xl font-bold">${i === 0 ? '🏆 ' : ''}${e.name}</h3>
-                  <p class="text-sm text-neutral-400">${e.serving} • Complexity: <span class="text-neutral-300">${e.complexity}</span></p>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                ${tags.map(t => `<span class="text-xs px-2 py-1 rounded border border-neutral-700 text-neutral-300">${t}</span>`).join('')}
-              </div>
-            </div>
-            <div class="grid sm:grid-cols-2 gap-3 text-sm mb-4">
-              <p><span class="text-brand-gold">✓</span> ${e.pros}</p>
-              <p><span class="text-neutral-500">✗</span> ${e.cons}</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-4 text-sm">
-              <span class="text-xs px-2 py-1 rounded border ${complexityBadge(e.complexity)}">${e.complexity} setup</span>
-              <span class="text-neutral-300">${matchNote}</span>
-              <a href="${e.setup_url}" target="_blank" rel="noopener" class="ml-auto px-4 py-2 rounded-lg bg-brand-gold text-black font-medium text-xs hover:opacity-90 transition-opacity">Install docs →</a>
-            </div>
-          </div>
-        `;
-      }).join('');
+    function badgeClass(ease) {
+      if (ease === 'Very Easy') return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+      if (ease === 'Easy' || ease === 'Medium') return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+      return 'bg-red-500/15 text-red-400 border-red-500/30';
     }
 
-    [useCaseEl, platformEl, osEl, quantEl, priorityEl].forEach(el => el.addEventListener('change', render));
+    function compute() {
+      const inps = getInputs();
 
-    resetBtn.addEventListener('click', () => {
-      useCaseEl.value = 'coding';
-      platformEl.value = 'nvidia-cuda';
-      osEl.value = 'Linux';
-      quantEl.value = 'any';
-      priorityEl.value = 'balanced';
-      render();
+      // Highlight compatible rows
+      document.querySelectorAll('#resultsBody tr').forEach(tr => {
+        const engineId = tr.dataset.engine;
+        const e = engines.find(x => x.id === engineId);
+        if (!e) return;
+        const compatible = isCompatible(e, inps);
+        tr.style.opacity = compatible ? '1' : '0.45';
+        tr.classList.remove('bg-cyan-400/10');
+      });
+
+      const scored = engines.map(e => ({ ...e, score: scoreEngine(e, inps) }))
+        .filter(e => e.score > -Infinity)
+        .sort((a, b) => b.score - a.score);
+
+      const top = scored[0];
+      const topSection = document.getElementById('topRecommendation');
+      const verdictText = document.getElementById('verdictText');
+
+      if (top) {
+        topSection.classList.remove('hidden');
+        document.getElementById('recName').textContent = top.name;
+        document.getElementById('recBestFor').textContent = top.best_for;
+        document.getElementById('recEase').textContent = top.ease;
+        document.getElementById('recThroughput').textContent = top.throughput;
+        document.getElementById('recFormats').textContent = top.formats.slice(0, 2).join(', ') + (top.formats.length > 2 ? '...' : '');
+        document.getElementById('recLicense').textContent = top.license;
+        document.getElementById('recWhy').textContent = `Compatible with ${inps.os.toUpperCase()} and your ${document.getElementById('hardwareSelect').selectedOptions[0].text}. ${top.strengths.slice(0, 3).join('; ')}.`;
+        document.getElementById('recLink').href = top.website;
+
+        const topRow = document.querySelector(`tr[data-engine="${top.id}"]`);
+        if (topRow) topRow.classList.add('bg-cyan-400/10');
+
+        const priorityName = priorities.find(p => p.id === inps.priority)?.name.toLowerCase() || 'balanced';
+        verdictText.textContent = `${top.name} is the ${priorityName} pick for ${useCases.find(u => u.id === inps.use_case)?.name.toLowerCase()} on ${document.getElementById('hardwareSelect').selectedOptions[0].text} / ${inps.os.toUpperCase()}.`;
+      } else {
+        topSection.classList.add('hidden');
+        verdictText.textContent = 'No engine matches that hardware/OS combination. Try a different OS or hardware option.';
+      }
+    }
+
+    function setInputs(useCase, hardware, os, priority) {
+      document.getElementById('useCaseSelect').value = useCase;
+      document.getElementById('hardwareSelect').value = hardware;
+      document.getElementById('osSelect').value = os;
+      document.getElementById('prioritySelect').value = priority;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.usecase-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const useCase = btn.dataset.usecase;
+          const defaultHardware = 'nvidia';
+          const defaultOs = 'linux';
+          let hardware = defaultHardware;
+          let os = defaultOs;
+          if (useCase === 'mac') { hardware = 'apple'; os = 'macos'; }
+          if (useCase === 'edge') { hardware = 'cpu'; os = 'linux'; }
+          setInputs(useCase, hardware, os, document.getElementById('prioritySelect').value);
+          compute();
+        });
+      });
+
+      ['useCaseSelect', 'hardwareSelect', 'osSelect', 'prioritySelect'].forEach(id => {
+        document.getElementById(id).addEventListener('change', compute);
+      });
+
+      compute();
     });
-
-    render();
   </script>
-
-  <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-    <h2 class="text-2xl font-bold mb-6">Why the backend matters</h2>
-    <div class="grid md:grid-cols-2 gap-6 text-sm text-neutral-400">
-      <div class="glass-card rounded-xl p-5 border border-neutral-700/50">
-        <h3 class="text-lg font-semibold text-white mb-2">Throughput vs latency</h3>
-        <p>Chat bots need low time-to-first-token. Batch pipelines care about total throughput. Servers like vLLM and TensorRT-LLM optimize throughput; Ollama and llama.cpp optimize quick local use.</p>
-      </div>
-      <div class="glass-card rounded-xl p-5 border border-neutral-700/50">
-        <h3 class="text-lg font-semibold text-white mb-2">Hardware lock-in</h3>
-        <p>MLX is Apple-only. TensorRT-LLM is NVIDIA-only. llama.cpp is the most portable. Choose the engine that matches the hardware you already own.</p>
-      </div>
-      <div class="glass-card rounded-xl p-5 border border-neutral-700/50">
-        <h3 class="text-lg font-semibold text-white mb-2">Quantization formats</h3>
-        <p>GGUF works nearly everywhere. GPTQ/AWQ/EXL2 are fastest on CUDA. FP16/BF16 need the most VRAM. Match your model file to your engine.</p>
-      </div>
-      <div class="glass-card rounded-xl p-5 border border-neutral-700/50">
-        <h3 class="text-lg font-semibold text-white mb-2">Serving interface</h3>
-        <p>OpenAI-compatible endpoints let you swap local and cloud with one line of code. Pick an engine with an HTTP server if you are building an app.</p>
-      </div>
-    </div>
-
-    <div class="mt-10 flex flex-wrap gap-3">
-      <a href="/tools/vram-calculator/" class="btn-primary text-sm">Check VRAM needs →</a>
-      <a href="/tools/vram-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Compare API vs local cost →</a>
-      <a href="/tools/no-code-agent-builder-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Build your agent stack →</a>
-    </div>
-  </section>
 </Layout>
