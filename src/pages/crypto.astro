@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import SubscriptionForm from '../components/SubscriptionForm.astro';
 
 const entries = await Astro.glob('../content/directory/*.md');
 const cryptoEntries = entries.filter(e => e.frontmatter.subcategory === 'mining');
@@ -40,6 +41,14 @@ const schema = {
       ASIC miners, GPU rigs, and profitability calculators. Run the numbers before you buy.
     </p>
     
+    <!-- Affiliate Disclosure -->
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 mb-8">
+      <svg class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span class="text-amber-400 text-xs">FTC Disclosure: Some links are affiliate/referral links. We may earn if you buy or sign up.</span>
+    </div>
+    
     <div class="flex flex-wrap justify-center gap-3 text-sm">
       <a href="/directory" class="px-4 py-2 rounded-full border border-white/10 hover:border-brand-gold/50 transition">← Full Directory</a>
       <a href="/crypto/roi" class="px-4 py-2 rounded-full border border-white/10 hover:border-brand-accent/50 transition">Mining ROI →</a>
@@ -65,10 +74,25 @@ const schema = {
           
           {product.why_use && <p class="text-sm text-gray-500 mb-4">{product.why_use}</p>}
           
-          <a href={product.referral_link || product.amazon_link} target="_blank" rel="noopener noreferrer"
-            class="block w-full text-center py-2.5 rounded-lg bg-brand-accent/10 border border-brand-accent/30 text-brand-accent font-medium hover:bg-brand-accent/20 transition">
-            {product.amazon_link ? 'View on Amazon →' : (product.referral_link ? 'Buy Direct →' : 'Learn More →')}
-          </a>
+          {(() => {
+            const ctaUrl = product.referral_link || product.amazon_link || product.source || '';
+            const ctaLabel = product.amazon_link
+              ? 'View on Amazon →'
+              : product.referral_link
+              ? 'Buy Direct →'
+              : 'Learn More →';
+            const slug = product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'product';
+            return (
+              <a
+                href={`/go/${slug}/?url=${encodeURIComponent(ctaUrl)}&source=crypto`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block w-full text-center py-2.5 rounded-lg bg-brand-accent/10 border border-brand-accent/30 text-brand-accent font-medium hover:bg-brand-accent/20 transition"
+              >
+                {ctaLabel}
+              </a>
+            );
+          })()}
           
           <p class="text-xs text-gray-600 mt-2 text-center">
             {product.referral_link ? 'Referral link — we may earn' : (product.amazon_link ? 'Affiliate link — we may earn' : '')}
@@ -165,6 +189,13 @@ const schema = {
   document.getElementById('power-cost').addEventListener('input', calculate);
   document.getElementById('btc-price').addEventListener('input', calculate);
 </script>
+
+<!-- Newsletter CTA -->
+<section class="max-w-4xl mx-auto px-4 pb-16">
+  <div class="glass-card rounded-2xl p-8 text-center">
+    <SubscriptionForm inline={true} />
+  </div>
+</section>
 
 <!-- Local Schema -->
 <script type="application/ld+json">

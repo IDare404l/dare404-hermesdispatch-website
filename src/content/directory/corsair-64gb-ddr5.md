@@ -26,7 +26,7 @@ faq_schema:
     for CPU-only inference.
 review: null
 verdict: High-capacity DDR5 kit ideal for model offloading and multi-agent workstations.
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 attribution: Based on community compatibility
 ollama_score: N/A (enabler)
 ---

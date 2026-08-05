@@ -12,7 +12,7 @@ agent_score: 94
 tags: [mini pc, amd, strix halo, local llm, 128gb]
 source: "https://www.bee-link.com/"
 attribution: "Based on public specs and community Ollama benchmarks."
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 ---
 
 ## What it is

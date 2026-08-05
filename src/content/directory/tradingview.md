@@ -14,7 +14,7 @@ affiliate_tags:
 - charting
 - trading
 verdict: Best charting platform for technical analysis and strategy prototyping.
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 applicationCategory: FinanceApplication
 operatingSystem: Web, Windows, macOS, iOS, Android
 softwareVersion: ''

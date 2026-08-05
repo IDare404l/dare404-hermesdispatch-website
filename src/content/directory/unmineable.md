@@ -28,7 +28,7 @@ faq_schema:
 review: null
 verdict: A simple way to point spare CPU/GPU power at a chosen coin without managing
   exchange swaps.
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 referral_link: https://unmineable.com/?ref=7k2l-4h7s
 attribution: Public pool terms
 ollama_score: N/A (enabler)

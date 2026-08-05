@@ -26,7 +26,7 @@ faq_schema:
     or share it.
 review: null
 verdict: Most trusted hardware wallet for securing crypto mining payouts and holdings.
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 attribution: Based on manufacturer specs
 ollama_score: N/A (enabler)
 ---

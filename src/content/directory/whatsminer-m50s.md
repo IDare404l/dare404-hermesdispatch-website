@@ -14,7 +14,7 @@ affiliate_tags:
 - asic
 - bitcoin
 verdict: Stable, efficient used-market ASIC and a solid alternative to the S19 XP.
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 applicationCategory: Hardware
 operatingSystem: ''
 softwareVersion: ''

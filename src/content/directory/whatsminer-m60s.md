@@ -33,7 +33,7 @@ faq_schema:
     seller reputation for ASICs.
 review: null
 verdict: Reliable Bitcoin ASIC with competitive efficiency for serious mining operations.
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 attribution: Based on manufacturer specs
 ollama_score: N/A (enabler)
 ---

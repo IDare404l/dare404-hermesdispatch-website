@@ -14,7 +14,7 @@ affiliate_tags:
 - security
 verdict: Best open-source hardware wallet alternative to Ledger for non-custodial
   security.
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 applicationCategory: BusinessApplication
 operatingSystem: Web, iOS, Android
 softwareVersion: ''

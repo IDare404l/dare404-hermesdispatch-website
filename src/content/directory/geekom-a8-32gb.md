@@ -12,7 +12,7 @@ agent_score: 70
 tags: [mini pc, amd, budget, local llm]
 source: "https://www.geekompc.com/"
 attribution: "Based on public specs and community Ollama benchmarks."
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 ---
 
 ## What it is

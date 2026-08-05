@@ -37,7 +37,7 @@ faq_schema:
     models.
 review: null
 verdict: A cost-effective alternative to NVIDIA for ROCm-based local inference.
-last_verified: '2026-08-02'
+last_verified: '2026-08-03'
 attribution: Based on community benchmarks
 ---
 
