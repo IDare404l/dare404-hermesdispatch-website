@@ -1,0 +1,275 @@
+{
+  "last_updated": "2026-08-07",
+  "currency": "USD",
+  "note": "Prices are directional estimates based on public list pricing as of 2026. Confirm current rates with each provider before committing to a cost model.",
+  "defaults": {
+    "agent_mode": "browser_agent",
+    "tasks_per_month": 5000,
+    "avg_steps_per_task": 8,
+    "avg_minutes_per_task": 2.5,
+    "screenshots_per_step": 1,
+    "screenshot_width": 1280,
+    "screenshot_height": 720,
+    "llm_model": "claude-sonnet-4-6",
+    "browser_provider": "browserbase",
+    "concurrency": 5,
+    "success_rate_pct": 85,
+    "include_proxy": false,
+    "proxy_gb_per_month": 10,
+    "margin_pct": 30,
+    "overhead_pct": 10
+  },
+  "scenarios": [
+    {
+      "slug": "lead-research",
+      "name": "Lead research bot",
+      "icon": "🔍",
+      "tasks_per_month": 3000,
+      "avg_steps_per_task": 6,
+      "avg_minutes_per_task": 1.5,
+      "screenshots_per_step": 1,
+      "screenshot_width": 1280,
+      "screenshot_height": 720,
+      "llm_model": "claude-sonnet-4-6",
+      "browser_provider": "browserbase",
+      "concurrency": 4,
+      "success_rate_pct": 90,
+      "include_proxy": true,
+      "proxy_gb_per_month": 5,
+      "margin_pct": 40,
+      "overhead_pct": 10
+    },
+    {
+      "slug": "support-form",
+      "name": "Support form automation",
+      "icon": "📝",
+      "tasks_per_month": 10000,
+      "avg_steps_per_task": 10,
+      "avg_minutes_per_task": 3.0,
+      "screenshots_per_step": 1,
+      "screenshot_width": 1280,
+      "screenshot_height": 720,
+      "llm_model": "gpt-4o",
+      "browser_provider": "skyvern",
+      "concurrency": 8,
+      "success_rate_pct": 88,
+      "include_proxy": false,
+      "proxy_gb_per_month": 0,
+      "margin_pct": 25,
+      "overhead_pct": 10
+    },
+    {
+      "slug": "e2e-testing",
+      "name": "QA / E2E testing",
+      "icon": "🧪",
+      "tasks_per_month": 25000,
+      "avg_steps_per_task": 12,
+      "avg_minutes_per_task": 2.0,
+      "screenshots_per_step": 1,
+      "screenshot_width": 1280,
+      "screenshot_height": 720,
+      "llm_model": "gemini-2-5-computer",
+      "browser_provider": "browserbase",
+      "concurrency": 10,
+      "success_rate_pct": 95,
+      "include_proxy": false,
+      "proxy_gb_per_month": 0,
+      "margin_pct": 20,
+      "overhead_pct": 10
+    },
+    {
+      "slug": "shopping",
+      "name": "Shopping / checkout agent",
+      "icon": "🛒",
+      "tasks_per_month": 1500,
+      "avg_steps_per_task": 15,
+      "avg_minutes_per_task": 4.0,
+      "screenshots_per_step": 1,
+      "screenshot_width": 1280,
+      "screenshot_height": 720,
+      "llm_model": "claude-sonnet-4-6",
+      "browser_provider": "tinyfish",
+      "concurrency": 3,
+      "success_rate_pct": 80,
+      "include_proxy": true,
+      "proxy_gb_per_month": 15,
+      "margin_pct": 35,
+      "overhead_pct": 15
+    }
+  ],
+  "llm_models": [
+    {
+      "slug": "claude-sonnet-4-6",
+      "name": "Claude Sonnet 4.6 (Computer Use)",
+      "input_per_1k_usd": 0.003,
+      "output_per_1k_usd": 0.015,
+      "screenshot_tokens": 1100,
+      "avg_output_tokens_per_step": 350,
+      "notes": "Strong vision + reasoning; image tokens dominate cost."
+    },
+    {
+      "slug": "claude-haiku",
+      "name": "Claude 3 Haiku",
+      "input_per_1k_usd": 0.00025,
+      "output_per_1k_usd": 0.00125,
+      "screenshot_tokens": 1100,
+      "avg_output_tokens_per_step": 250,
+      "notes": "Cheap and fast; best for simple, deterministic UI steps."
+    },
+    {
+      "slug": "gpt-4o",
+      "name": "OpenAI GPT-4o",
+      "input_per_1k_usd": 0.0025,
+      "output_per_1k_usd": 0.01,
+      "screenshot_tokens": 1100,
+      "avg_output_tokens_per_step": 320,
+      "notes": "Good visual understanding; price sits between Haiku and Sonnet."
+    },
+    {
+      "slug": "gemini-2-5-computer",
+      "name": "Gemini 2.5 Pro Computer Use",
+      "input_per_1k_usd": 0.0015,
+      "output_per_1k_usd": 0.01,
+      "screenshot_tokens": 1100,
+      "avg_output_tokens_per_step": 300,
+      "notes": "Competitive image-input pricing; strong for long-context browser sessions."
+    },
+    {
+      "slug": "gemini-2-5-flash",
+      "name": "Gemini 2.5 Flash",
+      "input_per_1k_usd": 0.0003,
+      "output_per_1k_usd": 0.0025,
+      "screenshot_tokens": 1100,
+      "avg_output_tokens_per_step": 280,
+      "notes": "Cheapest fast vision model for high-volume browser work."
+    },
+    {
+      "slug": "local-llm",
+      "name": "Local vision model (Qwen-VL / Llama)",
+      "input_per_1k_usd": 0,
+      "output_per_1k_usd": 0,
+      "screenshot_tokens": 1100,
+      "avg_output_tokens_per_step": 300,
+      "notes": "Self-hosted; GPU and power cost separate."
+    }
+  ],
+  "browser_providers": [
+    {
+      "slug": "browserbase",
+      "name": "Browserbase",
+      "base_month_usd": 0,
+      "included_hours": 1,
+      "hour_over_usd": 0.12,
+      "per_session_usd": 0,
+      "per_step_usd": 0,
+      "per_minute_usd": 0,
+      "proxy_gb_usd": 12,
+      "notes": "Pay-as-you-go free tier + $0.12/browser hr overage; proxy bandwidth $12/GB."
+    },
+    {
+      "slug": "browser-use-cloud",
+      "name": "Browser Use Cloud",
+      "base_month_usd": 0,
+      "included_hours": 0,
+      "hour_over_usd": 0.02,
+      "per_session_usd": 0,
+      "per_step_usd": 0,
+      "per_minute_usd": 0,
+      "proxy_gb_usd": 0,
+      "notes": "Managed browser from $0.02/hr; LLM and proxies billed separately."
+    },
+    {
+      "slug": "skyvern",
+      "name": "Skyvern",
+      "base_month_usd": 0,
+      "included_hours": 0,
+      "hour_over_usd": 0,
+      "per_session_usd": 0,
+      "per_step_usd": 0.05,
+      "per_minute_usd": 0,
+      "proxy_gb_usd": 0,
+      "notes": "$0.05 per step, AI + browser infrastructure bundled."
+    },
+    {
+      "slug": "tinyfish",
+      "name": "TinyFish",
+      "base_month_usd": 0,
+      "included_hours": 0,
+      "hour_over_usd": 0,
+      "per_session_usd": 0,
+      "per_step_usd": 0.015,
+      "per_minute_usd": 0.00375,
+      "proxy_gb_usd": 0,
+      "notes": "Credits: Web Agent 1/step, Browser 1/4 min (~$0.00375/min); PAYG credits $0.015."
+    },
+    {
+      "slug": "steel",
+      "name": "Steel.dev",
+      "base_month_usd": 49,
+      "included_hours": 0,
+      "hour_over_usd": 0,
+      "per_session_usd": 0,
+      "per_step_usd": 0,
+      "per_minute_usd": 0,
+      "proxy_gb_usd": 0,
+      "notes": "$49/mo base + per-session usage; proxy extra on higher tiers."
+    },
+    {
+      "slug": "self-hosted",
+      "name": "Self-hosted (Playwright/Docker)",
+      "base_month_usd": 0,
+      "included_hours": 0,
+      "hour_over_usd": 0,
+      "per_session_usd": 0,
+      "per_step_usd": 0,
+      "per_minute_usd": 0,
+      "proxy_gb_usd": 4,
+      "notes": "Open-source; pay only for VPS, residential proxy ($4/GB), and LLM."
+    }
+  ],
+  "computer_use_providers": [
+    {
+      "slug": "openai-operator",
+      "name": "OpenAI Operator",
+      "subscription_month_usd": 200,
+      "tasks_included": 0,
+      "per_task_usd": 0,
+      "notes": "$200/mo flat subscription; usage within Operator included."
+    },
+    {
+      "slug": "anthropic-computer",
+      "name": "Anthropic Claude Computer Use (API)",
+      "subscription_month_usd": 0,
+      "tasks_included": 0,
+      "per_task_usd": 0,
+      "notes": "Priced by LLM tokens only (screenshots + text). Use the LLM model above."
+    }
+  ],
+  "proxy_options": {
+    "residential_per_gb": 4,
+    "datacenter_per_gb": 1,
+    "browserbase_per_gb": 12
+  },
+  "faq": [
+    {
+      "question": "How much does an AI browser agent cost per task?",
+      "answer": "A typical managed browser-agent task with 6–12 steps costs $0.05–$0.40 in LLM + browser compute, depending on model choice, screenshot resolution, and retries. Self-hosted stacks can cut compute cost but add infrastructure labor."
+    },
+    {
+      "question": "Which is the cheapest browser infrastructure provider?",
+      "answer": "Browser Use Cloud advertises browsers from $0.02/hr, the cheapest metered option. Skyvern bundles AI + browser at $0.05 per step. TinyFish starts at $0.015 per step or ~$0.00375 per minute. Self-hosted is variable but can be cheapest at scale if you already run the servers."
+    },
+    {
+      "question": "How much does Computer Use cost with Claude vs Gemini?",
+      "answer": "Computer use is billed by LLM tokens, and each screenshot adds 1,000–2,000 image tokens. A 10-step task with 720p screenshots usually costs $0.05–$0.15 with Claude Sonnet and $0.02–$0.08 with Gemini Flash. OpenAI Operator is a flat $200/month subscription."
+    },
+    {
+      "question": "How do retries affect cost?",
+      "answer": "Retries multiply cost. If your success rate is 85%, roughly 15% of tasks fail and need a retry, raising effective cost by 15% or more. Use shorter tasks, lower screenshot resolution, and simpler UIs to reduce failure-driven retries."
+    },
+    {
+      "question": "What resolution should I use for screenshots?",
+      "answer": "1280×720 is a good default: detailed enough for most UI elements but cheaper than 1920×1080. Lower resolutions reduce image tokens but can miss small buttons or dense dashboards."
+    }
+  ]
+}

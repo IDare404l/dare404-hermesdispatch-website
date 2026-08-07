@@ -1,0 +1,511 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/browser_use_cost.json';
+
+const title = "AI Agent Browser Use / Computer Use Cost Estimator | Hermes Dispatch";
+const description = "Estimate the cost of running an AI browser agent or computer-use agent. Includes browser infrastructure, LLM tokens, screenshots, proxies, retries, and margin pricing.";
+
+const { defaults, scenarios, llm_models, browser_providers, proxy_options, faq } = data;
+const llmMap = Object.fromEntries(llm_models.map(m => [m.slug, m]));
+const browserMap = Object.fromEntries(browser_providers.map(p => [p.slug, p]));
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Browser Use / Computer Use Cost Estimator" description={description} url="https://hermesdispatch.dev/tools/browser-use-cost-estimator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({
+      "@type": "Question",
+      "name": f.question,
+      "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+    }))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🌐</div>
+        <h1 class="display-heading mb-4">AI Agent Browser / Computer Use Cost Estimator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate browser-infrastructure, LLM, screenshot, proxy, and retry costs for browser agents and computer-use agents. Add margin pricing to see what to charge per task.
+        </p>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">{s.icon}</div>
+            <h3 class="font-semibold text-sm">{s.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">{s.tasks_per_month.toLocaleString()} tasks • {s.avg_steps_per_task} steps</p>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <!-- Task volume -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Task volume</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Tasks per month</label>
+              <input id="tasksPerMonth" type="number" min="0" step="100" value={defaults.tasks_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Steps per task</label>
+                <input id="stepsPerTask" type="number" min="1" step="1" value={defaults.avg_steps_per_task} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Avg minutes / task</label>
+                <input id="avgMinutes" type="number" min="0.1" step="0.1" value={defaults.avg_minutes_per_task} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Concurrency</label>
+              <input id="concurrency" type="number" min="1" step="1" value={defaults.concurrency} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Success rate (%)</label>
+              <input id="successRate" type="number" min="1" max="100" step="1" value={defaults.success_rate_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Stack -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Browser stack</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Browser provider</label>
+              <select id="browserProvider" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {browser_providers.map(p => <option value={p.slug} selected={p.slug === defaults.browser_provider}>{p.name}</option>)}
+              </select>
+              <p id="browserNote" class="text-xs text-neutral-500 mt-1">{browserMap[defaults.browser_provider].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">LLM / vision model</label>
+              <select id="llmModel" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {llm_models.map(m => <option value={m.slug} selected={m.slug === defaults.llm_model}>{m.name}</option>)}
+              </select>
+              <p id="llmNote" class="text-xs text-neutral-500 mt-1">{llmMap[defaults.llm_model].notes}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Screenshots / step</label>
+                <input id="screenshotsPerStep" type="number" min="0" step="1" value={defaults.screenshots_per_step} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Screenshot width</label>
+                <select id="screenshotWidth" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  <option value="800" selected={defaults.screenshot_width === 800}>800px</option>
+                  <option value="1280" selected={defaults.screenshot_width === 1280}>1280px</option>
+                  <option value="1920" selected={defaults.screenshot_width === 1920}>1920px</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label class="flex items-center gap-3">
+                <input id="includeProxy" type="checkbox" class="w-4 h-4 accent-brand-gold" checked={defaults.include_proxy} />
+                <span class="text-sm text-neutral-300">Include proxy / residential IP</span>
+              </label>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Proxy data (GB / month)</label>
+              <input id="proxyGb" type="number" min="0" step="1" value={defaults.proxy_gb_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing assumptions -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Pricing assumptions</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Target gross margin (%)</label>
+              <input id="marginPct" type="number" min="0" max="99" step="1" value={defaults.margin_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Overhead markup (%)</label>
+              <input id="overheadPct" type="number" min="0" max="100" step="1" value={defaults.overhead_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="pt-2 text-sm text-neutral-400">
+              <p>LLM cost is dominated by screenshot image tokens. Each screenshot adds {defaults.screenshot_width === 1280 ? '~1,100' : '1,000–2,000'} tokens.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="grid lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Total steps / month</p>
+          <p id="outSteps" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cost per task</p>
+          <p id="outCostPerTask" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cost per step</p>
+          <p id="outCostPerStep" class="text-3xl font-bold text-white">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+          <p id="outTotalCost" class="text-3xl font-bold text-emerald-400">—</p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Browser compute</p>
+          <p id="outBrowser" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">LLM tokens</p>
+          <p id="outLlm" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Proxy</p>
+          <p id="outProxy" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Retry overhead</p>
+          <p id="outRetry" class="text-lg font-bold">—</p>
+        </div>
+      </div>
+
+      <!-- Pricing to hit margin -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Pricing to hit margin</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Price per task</p>
+            <p id="outPricePerTask" class="text-2xl font-bold text-brand-gold">—</p>
+            <p class="text-xs text-neutral-500 mt-1">includes overhead</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Price per step</p>
+            <p id="outPricePerStep" class="text-2xl font-bold text-white">—</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Required monthly revenue</p>
+            <p id="outRequiredRevenue" class="text-2xl font-bold text-emerald-400">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Provider comparison -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Cost by browser provider</h2>
+        <p class="text-sm text-neutral-400 mb-4">Same task volume and LLM; swapping only browser infrastructure. LLM and proxy costs are included.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Provider</th>
+                <th class="text-right py-2">Browser/mo</th>
+                <th class="text-right py-2">LLM/mo</th>
+                <th class="text-right py-2">Proxy/mo</th>
+                <th class="text-right py-2 font-semibold text-white">Total/mo</th>
+              </tr>
+            </thead>
+            <tbody id="browserTable" class="divide-y divide-neutral-800">
+              {browser_providers.map(p => (
+                <tr data-slug={p.slug} class="hover:bg-neutral-800/30">
+                  <td class="py-3">{p.name}<br><span class="text-xs text-neutral-500">{p.notes}</span></td>
+                  <td class="py-3 text-right browser-cost">—</td>
+                  <td class="py-3 text-right llm-cost">—</td>
+                  <td class="py-3 text-right proxy-cost">—</td>
+                  <td class="py-3 text-right total-cost font-semibold text-brand-gold">—</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LLM comparison -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Cost by LLM / vision model</h2>
+        <p class="text-sm text-neutral-400 mb-4">Same task volume and browser provider; swapping only the LLM.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Model</th>
+                <th class="text-right py-2">LLM/mo</th>
+                <th class="text-right py-2 font-semibold text-white">Total/mo</th>
+              </tr>
+            </thead>
+            <tbody id="llmTable" class="divide-y divide-neutral-800">
+              {llm_models.map(m => (
+                <tr data-slug={m.slug} class="hover:bg-neutral-800/30">
+                  <td class="py-3">{m.name}<br><span class="text-xs text-neutral-500">{m.notes}</span></td>
+                  <td class="py-3 text-right llm-cost">—</td>
+                  <td class="py-3 text-right total-cost font-semibold text-brand-gold">—</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How it works / FAQ -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Browser compute</strong> = task minutes × provider rate + per-step / per-session fees + base plan.</li>
+            <li><strong class="text-white">LLM cost</strong> = steps × (screenshots × screenshot tokens + system text) × input price + output tokens × output price.</li>
+            <li><strong class="text-white">Proxy</strong> = data transferred × GB rate when enabled.</li>
+            <li><strong class="text-white">Retry overhead</strong> = failed-task share ÷ success rate; 85% success means ~17.6% extra cost.</li>
+            <li><strong class="text-white">Margin pricing</strong> = cost per task × (1 + overhead%) ÷ (1 − margin%).</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">When to use each approach</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• <strong>Browserbase / Steel</strong> for robust CDP sessions and stealth when you already manage the agent logic.</li>
+            <li>• <strong>Skyvern</strong> when you want AI + browser bundled and priced per step.</li>
+            <li>• <strong>TinyFish</strong> for high-volume, credit-based web agents and browser sessions.</li>
+            <li>• <strong>Browser Use Cloud</strong> for the cheapest managed browser minutes.</li>
+            <li>• <strong>Self-hosted Playwright</strong> when you control the stack and can absorb infra labor.</li>
+          </ul>
+        </div>
+      </div>
+
+      <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faq.map(f => (
+            <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+              <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+              <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/agent-stack-builder/" class="btn-primary text-sm">Agent Stack Builder →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+        <a href="/tools/agent-hosting-cost-comparator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Hosting Comparator →</a>
+      </div>
+
+      <p class="text-neutral-500 text-sm mt-10">{data.note} Last updated: {data.last_updated}.</p>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, scenarios, llm_models, browser_providers, proxy_options }}>
+    const els = {
+      tasksPerMonth: document.getElementById('tasksPerMonth'),
+      stepsPerTask: document.getElementById('stepsPerTask'),
+      avgMinutes: document.getElementById('avgMinutes'),
+      concurrency: document.getElementById('concurrency'),
+      successRate: document.getElementById('successRate'),
+      browserProvider: document.getElementById('browserProvider'),
+      llmModel: document.getElementById('llmModel'),
+      screenshotsPerStep: document.getElementById('screenshotsPerStep'),
+      screenshotWidth: document.getElementById('screenshotWidth'),
+      includeProxy: document.getElementById('includeProxy'),
+      proxyGb: document.getElementById('proxyGb'),
+      marginPct: document.getElementById('marginPct'),
+      overheadPct: document.getElementById('overheadPct'),
+      browserNote: document.getElementById('browserNote'),
+      llmNote: document.getElementById('llmNote'),
+      outSteps: document.getElementById('outSteps'),
+      outCostPerTask: document.getElementById('outCostPerTask'),
+      outCostPerStep: document.getElementById('outCostPerStep'),
+      outTotalCost: document.getElementById('outTotalCost'),
+      outBrowser: document.getElementById('outBrowser'),
+      outLlm: document.getElementById('outLlm'),
+      outProxy: document.getElementById('outProxy'),
+      outRetry: document.getElementById('outRetry'),
+      outPricePerTask: document.getElementById('outPricePerTask'),
+      outPricePerStep: document.getElementById('outPricePerStep'),
+      outRequiredRevenue: document.getElementById('outRequiredRevenue'),
+    };
+
+    const llmMap = Object.fromEntries(llm_models.map(m => [m.slug, m]));
+    const browserMap = Object.fromEntries(browser_providers.map(p => [p.slug, p]));
+
+    // Approx image tokens by width (very rough heuristic)
+    const screenshotTokens = (width) => {
+      if (width <= 800) return 650;
+      if (width <= 1280) return 1100;
+      return 1800;
+    };
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (Math.abs(n) < 0.01) return '$' + n.toFixed(4);
+      if (Math.abs(n) < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+    const fmtNum = (n) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        tasks: Math.max(0, parseFloat(els.tasksPerMonth.value) || 0),
+        steps: Math.max(1, parseFloat(els.stepsPerTask.value) || 1),
+        minutes: Math.max(0.1, parseFloat(els.avgMinutes.value) || 0.1),
+        concurrency: Math.max(1, parseInt(els.concurrency.value, 10) || 1),
+        successRate: Math.max(0.01, Math.min(1, (parseFloat(els.successRate.value) || 50) / 100)),
+        screenshotsPerStep: Math.max(0, parseFloat(els.screenshotsPerStep.value) || 0),
+        screenshotWidth: parseInt(els.screenshotWidth.value, 10) || 1280,
+        includeProxy: els.includeProxy.checked,
+        proxyGb: Math.max(0, parseFloat(els.proxyGb.value) || 0),
+        marginPct: Math.max(0, Math.min(99, parseFloat(els.marginPct.value) || 0)) / 100,
+        overheadPct: Math.max(0, parseFloat(els.overheadPct.value) || 0) / 100,
+      };
+    }
+
+    function computeCost(inputs, browserSlug, llmSlug) {
+      const browser = browserMap[browserSlug] || browser_providers[0];
+      const llm = llmMap[llmSlug] || llm_models[0];
+      const monthlyMinutes = inputs.tasks * inputs.minutes;
+      const monthlySteps = inputs.tasks * inputs.steps;
+
+      // Browser provider cost
+      let browserCost = browser.base_month_usd;
+      if (monthlyMinutes > browser.included_hours * 60) {
+        browserCost += ((monthlyMinutes - browser.included_hours * 60) / 60) * browser.hour_over_usd;
+      }
+      browserCost += inputs.tasks * browser.per_session_usd;
+      browserCost += monthlySteps * browser.per_step_usd;
+      browserCost += monthlyMinutes * browser.per_minute_usd;
+
+      // LLM cost per step: screenshots + output tokens
+      const tokensPerScreenshot = screenshotTokens(inputs.screenshotWidth);
+      const inputTokensPerStep = inputs.screenshotsPerStep * tokensPerScreenshot + 500; // +system/history
+      const outputTokensPerStep = llm.avg_output_tokens_per_step;
+      const llmCost = monthlySteps * (
+        (inputTokensPerStep / 1000) * llm.input_per_1k_usd +
+        (outputTokensPerStep / 1000) * llm.output_per_1k_usd
+      );
+
+      // Proxy cost
+      const proxyCost = inputs.includeProxy ? inputs.proxyGb * Math.max(browser.proxy_gb_usd || 0, proxy_options.residential_per_gb) : 0;
+
+      // Retry overhead: expected attempts = 1 / success rate
+      const retryMultiplier = 1 / inputs.successRate;
+      const rawTotal = browserCost + llmCost + proxyCost;
+      const retryCost = rawTotal * (retryMultiplier - 1);
+      const total = rawTotal * retryMultiplier;
+
+      return {
+        monthlySteps,
+        monthlyMinutes,
+        browserCost,
+        llmCost,
+        proxyCost,
+        retryCost,
+        total,
+      };
+    }
+
+    function calc() {
+      const inputs = getInputs();
+      const res = computeCost(inputs, els.browserProvider.value, els.llmModel.value);
+
+      const effectiveTasks = Math.max(1, inputs.tasks);
+      const costPerTask = res.total / effectiveTasks;
+      const costPerStep = res.monthlySteps > 0 ? res.total / res.monthlySteps : 0;
+
+      els.outSteps.textContent = fmtNum(res.monthlySteps);
+      els.outCostPerTask.textContent = inputs.tasks > 0 ? fmtMoney(costPerTask) + '/task' : '—';
+      els.outCostPerStep.textContent = res.monthlySteps > 0 ? fmtMoney(costPerStep) + '/step' : '—';
+      els.outTotalCost.textContent = fmtMoney(res.total) + '/mo';
+
+      els.outBrowser.textContent = fmtMoney(res.browserCost) + '/mo';
+      els.outLlm.textContent = fmtMoney(res.llmCost) + '/mo';
+      els.outProxy.textContent = fmtMoney(res.proxyCost) + '/mo';
+      els.outRetry.textContent = fmtMoney(res.retryCost) + '/mo';
+
+      const markedUpCost = costPerTask * (1 + inputs.overheadPct);
+      const margin = Math.max(0, Math.min(0.99, inputs.marginPct));
+      const pricePerTask = margin < 1 ? markedUpCost / (1 - margin) : 0;
+      const pricePerStep = res.monthlySteps > 0 ? pricePerTask / inputs.steps : 0;
+      const requiredRevenue = pricePerTask * effectiveTasks;
+
+      els.outPricePerTask.textContent = pricePerTask > 0 ? fmtMoney(pricePerTask) + '/task' : '—';
+      els.outPricePerStep.textContent = pricePerStep > 0 ? fmtMoney(pricePerStep) + '/step' : '—';
+      els.outRequiredRevenue.textContent = requiredRevenue > 0 ? fmtMoney(requiredRevenue) + '/mo' : '—';
+
+      // Notes
+      const b = browserMap[els.browserProvider.value];
+      const l = llmMap[els.llmModel.value];
+      if (els.browserNote && b) els.browserNote.textContent = b.notes;
+      if (els.llmNote && l) els.llmNote.textContent = l.notes;
+
+      // Browser provider comparison table
+      document.querySelectorAll('#browserTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const r = computeCost(inputs, slug, els.llmModel.value);
+        row.querySelector('.browser-cost').textContent = fmtMoney(r.browserCost);
+        row.querySelector('.llm-cost').textContent = fmtMoney(r.llmCost);
+        row.querySelector('.proxy-cost').textContent = fmtMoney(r.proxyCost);
+        row.querySelector('.total-cost').textContent = fmtMoney(r.total);
+        if (slug === els.browserProvider.value) row.classList.add('bg-brand-gold/10');
+        else row.classList.remove('bg-brand-gold/10');
+      });
+
+      // LLM comparison table
+      document.querySelectorAll('#llmTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const r = computeCost(inputs, els.browserProvider.value, slug);
+        row.querySelector('.llm-cost').textContent = fmtMoney(r.llmCost);
+        row.querySelector('.total-cost').textContent = fmtMoney(r.total);
+        if (slug === els.llmModel.value) row.classList.add('bg-brand-gold/10');
+        else row.classList.remove('bg-brand-gold/10');
+      });
+    }
+
+    function applyScenario(idx) {
+      const s = scenarios[idx];
+      if (!s) return;
+      els.tasksPerMonth.value = s.tasks_per_month;
+      els.stepsPerTask.value = s.avg_steps_per_task;
+      els.avgMinutes.value = s.avg_minutes_per_task;
+      els.concurrency.value = s.concurrency;
+      els.successRate.value = s.success_rate_pct;
+      els.browserProvider.value = s.browser_provider;
+      els.llmModel.value = s.llm_model;
+      els.screenshotsPerStep.value = s.screenshots_per_step;
+      els.screenshotWidth.value = s.screenshot_width;
+      els.includeProxy.checked = s.include_proxy;
+      els.proxyGb.value = s.proxy_gb_per_month;
+      els.marginPct.value = s.margin_pct;
+      els.overheadPct.value = s.overhead_pct;
+      calc();
+    }
+
+    ['input', 'change'].forEach(evt => {
+      Object.values(els).forEach(el => {
+        if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT')) {
+          el.addEventListener(evt, calc);
+        }
+      });
+      els.includeProxy.addEventListener(evt, calc);
+    });
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.scenario-btn').forEach(b => {
+          b.classList.remove('border-brand-gold', 'bg-brand-gold/20');
+          b.classList.add('border-brand-gold/10');
+        });
+        btn.classList.add('border-brand-gold', 'bg-brand-gold/20');
+        applyScenario(parseInt(btn.dataset.idx, 10));
+      });
+    });
+
+    calc();
+  </script>
+</Layout>
