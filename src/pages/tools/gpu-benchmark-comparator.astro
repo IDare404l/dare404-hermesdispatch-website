@@ -1,0 +1,246 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/gpu_benchmark_comparator.json';
+
+const title = "H100 vs A100 vs B200 vs GB200 vs MI300X Benchmark Comparator | Hermes Dispatch";
+const description = "Compare NVIDIA H100, H200, A100, B200, GB200 and AMD MI300X on MLPerf benchmarks, memory bandwidth, TFLOPS, VRAM, TDP, price, and cloud cost.";
+const gpus = data.gpus;
+const benchmarks = data.benchmarks;
+const scenarios = data.scenarios;
+const providers = data.cloud_providers;
+const faqs = data.faq;
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="H100 vs A100 vs B200 vs GB200 vs MI300X Benchmark Comparator" description={description} url="https://hermesdispatch.dev/tools/gpu-benchmark-comparator/" applicationCategory="BusinessApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.question, "acceptedAnswer": {"@type": "Answer", "text": f.answer}}))
+  })} />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚡</div>
+      <h1 class="display-heading mb-4">GPU Benchmark Comparator</h1>
+      <p class="text-xl text-neutral-400 max-w-3xl mx-auto">Compare cloud/training GPUs — H100, H200, A100, B200, GB200, and AMD MI300X — across MLPerf benchmarks, memory bandwidth, TFLOPS, VRAM, TDP, street price, and cloud hourly cost.</p>
+    </div>
+
+    <!-- Preset workload selector -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Workload preset</h2>
+      <div class="flex flex-wrap gap-3" id="scenario-buttons">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={JSON.stringify(s)} data-index={i}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+      <div id="scenarioVerdict" class="mt-4 text-neutral-300">—</div>
+    </section>
+
+    <!-- Main comparison table -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20 overflow-x-auto">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Spec comparison</h2>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left text-neutral-500 border-b border-neutral-800">
+            <th class="py-3 pr-3">GPU</th>
+            <th class="py-3 pr-3">Arch</th>
+            <th class="py-3 pr-3">VRAM</th>
+            <th class="py-3 pr-3">HBM BW</th>
+            <th class="py-3 pr-3">FP16/BF16</th>
+            <th class="py-3 pr-3">FP8</th>
+            <th class="py-3 pr-3">FP4</th>
+            <th class="py-3 pr-3">FP64</th>
+            <th class="py-3 pr-3">TDP</th>
+            <th class="py-3 pr-3">Street price</th>
+            <th class="py-3 pr-3">Cloud/hr</th>
+            <th class="py-3 pl-3">Best for</th>
+          </tr>
+        </thead>
+        <tbody>
+          {gpus.map(g => (
+            <tr class="border-b border-neutral-800/50 text-neutral-300 hover:bg-neutral-900/40">
+              <td class="py-3 pr-3 font-semibold text-white">{g.name}</td>
+              <td class="py-3 pr-3">{g.architecture}</td>
+              <td class="py-3 pr-3">{g.vram_gb} GB</td>
+              <td class="py-3 pr-3">{g.memory_bandwidth_tbs} TB/s</td>
+              <td class="py-3 pr-3">{g.fp16_bf16_tflops ? `${g.fp16_bf16_tflops.toLocaleString()} T` : '—'}</td>
+              <td class="py-3 pr-3">{g.fp8_tflops ? `${g.fp8_tflops.toLocaleString()} T` : '—'}</td>
+              <td class="py-3 pr-3">{g.fp4_tflops ? `${g.fp4_tflops.toLocaleString()} T` : '—'}</td>
+              <td class="py-3 pr-3">{g.fp64_tflops ? `${g.fp64_tflops} T` : '—'}</td>
+              <td class="py-3 pr-3">{g.tdp_w} W</td>
+              <td class="py-3 pr-3">${g.street_price_usd.toLocaleString()}</td>
+              <td class="py-3 pr-3">{g.cloud_hourly_usd ? `$${g.cloud_hourly_usd}/hr` : 'Rack-only'}</td>
+              <td class="py-3 pl-3 text-neutral-400">{g.best_for.join(', ')}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p class="text-neutral-500 text-xs mt-4">{data.note}</p>
+    </section>
+
+    <!-- Benchmark bars -->
+    <section class="grid lg:grid-cols-2 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">MLPerf Training GPT-3 speedup vs A100</h2>
+        <div class="space-y-4">
+          {gpus.map(g => (
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-neutral-300">{g.name}</span>
+                <span class="text-brand-gold font-bold">{g.mlperf_training_gpt3_speedup_vs_a100.toFixed(1)}x</span>
+              </div>
+              <div class="h-2 bg-neutral-800 rounded-full overflow-hidden">
+                <div class="h-full bg-brand-gold rounded-full" style={`width: ${Math.min(100, (g.mlperf_training_gpt3_speedup_vs_a100 / 7) * 100)}%`}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">MLPerf Inference Llama 2 70B speedup vs A100</h2>
+        <div class="space-y-4">
+          {gpus.map(g => (
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-neutral-300">{g.name}</span>
+                <span class="text-brand-gold font-bold">{g.mlperf_inference_llama2_70b_speedup_vs_a100.toFixed(1)}x</span>
+              </div>
+              <div class="h-2 bg-neutral-800 rounded-full overflow-hidden">
+                <div class="h-full bg-brand-gold rounded-full" style={`width: ${Math.min(100, (g.mlperf_inference_llama2_70b_speedup_vs_a100 / 11) * 100)}%`}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Cost / value -->
+    <section class="grid lg:grid-cols-3 gap-6 mb-10">
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20 lg:col-span-2">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Cost-per-speedup</h2>
+        <p class="text-neutral-400 text-sm mb-4">Street price divided by MLPerf inference speedup vs A100. Lower is better raw hardware value for inference.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-neutral-500 border-b border-neutral-800">
+                <th class="py-2 pr-2">GPU</th>
+                <th class="py-2 pr-2">Street price</th>
+                <th class="py-2 pr-2">Inference speedup</th>
+                <th class="py-2 pr-2">Price per x speedup</th>
+                <th class="py-2 pl-2">Cloud $ per x speedup/hr</th>
+              </tr>
+            </thead>
+            <tbody>
+              {gpus.map(g => {
+                const value = g.street_price_usd / g.mlperf_inference_llama2_70b_speedup_vs_a100;
+                const cloudValue = g.cloud_hourly_usd ? (g.cloud_hourly_usd / g.mlperf_inference_llama2_70b_speedup_vs_a100).toFixed(2) : '—';
+                return (
+                  <tr class="border-b border-neutral-800/50 text-neutral-300">
+                    <td class="py-2 pr-2 font-medium">{g.name}</td>
+                    <td class="py-2 pr-2">${g.street_price_usd.toLocaleString()}</td>
+                    <td class="py-2 pr-2">{g.mlperf_inference_llama2_70b_speedup_vs_a100.toFixed(1)}x</td>
+                    <td class="py-2 pr-2">${Math.round(value).toLocaleString()}</td>
+                    <td class="py-2 pl-2">{cloudValue === '—' ? cloudValue : `$${cloudValue}`}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Cloud providers</h2>
+        <ul class="space-y-3 text-sm">
+          {providers.map(p => (
+            <li class="text-neutral-300">
+              <a href={p.url} target="_blank" rel="noopener" class="font-medium hover:text-brand-gold">{p.name}</a>
+              <p class="text-neutral-500 text-xs mt-1">{p.gpus.join(', ')} — {p.notes}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Pick your GPU -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Which GPU should you pick?</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        {scenarios.map(s => (
+          <div class="bg-neutral-900/50 rounded-xl p-5 border border-neutral-800">
+            <h3 class="font-semibold text-white mb-2">{s.name}</h3>
+            <p class="text-neutral-400 text-sm mb-3">{s.reason}</p>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <span class="bg-brand-gold/20 text-brand-gold px-2 py-1 rounded">Top: {s.top_pick}</span>
+              <span class="bg-neutral-800 text-neutral-300 px-2 py-1 rounded">Budget: {s.budget_pick}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Caveats -->
+    <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Caveats</h2>
+      <ul class="list-disc pl-5 text-neutral-300 space-y-2 text-sm">
+        <li>Peak TFLOPS are not real-world throughput. Framework, model size, batch size, quantization, sparsity, and interconnect all change results.</li>
+        <li>Cloud hourly rates are directional and can swing 2-5x based on spot, contract, and availability.</li>
+        <li>MLPerf speedups are approximate normalized comparisons vs A100; consult the latest submission tables for exact configs.</li>
+        <li>GB200 pricing is typically rack/reservation; street price shown is a per-GPU-die estimate for TCO modeling.</li>
+      </ul>
+      <p class="text-neutral-500 text-xs mt-4">Last updated: {data.last_updated}.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ scenarios, gpus }}>
+    function $(id) { return document.getElementById(id); }
+    const fmt = n => n.toFixed(1) + 'x';
+
+    function applyScenario(s) {
+      const map = {};
+      gpus.forEach(g => map[g.id] = g);
+      const top = map[Object.keys(map).find(k => s.top_pick.toLowerCase().includes(k))] || gpus[0];
+      const budget = map[Object.keys(map).find(k => s.budget_pick.toLowerCase().includes(k))] || gpus[0];
+      const topSpeed = s.benchmark.includes('training') ? top.mlperf_training_gpt3_speedup_vs_a100 : top.mlperf_inference_llama2_70b_speedup_vs_a100;
+      const budgetSpeed = s.benchmark.includes('training') ? budget.mlperf_training_gpt3_speedup_vs_a100 : budget.mlperf_inference_llama2_70b_speedup_vs_a100;
+      $('scenarioVerdict').innerHTML = `
+        <strong class="text-white">${s.name}:</strong> top pick is ${s.top_pick} (~${fmt(topSpeed)} vs A100), budget pick is ${s.budget_pick} (~${fmt(budgetSpeed)} vs A100).
+        ${s.reason}
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.scenario-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyScenario(JSON.parse(btn.dataset.scenario));
+          document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('bg-brand-gold', 'text-neutral-950', 'border-brand-gold'));
+          btn.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+        });
+      });
+      const first = document.querySelector('.scenario-btn');
+      if (first) {
+        first.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+        applyScenario(JSON.parse(first.dataset.scenario));
+      }
+    });
+  </script>
+</Layout>
