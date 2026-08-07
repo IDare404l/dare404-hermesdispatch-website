@@ -1,0 +1,507 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/ai_voice_agent_cost.json';
+
+const title = "AI Voice Agent Cost Calculator | Hermes Dispatch";
+const description = "Estimate the full cost of running an AI voice agent: telephony, voice platform, speech-to-text, text-to-speech, LLM, and margin pricing.";
+
+const {
+  defaults, scenarios, telephony_providers, voice_platforms, stt_providers, tts_providers, llm_models, faq
+} = data;
+
+const telephonyMap = Object.fromEntries(telephony_providers.map(p => [p.slug, p]));
+const platformMap = Object.fromEntries(voice_platforms.map(p => [p.slug, p]));
+const sttMap = Object.fromEntries(stt_providers.map(p => [p.slug, p]));
+const ttsMap = Object.fromEntries(tts_providers.map(p => [p.slug, p]));
+const llmMap = Object.fromEntries(llm_models.map(m => [m.slug, m]));
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Voice Agent Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/ai-voice-agent-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({
+      "@type": "Question",
+      "name": f.question,
+      "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+    }))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🎙️</div>
+        <h1 class="display-heading mb-4">AI Voice Agent Cost Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate telephony, voice platform, speech-to-text, text-to-speech, and LLM costs for AI voice agents. Add margin to see what to charge per minute or per call.
+        </p>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">{s.icon}</div>
+            <h3 class="font-semibold text-sm">{s.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">{s.calls_per_month.toLocaleString()} calls • {s.avg_call_minutes} min</p>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <!-- Call volume -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Call volume</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Calls per month</label>
+              <input id="callsPerMonth" type="number" min="0" step="100" value={defaults.calls_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Average call length (min)</label>
+              <input id="avgCallMinutes" type="number" min="0.1" step="0.1" value={defaults.avg_call_minutes} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Concurrency</label>
+                <input id="concurrency" type="number" min="1" step="1" value={defaults.concurrency} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Phone numbers</label>
+                <input id="phoneNumbers" type="number" min="0" step="1" value={defaults.phone_numbers} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="pt-2">
+              <label class="flex items-center gap-3">
+                <input id="includeSms" type="checkbox" class="w-4 h-4 accent-brand-gold" checked={defaults.include_sms} />
+                <span class="text-sm text-neutral-300">Include SMS / voicemail costs</span>
+              </label>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">SMS per call</label>
+              <input id="smsPerCall" type="number" min="0" step="0.05" value={defaults.sms_per_call} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Stack -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Voice stack</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Telephony</label>
+              <select id="telephonyProvider" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {telephony_providers.map(p => <option value={p.slug} selected={p.slug === defaults.telephony_provider}>{p.name} — ${p.inbound_min_usd.toFixed(4)}/min</option>)}
+              </select>
+              <p id="telephonyNote" class="text-xs text-neutral-500 mt-1">{telephonyMap[defaults.telephony_provider].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Voice platform</label>
+              <select id="voicePlatform" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {voice_platforms.map(p => <option value={p.slug} selected={p.slug === defaults.voice_platform}>{p.name} — ${p.per_minute_usd.toFixed(3)}/min</option>)}
+              </select>
+              <p id="platformNote" class="text-xs text-neutral-500 mt-1">{platformMap[defaults.voice_platform].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Speech-to-text</label>
+              <select id="sttProvider" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {stt_providers.map(p => <option value={p.slug} selected={p.slug === defaults.stt_provider}>{p.name} — ${p.per_minute_usd.toFixed(4)}/min</option>)}
+              </select>
+              <p id="sttNote" class="text-xs text-neutral-500 mt-1">{sttMap[defaults.stt_provider].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Text-to-speech</label>
+              <select id="ttsProvider" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {tts_providers.map(p => <option value={p.slug} selected={p.slug === defaults.tts_provider}>{p.name} — ${p.per_1k_chars_usd.toFixed(3)}/1k chars</option>)}
+              </select>
+              <p id="ttsNote" class="text-xs text-neutral-500 mt-1">{ttsMap[defaults.tts_provider].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">LLM</label>
+              <select id="llmModel" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {llm_models.map(m => <option value={m.slug} selected={m.slug === defaults.llm_model}>{m.name}</option>)}
+              </select>
+              <p id="llmNote" class="text-xs text-neutral-500 mt-1">{llmMap[defaults.llm_model].notes}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Token / pricing assumptions -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Usage assumptions</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">TTS chars per minute</label>
+              <input id="charsPerMinute" type="number" min="0" step="10" value={defaults.chars_per_minute} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">LLM input tokens / min</label>
+              <input id="llmInputPerMin" type="number" min="0" step="10" value={defaults.llm_input_tokens_per_min} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">LLM output tokens / min</label>
+              <input id="llmOutputPerMin" type="number" min="0" step="10" value={defaults.llm_output_tokens_per_min} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Target gross margin (%)</label>
+              <input id="marginPct" type="number" min="0" max="99" step="1" value={defaults.margin_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Overhead markup (%)</label>
+              <input id="overheadPct" type="number" min="0" max="100" step="1" value={defaults.overhead_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="grid lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Monthly minutes</p>
+          <p id="outMinutes" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cost per minute</p>
+          <p id="outCostPerMin" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cost per call</p>
+          <p id="outCostPerCall" class="text-3xl font-bold text-white">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+          <p id="outTotalCost" class="text-3xl font-bold text-emerald-400">—</p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Telephony</p>
+          <p id="outTelephony" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Voice platform</p>
+          <p id="outPlatform" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">STT + TTS</p>
+          <p id="outVoiceApis" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">LLM</p>
+          <p id="outLlm" class="text-lg font-bold">—</p>
+        </div>
+      </div>
+
+      <!-- Pricing to hit margin -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Pricing to hit margin</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Price per minute</p>
+            <p id="outPricePerMin" class="text-2xl font-bold text-brand-gold">—</p>
+            <p class="text-xs text-neutral-500 mt-1">includes overhead</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Price per call</p>
+            <p id="outPricePerCall" class="text-2xl font-bold text-white">—</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Required monthly revenue</p>
+            <p id="outRequiredRevenue" class="text-2xl font-bold text-emerald-400">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison tables -->
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4">Cost by voice platform</h2>
+          <p class="text-sm text-neutral-400 mb-4">Same call volume and stack, swapping only the voice platform.</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="text-neutral-500 border-b border-neutral-800">
+                <tr>
+                  <th class="text-left py-2">Platform</th>
+                  <th class="text-right py-2">Platform/mo</th>
+                  <th class="text-right py-2 font-semibold text-white">Total/mo</th>
+                </tr>
+              </thead>
+              <tbody id="platformTable" class="divide-y divide-neutral-800">
+                {voice_platforms.map(p => (
+                  <tr data-slug={p.slug} class="hover:bg-neutral-800/30">
+                    <td class="py-3">{p.name}<br><span class="text-xs text-neutral-500">${p.per_minute_usd.toFixed(3)}/min</span></td>
+                    <td class="py-3 text-right platform-cost">—</td>
+                    <td class="py-3 text-right total-cost font-semibold text-brand-gold">—</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4">Cost by telephony provider</h2>
+          <p class="text-sm text-neutral-400 mb-4">Same call volume, swapping only telephony. Assumes inbound minutes.</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="text-neutral-500 border-b border-neutral-800">
+                <tr>
+                  <th class="text-left py-2">Provider</th>
+                  <th class="text-right py-2">Telephony/mo</th>
+                  <th class="text-right py-2 font-semibold text-white">Total/mo</th>
+                </tr>
+              </thead>
+              <tbody id="telephonyTable" class="divide-y divide-neutral-800">
+                {telephony_providers.map(p => (
+                  <tr data-slug={p.slug} class="hover:bg-neutral-800/30">
+                    <td class="py-3">{p.name}<br><span class="text-xs text-neutral-500">${p.inbound_min_usd.toFixed(4)}/min</span></td>
+                    <td class="py-3 text-right telephony-cost">—</td>
+                    <td class="py-3 text-right total-cost font-semibold text-brand-gold">—</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- How it works / FAQ -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Telephony</strong> = minutes × per-minute rate + phone numbers × monthly fee + SMS count × SMS rate.</li>
+            <li><strong class="text-white">Voice platform</strong> = minutes × platform fee per minute.</li>
+            <li><strong class="text-white">STT</strong> = minutes × speech-to-text per-minute rate.</li>
+            <li><strong class="text-white">TTS</strong> = (minutes × chars per minute ÷ 1,000) × TTS per-1k-char rate.</li>
+            <li><strong class="text-white">LLM</strong> = minutes × (input tokens/1k × input price + output tokens/1k × output price).</li>
+            <li><strong class="text-white">Margin pricing</strong> = cost per minute × (1 + overhead%) ÷ (1 − margin%).</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">When to use each stack</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• <strong>Managed platforms (Vapi/Retell/Bland)</strong> for fastest time-to-market and built-in latency tuning.</li>
+            <li>• <strong>Pipecat + Daily</strong> when you need deep customization and can self-host.</li>
+            <li>• <strong>Deepgram</strong> for cheap, fast ASR; <strong>AssemblyAI</strong> when accuracy matters most.</li>
+            <li>• <strong>ElevenLabs</strong> for premium voices; <strong>OpenAI / Amazon Polly</strong> for cost-sensitive scale.</li>
+            <li>• <strong>GPT-4o mini / Claude Haiku</strong> for most voice agents; upgrade for complex reasoning.</li>
+          </ul>
+        </div>
+      </div>
+
+      <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faq.map(f => (
+            <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+              <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+              <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/webpage-tts-cost-estimator/" class="btn-primary text-sm">Webpage TTS Cost Estimator →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+        <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+      </div>
+
+      <p class="text-neutral-500 text-sm mt-10">{data.note} Last updated: {data.last_updated}.</p>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, scenarios, telephony_providers, voice_platforms, stt_providers, tts_providers, llm_models }}>
+    const els = {
+      callsPerMonth: document.getElementById('callsPerMonth'),
+      avgCallMinutes: document.getElementById('avgCallMinutes'),
+      concurrency: document.getElementById('concurrency'),
+      phoneNumbers: document.getElementById('phoneNumbers'),
+      includeSms: document.getElementById('includeSms'),
+      smsPerCall: document.getElementById('smsPerCall'),
+      telephonyProvider: document.getElementById('telephonyProvider'),
+      voicePlatform: document.getElementById('voicePlatform'),
+      sttProvider: document.getElementById('sttProvider'),
+      ttsProvider: document.getElementById('ttsProvider'),
+      llmModel: document.getElementById('llmModel'),
+      charsPerMinute: document.getElementById('charsPerMinute'),
+      llmInputPerMin: document.getElementById('llmInputPerMin'),
+      llmOutputPerMin: document.getElementById('llmOutputPerMin'),
+      marginPct: document.getElementById('marginPct'),
+      overheadPct: document.getElementById('overheadPct'),
+      telephonyNote: document.getElementById('telephonyNote'),
+      platformNote: document.getElementById('platformNote'),
+      sttNote: document.getElementById('sttNote'),
+      ttsNote: document.getElementById('ttsNote'),
+      llmNote: document.getElementById('llmNote'),
+      outMinutes: document.getElementById('outMinutes'),
+      outCostPerMin: document.getElementById('outCostPerMin'),
+      outCostPerCall: document.getElementById('outCostPerCall'),
+      outTotalCost: document.getElementById('outTotalCost'),
+      outTelephony: document.getElementById('outTelephony'),
+      outPlatform: document.getElementById('outPlatform'),
+      outVoiceApis: document.getElementById('outVoiceApis'),
+      outLlm: document.getElementById('outLlm'),
+      outPricePerMin: document.getElementById('outPricePerMin'),
+      outPricePerCall: document.getElementById('outPricePerCall'),
+      outRequiredRevenue: document.getElementById('outRequiredRevenue'),
+    };
+
+    const telephonyMap = Object.fromEntries(telephony_providers.map(p => [p.slug, p]));
+    const platformMap = Object.fromEntries(voice_platforms.map(p => [p.slug, p]));
+    const sttMap = Object.fromEntries(stt_providers.map(p => [p.slug, p]));
+    const ttsMap = Object.fromEntries(tts_providers.map(p => [p.slug, p]));
+    const llmMap = Object.fromEntries(llm_models.map(m => [m.slug, m]));
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (Math.abs(n) < 0.01) return '$' + n.toFixed(4);
+      if (Math.abs(n) < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+    const fmtNum = (n) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+    function getInputs() {
+      return {
+        calls: Math.max(0, parseFloat(els.callsPerMonth.value) || 0),
+        minutes: Math.max(0.1, parseFloat(els.avgCallMinutes.value) || 0.1),
+        concurrency: Math.max(1, parseInt(els.concurrency.value, 10) || 1),
+        phoneNumbers: Math.max(0, parseInt(els.phoneNumbers.value, 10) || 0),
+        includeSms: els.includeSms.checked,
+        smsPerCall: Math.max(0, parseFloat(els.smsPerCall.value) || 0),
+        charsPerMinute: Math.max(0, parseFloat(els.charsPerMinute.value) || 0),
+        llmInputPerMin: Math.max(0, parseFloat(els.llmInputPerMin.value) || 0),
+        llmOutputPerMin: Math.max(0, parseFloat(els.llmOutputPerMin.value) || 0),
+        marginPct: Math.max(0, Math.min(99, parseFloat(els.marginPct.value) || 0)) / 100,
+        overheadPct: Math.max(0, parseFloat(els.overheadPct.value) || 0) / 100,
+      };
+    }
+
+    function computeCost(inputs, telephonySlug, platformSlug, sttSlug, ttsSlug, llmSlug) {
+      const monthlyMinutes = inputs.calls * inputs.minutes;
+      const telephony = telephonyMap[telephonySlug] || telephony_providers[0];
+      const platform = platformMap[platformSlug] || voice_platforms[0];
+      const stt = sttMap[sttSlug] || stt_providers[0];
+      const tts = ttsMap[ttsSlug] || tts_providers[0];
+      const llm = llmMap[llmSlug] || llm_models[0];
+
+      const telephonyCost = (monthlyMinutes * telephony.inbound_min_usd) + (inputs.phoneNumbers * telephony.phone_number_month_usd);
+      const smsCount = inputs.includeSms ? inputs.calls * inputs.smsPerCall : 0;
+      const smsCost = smsCount * telephony.sms_sent_usd;
+      const totalTelephony = telephonyCost + smsCost;
+
+      const platformCost = monthlyMinutes * platform.per_minute_usd;
+      const sttCost = monthlyMinutes * stt.per_minute_usd;
+      const ttsChars = monthlyMinutes * inputs.charsPerMinute;
+      const ttsCost = (ttsChars / 1000) * tts.per_1k_chars_usd;
+      const llmCost = monthlyMinutes * ((inputs.llmInputPerMin / 1000) * llm.input_per_1k_usd + (inputs.llmOutputPerMin / 1000) * llm.output_per_1k_usd);
+
+      const total = totalTelephony + platformCost + sttCost + ttsCost + llmCost;
+      return { monthlyMinutes, totalTelephony, platformCost, sttCost, ttsCost, ttsChars, llmCost, total };
+    }
+
+    function calc() {
+      const inputs = getInputs();
+      const res = computeCost(inputs, els.telephonyProvider.value, els.voicePlatform.value, els.sttProvider.value, els.ttsProvider.value, els.llmModel.value);
+
+      els.outMinutes.textContent = fmtNum(res.monthlyMinutes);
+      els.outCostPerMin.textContent = res.monthlyMinutes > 0 ? fmtMoney(res.total / res.monthlyMinutes) + '/min' : '—';
+      els.outCostPerCall.textContent = inputs.calls > 0 ? fmtMoney(res.total / inputs.calls) + '/call' : '—';
+      els.outTotalCost.textContent = fmtMoney(res.total) + '/mo';
+
+      els.outTelephony.textContent = fmtMoney(res.totalTelephony) + '/mo';
+      els.outPlatform.textContent = fmtMoney(res.platformCost) + '/mo';
+      els.outVoiceApis.textContent = fmtMoney(res.sttCost + res.ttsCost) + '/mo';
+      els.outLlm.textContent = fmtMoney(res.llmCost) + '/mo';
+
+      const costPerMin = res.monthlyMinutes > 0 ? res.total / res.monthlyMinutes : 0;
+      const markedUpCost = costPerMin * (1 + inputs.overheadPct);
+      const margin = Math.max(0, Math.min(0.99, inputs.marginPct));
+      const pricePerMin = margin < 1 ? markedUpCost / (1 - margin) : 0;
+      const pricePerCall = pricePerMin * inputs.minutes;
+      const requiredRevenue = pricePerMin * res.monthlyMinutes;
+
+      els.outPricePerMin.textContent = pricePerMin > 0 ? fmtMoney(pricePerMin) + '/min' : '—';
+      els.outPricePerCall.textContent = pricePerCall > 0 ? fmtMoney(pricePerCall) + '/call' : '—';
+      els.outRequiredRevenue.textContent = requiredRevenue > 0 ? fmtMoney(requiredRevenue) + '/mo' : '—';
+
+      // Notes
+      const t = telephonyMap[els.telephonyProvider.value];
+      const p = platformMap[els.voicePlatform.value];
+      const s = sttMap[els.sttProvider.value];
+      const tt = ttsMap[els.ttsProvider.value];
+      const l = llmMap[els.llmModel.value];
+      if (els.telephonyNote && t) els.telephonyNote.textContent = t.notes;
+      if (els.platformNote && p) els.platformNote.textContent = p.notes;
+      if (els.sttNote && s) els.sttNote.textContent = s.notes;
+      if (els.ttsNote && tt) els.ttsNote.textContent = tt.notes;
+      if (els.llmNote && l) els.llmNote.textContent = l.notes;
+
+      // Comparison tables
+      document.querySelectorAll('#platformTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const r = computeCost(inputs, els.telephonyProvider.value, slug, els.sttProvider.value, els.ttsProvider.value, els.llmModel.value);
+        row.querySelector('.platform-cost').textContent = fmtMoney(r.platformCost);
+        row.querySelector('.total-cost').textContent = fmtMoney(r.total);
+        if (slug === els.voicePlatform.value) row.classList.add('bg-brand-gold/10');
+        else row.classList.remove('bg-brand-gold/10');
+      });
+
+      document.querySelectorAll('#telephonyTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const r = computeCost(inputs, slug, els.voicePlatform.value, els.sttProvider.value, els.ttsProvider.value, els.llmModel.value);
+        row.querySelector('.telephony-cost').textContent = fmtMoney(r.totalTelephony);
+        row.querySelector('.total-cost').textContent = fmtMoney(r.total);
+        if (slug === els.telephonyProvider.value) row.classList.add('bg-brand-gold/10');
+        else row.classList.remove('bg-brand-gold/10');
+      });
+    }
+
+    function applyScenario(idx) {
+      const s = scenarios[idx];
+      if (!s) return;
+      els.callsPerMonth.value = s.calls_per_month;
+      els.avgCallMinutes.value = s.avg_call_minutes;
+      els.concurrency.value = s.concurrency;
+      els.phoneNumbers.value = s.phone_numbers;
+      els.includeSms.checked = s.include_sms;
+      els.smsPerCall.value = s.sms_per_call;
+      els.telephonyProvider.value = s.telephony_provider;
+      els.voicePlatform.value = s.voice_platform;
+      els.sttProvider.value = s.stt_provider;
+      els.ttsProvider.value = s.tts_provider;
+      els.llmModel.value = s.llm_model;
+      els.marginPct.value = s.margin_pct;
+      calc();
+    }
+
+    ['input', 'change'].forEach(evt => {
+      Object.values(els).forEach(el => {
+        if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT')) {
+          el.addEventListener(evt, calc);
+        }
+      });
+      els.includeSms.addEventListener(evt, calc);
+    });
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.scenario-btn').forEach(b => {
+          b.classList.remove('border-brand-gold', 'bg-brand-gold/20');
+          b.classList.add('border-brand-gold/10');
+        });
+        btn.classList.add('border-brand-gold', 'bg-brand-gold/20');
+        applyScenario(parseInt(btn.dataset.idx, 10));
+      });
+    });
+
+    calc();
+  </script>
+</Layout>

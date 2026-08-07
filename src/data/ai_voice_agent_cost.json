@@ -1,76 +1,321 @@
 {
+  "last_updated": "2026-08-07",
+  "currency": "USD",
+  "note": "Prices are directional estimates based on public list pricing. Confirm current rates with each provider before committing to a pricing model.",
+  "defaults": {
+    "calls_per_month": 5000,
+    "avg_call_minutes": 3.5,
+    "chars_per_minute": 700,
+    "llm_input_tokens_per_min": 220,
+    "llm_output_tokens_per_min": 90,
+    "concurrency": 5,
+    "phone_numbers": 1,
+    "include_telephony": true,
+    "include_sms": false,
+    "sms_per_call": 0.25,
+    "telephony_provider": "twilio",
+    "voice_platform": "vapi",
+    "stt_provider": "deepgram",
+    "tts_provider": "elevenlabs",
+    "llm_model": "gpt-4o-mini",
+    "margin_pct": 0,
+    "overhead_pct": 0
+  },
   "scenarios": [
-    { "name": "Support bot", "minutes": 5000, "inboundPct": 80, "avgDuration": 4 },
-    { "name": "Sales agent", "minutes": 20000, "inboundPct": 30, "avgDuration": 6 },
-    { "name": "Scheduling assistant", "minutes": 50000, "inboundPct": 90, "avgDuration": 2 },
-    { "name": "Enterprise call center", "minutes": 200000, "inboundPct": 60, "avgDuration": 5 }
+    {
+      "slug": "sales-sdr",
+      "name": "Inbound sales SDR",
+      "icon": "📞",
+      "calls_per_month": 5000,
+      "avg_call_minutes": 4.0,
+      "concurrency": 5,
+      "phone_numbers": 2,
+      "include_sms": true,
+      "sms_per_call": 0.5,
+      "telephony_provider": "twilio",
+      "voice_platform": "vapi",
+      "stt_provider": "deepgram",
+      "tts_provider": "elevenlabs",
+      "llm_model": "gpt-4o-mini",
+      "margin_pct": 30
+    },
+    {
+      "slug": "support-bot",
+      "name": "Customer support bot",
+      "icon": "🎧",
+      "calls_per_month": 20000,
+      "avg_call_minutes": 3.0,
+      "concurrency": 12,
+      "phone_numbers": 3,
+      "include_sms": false,
+      "sms_per_call": 0,
+      "telephony_provider": "twilio",
+      "voice_platform": "retell",
+      "stt_provider": "deepgram",
+      "tts_provider": "openai",
+      "llm_model": "gpt-4o-mini",
+      "margin_pct": 25
+    },
+    {
+      "slug": "appointment",
+      "name": "Appointment reminders",
+      "icon": "📅",
+      "calls_per_month": 50000,
+      "avg_call_minutes": 1.0,
+      "concurrency": 8,
+      "phone_numbers": 2,
+      "include_sms": true,
+      "sms_per_call": 1.0,
+      "telephony_provider": "plivo",
+      "voice_platform": "vapi",
+      "stt_provider": "deepgram",
+      "tts_provider": "openai",
+      "llm_model": "gpt-4o-mini",
+      "margin_pct": 20
+    },
+    {
+      "slug": "concierge",
+      "name": "Premium concierge",
+      "icon": "🍸",
+      "calls_per_month": 1000,
+      "avg_call_minutes": 8.0,
+      "concurrency": 3,
+      "phone_numbers": 1,
+      "include_sms": true,
+      "sms_per_call": 0.3,
+      "telephony_provider": "twilio",
+      "voice_platform": "vapi",
+      "stt_provider": "deepgram",
+      "tts_provider": "elevenlabs",
+      "llm_model": "gpt-4o",
+      "margin_pct": 40
+    }
   ],
-  "providers": [
+  "telephony_providers": [
     {
-      "id": "bland",
-      "name": "Bland AI",
-      "platformPerMin": 0.045,
-      "llmPerMin": 0,
-      "sttPerMin": 0,
-      "ttsPerMin": 0,
-      "inboundPerMin": 0,
-      "outboundPerMin": 0,
-      "notes": "All-in per-minute rate for phone calls. Enterprise volume discounts available."
+      "slug": "twilio",
+      "name": "Twilio",
+      "inbound_min_usd": 0.0085,
+      "outbound_min_usd": 0.013,
+      "phone_number_month_usd": 1.15,
+      "sms_sent_usd": 0.0079,
+      "sms_received_usd": 0.0079,
+      "notes": "List pricing for US local numbers; toll-free and international rates differ."
     },
     {
-      "id": "retell",
-      "name": "Retell AI",
-      "platformPerMin": 0.035,
-      "llmPerMin": 0,
-      "sttPerMin": 0,
-      "ttsPerMin": 0,
-      "inboundPerMin": 0,
-      "outboundPerMin": 0,
-      "notes": "All-in rate for Retell voice agents. Custom enterprise pricing at scale."
+      "slug": "vonage",
+      "name": "Vonage (Nexmo)",
+      "inbound_min_usd": 0.005,
+      "outbound_min_usd": 0.005,
+      "phone_number_month_usd": 1.0,
+      "sms_sent_usd": 0.0058,
+      "sms_received_usd": 0.0058,
+      "notes": "Competitive per-minute rates; volume discounts common."
     },
     {
-      "id": "vapi",
+      "slug": "plivo",
+      "name": "Plivo",
+      "inbound_min_usd": 0.005,
+      "outbound_min_usd": 0.0065,
+      "phone_number_month_usd": 0.5,
+      "sms_sent_usd": 0.0035,
+      "sms_received_usd": 0.0035,
+      "notes": "Lower number rental and SMS cost."
+    },
+    {
+      "slug": "bandwidth",
+      "name": "Bandwidth",
+      "inbound_min_usd": 0.004,
+      "outbound_min_usd": 0.004,
+      "phone_number_month_usd": 0.35,
+      "sms_sent_usd": 0.004,
+      "sms_received_usd": 0.004,
+      "notes": "Carrier-direct pricing; usually requires minimums."
+    }
+  ],
+  "voice_platforms": [
+    {
+      "slug": "vapi",
       "name": "Vapi",
-      "platformPerMin": 0.05,
-      "llmPerMin": 0.015,
-      "sttPerMin": 0.008,
-      "ttsPerMin": 0.012,
-      "inboundPerMin": 0.015,
-      "outboundPerMin": 0.025,
-      "notes": "Platform fee + LLM, STT, TTS, and telephony broken out."
+      "per_minute_usd": 0.035,
+      "notes": "Includes orchestration + telephony piping; usage tiers apply."
     },
     {
-      "id": "synthflow",
+      "slug": "retell",
+      "name": "Retell AI",
+      "per_minute_usd": 0.03,
+      "notes": "Voice AI platform with built-in latency optimization."
+    },
+    {
+      "slug": "bland",
+      "name": "Bland AI",
+      "per_minute_usd": 0.04,
+      "notes": "Conversational voice agents with enterprise options."
+    },
+    {
+      "slug": "synthflow",
       "name": "Synthflow",
-      "platformPerMin": 0.08,
-      "llmPerMin": 0,
-      "sttPerMin": 0,
-      "ttsPerMin": 0,
-      "inboundPerMin": 0.02,
-      "outboundPerMin": 0.03,
-      "notes": "All-in AI assistant rate; telephony and some premium voices extra."
+      "per_minute_usd": 0.025,
+      "notes": "No-code voice agents; per-minute platform fee."
     },
     {
-      "id": "openai-realtime",
-      "name": "OpenAI Realtime API + Twilio",
-      "platformPerMin": 0,
-      "llmPerMin": 0.06,
-      "sttPerMin": 0,
-      "ttsPerMin": 0,
-      "inboundPerMin": 0.013,
-      "outboundPerMin": 0.022,
-      "notes": "Native audio tokens via Realtime API plus Twilio telephony."
+      "slug": "pipecat",
+      "name": "Pipecat (self-hosted)",
+      "per_minute_usd": 0,
+      "notes": "Open-source framework; infrastructure and LLM costs are separate."
     },
     {
-      "id": "self-hosted",
-      "name": "Self-hosted stack",
-      "platformPerMin": 0,
-      "llmPerMin": 0.04,
-      "sttPerMin": 0.006,
-      "ttsPerMin": 0.015,
-      "inboundPerMin": 0.0085,
-      "outboundPerMin": 0.013,
-      "notes": "DIY stack with Whisper, TTS, LLM, and Twilio. Add server and labor costs separately."
+      "slug": "daily",
+      "name": "Daily.co (custom)",
+      "per_minute_usd": 0.004,
+      "notes": "WebRTC transport; STT/TTS/LLM billed separately."
+    }
+  ],
+  "stt_providers": [
+    {
+      "slug": "deepgram",
+      "name": "Deepgram Nova-2",
+      "per_minute_usd": 0.0043,
+      "notes": "Low-latency streaming ASR with punctuation and diarization."
+    },
+    {
+      "slug": "assemblyai",
+      "name": "AssemblyAI",
+      "per_minute_usd": 0.0065,
+      "notes": "Best-in-class accuracy; includes summarization models."
+    },
+    {
+      "slug": "rev",
+      "name": "Rev AI",
+      "per_minute_usd": 0.02,
+      "notes": "Human-level accuracy tier available."
+    },
+    {
+      "slug": "openai-whisper",
+      "name": "OpenAI Whisper API",
+      "per_minute_usd": 0.006,
+      "notes": "Whisper large-v3 via API; no streaming on hosted endpoint."
+    },
+    {
+      "slug": "azure-speech",
+      "name": "Azure Speech-to-Text",
+      "per_minute_usd": 0.006,
+      "notes": "Fast transcription with custom model options."
+    },
+    {
+      "slug": "gladia",
+      "name": "Gladia",
+      "per_minute_usd": 0.0061,
+      "notes": "Audio intelligence API; per-minute transcription."
+    },
+    {
+      "slug": "local-whisper",
+      "name": "Local Whisper / faster-whisper",
+      "per_minute_usd": 0,
+      "notes": "Self-hosted ASR; GPU/CPU cost separate."
+    }
+  ],
+  "tts_providers": [
+    {
+      "slug": "elevenlabs",
+      "name": "ElevenLabs Turbo v2.5",
+      "per_1k_chars_usd": 0.10,
+      "notes": "High-quality multilingual voices; Turbo tier is cheaper."
+    },
+    {
+      "slug": "openai",
+      "name": "OpenAI TTS",
+      "per_1k_chars_usd": 0.015,
+      "notes": "TTS-1 and HD options; HD is $0.030 per 1k chars."
+    },
+    {
+      "slug": "cartesia",
+      "name": "Cartesia Sonic",
+      "per_1k_chars_usd": 0.015,
+      "notes": "Low-latency streaming voices."
+    },
+    {
+      "slug": "playht",
+      "name": "PlayHT 2.0",
+      "per_1k_chars_usd": 0.0275,
+      "notes": "Conversational and clone voices."
+    },
+    {
+      "slug": "azure-neural",
+      "name": "Azure Neural TTS",
+      "per_1k_chars_usd": 0.016,
+      "notes": "Standard neural voices; custom voices extra."
+    },
+    {
+      "slug": "amazon-polly",
+      "name": "Amazon Polly",
+      "per_1k_chars_usd": 0.004,
+      "notes": "Long-form and neural voices; cheapest managed option."
+    },
+    {
+      "slug": "local-tts",
+      "name": "Local TTS (Piper / Coqui)",
+      "per_1k_chars_usd": 0,
+      "notes": "Self-hosted; hardware cost separate."
+    }
+  ],
+  "llm_models": [
+    {
+      "slug": "gpt-4o-mini",
+      "name": "OpenAI GPT-4o mini",
+      "input_per_1k_usd": 0.00015,
+      "output_per_1k_usd": 0.0006,
+      "notes": "Fast, cheap voice-agent default."
+    },
+    {
+      "slug": "gpt-4o",
+      "name": "OpenAI GPT-4o",
+      "input_per_1k_usd": 0.0025,
+      "output_per_1k_usd": 0.01,
+      "notes": "Strong reasoning for complex tasks."
+    },
+    {
+      "slug": "claude-haiku",
+      "name": "Anthropic Claude 3 Haiku",
+      "input_per_1k_usd": 0.00025,
+      "output_per_1k_usd": 0.00125,
+      "notes": "Fast Anthropic model for voice agents."
+    },
+    {
+      "slug": "claude-sonnet",
+      "name": "Anthropic Claude 3.5 Sonnet",
+      "input_per_1k_usd": 0.003,
+      "output_per_1k_usd": 0.015,
+      "notes": "Best reasoning; higher latency/cost."
+    },
+    {
+      "slug": "llama-local",
+      "name": "Local Llama 3.1 / Qwen",
+      "input_per_1k_usd": 0,
+      "output_per_1k_usd": 0,
+      "notes": "Self-hosted; GPU cost separate."
+    }
+  ],
+  "faq": [
+    {
+      "question": "What does an AI voice agent cost per minute?",
+      "answer": "A typical managed stack costs $0.05–$0.15 per minute depending on telephony, speech-to-text, text-to-speech, LLM, and voice platform choices. Self-hosted stacks can drop variable cost close to $0 but add infrastructure labor."
+    },
+    {
+      "question": "Which voice platform is cheapest?",
+      "answer": "Open-source frameworks like Pipecat have no platform fee, but you pay for compute, telephony, and APIs. Among managed platforms, Synthflow and Retell often have the lowest per-minute platform fees, while Vapi and Bland include more bundled orchestration."
+    },
+    {
+      "question": "How much do AI voice agent telephony costs add?",
+      "answer": "US inbound local numbers typically cost $0.004–$0.009 per minute plus a $0.35–$1.15 monthly number fee. Outbound calls and SMS are billed separately; high-volume outbound use cases like reminders can make telephony the largest cost."
+    },
+    {
+      "question": "Are LLM costs significant in voice agents?",
+      "answer": "For cheap models like GPT-4o mini, LLM cost is usually under $0.01 per minute. For GPT-4o or Claude Sonnet it can become the second- or third-largest cost, especially on long calls with large context windows."
+    },
+    {
+      "question": "How do I price a voice-agent product with margin?",
+      "answer": "Use the cost-per-minute from this calculator, then divide by (1 − target margin). For example, if cost is $0.08/min and you want 30% gross margin, charge about $0.114/min. Add overhead and support costs on top for true net margin."
     }
   ]
 }
