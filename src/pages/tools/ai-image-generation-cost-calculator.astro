@@ -1,0 +1,565 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/ai_image_generation_cost_calculator.json';
+
+const title = "AI Image Generation Cost Calculator | Hermes Dispatch";
+const description = "Estimate the cost of generating images at scale across Midjourney, DALL·E, Ideogram, Fireworks, FLUX.1, Stability AI, and self-hosted GPUs. Includes prompting, review, upscaling, and local-hardware cost.";
+
+const { defaults, image_sizes, generation_modes, complexity_tiers, providers, prompt_providers, local_gpus, scenarios, faq, note, last_updated } = data;
+
+const providerMap = Object.fromEntries(providers.map(p => [p.slug, p]));
+const promptMap = Object.fromEntries(prompt_providers.map(p => [p.slug, p]));
+const gpuMap = Object.fromEntries(local_gpus.map(g => [g.slug, g]));
+const sizeMap = Object.fromEntries(Object.entries(image_sizes).map(([k, v]) => [k, v]));
+const modeMap = Object.fromEntries(Object.entries(generation_modes).map(([k, v]) => [k, v]));
+const complexityMap = Object.fromEntries(Object.entries(complexity_tiers).map(([k, v]) => [k, v]));
+
+function fmtMoney(n) {
+  if (n === 0) return '$0';
+  if (Math.abs(n) < 0.01) return '$' + n.toFixed(4);
+  if (Math.abs(n) < 1) return '$' + n.toFixed(2);
+  return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+
+const nonLocalProviders = providers.filter(p => p.slug !== 'self_hosted_flux');
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Image Generation Cost Calculator" description={description} url="https://hermesdispatch.dev/tools/ai-image-generation-cost-calculator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({"@type": "Question", "name": f.question, "acceptedAnswer": {"@type": "Answer", "text": f.answer}}))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🖼️</div>
+        <h1 class="display-heading mb-4">AI Image Generation Cost Calculator</h1>
+        <p class="text-xl text-neutral-400 max-w-3xl mx-auto">
+          Compare image generation costs across hosted APIs and self-hosted GPUs. Factor in prompting LLM, human review, upscaling, setup, and maintenance.
+        </p>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">{s.icon}</div>
+            <h3 class="font-semibold text-sm">{s.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">{s.images_per_month.toLocaleString()} img/mo • {s.image_size}</p>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <!-- Inputs: volume & quality -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Volume & quality</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Images per month</label>
+              <input id="imagesPerMonth" type="number" min="0" step="100" value={defaults.images_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Image size</label>
+                <select id="imageSize" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {Object.entries(image_sizes).map(([k, v]) => <option value={k} selected={k === defaults.image_size}>{v.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Generation mode</label>
+                <select id="generationMode" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {Object.entries(generation_modes).map(([k, v]) => <option value={k} selected={k === defaults.generation_mode}>{v.label}</option>)}
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Complexity</label>
+                <select id="complexity" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                  {Object.entries(complexity_tiers).map(([k, v]) => <option value={k} selected={k === defaults.complexity}>{v.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Batches per final image</label>
+                <input id="batchesPerImage" type="number" min="1" step="0.1" value={defaults.batches_per_image} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Upscale / refine (% of generations)</label>
+              <input id="upscalePercent" type="number" min="0" max="100" step="5" value={defaults.upscale_percent} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Projection period (months)</label>
+              <input id="projectionMonths" type="number" min="1" max="60" step="1" value={defaults.projection_months} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Inputs: prompt & labor -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Prompting & labor</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Prompt provider</label>
+              <select id="promptProvider" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {prompt_providers.map(p => <option value={p.slug} selected={p.slug === defaults.prompt_provider}>{p.name} — ${p.input_per_1m.toFixed(2)}/${p.output_per_1m.toFixed(2)} per 1M</option>)}
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Input tokens / prompt</label>
+                <input id="promptInputTokens" type="number" min="0" step="10" value={defaults.prompt_input_tokens} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Output tokens / prompt</label>
+                <input id="promptOutputTokens" type="number" min="0" step="10" value={defaults.prompt_output_tokens} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Prompt requests per image</label>
+              <input id="promptRequestsPerImage" type="number" min="0" step="0.5" value={defaults.prompt_requests_per_image} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Human review rate (%)</label>
+              <input id="reviewRatePercent" type="number" min="0" max="100" step="5" value={defaults.review_rate_percent} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Review minutes / image</label>
+                <input id="reviewMinutes" type="number" min="0" step="0.5" value={defaults.review_minutes_per_image} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Reviewer $/hour</label>
+                <input id="reviewerHourly" type="number" min="0" step="5" value={defaults.reviewer_hourly_cost} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Setup hours</label>
+                <input id="setupHours" type="number" min="0" step="1" value={defaults.setup_hours} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Setup $/hour</label>
+                <input id="setupHourly" type="number" min="0" step="5" value={defaults.setup_hourly_rate} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Maintenance hrs/mo</label>
+                <input id="maintHours" type="number" min="0" step="0.5" value={defaults.maintenance_hours_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Maintenance $/hour</label>
+                <input id="maintHourly" type="number" min="0" step="5" value={defaults.maintenance_hourly_rate} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inputs: self-hosting -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Self-hosting option</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Local GPU</label>
+              <select id="localGpu" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {local_gpus.map(g => <option value={g.slug} selected={g.slug === defaults.local_gpu}>{g.name}</option>)}
+              </select>
+              <p id="gpuNote" class="text-xs text-neutral-500 mt-1">{gpuMap[defaults.local_gpu].name} — {gpuMap[defaults.local_gpu].images_per_hour.toLocaleString()} images/hour estimated.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">GPU $/hour</label>
+                <input id="gpuHourly" type="number" min="0" step="0.05" value={gpuMap[defaults.local_gpu].gpu_hourly_cost} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Power $/kWh</label>
+                <input id="kwhCost" type="number" min="0" step="0.01" value={gpuMap[defaults.local_gpu].kwh_cost} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">GPU power draw (watts)</label>
+              <input id="gpuWatts" type="number" min="0" step="5" value={gpuMap[defaults.local_gpu].watts} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Images / hour (self-hosted)</label>
+              <input id="imagesPerHour" type="number" min="1" step="10" value={gpuMap[defaults.local_gpu].images_per_hour} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="grid lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Monthly image generations</p>
+          <p id="outGenerations" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cheapest hosted</p>
+          <p id="outCheapestHosted" class="text-3xl font-bold text-emerald-400">—</p>
+          <p id="outCheapestHostedName" class="text-xs text-neutral-400 mt-1">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Self-hosted estimate</p>
+          <p id="outSelfHosted" class="text-3xl font-bold text-white">—</p>
+          <p id="outSelfHostedPerImage" class="text-xs text-neutral-400 mt-1">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Total project cost (hosted winner)</p>
+          <p id="outProjectHosted" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">API / generation cost</p>
+          <p id="outApiCost" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Upscale cost</p>
+          <p id="outUpscaleCost" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Prompt LLM cost</p>
+          <p id="outPromptCost" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Review labor cost</p>
+          <p id="outReviewCost" class="text-lg font-bold">—</p>
+        </div>
+      </div>
+
+      <!-- Provider comparison table -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4">Provider comparison</h2>
+        <p class="text-sm text-neutral-400 mb-4">Same volume and quality settings across all providers. Self-hosted is shown separately because it uses GPU time instead of per-image pricing.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Provider</th>
+                <th class="text-right py-2">API cost / mo</th>
+                <th class="text-right py-2">Upscale / mo</th>
+                <th class="text-right py-2">Prompt LLM / mo</th>
+                <th class="text-right py-2">Review / mo</th>
+                <th class="text-right py-2 font-semibold text-white">Total / mo</th>
+                <th class="text-right py-2">Per 1K images</th>
+              </tr>
+            </thead>
+            <tbody id="providerTable" class="divide-y divide-neutral-800">
+              {nonLocalProviders.map(p => (
+                <tr data-slug={p.slug} class="hover:bg-neutral-800/30">
+                  <td class="py-3">
+                    {p.name}<br/>
+                    <span class="text-xs text-neutral-500">{p.billing}</span>
+                  </td>
+                  <td class="py-3 text-right api-cost">—</td>
+                  <td class="py-3 text-right upscale-cost">—</td>
+                  <td class="py-3 text-right prompt-cost">—</td>
+                  <td class="py-3 text-right review-cost">—</td>
+                  <td class="py-3 text-right total-cost font-semibold text-brand-gold">—</td>
+                  <td class="py-3 text-right per-1k">—</td>
+                </tr>
+              ))}
+              <tr data-slug="self_hosted_flux" class="hover:bg-neutral-800/30">
+                <td class="py-3">
+                  Self-hosted FLUX.1 / SDXL<br/>
+                  <span class="text-xs text-neutral-500">GPU + power</span>
+                </td>
+                <td class="py-3 text-right api-cost">—</td>
+                <td class="py-3 text-right upscale-cost">—</td>
+                <td class="py-3 text-right prompt-cost">—</td>
+                <td class="py-3 text-right review-cost">—</td>
+                <td class="py-3 text-right total-cost font-semibold text-brand-gold">—</td>
+                <td class="py-3 text-right per-1k">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How it works / FAQ -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Total generations</strong> = images per month × batches per final image × size multiplier × mode multiplier × complexity multiplier.</li>
+            <li><strong class="text-white">API cost</strong> = total generations × provider per-image price at 1024×1024.</li>
+            <li><strong class="text-white">Upscale cost</strong> = total generations × upscale% × provider upscale price.</li>
+            <li><strong class="text-white">Prompt cost</strong> = images × prompt requests × (input tokens/1M × input price + output tokens/1M × output price).</li>
+            <li><strong class="text-white">Review cost</strong> = images × review rate × review minutes × reviewer hourly rate.</li>
+            <li><strong class="text-white">Self-hosted</strong> = (total generations ÷ images per hour) × GPU hourly cost + power cost.</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Ways to reduce cost</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• Lower <strong>batches per image</strong> once your prompt and model are reliable.</li>
+            <li>• Use <strong>smaller output sizes</strong> for thumbnails and previews.</li>
+            <li>• Cache <strong>prompt rewrites</strong> to avoid LLM calls for repeated inputs.</li>
+            <li>• Use a <strong>cheaper embedding/prompt model</strong> (Gemini Flash, GPT-4o mini).</li>
+            <li>• Self-host on an RTX 4090 when volume exceeds a few thousand images per month.</li>
+            <li>• Reduce <strong>human review rate</strong> with automatic quality scoring.</li>
+          </ul>
+        </div>
+      </div>
+
+      <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faq.map(f => (
+            <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+              <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+              <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/agent-memory-cost-calculator/" class="btn-primary text-sm">Agent Memory / RAG Cost Calc →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+        <a href="/tools/ai-voice-agent-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">AI Voice Agent Cost Calc →</a>
+      </div>
+
+      <p class="text-neutral-500 text-sm mt-10">{note} Last updated: {last_updated}.</p>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, image_sizes, generation_modes, complexity_tiers, providers, prompt_providers, local_gpus, scenarios }}>
+    const el = {
+      imagesPerMonth: document.getElementById('imagesPerMonth'),
+      imageSize: document.getElementById('imageSize'),
+      generationMode: document.getElementById('generationMode'),
+      complexity: document.getElementById('complexity'),
+      batchesPerImage: document.getElementById('batchesPerImage'),
+      upscalePercent: document.getElementById('upscalePercent'),
+      projectionMonths: document.getElementById('projectionMonths'),
+      promptProvider: document.getElementById('promptProvider'),
+      promptInputTokens: document.getElementById('promptInputTokens'),
+      promptOutputTokens: document.getElementById('promptOutputTokens'),
+      promptRequestsPerImage: document.getElementById('promptRequestsPerImage'),
+      reviewRatePercent: document.getElementById('reviewRatePercent'),
+      reviewMinutes: document.getElementById('reviewMinutes'),
+      reviewerHourly: document.getElementById('reviewerHourly'),
+      setupHours: document.getElementById('setupHours'),
+      setupHourly: document.getElementById('setupHourly'),
+      maintHours: document.getElementById('maintHours'),
+      maintHourly: document.getElementById('maintHourly'),
+      localGpu: document.getElementById('localGpu'),
+      gpuHourly: document.getElementById('gpuHourly'),
+      kwhCost: document.getElementById('kwhCost'),
+      gpuWatts: document.getElementById('gpuWatts'),
+      imagesPerHour: document.getElementById('imagesPerHour'),
+      gpuNote: document.getElementById('gpuNote'),
+      outGenerations: document.getElementById('outGenerations'),
+      outCheapestHosted: document.getElementById('outCheapestHosted'),
+      outCheapestHostedName: document.getElementById('outCheapestHostedName'),
+      outSelfHosted: document.getElementById('outSelfHosted'),
+      outSelfHostedPerImage: document.getElementById('outSelfHostedPerImage'),
+      outProjectHosted: document.getElementById('outProjectHosted'),
+      outApiCost: document.getElementById('outApiCost'),
+      outUpscaleCost: document.getElementById('outUpscaleCost'),
+      outPromptCost: document.getElementById('outPromptCost'),
+      outReviewCost: document.getElementById('outReviewCost'),
+    };
+
+    const providerMap = Object.fromEntries(providers.map(p => [p.slug, p]));
+    const promptMap = Object.fromEntries(prompt_providers.map(p => [p.slug, p]));
+    const gpuMap = Object.fromEntries(local_gpus.map(g => [g.slug, g]));
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (Math.abs(n) < 0.01) return '$' + n.toFixed(4);
+      if (Math.abs(n) < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+    const fmtNum = (n) => n.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+    function getInputs() {
+      return {
+        imagesPerMonth: Math.max(0, parseFloat(el.imagesPerMonth.value) || 0),
+        imageSize: el.imageSize.value,
+        generationMode: el.generationMode.value,
+        complexity: el.complexity.value,
+        batchesPerImage: Math.max(1, parseFloat(el.batchesPerImage.value) || 1),
+        upscalePercent: Math.max(0, Math.min(100, parseFloat(el.upscalePercent.value) || 0)) / 100,
+        projectionMonths: Math.max(1, parseInt(el.projectionMonths.value, 10) || 1),
+        promptProvider: el.promptProvider.value,
+        promptInputTokens: Math.max(0, parseFloat(el.promptInputTokens.value) || 0),
+        promptOutputTokens: Math.max(0, parseFloat(el.promptOutputTokens.value) || 0),
+        promptRequestsPerImage: Math.max(0, parseFloat(el.promptRequestsPerImage.value) || 0),
+        reviewRatePercent: Math.max(0, Math.min(100, parseFloat(el.reviewRatePercent.value) || 0)) / 100,
+        reviewMinutes: Math.max(0, parseFloat(el.reviewMinutes.value) || 0),
+        reviewerHourly: Math.max(0, parseFloat(el.reviewerHourly.value) || 0),
+        setupHours: Math.max(0, parseFloat(el.setupHours.value) || 0),
+        setupHourly: Math.max(0, parseFloat(el.setupHourly.value) || 0),
+        maintHours: Math.max(0, parseFloat(el.maintHours.value) || 0),
+        maintHourly: Math.max(0, parseFloat(el.maintHourly.value) || 0),
+        localGpu: el.localGpu.value,
+        gpuHourly: Math.max(0, parseFloat(el.gpuHourly.value) || 0),
+        kwhCost: Math.max(0, parseFloat(el.kwhCost.value) || 0),
+        gpuWatts: Math.max(0, parseFloat(el.gpuWatts.value) || 0),
+        imagesPerHour: Math.max(1, parseFloat(el.imagesPerHour.value) || 1),
+      };
+    }
+
+    function computeCommon(inputs) {
+      const sizeMult = image_sizes[inputs.imageSize]?.multiplier || 1;
+      const modeMult = generation_modes[inputs.generationMode]?.multiplier || 1;
+      const complexityMult = complexity_tiers[inputs.complexity]?.multiplier || 1;
+      const totalGenerations = inputs.imagesPerMonth * inputs.batchesPerImage * sizeMult * modeMult * complexityMult;
+      const upscaleGenerations = totalGenerations * inputs.upscalePercent;
+      const promptProvider = promptMap[inputs.promptProvider] || prompt_providers[0];
+      const promptCost = inputs.imagesPerMonth * inputs.promptRequestsPerImage * (
+        (inputs.promptInputTokens / 1_000_000) * promptProvider.input_per_1m +
+        (inputs.promptOutputTokens / 1_000_000) * promptProvider.output_per_1m
+      );
+      const reviewCost = inputs.imagesPerMonth * inputs.reviewRatePercent * inputs.reviewMinutes * (inputs.reviewerHourly / 60);
+      const setupCost = inputs.setupHours * inputs.setupHourly;
+      const maintCost = inputs.maintHours * inputs.maintHourly;
+      return { totalGenerations, upscaleGenerations, promptCost, reviewCost, setupCost, maintCost };
+    }
+
+    function computeHosted(inputs, providerSlug) {
+      const common = computeCommon(inputs);
+      const provider = providerMap[providerSlug];
+      const apiCost = common.totalGenerations * provider.per_image_1024;
+      const upscaleCost = common.upscaleGenerations * provider.upscale_per_image;
+      const totalMonthly = apiCost + upscaleCost + common.promptCost + common.reviewCost + common.maintCost;
+      const totalProject = totalMonthly * inputs.projectionMonths + common.setupCost;
+      return { ...common, apiCost, upscaleCost, totalMonthly, totalProject };
+    }
+
+    function computeSelfHosted(inputs) {
+      const common = computeCommon(inputs);
+      const hoursNeeded = common.totalGenerations / inputs.imagesPerHour;
+      const gpuCost = hoursNeeded * inputs.gpuHourly;
+      const powerCost = hoursNeeded * (inputs.gpuWatts / 1000) * inputs.kwhCost;
+      const apiCost = gpuCost + powerCost;
+      const upscaleCost = 0; // self-hosted upscaling is included in GPU time approximation
+      const totalMonthly = apiCost + upscaleCost + common.promptCost + common.reviewCost + common.maintCost;
+      const totalProject = totalMonthly * inputs.projectionMonths + common.setupCost;
+      return { ...common, apiCost, upscaleCost: 0, totalMonthly, totalProject, gpuCost, powerCost, hoursNeeded };
+    }
+
+    function calc() {
+      const inputs = getInputs();
+      const common = computeCommon(inputs);
+
+      el.outGenerations.textContent = fmtNum(common.totalGenerations);
+      el.outPromptCost.textContent = fmtMoney(common.promptCost) + '/mo';
+      el.outReviewCost.textContent = fmtMoney(common.reviewCost) + '/mo';
+
+      let cheapest = null;
+      let cheapestSlug = null;
+
+      document.querySelectorAll('#providerTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const res = slug === 'self_hosted_flux' ? computeSelfHosted(inputs) : computeHosted(inputs, slug);
+        row.querySelector('.api-cost').textContent = fmtMoney(res.apiCost);
+        row.querySelector('.upscale-cost').textContent = fmtMoney(res.upscaleCost);
+        row.querySelector('.prompt-cost').textContent = fmtMoney(res.promptCost);
+        row.querySelector('.review-cost').textContent = fmtMoney(res.reviewCost);
+        row.querySelector('.total-cost').textContent = fmtMoney(res.totalMonthly);
+        row.querySelector('.per-1k').textContent = inputs.imagesPerMonth > 0 ? fmtMoney(res.totalMonthly / (inputs.imagesPerMonth / 1000)) : '—';
+
+        if (slug !== 'self_hosted_flux') {
+          if (!cheapest || res.totalMonthly < cheapest.totalMonthly) {
+            cheapest = res;
+            cheapestSlug = slug;
+          }
+        }
+      });
+
+      // highlight cheapest hosted row
+      document.querySelectorAll('#providerTable tr').forEach(row => {
+        if (row.dataset.slug === cheapestSlug) row.classList.add('bg-brand-gold/10');
+        else row.classList.remove('bg-brand-gold/10');
+      });
+
+      const self = computeSelfHosted(inputs);
+      el.outCheapestHosted.textContent = fmtMoney(cheapest.totalMonthly) + '/mo';
+      el.outCheapestHostedName.textContent = providerMap[cheapestSlug].name + ' wins at this volume';
+      el.outSelfHosted.textContent = fmtMoney(self.totalMonthly) + '/mo';
+      el.outSelfHostedPerImage.textContent = inputs.imagesPerMonth > 0 ? fmtMoney(self.totalMonthly / inputs.imagesPerMonth) + '/image' : '—';
+      el.outProjectHosted.textContent = fmtMoney(cheapest.totalProject);
+      el.outApiCost.textContent = fmtMoney(cheapest.apiCost) + '/mo';
+      el.outUpscaleCost.textContent = fmtMoney(cheapest.upscaleCost) + '/mo';
+
+      const gpu = gpuMap[inputs.localGpu];
+      if (gpu && el.gpuNote) {
+        el.gpuNote.textContent = `${gpu.name} — ${gpu.images_per_hour.toLocaleString()} images/hour estimated.`;
+      }
+    }
+
+    function applyScenario(idx) {
+      const s = scenarios[idx];
+      if (!s) return;
+      el.imagesPerMonth.value = s.images_per_month;
+      el.imageSize.value = s.image_size;
+      el.generationMode.value = s.generation_mode;
+      el.complexity.value = s.complexity;
+      el.batchesPerImage.value = s.batches_per_image;
+      el.upscalePercent.value = s.upscale_percent;
+      el.projectionMonths.value = s.projection_months;
+      el.promptProvider.value = s.prompt_provider;
+      el.promptInputTokens.value = s.prompt_input_tokens;
+      el.promptOutputTokens.value = s.prompt_output_tokens;
+      el.promptRequestsPerImage.value = s.prompt_requests_per_image;
+      el.reviewRatePercent.value = s.review_rate_percent;
+      el.reviewMinutes.value = s.review_minutes_per_image;
+      el.reviewerHourly.value = s.reviewer_hourly_cost;
+      el.setupHours.value = s.setup_hours;
+      el.setupHourly.value = s.setup_hourly_rate;
+      el.maintHours.value = s.maintenance_hours_per_month;
+      el.maintHourly.value = s.maintenance_hourly_rate;
+      el.localGpu.value = s.local_gpu;
+      const gpu = gpuMap[s.local_gpu];
+      if (gpu) {
+        el.gpuHourly.value = gpu.gpu_hourly_cost;
+        el.kwhCost.value = gpu.kwh_cost;
+        el.gpuWatts.value = gpu.watts;
+        el.imagesPerHour.value = gpu.images_per_hour;
+      }
+      document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('border-brand-gold', 'bg-brand-gold/20'));
+      const btn = document.querySelector(`.scenario-btn[data-idx="${idx}"]`);
+      if (btn) btn.classList.add('border-brand-gold', 'bg-brand-gold/20');
+      calc();
+    }
+
+    el.localGpu.addEventListener('change', () => {
+      const gpu = gpuMap[el.localGpu.value];
+      if (gpu) {
+        el.gpuHourly.value = gpu.gpu_hourly_cost;
+        el.kwhCost.value = gpu.kwh_cost;
+        el.gpuWatts.value = gpu.watts;
+        el.imagesPerHour.value = gpu.images_per_hour;
+      }
+      calc();
+    });
+
+    ['input', 'change'].forEach(evt => {
+      Object.values(el).forEach(input => {
+        if (input && (input.tagName === 'INPUT' || input.tagName === 'SELECT')) {
+          input.addEventListener(evt, calc);
+        }
+      });
+    });
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyScenario(parseInt(btn.dataset.idx, 10)));
+    });
+
+    calc();
+  </script>
+</Layout>

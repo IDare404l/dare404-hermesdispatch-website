@@ -1,0 +1,265 @@
+{
+  "last_updated": "2026-08-07",
+  "note": "Image-generation pricing changes frequently. Providers bill per generation, credit pack, or subscription. Edit rates in the table to match current public pricing. Local/self-hosted costs assume cloud GPU rental or owned hardware amortized over 24 months with power included.",
+  "defaults": {
+    "images_per_month": 2000,
+    "images_per_batch": 4,
+    "image_size": "1024x1024",
+    "generation_mode": "text_to_image",
+    "complexity": "medium",
+    "batches_per_image": 1.3,
+    "upscale_percent": 20,
+    "prompt_provider": "openai_gpt_4o_mini",
+    "prompt_input_tokens": 400,
+    "prompt_output_tokens": 120,
+    "prompt_requests_per_image": 1,
+    "review_rate_percent": 10,
+    "review_minutes_per_image": 3,
+    "reviewer_hourly_cost": 40,
+    "setup_hours": 6,
+    "setup_hourly_rate": 75,
+    "maintenance_hours_per_month": 3,
+    "maintenance_hourly_rate": 75,
+    "projection_months": 12,
+    "local_gpu": "rtx_4090"
+  },
+  "image_sizes": {
+    "512x512": { "label": "512×512 thumbnail", "multiplier": 0.65 },
+    "768x768": { "label": "768×768 small square", "multiplier": 0.85 },
+    "1024x1024": { "label": "1024×1024 standard square", "multiplier": 1.0 },
+    "1024x1536": { "label": "1024×1536 portrait poster", "multiplier": 1.25 },
+    "1536x1024": { "label": "1536×1024 landscape wide", "multiplier": 1.35 },
+    "2048x2048": { "label": "2048×2048 large print", "multiplier": 1.8 }
+  },
+  "generation_modes": {
+    "text_to_image": { "label": "Text-to-image", "multiplier": 1.0 },
+    "image_to_image": { "label": "Image-to-image / variation", "multiplier": 0.75 },
+    "inpainting": { "label": "Inpainting / edit", "multiplier": 0.9 },
+    "upscale_only": { "label": "Upscale only", "multiplier": 0.5 }
+  },
+  "complexity_tiers": {
+    "low": { "label": "Low (single subject, simple prompt)", "multiplier": 0.75 },
+    "medium": { "label": "Medium (multiple objects, style)", "multiplier": 1.0 },
+    "high": { "label": "High (scene, typography, people)", "multiplier": 1.4 }
+  },
+  "providers": [
+    {
+      "slug": "openai_dalle3",
+      "name": "OpenAI DALL·E 3",
+      "model": "dall-e-3",
+      "per_image_1024": 0.040,
+      "upscale_per_image": 0.020,
+      "best_for": "Reliable prompt adherence and brand-safe illustrations",
+      "billing": "per image"
+    },
+    {
+      "slug": "midjourney",
+      "name": "Midjourney (API/subscription)",
+      "model": "v6 / API proxy",
+      "per_image_1024": 0.050,
+      "upscale_per_image": 0.025,
+      "best_for": "High-aesthetic marketing and concept art",
+      "billing": "subscription or proxy"
+    },
+    {
+      "slug": "stability_sdxl",
+      "name": "Stability AI Stable Image",
+      "model": "SDXL / SD3 API",
+      "per_image_1024": 0.018,
+      "upscale_per_image": 0.010,
+      "best_for": "High-volume, programmatic image generation",
+      "billing": "credits"
+    },
+    {
+      "slug": "leonardo",
+      "name": "Leonardo.Ai",
+      "model": "Alchemy / Phoenix",
+      "per_image_1024": 0.024,
+      "upscale_per_image": 0.014,
+      "best_for": "Game assets, character consistency, style finetunes",
+      "billing": "tokens"
+    },
+    {
+      "slug": "ideogram",
+      "name": "Ideogram",
+      "model": "Text-to-image API",
+      "per_image_1024": 0.022,
+      "upscale_per_image": 0.012,
+      "best_for": "Typography, memes, and text-on-image layouts",
+      "billing": "credits"
+    },
+    {
+      "slug": "recraft",
+      "name": "Recraft",
+      "model": "Vector + raster API",
+      "per_image_1024": 0.020,
+      "upscale_per_image": 0.010,
+      "best_for": "Brand assets, vector-style graphics, UI mockups",
+      "billing": "credits"
+    },
+    {
+      "slug": "adobe_firefly",
+      "name": "Adobe Firefly",
+      "model": "Generative credits API",
+      "per_image_1024": 0.045,
+      "upscale_per_image": 0.022,
+      "best_for": "Commercial-safe enterprise creative workflows",
+      "billing": "credits"
+    },
+    {
+      "slug": "black_forest_flux",
+      "name": "Black Forest Labs FLUX.1 [pro]",
+      "model": "FLUX.1 [pro] / [dev] API",
+      "per_image_1024": 0.055,
+      "upscale_per_image": 0.028,
+      "best_for": "High-quality photorealism and typography",
+      "billing": "credits"
+    },
+    {
+      "slug": "self_hosted_flux",
+      "name": "Self-hosted FLUX.1 / SDXL",
+      "model": "Local GPU",
+      "per_image_1024": 0.0,
+      "upscale_per_image": 0.0,
+      "best_for": "Privacy-first, high-volume, or custom fine-tunes",
+      "billing": "hardware + power",
+      "gpu_hours_per_1000_images": 2.2
+    }
+  ],
+  "prompt_providers": [
+    { "slug": "openai_gpt_4o_mini", "name": "OpenAI GPT-4o mini", "input_per_1m": 0.15, "output_per_1m": 0.60 },
+    { "slug": "openai_gpt_4o", "name": "OpenAI GPT-4o", "input_per_1m": 2.50, "output_per_1m": 10.00 },
+    { "slug": "anthropic_haiku", "name": "Anthropic Claude 3 Haiku", "input_per_1m": 0.25, "output_per_1m": 1.25 },
+    { "slug": "anthropic_sonnet", "name": "Anthropic Claude 3.5 Sonnet", "input_per_1m": 3.00, "output_per_1m": 15.00 },
+    { "slug": "google_flash", "name": "Google Gemini 1.5 Flash", "input_per_1m": 0.075, "output_per_1m": 0.30 },
+    { "slug": "google_pro", "name": "Google Gemini 1.5 Pro", "input_per_1m": 1.25, "output_per_1m": 5.00 },
+    { "slug": "deepseek_v3", "name": "DeepSeek-V3", "input_per_1m": 0.07, "output_per_1m": 1.10 },
+    { "slug": "local_llama", "name": "Local Llama 3.1 70B", "input_per_1m": 0.15, "output_per_1m": 0.60 }
+  ],
+  "local_gpus": [
+    { "slug": "rtx_4090", "name": "NVIDIA RTX 4090 (24 GB)", "gpu_hourly_cost": 1.50, "watts": 450, "kwh_cost": 0.12, "images_per_hour": 455 },
+    { "slug": "rtx_5090", "name": "NVIDIA RTX 5090 (32 GB)", "gpu_hourly_cost": 2.40, "watts": 575, "kwh_cost": 0.12, "images_per_hour": 600 },
+    { "slug": "a100_80gb", "name": "NVIDIA A100 80GB (cloud)", "gpu_hourly_cost": 2.20, "watts": 400, "kwh_cost": 0.12, "images_per_hour": 680 },
+    { "slug": "mi300x", "name": "AMD MI300X (cloud)", "gpu_hourly_cost": 2.00, "watts": 750, "kwh_cost": 0.12, "images_per_hour": 700 }
+  ],
+  "scenarios": [
+    {
+      "name": "Social media asset factory",
+      "icon": "📱",
+      "images_per_month": 3000,
+      "images_per_batch": 4,
+      "image_size": "1024x1024",
+      "generation_mode": "text_to_image",
+      "complexity": "low",
+      "batches_per_image": 1.2,
+      "upscale_percent": 10,
+      "prompt_provider": "openai_gpt_4o_mini",
+      "prompt_input_tokens": 300,
+      "prompt_output_tokens": 80,
+      "prompt_requests_per_image": 1,
+      "review_rate_percent": 5,
+      "review_minutes_per_image": 2,
+      "reviewer_hourly_cost": 35,
+      "setup_hours": 4,
+      "setup_hourly_rate": 75,
+      "maintenance_hours_per_month": 2,
+      "maintenance_hourly_rate": 75,
+      "projection_months": 12,
+      "local_gpu": "rtx_4090"
+    },
+    {
+      "name": "E-commerce product-shot pipeline",
+      "icon": "🛒",
+      "images_per_month": 1500,
+      "images_per_batch": 1,
+      "image_size": "1536x1024",
+      "generation_mode": "image_to_image",
+      "complexity": "medium",
+      "batches_per_image": 1.5,
+      "upscale_percent": 40,
+      "prompt_provider": "anthropic_haiku",
+      "prompt_input_tokens": 600,
+      "prompt_output_tokens": 150,
+      "prompt_requests_per_image": 1,
+      "review_rate_percent": 15,
+      "review_minutes_per_image": 5,
+      "reviewer_hourly_cost": 45,
+      "setup_hours": 8,
+      "setup_hourly_rate": 75,
+      "maintenance_hours_per_month": 4,
+      "maintenance_hourly_rate": 75,
+      "projection_months": 12,
+      "local_gpu": "rtx_4090"
+    },
+    {
+      "name": "Ad-creative variant factory",
+      "icon": "🎯",
+      "images_per_month": 5000,
+      "images_per_batch": 4,
+      "image_size": "1024x1536",
+      "generation_mode": "text_to_image",
+      "complexity": "medium",
+      "batches_per_image": 1.4,
+      "upscale_percent": 15,
+      "prompt_provider": "google_flash",
+      "prompt_input_tokens": 350,
+      "prompt_output_tokens": 100,
+      "prompt_requests_per_image": 1,
+      "review_rate_percent": 0,
+      "review_minutes_per_image": 0,
+      "reviewer_hourly_cost": 40,
+      "setup_hours": 6,
+      "setup_hourly_rate": 75,
+      "maintenance_hours_per_month": 3,
+      "maintenance_hourly_rate": 75,
+      "projection_months": 12,
+      "local_gpu": "rtx_5090"
+    },
+    {
+      "name": "Design-team copilot",
+      "icon": "🎨",
+      "images_per_month": 800,
+      "images_per_batch": 2,
+      "image_size": "2048x2048",
+      "generation_mode": "text_to_image",
+      "complexity": "high",
+      "batches_per_image": 2.0,
+      "upscale_percent": 50,
+      "prompt_provider": "anthropic_sonnet",
+      "prompt_input_tokens": 900,
+      "prompt_output_tokens": 250,
+      "prompt_requests_per_image": 2,
+      "review_rate_percent": 30,
+      "review_minutes_per_image": 10,
+      "reviewer_hourly_cost": 75,
+      "setup_hours": 12,
+      "setup_hourly_rate": 100,
+      "maintenance_hours_per_month": 6,
+      "maintenance_hourly_rate": 100,
+      "projection_months": 12,
+      "local_gpu": "rtx_5090"
+    }
+  ],
+  "faq": [
+    {
+      "question": "Which image generator is cheapest at scale?",
+      "answer": "Self-hosted FLUX.1 / SDXL on a rented RTX 4090 is usually cheapest above a few thousand images per month because you pay for GPU time, not per generation. Among hosted APIs, Stability AI SDXL and Ideogram are typically the lowest per-image for standard 1024×1024 generations."
+    },
+    {
+      "question": "Does Midjourney have an official API?",
+      "answer": "Midjourney does not have a first-party public API. Most integrations use a Discord-bot proxy or unofficial API services, which is why pricing is approximate and often subscription-based."
+    },
+    {
+      "question": "How do I account for prompting cost?",
+      "answer": "Many production pipelines use an LLM to rewrite or expand prompts before generating images. The calculator adds prompt-input and prompt-output tokens multiplied by your chosen model's per-million-token price."
+    },
+    {
+      "question": "What about human review and curation?",
+      "answer": "Set a review rate (percentage of images a human checks) and minutes per review. The calculator multiplies that by the reviewer's hourly cost to estimate QA labor."
+    },
+    {
+      "question": "When is local/self-hosted worth it?",
+      "answer": "Self-hosting wins on volume, latency, and privacy. It loses if you need the absolute latest model quality, do not want to manage drivers/updates, or generate only a few hundred images per month."
+    }
+  ]
+}
