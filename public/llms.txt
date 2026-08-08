@@ -3,7 +3,7 @@
 Site: https://hermesdispatch.dev
 Topics: local LLMs, AI hardware, GPU cost math, crypto-miner pivots, no-code agents, AI affiliate deals
 
-## AI Tools (18)
+## AI Tools (19)
 - /tools/agent-hardware-sizer/
 - /tools/agent-hosting-cost-comparator/
 - /tools/ai-hardware-deal-tracker/
@@ -14,6 +14,7 @@ Topics: local LLMs, AI hardware, GPU cost math, crypto-miner pivots, no-code age
 - /tools/hardware-resale-estimator/
 - /tools/hashrate-to-inference-converter/
 - /tools/inference-engine-selector/
+- /tools/inference-engine-selector-v2/
 - /tools/local-llm-roi-calculator/
 - /tools/miner-pivot-calculator/
 - /tools/mini-pc-recommender/
