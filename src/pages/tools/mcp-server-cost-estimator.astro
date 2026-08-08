@@ -1,0 +1,485 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/mcp_server_cost.json';
+
+const title = "AI Agent MCP Server Cost Estimator | Hermes Dispatch";
+const description = "Estimate the cost of running Model Context Protocol (MCP) servers for AI agents. Compare managed hosting, self-hosted cloud, and local options with LLM, tool API, egress, and engineering costs.";
+
+const {
+  defaults, scenarios, hosting_providers, llm_models, tool_api_packs, egress, faq
+} = data;
+
+const hostingMap = Object.fromEntries(hosting_providers.map(p => [p.slug, p]));
+const llmMap = Object.fromEntries(llm_models.map(m => [m.slug, m]));
+const toolApiMap = Object.fromEntries(tool_api_packs.map(p => [p.slug, p]));
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent MCP Server Cost Estimator" description={description} url="https://hermesdispatch.dev/tools/mcp-server-cost-estimator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({
+      "@type": "Question",
+      "name": f.question,
+      "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+    }))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🔌</div>
+        <h1 class="display-heading mb-4">AI Agent MCP Server Cost Estimator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Estimate the full cost of running Model Context Protocol (MCP) servers for AI agents: managed hosting, self-hosted cloud, LLM orchestration, tool APIs, egress, and engineering.
+        </p>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">{s.icon}</div>
+            <h3 class="font-semibold text-sm">{s.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">{s.mcp_server_count} servers • {s.requests_per_month.toLocaleString()} req/mo</p>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <!-- MCP workload -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">MCP workload</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">MCP server count</label>
+              <input id="mcpServerCount" type="number" min="1" step="1" value={defaults.mcp_server_count} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Requests per month</label>
+              <input id="requestsPerMonth" type="number" min="0" step="1000" value={defaults.requests_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">LLM input tokens / req</label>
+                <input id="llmInputPerReq" type="number" min="0" step="50" value={defaults.llm_input_tokens_per_request} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">LLM output tokens / req</label>
+                <input id="llmOutputPerReq" type="number" min="0" step="50" value={defaults.llm_output_tokens_per_request} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Avg tool API cost / req</label>
+              <input id="toolApiCostPerReq" type="number" min="0" step="0.001" value={defaults.tool_api_cost_per_request_usd} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">Average cost of the underlying tool API (search, maps, finance, etc.).</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Tool API preset</label>
+              <select id="toolApiPreset" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {tool_api_packs.map(p => <option value={p.slug}>{p.name} — ${p.per_request_usd.toFixed(3)}/req</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hosting & infrastructure -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Hosting & infrastructure</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Hosting provider</label>
+              <select id="hostingProvider" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {hosting_providers.map(p => <option value={p.slug} selected={p.slug === defaults.hosting_provider}>{p.name} — ${p.base_monthly_usd}/mo + ${p.per_request_usd.toFixed(4)}/req</option>)}
+              </select>
+              <p id="hostingNote" class="text-xs text-neutral-500 mt-1">{hostingMap[defaults.hosting_provider].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Self-host compute / mo</label>
+              <input id="selfHostCompute" type="number" min="0" step="10" value={defaults.self_host_compute_month_usd} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">Only counted for self-hosted or local options.</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Egress GB / month</label>
+              <input id="egressGb" type="number" min="0" step="10" value={defaults.egress_gb_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">At ${egress.cost_per_gb_usd}/GB. Often bundled in managed tiers.</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Engineering hours / server / mo</label>
+              <input id="engHoursPerServer" type="number" min="0" step="0.5" value={defaults.engineering_hours_per_server_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Engineering rate / hour</label>
+              <input id="engRate" type="number" min="0" step="5" value={defaults.engineering_rate_hour_usd} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing model -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Pricing model</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Orchestration LLM</label>
+              <select id="llmModel" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {llm_models.map(m => <option value={m.slug} selected={m.slug === defaults.llm_model}>{m.name}</option>)}
+              </select>
+              <p id="llmNote" class="text-xs text-neutral-500 mt-1">{llmMap[defaults.llm_model].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Target gross margin (%)</label>
+              <input id="marginPct" type="number" min="0" max="99" step="1" value={defaults.margin_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Projection period (months)</label>
+              <input id="periodMonths" type="number" min="1" max="60" step="1" value={defaults.period_months} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="pt-2">
+              <label class="flex items-center gap-3">
+                <input id="includeEgress" type="checkbox" class="w-4 h-4 accent-brand-gold" checked />
+                <span class="text-sm text-neutral-300">Include egress costs</span>
+              </label>
+            </div>
+            <div>
+              <label class="flex items-center gap-3">
+                <input id="includeEngineering" type="checkbox" class="w-4 h-4 accent-brand-gold" checked />
+                <span class="text-sm text-neutral-300">Include engineering cost</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="grid lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+          <p id="outTotalMonthly" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cost per 1k requests</p>
+          <p id="outCostPer1k" class="text-3xl font-bold text-white">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cost per request</p>
+          <p id="outCostPerReq" class="text-3xl font-bold text-emerald-400">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">{defaults.period_months}-month total</p>
+          <p id="outPeriodTotal" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-5 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Hosting / mo</p>
+          <p id="outHosting" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">LLM / mo</p>
+          <p id="outLlm" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Tool APIs / mo</p>
+          <p id="outToolApi" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Egress / mo</p>
+          <p id="outEgress" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Engineering / mo</p>
+          <p id="outEngineering" class="text-lg font-bold">—</p>
+        </div>
+      </div>
+
+      <!-- Pricing to margin -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Pricing to hit margin</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Price per 1k requests</p>
+            <p id="outPricePer1k" class="text-2xl font-bold text-brand-gold">—</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Price per request</p>
+            <p id="outPricePerReq" class="text-2xl font-bold text-white">—</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Required monthly revenue</p>
+            <p id="outRequiredRevenue" class="text-2xl font-bold text-emerald-400">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison tables -->
+      <div class="grid lg:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4">Cost by hosting provider</h2>
+          <p class="text-sm text-neutral-400 mb-4">Same workload, swapping only the MCP hosting option.</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="text-neutral-500 border-b border-neutral-800">
+                <tr>
+                  <th class="text-left py-2">Provider</th>
+                  <th class="text-right py-2">Hosting/mo</th>
+                  <th class="text-right py-2 font-semibold text-white">Total/mo</th>
+                </tr>
+              </thead>
+              <tbody id="hostingTable" class="divide-y divide-neutral-800">
+                {hosting_providers.map(p => (
+                  <tr data-slug={p.slug} class="hover:bg-neutral-800/30">
+                    <td class="py-3">{p.name}<br><span class="text-xs text-neutral-500">${p.base_monthly_usd}/mo + ${p.per_request_usd.toFixed(4)}/req</span></td>
+                    <td class="py-3 text-right hosting-cost">—</td>
+                    <td class="py-3 text-right total-cost font-semibold text-brand-gold">—</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-4">Cost by LLM model</h2>
+          <p class="text-sm text-neutral-400 mb-4">Same workload, swapping only the orchestration LLM.</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="text-neutral-500 border-b border-neutral-800">
+                <tr>
+                  <th class="text-left py-2">LLM</th>
+                  <th class="text-right py-2">LLM/mo</th>
+                  <th class="text-right py-2 font-semibold text-white">Total/mo</th>
+                </tr>
+              </thead>
+              <tbody id="llmTable" class="divide-y divide-neutral-800">
+                {llm_models.map(m => (
+                  <tr data-slug={m.slug} class="hover:bg-neutral-800/30">
+                    <td class="py-3">{m.name}<br><span class="text-xs text-neutral-500">${(m.input_per_1k_usd * 1000).toFixed(2)}/${(m.output_per_1k_usd * 1000).toFixed(2)} per 1M tokens</span></td>
+                    <td class="py-3 text-right llm-cost">—</td>
+                    <td class="py-3 text-right total-cost font-semibold text-brand-gold">—</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- How it works / FAQ -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Hosting</strong> = base monthly fee + (requests × per-request fee). Self-hosted counts compute separately.</li>
+            <li><strong class="text-white">LLM</strong> = requests × ((input tokens ÷ 1000 × input price) + (output tokens ÷ 1000 × output price)).</li>
+            <li><strong class="text-white">Tool APIs</strong> = requests × average underlying tool cost per request.</li>
+            <li><strong class="text-white">Egress</strong> = GB/month × ${egress.cost_per_gb_usd}/GB. Often bundled with managed hosting.</li>
+            <li><strong class="text-white">Engineering</strong> = server count × hours/server × hourly rate. Higher for self-hosted integrations.</li>
+            <li><strong class="text-white">Margin pricing</strong> = monthly cost ÷ (1 − margin%).</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">When to use each option</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• <strong>Local / Claude Desktop</strong> for personal experiments and single-user agents.</li>
+            <li>• <strong>Managed gateway (Composio, Smithery, Relevance AI)</strong> when you need auth, observability, and pre-built integrations.</li>
+            <li>• <strong>Self-hosted cloud</strong> when the integration is the product, security is strict, or volume is very high.</li>
+            <li>• <strong>GPT-4o mini / Gemini Flash</strong> for most routing; upgrade to Sonnet for complex reasoning.</li>
+          </ul>
+        </div>
+      </div>
+
+      <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faq.map(f => (
+            <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+              <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+              <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/agent-memory-cost-calculator-v2/" class="btn-primary text-sm">Agent Memory / RAG Cost Calc v2 →</a>
+        <a href="/tools/agent-stack-builder/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Agent Stack Builder →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+      </div>
+
+      <p class="text-neutral-500 text-sm mt-10">{data.note} Last updated: {data.last_updated}.</p>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, scenarios, hosting_providers, llm_models, tool_api_packs, egress }}>
+    const els = {
+      mcpServerCount: document.getElementById('mcpServerCount'),
+      requestsPerMonth: document.getElementById('requestsPerMonth'),
+      llmInputPerReq: document.getElementById('llmInputPerReq'),
+      llmOutputPerReq: document.getElementById('llmOutputPerReq'),
+      toolApiCostPerReq: document.getElementById('toolApiCostPerReq'),
+      toolApiPreset: document.getElementById('toolApiPreset'),
+      hostingProvider: document.getElementById('hostingProvider'),
+      selfHostCompute: document.getElementById('selfHostCompute'),
+      egressGb: document.getElementById('egressGb'),
+      engHoursPerServer: document.getElementById('engHoursPerServer'),
+      engRate: document.getElementById('engRate'),
+      llmModel: document.getElementById('llmModel'),
+      marginPct: document.getElementById('marginPct'),
+      periodMonths: document.getElementById('periodMonths'),
+      includeEgress: document.getElementById('includeEgress'),
+      includeEngineering: document.getElementById('includeEngineering'),
+      hostingNote: document.getElementById('hostingNote'),
+      llmNote: document.getElementById('llmNote'),
+      outTotalMonthly: document.getElementById('outTotalMonthly'),
+      outCostPer1k: document.getElementById('outCostPer1k'),
+      outCostPerReq: document.getElementById('outCostPerReq'),
+      outPeriodTotal: document.getElementById('outPeriodTotal'),
+      outHosting: document.getElementById('outHosting'),
+      outLlm: document.getElementById('outLlm'),
+      outToolApi: document.getElementById('outToolApi'),
+      outEgress: document.getElementById('outEgress'),
+      outEngineering: document.getElementById('outEngineering'),
+      outPricePer1k: document.getElementById('outPricePer1k'),
+      outPricePerReq: document.getElementById('outPricePerReq'),
+      outRequiredRevenue: document.getElementById('outRequiredRevenue'),
+    };
+
+    const hostingMap = Object.fromEntries(hosting_providers.map(p => [p.slug, p]));
+    const llmMap = Object.fromEntries(llm_models.map(m => [m.slug, m]));
+    const toolApiMap = Object.fromEntries(tool_api_packs.map(p => [p.slug, p]));
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (Math.abs(n) < 0.01) return '$' + n.toFixed(4);
+      if (Math.abs(n) < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+
+    function getInputs() {
+      return {
+        servers: Math.max(1, parseInt(els.mcpServerCount.value, 10) || 1),
+        requests: Math.max(0, parseFloat(els.requestsPerMonth.value) || 0),
+        inputTokens: Math.max(0, parseFloat(els.llmInputPerReq.value) || 0),
+        outputTokens: Math.max(0, parseFloat(els.llmOutputPerReq.value) || 0),
+        toolApiCost: Math.max(0, parseFloat(els.toolApiCostPerReq.value) || 0),
+        hostingSlug: els.hostingProvider.value,
+        selfHostCompute: Math.max(0, parseFloat(els.selfHostCompute.value) || 0),
+        egressGb: Math.max(0, parseFloat(els.egressGb.value) || 0),
+        engHours: Math.max(0, parseFloat(els.engHoursPerServer.value) || 0),
+        engRate: Math.max(0, parseFloat(els.engRate.value) || 0),
+        llmSlug: els.llmModel.value,
+        marginPct: Math.max(0, Math.min(99, parseFloat(els.marginPct.value) || 0)) / 100,
+        periodMonths: Math.max(1, parseInt(els.periodMonths.value, 10) || 1),
+        includeEgress: els.includeEgress.checked,
+        includeEngineering: els.includeEngineering.checked,
+      };
+    }
+
+    function computeCost(inputs, hostingSlug, llmSlug) {
+      const hosting = hostingMap[hostingSlug] || hosting_providers[0];
+      const llm = llmMap[llmSlug] || llm_models[0];
+
+      const hostingCost = hosting.base_monthly_usd + (inputs.requests * hosting.per_request_usd);
+      const llmCost = inputs.requests * ((inputs.inputTokens / 1000 * llm.input_per_1k_usd) + (inputs.outputTokens / 1000 * llm.output_per_1k_usd));
+      const toolApiCost = inputs.requests * inputs.toolApiCost;
+      const egressCost = inputs.includeEgress ? inputs.egressGb * egress.cost_per_gb_usd : 0;
+      const engineeringCost = inputs.includeEngineering ? inputs.servers * inputs.engHours * inputs.engRate : 0;
+      const computeCost = hosting.type === 'self-hosted' || hosting.type === 'local' ? inputs.selfHostCompute : 0;
+
+      const total = hostingCost + llmCost + toolApiCost + egressCost + engineeringCost + computeCost;
+      return {
+        hosting: hostingCost,
+        llm: llmCost,
+        toolApi: toolApiCost,
+        egress: egressCost,
+        engineering: engineeringCost,
+        compute: computeCost,
+        total,
+        costPerReq: inputs.requests > 0 ? total / inputs.requests : 0,
+        costPer1k: inputs.requests > 0 ? (total / inputs.requests) * 1000 : 0,
+      };
+    }
+
+    function update() {
+      const inputs = getInputs();
+      const current = computeCost(inputs, inputs.hostingSlug, inputs.llmSlug);
+      const requiredRevenue = inputs.marginPct > 0 ? current.total / (1 - inputs.marginPct) : current.total;
+
+      els.outTotalMonthly.textContent = fmtMoney(current.total);
+      els.outCostPer1k.textContent = fmtMoney(current.costPer1k);
+      els.outCostPerReq.textContent = fmtMoney(current.costPerReq);
+      els.outPeriodTotal.textContent = fmtMoney(current.total * inputs.periodMonths);
+      els.outHosting.textContent = fmtMoney(current.hosting + current.compute);
+      els.outLlm.textContent = fmtMoney(current.llm);
+      els.outToolApi.textContent = fmtMoney(current.toolApi);
+      els.outEgress.textContent = fmtMoney(current.egress);
+      els.outEngineering.textContent = fmtMoney(current.engineering);
+      els.outPricePer1k.textContent = fmtMoney(inputs.marginPct > 0 ? (requiredRevenue / inputs.requests) * 1000 : 0);
+      els.outPricePerReq.textContent = fmtMoney(inputs.marginPct > 0 ? requiredRevenue / inputs.requests : 0);
+      els.outRequiredRevenue.textContent = fmtMoney(requiredRevenue);
+
+      // Notes
+      els.hostingNote.textContent = hostingMap[inputs.hostingSlug].notes;
+      els.llmNote.textContent = llmMap[inputs.llmSlug].notes;
+
+      // Hosting comparison
+      document.querySelectorAll('#hostingTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const result = computeCost(inputs, slug, inputs.llmSlug);
+        row.querySelector('.hosting-cost').textContent = fmtMoney(result.hosting + result.compute);
+        row.querySelector('.total-cost').textContent = fmtMoney(result.total);
+        row.classList.toggle('bg-neutral-800/40', slug === inputs.hostingSlug);
+      });
+
+      // LLM comparison
+      document.querySelectorAll('#llmTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const result = computeCost(inputs, inputs.hostingSlug, slug);
+        row.querySelector('.llm-cost').textContent = fmtMoney(result.llm);
+        row.querySelector('.total-cost').textContent = fmtMoney(result.total);
+        row.classList.toggle('bg-neutral-800/40', slug === inputs.llmSlug);
+      });
+    }
+
+    function applyScenario(idx) {
+      const s = scenarios[idx];
+      if (!s) return;
+      els.mcpServerCount.value = s.mcp_server_count;
+      els.requestsPerMonth.value = s.requests_per_month;
+      els.llmInputPerReq.value = s.llm_input_tokens_per_request;
+      els.llmOutputPerReq.value = s.llm_output_tokens_per_request;
+      els.toolApiCostPerReq.value = s.tool_api_cost_per_request_usd;
+      els.hostingProvider.value = s.hosting_provider;
+      els.selfHostCompute.value = s.self_host_compute_month_usd;
+      els.egressGb.value = s.egress_gb_per_month;
+      els.engHoursPerServer.value = s.engineering_hours_per_server_month;
+      els.llmModel.value = s.llm_model;
+      els.marginPct.value = s.margin_pct;
+      els.periodMonths.value = s.period_months;
+      update();
+    }
+
+    els.toolApiPreset.addEventListener('change', (e) => {
+      els.toolApiCostPerReq.value = toolApiMap[e.target.value].per_request_usd;
+      update();
+    });
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyScenario(parseInt(btn.dataset.idx, 10)));
+    });
+
+    Object.values(els).forEach(el => {
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT')) {
+        el.addEventListener('input', update);
+      }
+    });
+
+    update();
+  </script>
+</Layout>

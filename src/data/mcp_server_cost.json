@@ -1,0 +1,260 @@
+{
+  "last_updated": "2026-08-10",
+  "currency": "USD",
+  "note": "Prices are directional estimates based on public list pricing and typical managed MCP platform tiers. Confirm current rates before budgeting. Tool API costs are averages; real costs depend on the underlying service (Brave, Perplexity, Google Maps, etc.).",
+  "defaults": {
+    "mcp_server_count": 10,
+    "requests_per_month": 100000,
+    "llm_input_tokens_per_request": 800,
+    "llm_output_tokens_per_request": 250,
+    "hosting_provider": "composio",
+    "tool_api_cost_per_request_usd": 0.005,
+    "egress_gb_per_month": 50,
+    "self_host_compute_month_usd": 50,
+    "engineering_hours_per_server_month": 2,
+    "engineering_rate_hour_usd": 150,
+    "llm_model": "gpt-4o-mini",
+    "margin_pct": 0,
+    "period_months": 12
+  },
+  "scenarios": [
+    {
+      "slug": "personal-assistant",
+      "name": "Personal desktop assistant",
+      "icon": "💻",
+      "mcp_server_count": 5,
+      "requests_per_month": 2000,
+      "llm_input_tokens_per_request": 600,
+      "llm_output_tokens_per_request": 200,
+      "hosting_provider": "local-desktop",
+      "tool_api_cost_per_request_usd": 0.003,
+      "egress_gb_per_month": 2,
+      "self_host_compute_month_usd": 0,
+      "engineering_hours_per_server_month": 0.5,
+      "llm_model": "gpt-4o-mini",
+      "margin_pct": 0,
+      "period_months": 12
+    },
+    {
+      "slug": "saas-agent",
+      "name": "SaaS AI agent",
+      "icon": "🚀",
+      "mcp_server_count": 20,
+      "requests_per_month": 200000,
+      "llm_input_tokens_per_request": 1200,
+      "llm_output_tokens_per_request": 350,
+      "hosting_provider": "composio",
+      "tool_api_cost_per_request_usd": 0.006,
+      "egress_gb_per_month": 100,
+      "self_host_compute_month_usd": 75,
+      "engineering_hours_per_server_month": 1,
+      "llm_model": "gpt-4o-mini",
+      "margin_pct": 30,
+      "period_months": 12
+    },
+    {
+      "slug": "support-automation",
+      "name": "Support automation",
+      "icon": "🎧",
+      "mcp_server_count": 8,
+      "requests_per_month": 500000,
+      "llm_input_tokens_per_request": 900,
+      "llm_output_tokens_per_request": 180,
+      "hosting_provider": "relevance",
+      "tool_api_cost_per_request_usd": 0.004,
+      "egress_gb_per_month": 250,
+      "self_host_compute_month_usd": 100,
+      "engineering_hours_per_server_month": 1.5,
+      "llm_model": "claude-haiku",
+      "margin_pct": 25,
+      "period_months": 12
+    },
+    {
+      "slug": "enterprise-platform",
+      "name": "Enterprise agent platform",
+      "icon": "🏢",
+      "mcp_server_count": 100,
+      "requests_per_month": 2000000,
+      "llm_input_tokens_per_request": 1500,
+      "llm_output_tokens_per_request": 400,
+      "hosting_provider": "self-hosted-cloud",
+      "tool_api_cost_per_request_usd": 0.005,
+      "egress_gb_per_month": 2000,
+      "self_host_compute_month_usd": 400,
+      "engineering_hours_per_server_month": 3,
+      "llm_model": "gpt-4o",
+      "margin_pct": 20,
+      "period_months": 12
+    }
+  ],
+  "hosting_providers": [
+    {
+      "slug": "composio",
+      "name": "Composio",
+      "type": "managed",
+      "base_monthly_usd": 49,
+      "per_request_usd": 0.001,
+      "notes": "Production MCP integration platform; open-source core available. Usage-based enterprise tiers."
+    },
+    {
+      "slug": "smithery",
+      "name": "Smithery",
+      "type": "managed",
+      "base_monthly_usd": 29,
+      "per_request_usd": 0.0015,
+      "notes": "MCP server registry and hosted gateway. Freemium for low volume."
+    },
+    {
+      "slug": "relevance",
+      "name": "Relevance AI",
+      "type": "managed",
+      "base_monthly_usd": 99,
+      "per_request_usd": 0.002,
+      "notes": "Agent platform with built-in MCP tooling and multi-agent orchestration."
+    },
+    {
+      "slug": "glama",
+      "name": "Glama MCP Gateway",
+      "type": "managed",
+      "base_monthly_usd": 19,
+      "per_request_usd": 0.001,
+      "notes": "Hosted MCP servers with gateway access; paid tiers for higher concurrency."
+    },
+    {
+      "slug": "self-hosted-cloud",
+      "name": "Self-hosted (cloud VM / Cloud Run)",
+      "type": "self-hosted",
+      "base_monthly_usd": 0,
+      "per_request_usd": 0.0002,
+      "notes": "Compute cost billed separately. Best for control and high volume."
+    },
+    {
+      "slug": "local-desktop",
+      "name": "Local / Claude Desktop / Windsurf",
+      "type": "local",
+      "base_monthly_usd": 0,
+      "per_request_usd": 0,
+      "notes": "No hosting fee; only LLM and underlying API costs."
+    }
+  ],
+  "llm_models": [
+    {
+      "slug": "gpt-4o-mini",
+      "name": "GPT-4o mini",
+      "input_per_1k_usd": 0.00015,
+      "output_per_1k_usd": 0.0006,
+      "notes": "Cheap default for high-volume MCP orchestration."
+    },
+    {
+      "slug": "gpt-4o",
+      "name": "GPT-4o",
+      "input_per_1k_usd": 0.0025,
+      "output_per_1k_usd": 0.01,
+      "notes": "Strong reasoning for complex multi-tool workflows."
+    },
+    {
+      "slug": "claude-haiku",
+      "name": "Claude 3.5 Haiku",
+      "input_per_1k_usd": 0.0008,
+      "output_per_1k_usd": 0.004,
+      "notes": "Fast, cheap Anthropic model for agent routing."
+    },
+    {
+      "slug": "claude-sonnet",
+      "name": "Claude 3.7 Sonnet",
+      "input_per_1k_usd": 0.003,
+      "output_per_1k_usd": 0.015,
+      "notes": "Best for reasoning-heavy tool selection."
+    },
+    {
+      "slug": "gemini-flash",
+      "name": "Gemini 2.5 Flash",
+      "input_per_1k_usd": 0.00015,
+      "output_per_1k_usd": 0.0006,
+      "notes": "Low-cost Google model with long context."
+    },
+    {
+      "slug": "local-llm",
+      "name": "Local LLM (self-hosted)",
+      "input_per_1k_usd": 0,
+      "output_per_1k_usd": 0,
+      "notes": "GPU/electricity cost separate."
+    }
+  ],
+  "tool_api_packs": [
+    {
+      "slug": "web-search",
+      "name": "Web search (Brave / Perplexity / Tavily)",
+      "per_request_usd": 0.005,
+      "notes": "Search queries and result snippets."
+    },
+    {
+      "slug": "maps-local",
+      "name": "Maps & local (Google Maps / Yelp)",
+      "per_request_usd": 0.01,
+      "notes": "Geocoding, places, routing."
+    },
+    {
+      "slug": "finance",
+      "name": "Finance / stocks (Polygon / Alpha Vantage)",
+      "per_request_usd": 0.002,
+      "notes": "Stock quotes, fundamentals, market data."
+    },
+    {
+      "slug": "communication",
+      "name": "Communication (Slack / email / calendar)",
+      "per_request_usd": 0.001,
+      "notes": "Mostly API quota; often free at low volume."
+    },
+    {
+      "slug": "knowledge",
+      "name": "Knowledge base (Notion / Airtable / DB)",
+      "per_request_usd": 0.0005,
+      "notes": "CRUD operations; negligible per-call cost."
+    },
+    {
+      "slug": "code",
+      "name": "Code / GitHub",
+      "per_request_usd": 0.003,
+      "notes": "GitHub API or code-analysis tools."
+    },
+    {
+      "slug": "browser",
+      "name": "Browser automation (Browserbase / Steel)",
+      "per_request_usd": 0.02,
+      "notes": "Most expensive due to browser infra per step."
+    },
+    {
+      "slug": "custom",
+      "name": "Custom internal API",
+      "per_request_usd": 0.001,
+      "notes": "Internal cost allocation; usually lowest."
+    }
+  ],
+  "egress": {
+    "cost_per_gb_usd": 0.09,
+    "notes": "Public cloud average egress. Free or bundled inside many managed platforms."
+  },
+  "faq": [
+    {
+      "question": "What is an MCP server cost made of?",
+      "answer": "Four main buckets: (1) hosting/gateway fees for the MCP server itself, (2) the orchestration LLM call that decides which tool to use and formats arguments, (3) underlying tool API costs (search, maps, finance, etc.), and (4) data egress and engineering maintenance for self-hosted setups."
+    },
+    {
+      "question": "When is self-hosting MCP servers cheaper?",
+      "answer": "At high request volume, managed per-request fees dominate. Self-hosted cloud compute is usually cheaper per call, but you add engineering hours, security, auth, and observability costs. Break-even often appears above a few hundred thousand requests per month."
+    },
+    {
+      "question": "Do I pay for the LLM and the tool API separately?",
+      "answer": "Yes. Every MCP call typically involves an LLM call to select and invoke the tool, plus any cost charged by the tool itself (e.g. a Brave Search API call or a Google Maps lookup)."
+    },
+    {
+      "question": "Which MCP hosting provider should I pick?",
+      "answer": "Use local/desktop for personal experiments. Pick a managed gateway like Composio, Smithery, or Relevance AI for production teams that want auth, observability, and pre-built integrations. Choose self-hosted cloud when the integration is the product or you need tight security controls."
+    },
+    {
+      "question": "Why add engineering hours for self-hosted?",
+      "answer": "Self-hosted servers need deployment, OAuth/secret rotation, vendor API changes, monitoring, and prompt-injection guardrails. Industry estimates put custom integration maintenance at $15k–$50k per integration per year."
+    }
+  ]
+}
