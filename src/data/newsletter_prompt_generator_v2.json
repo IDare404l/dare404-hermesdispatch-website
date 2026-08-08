@@ -1,0 +1,205 @@
+{
+  "last_updated": "2026-08-08",
+  "persona": "You are Hermes Dispatch — a terse, action-first daily newsletter about AI agent automation, local AI hardware, crypto-to-AI pivots, and answer-engine optimization. Each issue gives one concrete insight, one number or benchmark, one tool or resource, and one clear next step.",
+  "audience": "Solo builders, AI operators, crypto miners pivoting to inference, indie hackers, and newsletter writers who want to be cited by answer engines.",
+  "default_word_count": 500,
+  "tones": [
+    { "slug": "fast", "name": "Fast and direct", "description": "Short paragraphs, bullet takeaways, no filler." },
+    { "slug": "data", "name": "Data-driven", "description": "Lead with a number, benchmark, or comparison." },
+    { "slug": "skeptical", "name": "Skeptical but constructive", "description": "Call out hype, then give the practical fix." },
+    { "slug": "tutorial", "name": "Tutorial-style", "description": "Step-by-step so the reader can act today." },
+    { "slug": "opinion", "name": "Opinionated", "description": "Take a side, name names, and defend it with proof." },
+    { "slug": "curator", "name": "Curator's pick", "description": "One great find with why it matters." },
+    { "slug": "contrarian", "name": "Contrarian", "description": "Challenge the consensus with a specific counter-example." }
+  ],
+  "hook_styles": [
+    { "slug": "question", "name": "Open question", "template": "What if [common assumption] is wrong?" },
+    { "slug": "number", "name": "Lead number", "template": "[X]% of [group] still [outdated action]." },
+    { "slug": "mistake", "name": "Common mistake", "template": "The #1 mistake [audience] makes with [topic]." },
+    { "slug": "prediction", "name": "12-month prediction", "template": "In 12 months, [topic] will look completely different." },
+    { "slug": "teardown", "name": "Teardown", "template": "I spent [time/money] on [topic]. Here is what broke first." },
+    { "slug": "checklist", "name": "Checklist", "template": "[N] things I check before [action]." }
+  ],
+  "output_formats": [
+    { "slug": "newsletter", "name": "Full newsletter issue", "word_count": 500, "sections": ["Subject line (5 options)", "Hook", "The one insight", "Proof: number, benchmark, or example", "Tool or resource link with verdict", "Counter-argument or gotcha", "Actionable takeaway", "Closing CTA"] },
+    { "slug": "thread", "name": "X/Twitter thread", "word_count": 300, "sections": ["Hook tweet", "3-5 thread bullets", "Proof or screenshot prompt", "Tool or resource", "CTA tweet"] },
+    { "slug": "linkedin", "name": "LinkedIn post", "word_count": 250, "sections": ["Hook line", "Short story or observation", "One data point", "Tool or resource", "Question CTA"] },
+    { "slug": "answer", "name": "Answer-engine snippet", "word_count": 150, "sections": ["Direct answer", "One supporting number", "Tool or resource link", "Caveat", "Next step"] }
+  ],
+  "site_tools": [
+    { "name": "VRAM Calculator", "path": "/tools/vram-calculator/", "category": "ai-hardware" },
+    { "name": "GPU Comparison", "path": "/compare/gpus/", "category": "ai-hardware" },
+    { "name": "GPU Benchmark Comparator", "path": "/tools/gpu-benchmark-comparator/", "category": "ai-hardware" },
+    { "name": "GPU Recommender", "path": "/compare/recommend/", "category": "ai-hardware" },
+    { "name": "Mini PC Comparison", "path": "/compare/mini-pcs/", "category": "ai-hardware" },
+    { "name": "Mini PC Recommender", "path": "/tools/mini-pc-recommender/", "category": "ai-hardware" },
+    { "name": "Agent Hardware Sizer", "path": "/tools/agent-hardware-sizer/", "category": "ai-agents" },
+    { "name": "Local LLM ROI Calculator", "path": "/tools/local-llm-roi-calculator/", "category": "ai-agents" },
+    { "name": "Inference Engine Selector v2", "path": "/tools/inference-engine-selector-v2/", "category": "ai-agents" },
+    { "name": "Open Source LLM Selector", "path": "/tools/open-source-llm-selector/", "category": "ai-agents" },
+    { "name": "Quantization Advisor", "path": "/tools/quantization-advisor/", "category": "ai-agents" },
+    { "name": "Agent Hosting Cost Comparator", "path": "/tools/agent-hosting-cost-comparator/", "category": "ai-agents" },
+    { "name": "Agent Benchmark Selector", "path": "/tools/agent-benchmark-selector/", "category": "ai-agents" },
+    { "name": "Context Window Cheat Sheet", "path": "/tools/context-window-cheat-sheet/", "category": "ai-agents" },
+    { "name": "AI Agent Compliance Checker", "path": "/tools/ai-agent-compliance-checker/", "category": "ai-agents" },
+    { "name": "Agent Memory / RAG Cost Calc v2", "path": "/tools/agent-memory-cost-calculator-v2/", "category": "ai-agents" },
+    { "name": "Agent Marketplace Fee Comparator", "path": "/tools/agent-marketplace-fee-comparator/", "category": "ai-agents" },
+    { "name": "Agent Routing / Gateway Cost Comparator", "path": "/tools/agent-routing-cost-comparator/", "category": "ai-agents" },
+    { "name": "Agent Observability Cost Comparator", "path": "/tools/agent-observability-cost-comparator/", "category": "ai-agents" },
+    { "name": "MCP Server Cost Estimator", "path": "/tools/mcp-server-cost-estimator/", "category": "ai-agents" },
+    { "name": "Browser Use Cost Estimator", "path": "/tools/browser-use-cost-estimator/", "category": "ai-agents" },
+    { "name": "AI Voice Agent Cost Calculator", "path": "/tools/ai-voice-agent-cost-calculator/", "category": "ai-agents" },
+    { "name": "AI Image Generation Cost Calculator", "path": "/tools/ai-image-generation-cost-calculator/", "category": "ai-agents" },
+    { "name": "No-Code Agent Builder Selector", "path": "/tools/no-code-agent-builder-selector/", "category": "ai-agents" },
+    { "name": "Miner Pivot Calculator", "path": "/tools/miner-pivot-calculator/", "category": "crypto-pivot" },
+    { "name": "Hashrate → Inference Converter", "path": "/tools/hashrate-to-inference-converter/", "category": "crypto-pivot" },
+    { "name": "Crypto Tax Loss Harvester", "path": "/tools/crypto-tax-loss-harvester/", "category": "crypto-pivot" },
+    { "name": "Staking vs Inference Yield", "path": "/tools/crypto-staking-vs-inference-yield/", "category": "crypto-pivot" },
+    { "name": "Startup Runway Calculator", "path": "/tools/startup-runway-calculator/", "category": "investing-startups" },
+    { "name": "Affiliate Revenue Estimator", "path": "/tools/affiliate-revenue-estimator/", "category": "investing-startups" },
+    { "name": "AI Hardware Deal Tracker", "path": "/tools/ai-hardware-deal-tracker/", "category": "investing-startups" },
+    { "name": "Answer Engine Citation Tracker", "path": "/tools/answer-engine-citation-tracker/", "category": "answer-engines" },
+    { "name": "Newsletter Topic Finder", "path": "/tools/newsletter-topic-finder/", "category": "answer-engines" },
+    { "name": "Daily Newsletter Prompt Generator", "path": "/tools/newsletter-prompt-generator/", "category": "answer-engines" }
+  ],
+  "categories": [
+    {
+      "slug": "ai-hardware",
+      "name": "AI Hardware",
+      "icon": "🖥️",
+      "audience": "Local LLM builders who care about VRAM, watts, and tok/s per dollar.",
+      "sample_topics": [
+        "Best GPU for Llama 3 70B under $2,000",
+        "Mac Mini M4 vs RTX 4090 for local LLMs",
+        "How much VRAM do I need for a 7B model?",
+        "RTX 5090 vs RTX 4090 tokens-per-second comparison",
+        "Mini PC showdown: M4 Pro vs AMD HX 370"
+      ],
+      "angles": [
+        "What the spec sheet does not tell you",
+        "The used-market sweet spot right now",
+        "Power, noise, and wife-acceptance factor",
+        "When to buy vs when to build",
+        "The upgrade that actually moved tok/s"
+      ],
+      "must_include": [
+        "A concrete VRAM, TDP, or tok/s number",
+        "A link to the VRAM calculator or GPU comparison page",
+        "One buy-or-skip verdict"
+      ]
+    },
+    {
+      "slug": "ai-agents",
+      "name": "AI Agents",
+      "icon": "🤖",
+      "audience": "Builders shipping agents with memory, tools, and real API bills.",
+      "sample_topics": [
+        "Best framework for building AI agents",
+        "How to run an AI agent 24/7 cheaply",
+        "AI agent stack for content automation",
+        "Privacy-first AI agent setup guide",
+        "When to add MCP servers vs native tools"
+      ],
+      "angles": [
+        "The framework decision that locks you in",
+        "The hidden cost of long context",
+        "Why most agents fail after demo day",
+        "One tool swap that cut my bill 40%",
+        "Observability: the line item founders skip"
+      ],
+      "must_include": [
+        "A stack recommendation (LLM, framework, hosting)",
+        "A rough monthly cost figure",
+        "A compliance or privacy caveat"
+      ]
+    },
+    {
+      "slug": "crypto-pivot",
+      "name": "Crypto → AI Pivot",
+      "icon": "⛏️",
+      "audience": "Crypto miners and GPU owners looking for inference revenue instead of hash.",
+      "sample_topics": [
+        "Should I sell my GPU mining rig or repurpose it for AI?",
+        "Mining profitability vs AI inference revenue in 2026",
+        "Crypto tax loss harvesting before pivoting to AI",
+        "GPU hashrate vs LLM inference capacity",
+        "ASIC owner playbook for the AI era"
+      ],
+      "angles": [
+        "Hashrate is not the only asset you own",
+        "The tax move to make before year-end",
+        "Repurpose, rent, or sell: the math",
+        "What ASIC owners can still do",
+        "The rig that pays more in inference than mining"
+      ],
+      "must_include": [
+        "A profitability or tax-saving number",
+        "A link to the miner pivot or rig repurposing guide",
+        "One practical next action for hardware owners"
+      ]
+    },
+    {
+      "slug": "investing-startups",
+      "name": "Investing & Startups",
+      "icon": "🚀",
+      "audience": "AI-native founders, indie hackers, and investors tracking agent economics.",
+      "sample_topics": [
+        "AI agent startup costs: first-year burn estimate",
+        "How many months of runway does my startup have?",
+        "ROI of local LLM hardware vs API spend",
+        "Customer support automation ROI calculator",
+        "The affiliate math behind AI tool reviews"
+      ],
+      "angles": [
+        "The burn category founders underestimate",
+        "Local hardware as a fundraising signal",
+        "When API spend is cheaper than headcount",
+        "The metric that actually matters to investors",
+        "Why runway is a product decision"
+      ],
+      "must_include": [
+        "A cost, runway, or ROI figure",
+        "A link to the startup cost or ROI calculator",
+        "One decision framework (build vs buy vs rent)"
+      ]
+    },
+    {
+      "slug": "answer-engines",
+      "name": "AEO & Citations",
+      "icon": "🔗",
+      "audience": "Writers and operators who want their content cited by Perplexity, ChatGPT, and Gemini.",
+      "sample_topics": [
+        "How to get cited by Perplexity and ChatGPT",
+        "Schema.org types every AI directory needs",
+        "Why answer engine optimization beats traditional SEO",
+        "How to track AI citations to your website",
+        "Turning a newsletter issue into an answer-engine snippet"
+      ],
+      "angles": [
+        "The page type AI search engines cite most",
+        "One schema change that lifted citations",
+        "What most AEO advice gets wrong",
+        "Turn your FAQ into an answer-engine magnet",
+        "The metric that proves AI referral traffic"
+      ],
+      "must_include": [
+        "A specific schema type or content format",
+        "A link to the citation tracker or newsletter topic finder",
+        "One measurable test the reader can run today"
+      ]
+    }
+  ],
+  "ctas": [
+    "Subscribe to the daily dispatch",
+    "Try the calculator and reply with your number",
+    "Forward this to someone sitting on unused GPUs",
+    "Run the numbers, then decide",
+    "Bookmark the tool and test it this week",
+    "Share the one metric that surprised you"
+  ],
+  "sponsor_templates": [
+    "This issue is sponsored by [SPONSOR]. [SPONSOR] helps [audience] [benefit]. Learn more: [LINK].",
+    "Sponsor spotlight: [SPONSOR] — [one-line value prop]. [LINK]",
+    "Partner note: [SPONSOR] is the [category] I use for [use case]. [LINK]"
+  ]
+}

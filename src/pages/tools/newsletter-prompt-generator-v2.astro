@@ -1,0 +1,555 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/newsletter_prompt_generator_v2.json';
+
+const title = "Daily Newsletter Prompt Generator v2 | Hermes Dispatch";
+const description = "Build a complete DOC-id newsletter brief with hook styles, output formats, embedded tool links, sponsor slots, and answer-engine snippets. Save drafts locally and copy markdown.";
+const url = "https://hermesdispatch.dev/tools/newsletter-prompt-generator-v2/";
+const tones = data.tones;
+const categories = data.categories;
+const hookStyles = data.hook_styles;
+const formats = data.output_formats;
+const siteTools = data.site_tools;
+const ctas = data.ctas;
+const sponsorTemplates = data.sponsor_templates;
+
+const today = new Date().toISOString().slice(0, 10);
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Daily Newsletter Prompt Generator v2" description={description} url={url} applicationCategory="WebApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type": "Question", "name": "What is the difference between the original and v2 prompt generator?", "acceptedAnswer": {"@type": "Answer", "text": "v2 adds output format choices (newsletter, X/Twitter thread, LinkedIn post, answer-engine snippet), hook-style templates, embedded site tool links, sponsor slot templates, local draft history, and a live markdown preview."}},
+      {"@type": "Question", "name": "What is a DOC-id prompt?", "acceptedAnswer": {"@type": "Answer", "text": "A DOC-id prompt is a structured daily newsletter prompt used by Hermes Dispatch. It includes persona, audience, category, tone, word count, required sections, and links to site tools so the AI output is consistent and citable."}},
+      {"@type": "Question", "name": "How do I use the generated markdown brief?", "acceptedAnswer": {"@type": "Answer", "text": "Copy the markdown brief and paste it into Claude, ChatGPT, or your AI writer as a system/user prompt. The brief includes front matter, section instructions, and links to Hermes Dispatch tools so the draft stays on-brand."}},
+      {"@type": "Question", "name": "Which output format should I pick?", "acceptedAnswer": {"@type": "Answer", "text": "Use 'Full newsletter issue' for the daily email, 'X/Twitter thread' for social distribution, 'LinkedIn post' for longer-form social, and 'Answer-engine snippet' for content optimized to be cited by AI search engines."}},
+      {"@type": "Question", "name": "Can I save drafts?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The generator stores your last 20 generated briefs in the browser's localStorage. You can reload a saved draft, edit it, or delete old ones."}}
+    ]
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">✍️</div>
+      <h1 class="display-heading mb-4">Daily Newsletter Prompt Generator v2</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Build a complete DOC-id brief for today's Hermes Dispatch issue. Choose a format, hook style, embedded tool link, and copy a production-ready markdown prompt.</p>
+    </div>
+
+    <section class="grid lg:grid-cols-12 gap-6 mb-8">
+      <div class="lg:col-span-7 space-y-6">
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-lg font-bold mb-4 text-brand-gold">Issue blueprint</h2>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <label class="block">
+              <span class="text-neutral-400 text-sm">Issue date</span>
+              <input id="issueDate" type="date" value={today} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+            </label>
+            <label class="block">
+              <span class="text-neutral-400 text-sm">Output format</span>
+              <select id="outputFormat" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+                {formats.map(f => <option value={JSON.stringify(f)}>{f.name}</option>)}
+              </select>
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="text-neutral-400 text-sm">Topic or headline idea</span>
+              <input id="topic" type="text" value={categories[0].sample_topics[0]} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="text-neutral-400 text-sm">Target audience</span>
+              <input id="audience" type="text" value={data.audience} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+            </label>
+            <label class="block">
+              <span class="text-neutral-400 text-sm">Word count</span>
+              <input id="wordCount" type="number" min="50" step="50" value={data.default_word_count} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+            </label>
+            <label class="block">
+              <span class="text-neutral-400 text-sm">Lead number (optional)</span>
+              <input id="leadNumber" type="text" placeholder="e.g. 73% or $0.004 per 1K tokens" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+            </label>
+          </div>
+
+          <div class="mt-6">
+            <span class="text-neutral-400 text-sm block mb-2">Category</span>
+            <div class="flex flex-wrap gap-2" id="category-buttons">
+              {categories.map((c, i) => (
+                <button type="button" class="category-btn px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-xs transition-colors text-left" data-category={JSON.stringify(c)} data-index={i}>
+                  <span class="mr-1">{c.icon}</span>{c.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <span class="text-neutral-400 text-sm block mb-2">Tone</span>
+            <div class="flex flex-wrap gap-2" id="tone-buttons">
+              {tones.map((t, i) => (
+                <button type="button" class="tone-btn px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-xs transition-colors" data-tone={JSON.stringify(t)} data-index={i}>
+                  {t.name}
+                </button>
+              ))}
+            </div>
+            <p id="toneDescription" class="text-neutral-500 text-sm mt-2">{tones[0].description}</p>
+          </div>
+
+          <div class="mt-4">
+            <span class="text-neutral-400 text-sm block mb-2">Hook style</span>
+            <div class="flex flex-wrap gap-2" id="hook-buttons">
+              {hookStyles.map((h, i) => (
+                <button type="button" class="hook-btn px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-xs transition-colors" data-hook={JSON.stringify(h)} data-index={i}>
+                  {h.name}
+                </button>
+              ))}
+            </div>
+            <p id="hookTemplate" class="text-neutral-500 text-sm mt-2">{hookStyles[0].template}</p>
+          </div>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-lg font-bold mb-4 text-brand-gold">Angle, tool link, and CTA</h2>
+          <div class="space-y-4">
+            <label class="block">
+              <span class="text-neutral-400 text-sm">Angle</span>
+              <select id="angle" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+                {categories[0].angles.map(a => <option value={a}>{a}</option>)}
+              </select>
+            </label>
+            <label class="block">
+              <span class="text-neutral-400 text-sm">Embed a Hermes Dispatch tool</span>
+              <select id="siteTool" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+                <option value="">None / pick manually</option>
+                {siteTools.map(t => <option value={JSON.stringify(t)}>{t.name}</option>)}
+              </select>
+            </label>
+            <label class="block">
+              <span class="text-neutral-400 text-sm">Closing CTA</span>
+              <select id="cta" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+                {ctas.map(c => <option value={c}>{c}</option>)}
+              </select>
+              <input id="ctaCustom" type="text" placeholder="Or type a custom CTA" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-2" />
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input id="includeSponsor" type="checkbox" class="w-4 h-4 rounded bg-neutral-900 border-neutral-700 text-brand-gold" />
+              <span class="text-neutral-400 text-sm">Include sponsor slot</span>
+            </label>
+            <label id="sponsorWrap" class="block hidden">
+              <span class="text-neutral-400 text-sm">Sponsor line (replace bracket placeholders)</span>
+              <input id="sponsorLine" type="text" value={sponsorTemplates[0]} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input id="includeMustInclude" type="checkbox" checked class="w-4 h-4 rounded bg-neutral-900 border-neutral-700 text-brand-gold" />
+              <span class="text-neutral-400 text-sm">Include category must-include checklist</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input id="answerEngineMode" type="checkbox" class="w-4 h-4 rounded bg-neutral-900 border-neutral-700 text-brand-gold" />
+              <span class="text-neutral-400 text-sm">Add answer-engine optimization instructions (schema, FAQ, citations)</span>
+            </label>
+          </div>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-lg font-bold mb-4 text-brand-gold">Sample angles & topics</h2>
+          <div id="sampleTopics" class="space-y-3 text-sm"></div>
+        </section>
+      </div>
+
+      <div class="lg:col-span-5 space-y-6">
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 class="text-xl font-bold text-brand-gold flex items-center gap-2"><span>📋</span> Generated brief</h2>
+            <div class="flex gap-2">
+              <button id="copyMdBtn" type="button" class="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors">Copy markdown</button>
+              <button id="saveDraftBtn" type="button" class="px-3 py-1.5 rounded-lg bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/40 text-brand-gold text-sm transition-colors">Save draft</button>
+            </div>
+          </div>
+          <textarea id="briefOutput" rows="26" readonly class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white text-sm font-mono resize-y"></textarea>
+          <p id="copyFeedback" class="text-brand-gold text-sm mt-2 hidden">Copied to clipboard.</p>
+          <p id="saveFeedback" class="text-brand-gold text-sm mt-2 hidden">Draft saved.</p>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold text-brand-gold">Draft history</h2>
+            <button id="clearHistoryBtn" type="button" class="text-xs text-neutral-500 hover:text-neutral-300">Clear all</button>
+          </div>
+          <div id="draftHistory" class="space-y-2 text-sm max-h-64 overflow-y-auto">
+            <p class="text-neutral-500">No saved drafts yet.</p>
+          </div>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-lg font-bold mb-4 text-brand-gold">How to use it</h2>
+          <ul class="list-disc pl-5 text-neutral-300 space-y-2 text-sm">
+            <li>Pick a category to load sample topics, angles, and must-include rules.</li>
+            <li>Choose a hook style and output format for the channel you are writing for.</li>
+            <li>Embed a Hermes Dispatch tool to keep the issue citable and useful.</li>
+            <li>Add a lead number to force the draft to open with proof.</li>
+            <li>Copy the markdown brief, paste it into your AI writer, and edit the final draft.</li>
+            <li>Save drafts to keep a rotating bank of topic ideas.</li>
+          </ul>
+        </section>
+      </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+          <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">What is the difference between the original and v2 prompt generator?<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+          <p class="p-4 pt-0 text-neutral-400">v2 adds output format choices (newsletter, X/Twitter thread, LinkedIn post, answer-engine snippet), hook-style templates, embedded site tool links, sponsor slot templates, local draft history, and a live markdown preview.</p>
+        </details>
+        <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+          <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">What is a DOC-id prompt?<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+          <p class="p-4 pt-0 text-neutral-400">A DOC-id prompt is a structured daily newsletter prompt used by Hermes Dispatch. It includes persona, audience, category, tone, word count, required sections, and links to site tools so the AI output is consistent and citable.</p>
+        </details>
+        <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+          <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">How do I use the generated markdown brief?<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+          <p class="p-4 pt-0 text-neutral-400">Copy the markdown brief and paste it into Claude, ChatGPT, or your AI writer as a system/user prompt. The brief includes front matter, section instructions, and links to Hermes Dispatch tools so the draft stays on-brand.</p>
+        </details>
+        <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+          <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">Which output format should I pick?<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+          <p class="p-4 pt-0 text-neutral-400">Use 'Full newsletter issue' for the daily email, 'X/Twitter thread' for social distribution, 'LinkedIn post' for longer-form social, and 'Answer-engine snippet' for content optimized to be cited by AI search engines.</p>
+        </details>
+        <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+          <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">Can I save drafts?<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+          <p class="p-4 pt-0 text-neutral-400">Yes. The generator stores your last 20 generated briefs in the browser's localStorage. You can reload a saved draft, edit it, or delete old ones.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <script is:inline define:vars={{ data, tones, categories, hookStyles, formats, siteTools, ctas, sponsorTemplates, today }}>
+    function $(id) { return document.getElementById(id); }
+    let currentCategory = categories[0];
+    let currentTone = tones[0];
+    let currentHook = hookStyles[0];
+    let currentFormat = formats[0];
+    const LS_KEY = 'hermes_newsletter_prompt_v2_drafts';
+
+    function setActive(groupClass, btn) {
+      document.querySelectorAll('.' + groupClass).forEach(b => b.classList.remove('bg-brand-gold', 'text-neutral-950', 'border-brand-gold'));
+      if (btn) btn.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+    }
+
+    function updateAngleOptions() {
+      const sel = $('angle');
+      sel.innerHTML = '';
+      currentCategory.angles.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a; opt.textContent = a;
+        sel.appendChild(opt);
+      });
+    }
+
+    function renderSampleTopics() {
+      const container = $('sampleTopics');
+      const c = currentCategory;
+      let html = '';
+      if (c.sample_topics && c.sample_topics.length) {
+        html += '<p class="text-brand-gold font-medium mb-1">Sample topics</p><ul class="list-disc pl-5 text-neutral-300 space-y-1">';
+        c.sample_topics.forEach(t => html += '<li>' + t + '</li>');
+        html += '</ul>';
+      }
+      if (c.angles && c.angles.length) {
+        html += '<p class="text-brand-gold font-medium mt-3 mb-1">Angles</p><ul class="list-disc pl-5 text-neutral-300 space-y-1">';
+        c.angles.forEach(a => html += '<li>' + a + '</li>');
+        html += '</ul>';
+      }
+      if (c.must_include && c.must_include.length) {
+        html += '<p class="text-brand-gold font-medium mt-3 mb-1">Must include</p><ul class="list-disc pl-5 text-neutral-300 space-y-1">';
+        c.must_include.forEach(m => html += '<li>' + m + '</li>');
+        html += '</ul>';
+      }
+      container.innerHTML = html || '<p class="text-neutral-500">No samples for this category.</p>';
+    }
+
+    function getSelectedTool() {
+      const raw = $('siteTool').value;
+      if (!raw) return null;
+      try { return JSON.parse(raw); } catch (e) { return null; }
+    }
+
+    function getSelectedFormat() {
+      try { return JSON.parse($('outputFormat').value); } catch (e) { return formats[0]; }
+    }
+
+    function generateBrief() {
+      currentFormat = getSelectedFormat();
+      const topic = $('topic').value.trim() || currentCategory.sample_topics[0] || "today's AI topic";
+      const audience = $('audience').value.trim() || data.audience;
+      const wordCount = Math.max(50, parseInt($('wordCount').value, 10) || currentFormat.word_count);
+      const leadNumber = $('leadNumber').value.trim();
+      const angle = $('angle').value.trim() || currentCategory.angles[0];
+      const includeMust = $('includeMustInclude').checked;
+      const answerEngine = $('answerEngineMode').checked;
+      const includeSponsor = $('includeSponsor').checked;
+      const sponsorLine = $('sponsorLine').value.trim();
+      const ctaCustom = $('ctaCustom').value.trim();
+      const cta = ctaCustom || $('cta').value;
+      const tool = getSelectedTool();
+      const issueDate = $('issueDate').value || today;
+
+      let md = `---\n`;
+      md += `issue_date: ${issueDate}\n`;
+      md += `category: ${currentCategory.name} ${currentCategory.icon}\n`;
+      md += `topic: ${topic}\n`;
+      md += `audience: ${audience}\n`;
+      md += `tone: ${currentTone.name}\n`;
+      md += `hook_style: ${currentHook.name}\n`;
+      md += `angle: ${angle}\n`;
+      md += `word_count: ${wordCount}\n`;
+      md += `output_format: ${currentFormat.name}\n`;
+      if (tool) md += `tool_link: https://hermesdispatch.dev${tool.path}\n`;
+      md += `cta: ${cta}\n`;
+      md += `---\n\n`;
+
+      md += `# DOC-id Brief: ${topic}\n\n`;
+      md += `## Writer context\n`;
+      md += `- Persona: ${data.persona}\n`;
+      md += `- Audience: ${audience}\n`;
+      md += `- Tone: ${currentTone.name} — ${currentTone.description}\n`;
+      md += `- Angle: ${angle}\n`;
+      if (leadNumber) md += `- Lead number: ${leadNumber}\n`;
+      md += `- Target length: ${wordCount} words\n\n`;
+
+      md += `## Hook\n`;
+      md += `Style: ${currentHook.name}\n`;
+      md += `Template: ${currentHook.template}\n`;
+      if (leadNumber) md += `Fill the template with the lead number above.\n`;
+      md += `\n`;
+
+      md += `## Required sections\n`;
+      currentFormat.sections.forEach((s, i) => md += `${i + 1}. ${s}\n`);
+      md += `\n`;
+
+      if (includeMust && currentCategory.must_include && currentCategory.must_include.length) {
+        md += `## Category must-include checklist\n`;
+        currentCategory.must_include.forEach(m => md += `- ${m}\n`);
+        md += `\n`;
+      }
+
+      md += `## Voice rules\n`;
+      md += `- Lead with the most important insight, not background.\n`;
+      md += `- Include one concrete number, benchmark, or price.\n`;
+      if (tool) md += `- Cite this Hermes Dispatch tool: [${tool.name}](https://hermesdispatch.dev${tool.path}) when relevant.\n`;
+      else md += `- Cite one Hermes Dispatch tool or comparison page when relevant.\n`;
+      md += `- Add one counter-argument, gotcha, or caveat.\n`;
+      md += `- End with one clear action the reader can take today.\n`;
+      md += `- Keep paragraphs short and scannable.\n`;
+      if (currentTone.slug === 'data') md += '- Open with the number and keep every claim tied to a metric.\n';
+      if (currentTone.slug === 'skeptical') md += '- Call out the hype first, then deliver the practical fix.\n';
+      if (currentTone.slug === 'tutorial') md += '- Write step-by-step so the reader can follow along.\n';
+      if (currentTone.slug === 'opinion') md += '- Take a clear side, name names, and defend with proof.\n';
+      if (currentTone.slug === 'curator') md += '- Focus on one great find and why it matters.\n';
+      if (currentTone.slug === 'contrarian') md += '- Challenge the consensus with one specific counter-example.\n';
+      if (currentTone.slug === 'fast') md += '- No filler. Short paragraphs. Bullet takeaways.\n';
+      md += `\n`;
+
+      if (answerEngine) {
+        md += `## Answer-engine optimization\n`;
+        md += `- Include a concise FAQ section with 2-4 question/answer pairs.\n`;
+        md += `- Use schema-friendly headings (H2/H3) for each key claim.\n`;
+        md += `- Link to at least one Hermes Dispatch tool or data page.\n`;
+        md += `- Put the direct answer in the first paragraph.\n`;
+        md += `- Add a clear "next step" so the snippet has action value.\n\n`;
+      }
+
+      if (includeSponsor && sponsorLine) {
+        md += `## Sponsor slot\n${sponsorLine}\n\n`;
+      }
+
+      md += `## Closing CTA\n${cta}\n\n`;
+
+      md += `## Prompt to AI writer\n`;
+      md += `Write the above ${currentFormat.name.toLowerCase()} for Hermes Dispatch. Follow the structure, tone, and must-include checklist. Do not exceed ${wordCount} words.\n`;
+
+      $('briefOutput').value = md;
+    }
+
+    function getDrafts() {
+      try { return JSON.parse(localStorage.getItem(LS_KEY)) || []; } catch (e) { return []; }
+    }
+
+    function saveDrafts(drafts) {
+      try { localStorage.setItem(LS_KEY, JSON.stringify(drafts.slice(0, 20))); } catch (e) {}
+    }
+
+    function renderHistory() {
+      const container = $('draftHistory');
+      const drafts = getDrafts();
+      if (!drafts.length) {
+        container.innerHTML = '<p class="text-neutral-500">No saved drafts yet.</p>';
+        return;
+      }
+      container.innerHTML = '';
+      drafts.forEach((d, i) => {
+        const div = document.createElement('div');
+        div.className = 'bg-neutral-900/60 border border-neutral-800 rounded-lg p-3 flex items-center justify-between gap-2';
+        div.innerHTML = '<div class="min-w-0"><p class="truncate text-neutral-200">' + (d.topic || 'Untitled') + '</p><p class="text-xs text-neutral-500">' + (d.date || '') + ' • ' + (d.format || 'newsletter') + '</p></div>' +
+          '<div class="flex gap-1 flex-shrink-0"><button data-i="' + i + '" class="load-draft px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-xs">Load</button>' +
+          '<button data-i="' + i + '" class="del-draft px-2 py-1 rounded bg-neutral-800 hover:bg-red-900/40 text-xs text-red-400">×</button></div>';
+        container.appendChild(div);
+      });
+      container.querySelectorAll('.load-draft').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const drafts = getDrafts();
+          const draft = drafts[parseInt(btn.dataset.i)];
+          if (!draft) return;
+          $('topic').value = draft.topic || '';
+          $('audience').value = draft.audience || '';
+          $('wordCount').value = draft.wordCount || data.default_word_count;
+          $('leadNumber').value = draft.leadNumber || '';
+          $('issueDate').value = draft.issueDate || today;
+          if (draft.formatSlug) {
+            const fmt = formats.find(f => f.slug === draft.formatSlug);
+            if (fmt) $('outputFormat').value = JSON.stringify(fmt);
+          }
+          if (draft.categorySlug) {
+            const cat = categories.find(c => c.slug === draft.categorySlug);
+            if (cat) {
+              currentCategory = cat;
+              updateAngleOptions();
+              renderSampleTopics();
+              const catBtn = document.querySelector('.category-btn[data-index="' + categories.indexOf(cat) + '"]');
+              setActive('category-btn', catBtn);
+            }
+          }
+          if (draft.angle) $('angle').value = draft.angle;
+          if (draft.toneSlug) {
+            const tone = tones.find(t => t.slug === draft.toneSlug);
+            if (tone) {
+              currentTone = tone;
+              $('toneDescription').textContent = tone.description;
+              const toneBtn = document.querySelector('.tone-btn[data-index="' + tones.indexOf(tone) + '"]');
+              setActive('tone-btn', toneBtn);
+            }
+          }
+          if (draft.hookSlug) {
+            const hook = hookStyles.find(h => h.slug === draft.hookSlug);
+            if (hook) {
+              currentHook = hook;
+              $('hookTemplate').textContent = hook.template;
+              const hookBtn = document.querySelector('.hook-btn[data-index="' + hookStyles.indexOf(hook) + '"]');
+              setActive('hook-btn', hookBtn);
+            }
+          }
+          if (draft.cta) { $('ctaCustom').value = draft.cta; }
+          if (draft.toolPath) {
+            const tool = siteTools.find(t => t.path === draft.toolPath);
+            if (tool) $('siteTool').value = JSON.stringify(tool);
+          }
+          $('includeSponsor').checked = !!draft.includeSponsor;
+          $('sponsorLine').value = draft.sponsorLine || sponsorTemplates[0];
+          $('sponsorWrap').classList.toggle('hidden', !$('includeSponsor').checked);
+          $('answerEngineMode').checked = !!draft.answerEngine;
+          generateBrief();
+        });
+      });
+      container.querySelectorAll('.del-draft').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const drafts = getDrafts();
+          drafts.splice(parseInt(btn.dataset.i), 1);
+          saveDrafts(drafts);
+          renderHistory();
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCategory = JSON.parse(btn.dataset.category);
+          updateAngleOptions();
+          renderSampleTopics();
+          setActive('category-btn', btn);
+          generateBrief();
+        });
+      });
+
+      document.querySelectorAll('.tone-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentTone = JSON.parse(btn.dataset.tone);
+          $('toneDescription').textContent = currentTone.description;
+          setActive('tone-btn', btn);
+          generateBrief();
+        });
+      });
+
+      document.querySelectorAll('.hook-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentHook = JSON.parse(btn.dataset.hook);
+          $('hookTemplate').textContent = currentHook.template;
+          setActive('hook-btn', btn);
+          generateBrief();
+        });
+      });
+
+      const inputIds = ['topic', 'audience', 'wordCount', 'leadNumber', 'angle', 'siteTool', 'cta', 'ctaCustom', 'issueDate', 'outputFormat'];
+      inputIds.forEach(id => { $(id).addEventListener('input', generateBrief); $(id).addEventListener('change', generateBrief); });
+      ['includeMustInclude', 'answerEngineMode', 'includeSponsor'].forEach(id => { $(id).addEventListener('change', generateBrief); });
+      $('includeSponsor').addEventListener('change', () => {
+        $('sponsorWrap').classList.toggle('hidden', !$('includeSponsor').checked);
+        generateBrief();
+      });
+      $('sponsorLine').addEventListener('input', generateBrief);
+
+      $('copyMdBtn').addEventListener('click', () => {
+        $('briefOutput').select();
+        document.execCommand('copy');
+        const fb = $('copyFeedback');
+        fb.classList.remove('hidden');
+        setTimeout(() => fb.classList.add('hidden'), 2000);
+      });
+
+      $('saveDraftBtn').addEventListener('click', () => {
+        const drafts = getDrafts();
+        drafts.unshift({
+          topic: $('topic').value.trim() || currentCategory.sample_topics[0],
+          date: new Date().toISOString().slice(0, 16).replace('T', ' '),
+          format: currentFormat.name,
+          formatSlug: currentFormat.slug,
+          categorySlug: currentCategory.slug,
+          toneSlug: currentTone.slug,
+          hookSlug: currentHook.slug,
+          audience: $('audience').value.trim(),
+          wordCount: $('wordCount').value,
+          leadNumber: $('leadNumber').value.trim(),
+          issueDate: $('issueDate').value,
+          angle: $('angle').value,
+          cta: $('ctaCustom').value.trim() || $('cta').value,
+          toolPath: getSelectedTool()?.path,
+          includeSponsor: $('includeSponsor').checked,
+          sponsorLine: $('sponsorLine').value,
+          answerEngine: $('answerEngineMode').checked,
+          brief: $('briefOutput').value
+        });
+        saveDrafts(drafts);
+        renderHistory();
+        const fb = $('saveFeedback');
+        fb.classList.remove('hidden');
+        setTimeout(() => fb.classList.add('hidden'), 2000);
+      });
+
+      $('clearHistoryBtn').addEventListener('click', () => {
+        saveDrafts([]);
+        renderHistory();
+      });
+
+      // initial highlights
+      const firstCat = document.querySelector('.category-btn');
+      if (firstCat) firstCat.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+      const firstTone = document.querySelector('.tone-btn');
+      if (firstTone) firstTone.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+      const firstHook = document.querySelector('.hook-btn');
+      if (firstHook) firstHook.classList.add('bg-brand-gold', 'text-neutral-950', 'border-brand-gold');
+
+      updateAngleOptions();
+      renderSampleTopics();
+      renderHistory();
+      generateBrief();
+    });
+  </script>
+</Layout>
