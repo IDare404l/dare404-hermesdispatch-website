@@ -1,0 +1,463 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/agent_routing_cost.json';
+
+const title = "AI Agent Routing / Gateway Cost Comparator | Hermes Dispatch";
+const description = "Compare AI gateway and LLM routing costs across Cloudflare, Portkey, Helicone, LiteLLM, Braintrust, Zuplo, TrueFoundry, Kong, and self-hosted options. Estimate gateway fees, caching savings, routing savings, and pricing to hit margin.";
+
+const { defaults, scenarios, gateway_providers, faq } = data;
+const providerMap = Object.fromEntries(gateway_providers.map(p => [p.slug, p]));
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="AI Agent Routing / Gateway Cost Comparator" description={description} url="https://hermesdispatch.dev/tools/agent-routing-cost-comparator/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faq.map(f => ({
+      "@type": "Question",
+      "name": f.question,
+      "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+    }))
+  })} />
+
+  <section class="relative pt-24 pb-12 overflow-hidden">
+    <div class="absolute inset-0 animated-gradient opacity-50"></div>
+    <div class="grid-overlay"></div>
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">🛰️</div>
+        <h1 class="display-heading mb-4">AI Agent Routing / Gateway Cost Comparator</h1>
+        <p class="text-xl text-neutral-400 max-w-2xl mx-auto">
+          Compare AI gateway and LLM routing costs across leading platforms. Model gateway fees, LLM token spend, caching savings, routing savings, and margin pricing.
+        </p>
+      </div>
+
+      <!-- Scenarios -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {scenarios.map((s, i) => (
+          <button type="button" class="scenario-btn glass-card rounded-xl p-4 text-left hover:border-brand-gold/50 transition-all" data-idx={i}>
+            <div class="text-2xl mb-2">{s.icon}</div>
+            <h3 class="font-semibold text-sm">{s.name}</h3>
+            <p class="text-xs text-neutral-400 mt-1">{s.requests_per_month.toLocaleString()} req/mo</p>
+          </button>
+        ))}
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+        <!-- Workload -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">LLM workload</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Requests per month</label>
+              <input id="requestsPerMonth" type="number" min="0" step="1000" value={defaults.requests_per_month} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Input tokens / req</label>
+                <input id="inputPerReq" type="number" min="0" step="50" value={defaults.llm_input_tokens_per_request} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">Output tokens / req</label>
+                <input id="outputPerReq" type="number" min="0" step="50" value={defaults.llm_output_tokens_per_request} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">LLM input $/1M</label>
+                <input id="inputPer1m" type="number" min="0" step="0.1" value={defaults.avg_llm_input_per_1m_usd} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+              <div>
+                <label class="block text-sm text-neutral-400 mb-1">LLM output $/1M</label>
+                <input id="outputPer1m" type="number" min="0" step="0.1" value={defaults.avg_llm_output_per_1m_usd} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gateway -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Gateway platform</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Gateway provider</label>
+              <select id="gatewayProvider" class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white">
+                {gateway_providers.map(p => <option value={p.slug} selected={p.slug === defaults.gateway_provider}>{p.name}</option>)}
+              </select>
+              <p id="providerNote" class="text-xs text-neutral-500 mt-1">{providerMap[defaults.gateway_provider].notes}</p>
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Cache hit (%)</label>
+              <input id="cacheHitPct" type="number" min="0" max="100" step="1" value={defaults.cache_hit_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Cache cost reduction (%)</label>
+              <input id="cacheSavePct" type="number" min="0" max="100" step="1" value={defaults.cache_cost_reduction_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Routing savings (%)</label>
+              <input id="routingSavePct" type="number" min="0" max="100" step="1" value={defaults.routing_save_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Self-host compute / mo</label>
+              <input id="selfHostCompute" type="number" min="0" step="10" value={defaults.self_host_compute_month_usd} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+              <p class="text-xs text-neutral-500 mt-1">Counted only for self-hosted option.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pricing model -->
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-xl font-bold mb-5 text-brand-gold">Pricing model</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Target gross margin (%)</label>
+              <input id="marginPct" type="number" min="0" max="99" step="1" value={defaults.margin_pct} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Projection period (months)</label>
+              <input id="periodMonths" type="number" min="1" max="60" step="1" value={defaults.period_months} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Engineering hours / week</label>
+              <input id="engHoursPerWeek" type="number" min="0" step="0.5" value={defaults.engineering_hours_per_week} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="block text-sm text-neutral-400 mb-1">Engineering rate / hour</label>
+              <input id="engRate" type="number" min="0" step="5" value={defaults.engineering_rate_hour_usd} class="w-full px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white" />
+            </div>
+            <div>
+              <label class="flex items-center gap-3">
+                <input id="includeEngineering" type="checkbox" class="w-4 h-4 accent-brand-gold" checked />
+                <span class="text-sm text-neutral-300">Include engineering cost</span>
+              </label>
+            </div>
+            <div>
+              <label class="flex items-center gap-3">
+                <input id="includeSelfHost" type="checkbox" class="w-4 h-4 accent-brand-gold" checked />
+                <span class="text-sm text-neutral-300">Include self-host compute</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="grid lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Total monthly cost</p>
+          <p id="outTotalMonthly" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Net LLM spend / mo</p>
+          <p id="outNetLlm" class="text-3xl font-bold text-white">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Gateway fee / mo</p>
+          <p id="outGatewayFee" class="text-3xl font-bold text-emerald-400">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 text-center border border-brand-gold/20">
+          <p class="text-xs text-neutral-500 uppercase mb-1">{defaults.period_months}-month total</p>
+          <p id="outPeriodTotal" class="text-3xl font-bold text-brand-gold">—</p>
+        </div>
+      </div>
+
+      <div class="grid lg:grid-cols-5 gap-4 mb-8">
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Raw LLM spend / mo</p>
+          <p id="outRawLlm" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Cache savings / mo</p>
+          <p id="outCacheSave" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Routing savings / mo</p>
+          <p id="outRoutingSave" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Self-host compute / mo</p>
+          <p id="outCompute" class="text-lg font-bold">—</p>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <p class="text-xs text-neutral-500 uppercase mb-1">Engineering / mo</p>
+          <p id="outEngineering" class="text-lg font-bold">—</p>
+        </div>
+      </div>
+
+      <!-- Pricing to margin -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Pricing to hit margin</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Required monthly revenue</p>
+            <p id="outRequiredRevenue" class="text-2xl font-bold text-brand-gold">—</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Price per 1k requests</p>
+            <p id="outPricePer1k" class="text-2xl font-bold text-white">—</p>
+          </div>
+          <div class="text-center">
+            <p class="text-xs text-neutral-500 uppercase mb-1">Price per 1M tokens</p>
+            <p id="outPricePer1mTokens" class="text-2xl font-bold text-emerald-400">—</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20 overflow-hidden">
+        <h2 class="text-xl font-bold mb-4">Cost comparison by gateway provider</h2>
+        <p class="text-sm text-neutral-400 mb-4">Same workload and LLM spend across all gateway options.</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm min-w-[900px]">
+            <thead class="text-neutral-500 border-b border-neutral-800">
+              <tr>
+                <th class="text-left py-2">Gateway / plan</th>
+                <th class="text-right py-2">Base</th>
+                <th class="text-right py-2">Overage</th>
+                <th class="text-right py-2">Logpush</th>
+                <th class="text-right py-2">Compute</th>
+                <th class="text-right py-2">Eng.</th>
+                <th class="text-right py-2 font-semibold text-white">Total/mo</th>
+              </tr>
+            </thead>
+            <tbody id="providerTable" class="divide-y divide-neutral-800">
+              {gateway_providers.map(p => (
+                <tr data-slug={p.slug} class="hover:bg-neutral-800/30">
+                  <td class="py-3">
+                    <div class="font-medium">{p.name}</div>
+                    <div class="text-xs text-neutral-500">{p.notes}</div>
+                  </td>
+                  <td class="py-3 text-right base-cost">—</td>
+                  <td class="py-3 text-right overage-cost">—</td>
+                  <td class="py-3 text-right logpush-cost">—</td>
+                  <td class="py-3 text-right compute-cost">—</td>
+                  <td class="py-3 text-right engineering-cost">—</td>
+                  <td class="py-3 text-right total-cost font-semibold text-brand-gold">—</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- How it works / When to use -->
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">How the estimate works</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li><strong class="text-white">Raw LLM spend</strong> = requests × ((input tokens ÷ 1M × input price) + (output tokens ÷ 1M × output price)).</li>
+            <li><strong class="text-white">Cache savings</strong> = raw LLM spend × cache hit% × cache cost reduction%.</li>
+            <li><strong class="text-white">Routing savings</strong> = raw LLM spend × routing savings%.</li>
+            <li><strong class="text-white">Net LLM spend</strong> = raw LLM spend − cache savings − routing savings.</li>
+            <li><strong class="text-white">Gateway fee</strong> = base fee + request overage + logpush. Many tiers have zero gateway fee.</li>
+            <li><strong class="text-white">Margin pricing</strong> = total monthly cost ÷ (1 − margin%).</li>
+          </ul>
+        </div>
+        <div class="glass-card rounded-2xl p-6">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">When to use each gateway</h2>
+          <ul class="space-y-2 text-neutral-300 text-sm">
+            <li>• <strong>Cloudflare</strong> for free core gateway if already on Cloudflare Workers/Pages.</li>
+            <li>• <strong>Portkey</strong> when you need managed gateway + prompt management + guardrails.</li>
+            <li>• <strong>Helicone</strong> for open-source-friendly gateway with zero provider markup.</li>
+            <li>• <strong>LiteLLM / Bifrost OSS</strong> if you want self-hosting and multi-provider standardization.</li>
+            <li>• <strong>Braintrust</strong> when gateway traffic should feed evals and release checks.</li>
+            <li>• <strong>TrueFoundry / Kong</strong> for enterprise governance, MCP, or existing API-management stacks.</li>
+          </ul>
+        </div>
+      </div>
+
+      <section class="glass-card rounded-2xl p-6 mb-10 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+        <div class="space-y-4">
+          {faq.map(f => (
+            <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+              <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.question}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+              <p class="p-4 pt-0 text-neutral-400">{f.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="/tools/agent-observability-cost-comparator/" class="btn-primary text-sm">Agent Observability Cost Comparator →</a>
+        <a href="/tools/mcp-server-cost-estimator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">MCP Server Cost Estimator →</a>
+        <a href="/tools/llm-cost-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">LLM Cost Calculator →</a>
+      </div>
+
+      <p class="text-neutral-500 text-sm mt-10">{data.note} Last updated: {data.last_updated}.</p>
+    </div>
+  </section>
+
+  <script define:vars={{ defaults, scenarios, gateway_providers }}>
+    const els = {
+      requestsPerMonth: document.getElementById('requestsPerMonth'),
+      inputPerReq: document.getElementById('inputPerReq'),
+      outputPerReq: document.getElementById('outputPerReq'),
+      inputPer1m: document.getElementById('inputPer1m'),
+      outputPer1m: document.getElementById('outputPer1m'),
+      gatewayProvider: document.getElementById('gatewayProvider'),
+      cacheHitPct: document.getElementById('cacheHitPct'),
+      cacheSavePct: document.getElementById('cacheSavePct'),
+      routingSavePct: document.getElementById('routingSavePct'),
+      selfHostCompute: document.getElementById('selfHostCompute'),
+      marginPct: document.getElementById('marginPct'),
+      periodMonths: document.getElementById('periodMonths'),
+      engHoursPerWeek: document.getElementById('engHoursPerWeek'),
+      engRate: document.getElementById('engRate'),
+      includeEngineering: document.getElementById('includeEngineering'),
+      includeSelfHost: document.getElementById('includeSelfHost'),
+      providerNote: document.getElementById('providerNote'),
+      outTotalMonthly: document.getElementById('outTotalMonthly'),
+      outNetLlm: document.getElementById('outNetLlm'),
+      outGatewayFee: document.getElementById('outGatewayFee'),
+      outPeriodTotal: document.getElementById('outPeriodTotal'),
+      outRawLlm: document.getElementById('outRawLlm'),
+      outCacheSave: document.getElementById('outCacheSave'),
+      outRoutingSave: document.getElementById('outRoutingSave'),
+      outCompute: document.getElementById('outCompute'),
+      outEngineering: document.getElementById('outEngineering'),
+      outRequiredRevenue: document.getElementById('outRequiredRevenue'),
+      outPricePer1k: document.getElementById('outPricePer1k'),
+      outPricePer1mTokens: document.getElementById('outPricePer1mTokens'),
+    };
+
+    const providerMap = Object.fromEntries(gateway_providers.map(p => [p.slug, p]));
+
+    const fmtMoney = (n) => {
+      if (n === 0) return '$0';
+      if (Math.abs(n) < 0.01) return '$' + n.toFixed(4);
+      if (Math.abs(n) < 1) return '$' + n.toFixed(2);
+      return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    };
+
+    function getInputs() {
+      return {
+        requests: Math.max(0, parseFloat(els.requestsPerMonth.value) || 0),
+        inputTokens: Math.max(0, parseFloat(els.inputPerReq.value) || 0),
+        outputTokens: Math.max(0, parseFloat(els.outputPerReq.value) || 0),
+        inputPer1m: Math.max(0, parseFloat(els.inputPer1m.value) || 0),
+        outputPer1m: Math.max(0, parseFloat(els.outputPer1m.value) || 0),
+        providerSlug: els.gatewayProvider.value,
+        cacheHitPct: Math.max(0, Math.min(100, parseFloat(els.cacheHitPct.value) || 0)) / 100,
+        cacheSavePct: Math.max(0, Math.min(100, parseFloat(els.cacheSavePct.value) || 0)) / 100,
+        routingSavePct: Math.max(0, Math.min(100, parseFloat(els.routingSavePct.value) || 0)) / 100,
+        selfHostCompute: Math.max(0, parseFloat(els.selfHostCompute.value) || 0),
+        marginPct: Math.max(0, Math.min(99, parseFloat(els.marginPct.value) || 0)) / 100,
+        periodMonths: Math.max(1, parseInt(els.periodMonths.value, 10) || 1),
+        engHoursPerWeek: Math.max(0, parseFloat(els.engHoursPerWeek.value) || 0),
+        engRate: Math.max(0, parseFloat(els.engRate.value) || 0),
+        includeEngineering: els.includeEngineering.checked,
+        includeSelfHost: els.includeSelfHost.checked,
+      };
+    }
+
+    function rawLlmCost(inputs) {
+      return inputs.requests * (
+        (inputs.inputTokens / 1000000 * inputs.inputPer1m) +
+        (inputs.outputTokens / 1000000 * inputs.outputPer1m)
+      );
+    }
+
+    function gatewayFee(provider, inputs) {
+      let fee = provider.base_monthly_usd;
+
+      // Overage for recorded logs / requests
+      if (provider.overage_per_100k_usd && inputs.requests > provider.included_requests) {
+        const overageUnits = Math.max(0, inputs.requests - provider.included_requests);
+        fee += (overageUnits / 100000) * provider.overage_per_100k_usd;
+      }
+
+      // Logpush for Cloudflare-like providers
+      if (provider.logpush_per_million_usd && inputs.requests > provider.included_requests) {
+        const overageLogs = Math.max(0, inputs.requests - provider.included_requests);
+        fee += (overageLogs / 1000000) * provider.logpush_per_million_usd;
+      }
+
+      return fee;
+    }
+
+    function computeCost(inputs, providerSlug) {
+      const p = providerMap[providerSlug] || gateway_providers[0];
+      const raw = rawLlmCost(inputs);
+      const cacheSave = raw * inputs.cacheHitPct * inputs.cacheSavePct;
+      const routingSave = raw * inputs.routingSavePct;
+      const netLlm = Math.max(0, raw - cacheSave - routingSave);
+      const fee = gatewayFee(p, inputs);
+      const compute = (p.type === 'self-hosted' && inputs.includeSelfHost) ? inputs.selfHostCompute : 0;
+      const engineering = inputs.includeEngineering ? inputs.engHoursPerWeek * 4.33 * inputs.engRate : 0;
+      const total = netLlm + fee + compute + engineering;
+      return { raw, cacheSave, routingSave, netLlm, fee, compute, engineering, total };
+    }
+
+    function update() {
+      const inputs = getInputs();
+      const current = computeCost(inputs, inputs.providerSlug);
+      const requiredRevenue = inputs.marginPct > 0 ? current.total / (1 - inputs.marginPct) : current.total;
+      const totalTokens = inputs.requests * (inputs.inputTokens + inputs.outputTokens);
+
+      els.outTotalMonthly.textContent = fmtMoney(current.total);
+      els.outNetLlm.textContent = fmtMoney(current.netLlm);
+      els.outGatewayFee.textContent = fmtMoney(current.fee);
+      els.outPeriodTotal.textContent = fmtMoney(current.total * inputs.periodMonths);
+      els.outRawLlm.textContent = fmtMoney(current.raw);
+      els.outCacheSave.textContent = fmtMoney(current.cacheSave);
+      els.outRoutingSave.textContent = fmtMoney(current.routingSave);
+      els.outCompute.textContent = fmtMoney(current.compute);
+      els.outEngineering.textContent = fmtMoney(current.engineering);
+      els.outRequiredRevenue.textContent = fmtMoney(requiredRevenue);
+      els.outPricePer1k.textContent = fmtMoney(inputs.requests > 0 ? (requiredRevenue / inputs.requests) * 1000 : 0);
+      els.outPricePer1mTokens.textContent = fmtMoney(totalTokens > 0 ? (requiredRevenue / totalTokens) * 1000000 : 0);
+
+      els.providerNote.textContent = providerMap[inputs.providerSlug].notes;
+
+      document.querySelectorAll('#providerTable tr').forEach(row => {
+        const slug = row.dataset.slug;
+        const result = computeCost(inputs, slug);
+        const p = providerMap[slug];
+        row.querySelector('.base-cost').textContent = fmtMoney(p.base_monthly_usd);
+        row.querySelector('.overage-cost').textContent = fmtMoney(result.fee - p.base_monthly_usd);
+        row.querySelector('.logpush-cost').textContent = fmtMoney(p.logpush_per_million_usd ? (Math.max(0, inputs.requests - p.included_requests) / 1000000) * p.logpush_per_million_usd : 0);
+        row.querySelector('.compute-cost').textContent = fmtMoney(result.compute);
+        row.querySelector('.engineering-cost').textContent = fmtMoney(result.engineering);
+        row.querySelector('.total-cost').textContent = fmtMoney(result.total);
+        row.classList.toggle('bg-neutral-800/40', slug === inputs.providerSlug);
+      });
+    }
+
+    function applyScenario(idx) {
+      const s = scenarios[idx];
+      if (!s) return;
+      els.requestsPerMonth.value = s.requests_per_month;
+      els.inputPerReq.value = s.llm_input_tokens_per_request;
+      els.outputPerReq.value = s.llm_output_tokens_per_request;
+      els.inputPer1m.value = s.avg_llm_input_per_1m_usd;
+      els.outputPer1m.value = s.avg_llm_output_per_1m_usd;
+      els.gatewayProvider.value = s.gateway_provider;
+      els.cacheHitPct.value = s.cache_hit_pct;
+      els.cacheSavePct.value = s.cache_cost_reduction_pct;
+      els.routingSavePct.value = s.routing_save_pct;
+      els.selfHostCompute.value = s.self_host_compute_month_usd;
+      els.engHoursPerWeek.value = s.engineering_hours_per_week;
+      els.engRate.value = s.engineering_rate_hour_usd;
+      els.marginPct.value = s.margin_pct;
+      els.periodMonths.value = s.period_months;
+      update();
+    }
+
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyScenario(parseInt(btn.dataset.idx, 10)));
+    });
+
+    Object.values(els).forEach(el => {
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT')) {
+        el.addEventListener('input', update);
+      }
+    });
+
+    update();
+  </script>
+</Layout>

@@ -1,0 +1,237 @@
+{
+  "last_updated": "2026-08-10",
+  "currency": "USD",
+  "note": "Prices are directional estimates based on public list pricing for AI gateway / LLM routing platforms. Confirm current rates before budgeting. LLM provider token costs are passed through by most gateways; this tool focuses on gateway fees, infrastructure, and savings from caching/routing. Some vendors quote custom Enterprise pricing.",
+  "defaults": {
+    "requests_per_month": 500000,
+    "llm_input_tokens_per_request": 1200,
+    "llm_output_tokens_per_request": 400,
+    "avg_llm_input_per_1m_usd": 2.5,
+    "avg_llm_output_per_1m_usd": 10.0,
+    "gateway_provider": "cloudflare",
+    "cache_hit_pct": 15,
+    "cache_cost_reduction_pct": 80,
+    "routing_save_pct": 10,
+    "self_host_compute_month_usd": 0,
+    "engineering_hours_per_week": 1,
+    "engineering_rate_hour_usd": 150,
+    "margin_pct": 0,
+    "period_months": 12
+  },
+  "scenarios": [
+    {
+      "slug": "side-project",
+      "name": "Side project / prototype",
+      "icon": "🧪",
+      "requests_per_month": 10000,
+      "llm_input_tokens_per_request": 800,
+      "llm_output_tokens_per_request": 250,
+      "avg_llm_input_per_1m_usd": 0.15,
+      "avg_llm_output_per_1m_usd": 0.6,
+      "gateway_provider": "cloudflare",
+      "cache_hit_pct": 20,
+      "cache_cost_reduction_pct": 80,
+      "routing_save_pct": 5,
+      "self_host_compute_month_usd": 0,
+      "engineering_hours_per_week": 0.5,
+      "engineering_rate_hour_usd": 100,
+      "margin_pct": 0,
+      "period_months": 12
+    },
+    {
+      "slug": "saas-agent",
+      "name": "SaaS AI agent",
+      "icon": "🚀",
+      "requests_per_month": 500000,
+      "llm_input_tokens_per_request": 1500,
+      "llm_output_tokens_per_request": 500,
+      "avg_llm_input_per_1m_usd": 2.5,
+      "avg_llm_output_per_1m_usd": 10.0,
+      "gateway_provider": "portkey",
+      "cache_hit_pct": 15,
+      "cache_cost_reduction_pct": 80,
+      "routing_save_pct": 12,
+      "self_host_compute_month_usd": 0,
+      "engineering_hours_per_week": 1,
+      "engineering_rate_hour_usd": 150,
+      "margin_pct": 25,
+      "period_months": 12
+    },
+    {
+      "slug": "support-automation",
+      "name": "Support automation",
+      "icon": "🎧",
+      "requests_per_month": 2000000,
+      "llm_input_tokens_per_request": 900,
+      "llm_output_tokens_per_request": 200,
+      "avg_llm_input_per_1m_usd": 3.0,
+      "avg_llm_output_per_1m_usd": 12.0,
+      "gateway_provider": "helicone",
+      "cache_hit_pct": 35,
+      "cache_cost_reduction_pct": 85,
+      "routing_save_pct": 8,
+      "self_host_compute_month_usd": 0,
+      "engineering_hours_per_week": 2,
+      "engineering_rate_hour_usd": 150,
+      "margin_pct": 20,
+      "period_months": 12
+    },
+    {
+      "slug": "enterprise-platform",
+      "name": "Enterprise agent platform",
+      "icon": "🏢",
+      "requests_per_month": 10000000,
+      "llm_input_tokens_per_request": 2500,
+      "llm_output_tokens_per_request": 700,
+      "avg_llm_input_per_1m_usd": 3.0,
+      "avg_llm_output_per_1m_usd": 15.0,
+      "gateway_provider": "self-hosted-litellm",
+      "cache_hit_pct": 25,
+      "cache_cost_reduction_pct": 80,
+      "routing_save_pct": 10,
+      "self_host_compute_month_usd": 2500,
+      "engineering_hours_per_week": 8,
+      "engineering_rate_hour_usd": 175,
+      "margin_pct": 20,
+      "period_months": 12
+    }
+  ],
+  "gateway_providers": [
+    {
+      "slug": "cloudflare",
+      "name": "Cloudflare AI Gateway",
+      "type": "cloud",
+      "base_monthly_usd": 0,
+      "per_request_usd": 0,
+      "free_requests": 3000000,
+      "included_requests": 3000000,
+      "logpush_per_million_usd": 5,
+      "notes": "Core gateway is free. Persistent logs limited (100k free, 10M paid per gateway). Logpush billed at $0.05/million on Workers Paid. Provider token costs pass through.",
+      "best_for": "Cloudflare-hosted apps and moderate AI workloads"
+    },
+    {
+      "slug": "portkey",
+      "name": "Portkey AI Gateway",
+      "type": "cloud",
+      "base_monthly_usd": 49,
+      "per_request_usd": 0,
+      "free_requests": 0,
+      "included_requests": 100000,
+      "logpush_per_million_usd": 0,
+      "overage_per_100k_usd": 9,
+      "notes": "$49/mo base with 100k recorded logs. +$9 per 100k logs up to 3M. OSS self-hosted available. Provider token costs pass through.",
+      "best_for": "Managed gateway + observability combo"
+    },
+    {
+      "slug": "helicone",
+      "name": "Helicone AI Gateway",
+      "type": "cloud",
+      "base_monthly_usd": 79,
+      "per_request_usd": 0,
+      "free_requests": 10000,
+      "included_requests": 1000000,
+      "logpush_per_million_usd": 0,
+      "notes": "$79/mo Pro with ~1M requests. Free tier for 10k/mo. Zero markup on provider tokens. Apache-2.0 self-host option.",
+      "best_for": "Gateway + light observability with open-source option"
+    },
+    {
+      "slug": "litellm",
+      "name": "LiteLLM Enterprise (managed)",
+      "type": "cloud",
+      "base_monthly_usd": 250,
+      "per_request_usd": 0,
+      "free_requests": 0,
+      "included_requests": 0,
+      "logpush_per_million_usd": 0,
+      "notes": "Enterprise Basic starts around $250/mo. Premium around $2,500/mo. Pricing by annual request volume and support level. OSS core is free self-hosted.",
+      "best_for": "Teams that want open standards and multi-provider routing"
+    },
+    {
+      "slug": "braintrust",
+      "name": "Braintrust Gateway",
+      "type": "cloud",
+      "base_monthly_usd": 0,
+      "per_request_usd": 0,
+      "free_requests": 0,
+      "included_requests": 0,
+      "logpush_per_million_usd": 0,
+      "notes": "Gateway currently free in beta. Starter plan free with 1M spans + 1 GB data; Pro $249/mo. Tracing and eval platform separate.",
+      "best_for": "Teams wanting gateway traffic tied to evals and release checks"
+    },
+    {
+      "slug": "zuplo",
+      "name": "Zuplo (API gateway for AI)",
+      "type": "cloud",
+      "base_monthly_usd": 25,
+      "per_request_usd": 0,
+      "free_requests": 100000,
+      "included_requests": 100000,
+      "logpush_per_million_usd": 0,
+      "notes": "$0 free tier with 100k requests/mo; Builder plan $25/mo with scalable limits. Token-based rate limits and policies.",
+      "best_for": "Developer-first API management around AI endpoints"
+    },
+    {
+      "slug": "truefoundry",
+      "name": "TrueFoundry AI Gateway",
+      "type": "cloud",
+      "base_monthly_usd": 499,
+      "per_request_usd": 0,
+      "free_requests": 0,
+      "included_requests": 1000000,
+      "logpush_per_million_usd": 0,
+      "notes": "$499/mo Pro includes 1M requests. Enterprise custom. MCP gateway, governance, and routing included.",
+      "best_for": "Enterprise needing governance, MCP, and multi-region"
+    },
+    {
+      "slug": "kong",
+      "name": "Kong AI Gateway (Konnect)",
+      "type": "cloud",
+      "base_monthly_usd": 500,
+      "per_request_usd": 0,
+      "free_requests": 0,
+      "included_requests": 0,
+      "logpush_per_million_usd": 0,
+      "model_proxy_per_model_month_usd": 100,
+      "notes": "~$105/service/mo plus usage; AI Gateway add-on; model proxy $100/model/mo in Konnect. Enterprise custom. Best for existing Kong users.",
+      "best_for": "Teams already in Kong / Konnect ecosystem"
+    },
+    {
+      "slug": "self-hosted-litellm",
+      "name": "Self-hosted LiteLLM / Bifrost OSS",
+      "type": "self-hosted",
+      "base_monthly_usd": 0,
+      "per_request_usd": 0,
+      "free_requests": 0,
+      "included_requests": 0,
+      "logpush_per_million_usd": 0,
+      "notes": "Open-source self-hosted: no per-request gateway fees. You pay compute, storage, and engineering time. Enterprise license optional.",
+      "best_for": "Privacy-sensitive or high-volume teams with SRE capacity"
+    }
+  ],
+  "faq": [
+    {
+      "question": "What does an AI gateway actually save?",
+      "answer": "Three main levers: (1) caching reduces repeated identical calls, (2) routing picks cheaper or faster providers for the same model class, and (3) rate limits and retries stop runaway spend from loops or bad deploys."
+    },
+    {
+      "question": "Do gateway fees replace LLM provider fees?",
+      "answer": "No for most gateways. Cloudflare, Helicone, Portkey, and Braintrust pass through provider token costs with zero markup; you pay the gateway/platform fee on top. LiteLLM OSS and Bifrost OSS have no per-token gateway fee beyond your own infrastructure."
+    },
+    {
+      "question": "When is a self-hosted gateway cheaper than managed?",
+      "answer": "At high request volume, managed log/request fees and seat costs dominate. Self-hosting LiteLLM or Bifrost shifts cost to compute and SRE time. Break-even often appears above a few million requests per month, especially with heavy caching."
+    },
+    {
+      "question": "How do I model caching savings?",
+      "answer": "Set a cache hit percentage and a cost-reduction percentage. A 20% cache hit with 80% cost reduction means 16% of otherwise-billable LLM spend is avoided. The tool subtracts that from the raw LLM estimate and shows net LLM spend."
+    },
+    {
+      "question": "Which gateway should I start with?",
+      "answer": "Cloudflare AI Gateway is free and generous for apps already on Cloudflare. Helicone and Portkey are strong managed options with observability. LiteLLM/Bifrost are good if you need self-hosting or multi-provider standardization."
+    },
+    {
+      "question": "What about routing savings?",
+      "answer": "Smart routing can move traffic to cheaper provider keys (e.g. AWS Bedrock vs direct Anthropic), use smaller models for simple prompts, or fall back to cached responses. Savings are typically 5–20% of LLM spend."
+    }
+  ]
+}
