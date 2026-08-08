@@ -1,0 +1,451 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/inference_engine_selector_v2.json';
+
+const title = "Local LLM Inference Engine Selector v2 | Hermes Dispatch";
+const description = "Pick the best local LLM inference engine for your GPU, model, quantization, batch size, and use case. Weighted scoring across Ollama, vLLM, SGLang, TensorRT-LLM, MLX, ExLlamaV2, KTransformers, and more.";
+
+const gpus = data.gpus;
+const models = data.models;
+const quants = data.quants;
+const scenarios = data.scenarios;
+const engines = data.engines;
+const defaults = data.default;
+
+const faqs = [
+  { q: "What is the fastest local inference engine for a single RTX 4090?", a: "For 4-bit quantized dense models, TabbyAPI / ExLlamaV2 or TensorRT-LLM are usually fastest. For native FP16/BF16 models, vLLM and SGLang extract the highest throughput thanks to continuous batching." },
+  { q: "Which engine should I pick for a production API?", a: "Use vLLM or SGLang for open-model serving with continuous batching and OpenAI-compatible endpoints. If you only serve NVIDIA and can pre-compile engines, TensorRT-LLM can squeeze out extra throughput. TGI is also a proven production option." },
+  { q: "Can I run Mixtral 8x22B on a 24 GB consumer GPU?", a: "Not fully loaded in FP16. Use KTransformers or llama.cpp with CPU/NVMe offloading, or quantize to Q4 GGUF. Expect lower tok/s because expert layers move through system memory." },
+  { q: "What should I use on an Apple Silicon Mac?", a: "MLX is purpose-built for M-series chips and gives the best tokens-per-watt. Ollama and llama.cpp are also excellent if you already have GGUF models." },
+  { q: "Do I need continuous batching?", a: "Only if you serve multiple concurrent users. Single-user chat or local agents rarely benefit; one of the simpler GGUF engines is often easier to set up." },
+  { q: "Are the tok/s numbers exact?", a: "No. The calculator uses directional multipliers based on memory bandwidth, quantization, and engine efficiency. Real numbers depend on drivers, prompt length, KV cache, and PCIe/NVLink topology." }
+];
+
+const featureLabels: Record<string, string> = {
+  openai_api: "OpenAI API",
+  continuous_batching: "Continuous batching",
+  structured: "Structured output",
+  speculative: "Speculative decoding",
+  multi_gpu: "Multi-GPU",
+  gguf: "GGUF",
+  safetensors: "Safetensors",
+  exl2: "EXL2",
+  fp8: "FP8",
+  awq: "AWQ",
+  gptq: "GPTQ",
+  onnx: "ONNX"
+};
+---
+
+<Layout title={title} description={description}>
+  <ToolSchema name="Local LLM Inference Engine Selector v2" description={description} url="https://hermesdispatch.dev/tools/inference-engine-selector-v2/" applicationCategory="DeveloperApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">⚙️</div>
+      <h1 class="display-heading mb-4">Local LLM Inference Engine Selector <span class="text-brand-gold">v2</span></h1>
+      <p class="text-xl text-neutral-400 max-w-3xl mx-auto">Weighted scoring for Ollama, vLLM, SGLang, TensorRT-LLM, MLX, ExLlamaV2, KTransformers, and more. Pick by GPU, model size, quantization, batch size, and priority.</p>
+    </div>
+
+    <!-- Scenario presets -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Scenario presets</h2>
+      <div class="flex flex-wrap gap-3" id="scenario-buttons">
+        {scenarios.map(s => (
+          <button type="button" class="scenario-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-scenario={s.id}>
+            {s.icon} {s.name}
+          </button>
+        ))}
+      </div>
+      <p id="scenario-desc" class="text-neutral-400 text-sm mt-4">Select a preset to auto-tune weights, batch size, and recommendation.</p>
+    </section>
+
+    <!-- Inputs -->
+    <section class="grid lg:grid-cols-3 gap-6 mb-10">
+      <div class="lg:col-span-2 glass-card rounded-2xl p-6 border border-brand-gold/20">
+        <h2 class="text-xl font-bold mb-6 text-brand-gold">Your setup</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
+          <label class="block">
+            <span class="text-neutral-400 text-sm">GPU</span>
+            <select id="gpuSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {gpus.map(g => <option value={g.id} selected={g.id === defaults.gpu}>{g.name}</option>)}
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Operating system</span>
+            <select id="osSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              <option value="linux">Linux</option>
+              <option value="windows">Windows</option>
+              <option value="macos">macOS</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Model</span>
+            <select id="modelSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {models.map(m => <option value={m.id} selected={m.id === defaults.model}>{m.name}</option>)}
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Quantization</span>
+            <select id="quantSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              {quants.map(q => <option value={q.id} selected={q.id === defaults.quant}>{q.name}</option>)}
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Batch / concurrency</span>
+            <input id="batchInput" type="number" min="1" max="256" value={defaults.batch_size} class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1" />
+          </label>
+          <label class="block">
+            <span class="text-neutral-400 text-sm">Context length</span>
+            <select id="contextSelect" class="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-white mt-1">
+              <option value="2048">2,048</option>
+              <option value="4096" selected>4,096</option>
+              <option value="8192">8,192</option>
+              <option value="16384">16,384</option>
+              <option value="32768">32,768</option>
+              <option value="65536">65,536</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="border-t border-neutral-800 pt-6">
+          <h3 class="text-sm font-bold text-brand-gold mb-4">Weight priorities (0–5)</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <label class="block"><span class="text-neutral-400 text-sm">Ease of setup</span><input id="w-ease" type="range" min="0" max="5" step="1" value={defaults.weights.ease} class="w-full accent-brand-gold" /></label>
+            <label class="block"><span class="text-neutral-400 text-sm">Throughput</span><input id="w-throughput" type="range" min="0" max="5" step="1" value={defaults.weights.throughput} class="w-full accent-brand-gold" /></label>
+            <label class="block"><span class="text-neutral-400 text-sm">Low latency</span><input id="w-latency" type="range" min="0" max="5" step="1" value={defaults.weights.latency} class="w-full accent-brand-gold" /></label>
+            <label class="block"><span class="text-neutral-400 text-sm">Compatibility</span><input id="w-compatibility" type="range" min="0" max="5" step="1" value={defaults.weights.compatibility} class="w-full accent-brand-gold" /></label>
+            <label class="block"><span class="text-neutral-400 text-sm">Structured output</span><input id="w-structured" type="range" min="0" max="5" step="1" value={defaults.weights.structured} class="w-full accent-brand-gold" /></label>
+            <label class="block"><span class="text-neutral-400 text-sm">VRAM efficiency</span><input id="w-quant" type="range" min="0" max="5" step="1" value={defaults.weights.quant_efficiency} class="w-full accent-brand-gold" /></label>
+            <label class="block"><span class="text-neutral-400 text-sm">Multi-GPU scaling</span><input id="w-multi" type="range" min="0" max="5" step="1" value={defaults.weights.multi_gpu} class="w-full accent-brand-gold" /></label>
+            <label class="block"><span class="text-neutral-400 text-sm">MoE support</span><input id="w-moe" type="range" min="0" max="5" step="1" value={defaults.weights.moe} class="w-full accent-brand-gold" /></label>
+          </div>
+        </div>
+        <p class="text-neutral-500 text-sm mt-6">Last updated: {data.last_updated}. <a href="#note" class="text-cyan-400 underline">See notes</a>.</p>
+      </div>
+
+      <div class="lg:col-span-1 space-y-6">
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20 text-center">
+          <h2 class="text-xl font-bold mb-4 text-brand-gold">Top pick</h2>
+          <p class="text-sm text-neutral-500 uppercase mb-2">Recommended engine</p>
+          <p id="topName" class="text-2xl font-bold text-brand-gold mb-2">—</p>
+          <p id="topScore" class="text-sm text-neutral-400 mb-4">Score: —</p>
+          <div class="grid grid-cols-2 gap-3 text-sm mb-4">
+            <div class="bg-neutral-900 rounded-lg p-3"><p class="text-neutral-500 text-xs">VRAM needed</p><p id="topVram" class="font-bold text-white">—</p></div>
+            <div class="bg-neutral-900 rounded-lg p-3"><p class="text-neutral-500 text-xs">Est. tok/s</p><p id="topToks" class="font-bold text-white">—</p></div>
+          </div>
+          <p id="topWhy" class="text-sm text-neutral-400">Select your setup to see a recommendation.</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-lg font-bold mb-4 text-brand-gold">VRAM math</h2>
+          <p class="text-sm text-neutral-400 mb-1">Model weights: <span id="mathWeights" class="text-white font-medium">—</span></p>
+          <p class="text-sm text-neutral-400 mb-1">KV cache: <span id="mathKv" class="text-white font-medium">—</span></p>
+          <p class="text-sm text-neutral-400 mb-1">Total estimate: <span id="mathTotal" class="text-white font-medium">—</span></p>
+          <p class="text-sm text-neutral-400 mt-2">GPU VRAM: <span id="mathGpu" class="text-white font-medium">—</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rankings -->
+    <section class="mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Engine rankings</h2>
+      <div id="ranking-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {engines.map(e => (
+          <article class="rank-card glass-card rounded-2xl p-6 border border-neutral-800" data-engine={e.id}>
+            <div class="flex items-start justify-between mb-3">
+              <h3 class="text-lg font-bold text-white">{e.name}</h3>
+              <span class="score-badge text-xs px-2 py-1 rounded bg-neutral-800 text-neutral-300 border border-neutral-700">Score: —</span>
+            </div>
+            <p class="text-sm text-neutral-400 mb-4 bestfor-text">{e.best_for}</p>
+            <div class="grid grid-cols-2 gap-3 text-sm mb-4">
+              <div class="bg-neutral-900 rounded-lg p-3"><p class="text-neutral-500 text-xs">VRAM</p><p class="vram-text font-bold text-white">—</p></div>
+              <div class="bg-neutral-900 rounded-lg p-3"><p class="text-neutral-500 text-xs">Tok/s</p><p class="toks-text font-bold text-white">—</p></div>
+            </div>
+            <div class="fit-tag text-xs px-2 py-1 rounded bg-neutral-800 border border-neutral-700 inline-block mb-3">—</div>
+            <div class="flex flex-wrap gap-2 text-xs">
+              {Object.entries(featureLabels).filter(([k]) => e.features[k as keyof typeof e.features]).map(([k, label]) => (
+                <span class="px-2 py-1 rounded bg-neutral-800 text-neutral-300 border border-neutral-700">{label}</span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <!-- Comparison table -->
+    <section class="overflow-x-auto mb-12">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Feature matrix</h2>
+      <table class="w-full text-left border-collapse text-sm">
+        <thead>
+          <tr class="border-b border-neutral-700 text-neutral-400 uppercase tracking-wide">
+            <th class="py-3 pr-4">Engine</th>
+            <th class="py-3 pr-4">Formats</th>
+            <th class="py-3 pr-4">Platforms</th>
+            <th class="py-3 pr-4">OpenAI API</th>
+            <th class="py-3 pr-4">Batching</th>
+            <th class="py-3 pr-4">Multi-GPU</th>
+            <th class="py-3 pr-4">Structured</th>
+            <th class="py-3 pr-4">License</th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody" class="text-neutral-200">
+          {engines.map(e => (
+            <tr class="border-b border-neutral-800/50" data-engine={e.id}>
+              <td class="py-3 pr-4 font-medium text-white">{e.name}</td>
+              <td class="py-3 pr-4">{e.formats.join(', ')}</td>
+              <td class="py-3 pr-4">{e.platforms.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ')}</td>
+              <td class="py-3 pr-4">{e.features.openai_api ? '✅' : '—'}</td>
+              <td class="py-3 pr-4">{e.features.continuous_batching ? 'Continuous' : 'Basic'}</td>
+              <td class="py-3 pr-4">{e.features.multi_gpu ? '✅' : '—'}</td>
+              <td class="py-3 pr-4">{e.features.structured ? '✅' : '—'}</td>
+              <td class="py-3 pr-4">{e.license}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 mb-12 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-4 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.q}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <!-- Cross-links -->
+    <div class="flex flex-wrap gap-3 mb-8">
+      <a href="/tools/inference-engine-selector/" class="btn-primary text-sm">Inference Engine Selector v1 →</a>
+      <a href="/tools/vram-calculator/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">VRAM Calculator →</a>
+      <a href="/tools/quantization-advisor/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Quantization Advisor →</a>
+      <a href="/tools/open-source-llm-selector/" class="px-4 py-2 rounded-lg border border-neutral-700 hover:bg-neutral-800 text-sm transition-colors">Open-Source LLM Selector →</a>
+    </div>
+
+    <p id="note" class="text-neutral-500 text-sm">{data.note}</p>
+  </main>
+
+  <script is:inline define:vars={{
+    gpusJson: JSON.stringify(gpus),
+    modelsJson: JSON.stringify(models),
+    quantsJson: JSON.stringify(quants),
+    scenariosJson: JSON.stringify(scenarios),
+    enginesJson: JSON.stringify(engines),
+    defaultsJson: JSON.stringify(defaults)
+  }}>
+    const gpus = JSON.parse(gpusJson);
+    const models = JSON.parse(modelsJson);
+    const quants = JSON.parse(quantsJson);
+    const scenarios = JSON.parse(scenariosJson);
+    const engines = JSON.parse(enginesJson);
+    const defaults = JSON.parse(defaultsJson);
+
+    function $(id) { return document.getElementById(id); }
+
+    const hardwareTagForGpu = (gpu) => {
+      if (gpu.arch === 'Apple Silicon') return 'apple';
+      if (gpu.arch === 'RDNA 3') return 'amd';
+      if (gpu.arch === 'x86/ARM') return 'cpu';
+      return 'nvidia';
+    };
+
+    function getInputs() {
+      return {
+        gpuId: $('gpuSelect').value,
+        os: $('osSelect').value,
+        modelId: $('modelSelect').value,
+        quantId: $('quantSelect').value,
+        batch: parseInt($('batchInput').value, 10) || 1,
+        context: parseInt($('contextSelect').value, 10) || 4096,
+        weights: {
+          ease: parseInt($('w-ease').value, 10),
+          throughput: parseInt($('w-throughput').value, 10),
+          latency: parseInt($('w-latency').value, 10),
+          compatibility: parseInt($('w-compatibility').value, 10),
+          structured: parseInt($('w-structured').value, 10),
+          quant_efficiency: parseInt($('w-quant').value, 10),
+          multi_gpu: parseInt($('w-multi').value, 10),
+          moe: parseInt($('w-moe').value, 10)
+        }
+      };
+    }
+
+    function vramEstimate(model, quant, contextK) {
+      const weightGb = model.active_params_b * quant.bits / 8 * quant.overhead;
+      const kvGb = model.active_params_b * contextK * 0.0000175;
+      const totalGb = weightGb + kvGb + 0.5;
+      return { weightGb, kvGb, totalGb };
+    }
+
+    function formatNum(n) {
+      return n % 1 === 0 ? n.toString() : n.toFixed(1);
+    }
+
+    function isCompatible(engine, gpu, os, quant) {
+      const hwTag = hardwareTagForGpu(gpu);
+      if (!engine.hardware.includes(hwTag)) return false;
+      if (!engine.platforms.includes(os)) return false;
+      const quantOk = quant.formats.some((f) => engine.formats.map(x => x.toLowerCase()).includes(f.toLowerCase()));
+      return quantOk;
+    }
+
+    function fitStatus(engine, gpu, vram) {
+      if (vram.totalGb <= gpu.vram_gb) return { ok: true, label: `Fits in ${gpu.vram_gb} GB`, gpus: 1 };
+      if (engine.features.multi_gpu) {
+        const needed = Math.ceil(vram.totalGb / gpu.vram_gb);
+        return { ok: true, label: `Needs ${needed}× ${gpu.name}`, gpus: needed };
+      }
+      if (engine.id === 'ktransformers') return { ok: true, label: 'CPU/NVMe offload', gpus: 1 };
+      return { ok: false, label: `Needs ${formatNum(vram.totalGb)} GB`, gpus: 0 };
+    }
+
+    function estimateToks(engine, gpu, model, quant, batch) {
+      const eff = engine.efficiency[gpu.id];
+      if (!eff) return { single: 0, batched: 0 };
+      const single = gpu.reference_tok_s_fp16_7b * eff * quant.speed_factor / Math.sqrt(model.active_params_b / 7);
+      const maxBatch = engine.features.continuous_batching ? Math.min(batch, 8) : Math.min(batch, 2);
+      const batchEff = engine.features.continuous_batching ? 0.85 : 0.55;
+      const batched = single * maxBatch * batchEff;
+      return { single: Math.max(0.1, single), batched: Math.max(0.1, batched) };
+    }
+
+    function scoreEngine(engine, inputs, gpu, model, quant, vram) {
+      const w = inputs.weights;
+      const dims = ['ease', 'throughput', 'latency', 'compatibility', 'structured', 'quant_efficiency', 'multi_gpu', 'moe'];
+      let totalWeight = 0;
+      let weighted = 0;
+      dims.forEach(d => {
+        const weight = w[d] || 0;
+        totalWeight += weight;
+        weighted += weight * engine.scores[d];
+      });
+      const baseScore = totalWeight > 0 ? weighted / totalWeight : 0;
+
+      const fit = fitStatus(engine, gpu, vram);
+      if (!fit.ok) return { score: baseScore * 0.2, fit, toks: { single: 0, batched: 0 } };
+
+      // Penalize multi-GPU if user only has one GPU and doesn't value multi-GPU
+      if (fit.gpus > 1 && (w.multi_gpu || 0) < 2) {
+        return { score: baseScore * 0.7, fit, toks: estimateToks(engine, gpu, model, quant, inputs.batch) };
+      }
+
+      return { score: baseScore, fit, toks: estimateToks(engine, gpu, model, quant, inputs.batch) };
+    }
+
+    function updateUI() {
+      const inputs = getInputs();
+      const gpu = gpus.find(g => g.id === inputs.gpuId);
+      const model = models.find(m => m.id === inputs.modelId);
+      const quant = quants.find(q => q.id === inputs.quantId);
+      const vram = vramEstimate(model, quant, inputs.context);
+
+      // VRAM math
+      $('mathWeights').textContent = `${formatNum(vram.weightGb)} GB`;
+      $('mathKv').textContent = `${formatNum(vram.kvGb)} GB`;
+      $('mathTotal').textContent = `${formatNum(vram.totalGb)} GB`;
+      $('mathGpu').textContent = `${gpu.vram_gb} GB`;
+
+      const results = engines.map(e => {
+        const compat = isCompatible(e, gpu, inputs.os, quant);
+        if (!compat) return { engine: e, score: 0, fit: { ok: false, label: 'Incompatible', gpus: 0 }, toks: { single: 0, batched: 0 }, compat: false };
+        const { score, fit, toks } = scoreEngine(e, inputs, gpu, model, quant, vram);
+        return { engine: e, score, fit, toks, compat: true };
+      });
+
+      results.sort((a, b) => b.score - a.score);
+
+      // Top pick
+      const top = results[0];
+      if (top && top.score > 0) {
+        $('topName').textContent = top.engine.name;
+        $('topScore').textContent = `Score: ${formatNum(top.score)} / 5`;
+        $('topVram').textContent = `${formatNum(vram.totalGb)} GB ${top.fit.gpus > 1 ? `(${top.fit.gpus} GPUs)` : ''}`;
+        $('topToks').textContent = `${formatNum(top.toks.batched)} tok/s`;
+        $('topWhy').textContent = top.engine.best_for;
+      } else {
+        $('topName').textContent = '—';
+        $('topScore').textContent = 'Score: —';
+        $('topVram').textContent = '—';
+        $('topToks').textContent = '—';
+        $('topWhy').textContent = 'No compatible engine for this combo. Try a smaller model, different quant, or a GPU with more VRAM.';
+      }
+
+      // Rank cards
+      document.querySelectorAll('.rank-card').forEach(card => {
+        const id = card.dataset.engine;
+        const r = results.find(x => x.engine.id === id);
+        if (!r) return;
+        card.querySelector('.score-badge').textContent = `Score: ${formatNum(r.score)} / 5`;
+        card.querySelector('.vram-text').textContent = `${formatNum(vram.totalGb)} GB`;
+        card.querySelector('.toks-text').textContent = r.compat ? `${formatNum(r.toks.batched)} tok/s` : '—';
+        const fitEl = card.querySelector('.fit-tag');
+        fitEl.textContent = r.fit.label;
+        fitEl.className = `fit-tag text-xs px-2 py-1 rounded inline-block mb-3 ${r.fit.ok ? 'bg-emerald-900/40 text-emerald-300 border border-emerald-700' : 'bg-red-900/40 text-red-300 border border-red-700'}`;
+        card.classList.toggle('border-brand-gold/60', r === top && r.score > 0);
+        card.classList.toggle('shadow', r === top && r.score > 0);
+        card.classList.toggle('shadow-brand-gold/10', r === top && r.score > 0);
+      });
+
+      // Matrix row highlight
+      document.querySelectorAll('#matrixBody tr').forEach(row => {
+        const id = row.dataset.engine;
+        const r = results.find(x => x.engine.id === id);
+        row.classList.toggle('bg-brand-gold/5', r === top && r.score > 0);
+      });
+    }
+
+    function applyScenario(id) {
+      const s = scenarios.find(x => x.id === id);
+      if (!s) return;
+      $('batchInput').value = s.batch_size;
+      $('w-ease').value = s.weights.ease;
+      $('w-throughput').value = s.weights.throughput;
+      $('w-latency').value = s.weights.latency;
+      $('w-compatibility').value = s.weights.compatibility;
+      $('w-structured').value = s.weights.structured;
+      $('w-quant').value = s.weights.quant_efficiency;
+      $('w-multi').value = s.weights.multi_gpu;
+      $('w-moe').value = s.weights.moe;
+      $('scenario-desc').textContent = `${s.icon} ${s.name}: ${s.description}`;
+      document.querySelectorAll('.scenario-btn').forEach(b => {
+        b.classList.toggle('bg-brand-gold', b.dataset.scenario === id);
+        b.classList.toggle('text-brand-dark', b.dataset.scenario === id);
+        b.classList.toggle('border-brand-gold', b.dataset.scenario === id);
+      });
+      updateUI();
+    }
+
+    // Event listeners
+    ['gpuSelect', 'osSelect', 'modelSelect', 'quantSelect', 'contextSelect'].forEach(id => {
+      $(id).addEventListener('change', updateUI);
+    });
+    $('batchInput').addEventListener('input', updateUI);
+    ['w-ease', 'w-throughput', 'w-latency', 'w-compatibility', 'w-structured', 'w-quant', 'w-multi', 'w-moe'].forEach(id => {
+      $(id).addEventListener('input', updateUI);
+    });
+    document.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => applyScenario(btn.dataset.scenario));
+    });
+
+    // Auto-detect OS for Apple GPU
+    $('gpuSelect').addEventListener('change', () => {
+      const gpu = gpus.find(g => g.id === $('gpuSelect').value);
+      if (gpu.arch === 'Apple Silicon') $('osSelect').value = 'macos';
+    });
+
+    // Init
+    applyScenario(defaults.scenario);
+  </script>
+</Layout>
