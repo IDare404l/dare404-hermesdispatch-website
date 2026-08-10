@@ -1,0 +1,259 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+---
+
+<Layout title="Vermi-Couture Preview" description="Local worm and vermicompost business preview from dare404">
+<header>
+    <div class="container">
+      <nav>
+        <div class="brand">
+          <img src="./assets/vermi-couture-logo.png" alt="Vermi-Couture logo" />
+          Vermi-Couture
+        </div>
+        <div class="nav-links">
+          <a href="#products">Products</a>
+          <a href="#waitlist">Waitlist</a>
+          <a href="#mission">Mission</a>
+          <a href="#how">How It Works</a>
+          <a href="#business">Our Story</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="coming-soon">
+    <div class="container">
+      <strong>Coming soon.</strong> Products are not available for purchase yet — join the waitlist below to tell us what you're interested in and be first to know when we launch.
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <h1>Living soil biology, delivered local.</h1>
+        <p>Red wiggler starter kits, worm castings, and aerated worm tea for Boise-area gardeners, composters, and urban growers. Fresh, small-batch, and rooted in education.</p>
+        <div class="cta-group">
+          <a href="#waitlist" class="btn btn-primary">Join the Waitlist</a>
+          <a href="#products" class="btn btn-secondary">See Products</a>
+        </div>
+      </div>
+      <div class="hero-logo">
+        <img src="./assets/vermi-couture-logo.png" alt="Vermi-Couture brand logo" />
+      </div>
+    </div>
+  </section>
+
+  <section id="waitlist" class="alt">
+    <div class="container">
+      <h2>Get on the List</h2>
+      <p class="section-lead">We are building demand-first: no inventory risk, no pre-orders, just a quick signal of what Boise-area growers actually want. Tell us what you're interested in and we'll email you first when it's ready.</p>
+      <div class="newsletter">
+        <form id="waitlistForm" class="waitlist-form" action="mailto:derekkosakura@gmail.com" method="post" enctype="text/plain">
+          <input type="email" name="email" placeholder="you@example.com" required />
+          <input type="text" name="zip" placeholder="ZIP code (optional, helps us plan pickup/delivery)" maxlength="10" />
+          <p class="hint">Select all products you're interested in:</p>
+          <label><input type="checkbox" name="interest" value="Red Wiggler Starter Kit" checked /> Red Wiggler Starter Kit</label>
+          <label><input type="checkbox" name="interest" value="Worm Castings" /> Worm Castings</label>
+          <label><input type="checkbox" name="interest" value="Aerated Worm Tea" /> Aerated Worm Tea</label>
+          <label><input type="checkbox" name="interest" value="Newsletter only" /> Just the composting newsletter</label>
+          <input type="hidden" name="subject" value="Vermi-Couture waitlist signup" />
+          <button type="submit">Join Waitlist — Send Interest Email</button>
+        </form>
+        <div id="waitlistSuccess" class="waitlist-success">Thanks! Your email client should open with the details pre-filled. Send it to complete signup.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="mission">
+    <div class="container">
+      <h2>Our Mission</h2>
+      <p class="section-lead">We produce and sell high-quality red wiggler composting worms, worm castings, and beginner-friendly vermicomposting kits to home gardeners in our local region — starting small, selling direct, and growing only as demand proves itself.</p>
+      <div class="mission-box">
+        <p><strong>We prioritize freshness, education, and customer success over bulk volume.</strong> We are not a commodity agricultural supplier. We are a trusted local source for living soil biology and composting know-how.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="business" class="alt">
+    <div class="container">
+      <h2>Started Small in Boise</h2>
+      <p class="section-lead">Vermi-Couture began as a sole proprietorship: one person, a few breeding bins, and a mission to build something honest. That structure lets us test the market and serve customers without the overhead of a corporation.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="badge">Now</span>
+          <h3>Sole Proprietorship</h3>
+          <p>Operating under an Assumed Business Name (DBA) with the Idaho Secretary of State. All products are harvest-to-order, labeled conservatively, and tracked by batch.</p>
+        </div>
+        <div class="card">
+          <span class="badge">Next</span>
+          <h3>LLC Conversion</h3>
+          <p>Once revenue is consistent and product liability exposure grows, the business will convert to an Idaho LLC for stronger legal protection and cleaner ownership.</p>
+        </div>
+        <div class="card">
+          <span class="badge">Always</span>
+          <h3>Insurance &amp; Testing</h3>
+          <p>General and product liability insurance, Idaho ISDA soil amendment registration, and voluntary lab testing are built into the growth path from day one.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="products">
+    <div class="container">
+      <h2>Phase 1 Products <span style="font-size:0.75em;color:var(--muted);font-family:'Inter',sans-serif;font-weight:500;">— planned, not yet for sale</span></h2>
+      <p class="section-lead">Everything is harvest-to-order, produced indoors in Boise, and packaged to keep the biology alive. Prices are estimates; final pricing will be set at launch.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="badge">Best Seller</span>
+          <h3>Red Wiggler Starter Kit</h3>
+          <p class="price">From ~$35</p>
+          <p>1/2 lb or 1 lb of healthy red wigglers with bedding and a simple care card. Perfect for first-time vermicomposters. <em>Planned — join waitlist to confirm interest.</em></p>
+        </div>
+        <div class="card">
+          <span class="badge">Repeat Buy</span>
+          <h3>Worm Castings</h3>
+          <p class="price">From ~$12 / lb</p>
+          <p>Finely finished, dark, and earthy. Lab-tested in batches. Ornamental label available while registration is pending. <em>Planned — join waitlist to confirm interest.</em></p>
+        </div>
+        <div class="card">
+          <span class="badge">Local Pickup</span>
+          <h3>Aerated Worm Tea</h3>
+          <p class="price">From ~$8 / quart</p>
+          <p>Brewed fresh from finished castings. Use within 24–48 hours. Not raw bin leachate. <em>Planned — join waitlist to confirm interest.</em></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="container">
+      <h2>How It Will Work</h2>
+      <p class="section-lead">Start composting with worms in four simple steps once we launch.</p>
+      <div class="steps">
+        <div class="step">
+          <h4>Reserve a kit</h4>
+          <p>Choose 1/2 lb or 1 lb of red wigglers. Local pickup or delivery in Boise area.</p>
+        </div>
+        <div class="step">
+          <h4>Set up your bin</h4>
+          <p>Use the bedding and care card we include. Keep it indoors at 55–77°F.</p>
+        </div>
+        <div class="step">
+          <h4>Feed &amp; learn</h4>
+          <p>Add small amounts of veggie scraps, coffee grounds, and paper. We teach you what works.</p>
+        </div>
+        <div class="step">
+          <h4>Harvest castings</h4>
+          <p>In 2–4 months, harvest dark, crumbly castings — or trade up to a bigger kit.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="container">
+      <h2>Best Practices, Built In</h2>
+      <p class="section-lead">We run clean because your plants and our business depend on it.</p>
+      <div class="cards">
+        <div class="card">
+          <h3>Clean Feedstock</h3>
+          <p>Paper, cardboard, vegetable scraps, coffee grounds, eggshells. No meat, dairy, oils, pet waste, or synthetics.</p>
+        </div>
+        <div class="card">
+          <h3>Harvest-to-Order</h3>
+          <p>Live worms are never warehoused. We pack them when you order so they arrive active and fresh.</p>
+        </div>
+        <div class="card">
+          <h3>Batch Records</h3>
+          <p>Every castings batch is logged with feedstock source, harvest date, and test status.</p>
+        </div>
+        <div class="card">
+          <h3>Honest Labels</h3>
+          <p>No fake “100% safe” or “guaranteed organic” claims. Just clear directions and a conservative disclaimer.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <div class="container">
+      <h2>First 90 Days</h2>
+      <p class="section-lead">From DBA to first local sales — a lean launch plan.</p>
+      <div class="steps">
+        <div class="step">
+          <h4>Weeks 1–2</h4>
+          <p>File DBA with Idaho Secretary of State, get EIN, open business bank account, confirm local permits.</p>
+        </div>
+        <div class="step">
+          <h4>Weeks 3–4</h4>
+          <p>Set up first breeding bins and begin population build.</p>
+        </div>
+        <div class="step">
+          <h4>Weeks 5–6</h4>
+          <p>Build Shopify or Astro site, photograph products, prepare labels.</p>
+        </div>
+        <div class="step">
+          <h4>Weeks 7–8</h4>
+          <p>List worms on Facebook Marketplace and local groups; test pricing and packaging.</p>
+        </div>
+        <div class="step">
+          <h4>Weeks 9–10</h4>
+          <p>Launch newsletter signup and publish first educational content.</p>
+        </div>
+        <div class="step">
+          <h4>Weeks 11–12</h4>
+          <p>Submit ISDA registration, arrange first lab test, evaluate sales data.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="container">
+      <h2>Honest from Day One</h2>
+      <p class="section-lead">We do not hide behind clever marketing. Our labels are clear, our products are tested, and our growth is documented.</p>
+      <div class="mission-box">
+        <p><strong>Suggested product disclaimer:</strong> This product is a soil amendment made from composted organic materials processed by earthworms. Use as directed. We recommend washing all produce grown with any soil amendment before consumption. This product is not a pesticide or plant nutrient guarantee.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="newsletter">
+    <div class="container">
+      <div class="newsletter">
+        <div>
+          <h2>Get the Dirt</h2>
+          <p>Join for weekly or biweekly composting tips, worm care reminders, and first notice of product drops. No spam. Use the waitlist form above or just <a href="mailto:derekkosakura@gmail.com?subject=Vermi-Couture%20newsletter%20signup">email us</a>.</p>
+        </div>
+        <a href="mailto:derekkosakura@gmail.com?subject=Vermi-Couture%20newsletter%20signup" class="btn btn-primary">Email to Subscribe</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div>
+        <strong>Vermi-Couture</strong> · Boise, Idaho · A sole proprietorship, DBA registered in Idaho.<br />
+        Living soil biology for local growers. Products launching soon.
+      </div>
+      <div>
+        <a href="/vermi-couture-business-guide.pdf">Download the full business guide PDF</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('waitlistForm').addEventListener('submit', function(e) {
+      const form = e.target;
+      const email = form.email.value.trim();
+      const zip = form.zip.value.trim();
+      const interests = Array.from(form.querySelectorAll('input[name="interest"]:checked')).map(cb => cb.value).join(', ');
+      if (!interests) { alert('Please select at least one interest.'); e.preventDefault(); return false; }
+      const body = 'email=' + encodeURIComponent(email) +
+        (zip ? '\u0026zip=' + encodeURIComponent(zip) : '') +
+        '\u0026interests=' + encodeURIComponent(interests);
+      form.setAttribute('action', 'mailto:derekkosakura@gmail.com?subject=' + encodeURIComponent('Vermi-Couture waitlist signup') + '\u0026body=' + encodeURIComponent(body));
+      document.getElementById('waitlistSuccess').style.display = 'block';
+    });
+  </script>
+</Layout>
