@@ -200,7 +200,8 @@ const productLinks: Record<string, { slug: string; label: string; url: string }>
         ].join('');
 
       rec.build.forEach(function(item) {
-          var link = productLinks[item.slug] && productLinks[item.slug].url ? '/go/' + item.slug + '/' : '/directory#' + item.slug;
+          var hasLink = productLinks[item.slug] && productLinks[item.slug].url;
+          var link = hasLink ? '/go/' + item.slug + '/?url=' + encodeURIComponent(productLinks[item.slug].url) + '&source=agent-hardware-sizer' : '/directory#' + item.slug;
           var label = (productLinks[item.slug] && productLinks[item.slug].label) || 'View in Directory';
           html += [
             '<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/10">',
@@ -212,6 +213,7 @@ const productLinks: Record<string, { slug: string; label: string; url: string }>
             '<div class="text-right md:text-right flex flex-row md:flex-col items-center md:items-end gap-3">',
             '<span class="text-lg font-mono text-brand-gold">' + item.price + '</span>',
             '<a href="' + link + '"',
+            'target="_blank" rel="noopener noreferrer"',
             'class="px-4 py-2 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-sm font-medium hover:bg-brand-gold/20 transition">' + label + ' →</a>',
             '</div>',
             '</div>'

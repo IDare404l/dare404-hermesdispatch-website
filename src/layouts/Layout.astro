@@ -6,9 +6,10 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 interface Props {
   title: string;
   description?: string;
+  noindex?: boolean;
 }
 
-const { title, description = "The Hermes Dispatch - Daily AI automation insights, Hermes skills, and tools from dare404" } = Astro.props;
+const { title, description = "The Hermes Dispatch - Daily AI automation insights, Hermes skills, and tools from dare404", noindex = false } = Astro.props;
 const buildTime = new Date().toISOString().slice(0,19).replace('T',' ') + ' UTC';
 const commitHash = versionData?.commit?.slice(0,7) || 'local';
 const buildNum = versionData?.build || 'DEV';
@@ -22,6 +23,7 @@ const fullCommit = versionData?.commit || 'local';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0a0a0a" />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title} | Hermes Mission Freedom</title>
     <link rel="canonical" href={`https://hermesdispatch.dev${Astro.url.pathname}`} />
