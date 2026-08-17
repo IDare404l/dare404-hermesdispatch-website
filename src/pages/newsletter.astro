@@ -10,6 +10,20 @@ const issues = sorted.filter(n => n.slug !== featured?.slug);
 ---
 
 <Layout title={title} description={description}>
+  <!-- Schema: ItemList for AEO -->
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "The Hermes Dispatch — Daily AI Hardware, Crypto, and Trading Brief",
+    "itemListElement": sorted.map((n, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "name": n.title,
+      "url": `https://hermesdispatch.dev/newsletter/${n.slug}/`,
+      "datePublished": n.date
+    }))
+  })} />
+
   <section class="relative py-16 overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand-dark to-cyan-900/10"></div>
     <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
