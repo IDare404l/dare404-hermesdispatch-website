@@ -24,7 +24,7 @@ export async function GET(context: APIContext) {
     { path: '/compare/gpus/', changefreq: 'weekly', priority: 0.8 },
     { path: '/compare/mini-pcs/', changefreq: 'weekly', priority: 0.8 },
     { path: '/compare/recommend/', changefreq: 'weekly', priority: 0.8 },
-    { path: '/newsletter/issue-20260810-001/', changefreq: 'monthly', priority: 0.6 },
+    { path: '/newsletter/issue-20260809-001/', changefreq: 'monthly', priority: 0.6 },
     // Tools — keep in sync with src/pages/tools/*.astro
     { path: '/tools/agent-hardware-sizer/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/agent-hosting-cost-comparator/', changefreq: 'weekly', priority: 0.8 },
