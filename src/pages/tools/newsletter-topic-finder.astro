@@ -1,0 +1,194 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ToolSchema from '../../components/ToolSchema.astro';
+import data from '../../data/newsletter_prompt_generator_v2.json';
+import AgentCodeBlock from '../../components/AgentCodeBlock.astro';
+
+const title = "Newsletter Topic Finder | Hermes Dispatch";
+const description = "Find newsletter topic ideas for AI hardware, AI agents, crypto-to-AI pivots, investing, and answer-engine optimization. Copy your pick into the Daily Newsletter Prompt Generator.";
+const url = "https://hermesdispatch.dev/tools/newsletter-topic-finder/";
+const categories = data.categories;
+const siteTools = data.site_tools;
+
+const faqs = [
+  { q: "How do I use the Newsletter Topic Finder?", a: "Pick a category to see 10 rotating newsletter topic ideas. Click any idea to copy it, then paste it into the Daily Newsletter Prompt Generator to build a full DOC-id brief." },
+  { q: "What categories are covered?", a: "AI Hardware, AI Agents, Crypto → AI Pivot, Investing & Startups, and AEO & Citations. Each category has sample topics, angles, and must-include rules aligned with Hermes Dispatch voice." },
+  { q: "Can I see related Hermes Dispatch tools?", a: "Yes. The embedded tool grid shows the most relevant calculator or selector for each category so you can link to it from the generated newsletter issue." },
+  { q: "Is this connected to the prompt generator?", a: "It shares the same data file, so topics, angles, and tools stay consistent across both tools." },
+];
+---
+
+<Layout title={title} description={description} noindex={false}>
+  <ToolSchema name="Newsletter Topic Finder" description={description} url={url} applicationCategory="WebApplication" operatingSystem="Any" />
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(f => ({"@type": "Question", "name": f.q, "acceptedAnswer": {"@type": "Answer", "text": f.a}}))
+  })} />
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-12">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-gold to-brand-amber mx-auto mb-6 flex items-center justify-center text-3xl shadow-lg shadow-brand-gold/30">💡</div>
+      <h1 class="display-heading mb-4">Newsletter Topic Finder</h1>
+      <p class="text-xl text-neutral-400 max-w-2xl mx-auto">Find a fresh topic for today's Hermes Dispatch issue. Pick a category, copy an idea, and turn it into a full DOC-id brief.</p>
+    </div>
+
+    <!-- Category picker -->
+    <section class="glass-card rounded-2xl p-6 mb-8 border border-brand-gold/20">
+      <h2 class="text-lg font-bold mb-4 text-brand-gold">Pick a category</h2>
+      <div class="flex flex-wrap gap-3" id="category-buttons">
+        {categories.map((c, i) => (
+          <button type="button" class="category-btn px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors" data-category={JSON.stringify(c)} data-index={i}>
+            <span class="mr-1">{c.icon}</span>{c.name}
+          </button>
+        ))}
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-3 gap-6 mb-10">
+      <!-- Topics -->
+      <div class="lg:col-span-2 space-y-6">
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h2 class="text-xl font-bold text-brand-gold flex items-center gap-2"><span id="categoryIcon">🖥️</span> <span id="categoryName">AI Hardware</span></h2>
+            <button id="refreshBtn" type="button" class="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-sm transition-colors">↻ Refresh topics</button>
+          </div>
+          <p id="categoryAudience" class="text-sm text-neutral-400 mb-4">Local LLM builders who care about VRAM, watts, and tok/s per dollar.</p>
+          <ul id="topicList" class="space-y-3"></ul>
+          <p id="copyFeedback" class="text-brand-gold text-sm mt-4 hidden">Topic copied. Paste it into the prompt generator.</p>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-lg font-bold mb-4 text-brand-gold">Category playbook</h2>
+          <div class="space-y-4 text-sm text-neutral-300">
+            <div>
+              <p class="text-neutral-500 uppercase text-xs mb-1">Sample angles</p>
+              <ul id="angleList" class="list-disc pl-5 space-y-1"></ul>
+            </div>
+            <div>
+              <p class="text-neutral-500 uppercase text-xs mb-1">Must include</p>
+              <ul id="mustIncludeList" class="list-disc pl-5 space-y-1"></ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Tools sidebar -->
+      <div class="space-y-6">
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-lg font-bold mb-4 text-brand-gold">Relevant tools</h2>
+          <p class="text-sm text-neutral-400 mb-4">Link one of these in the issue to make it citable.</p>
+          <div id="toolList" class="space-y-2 text-sm"></div>
+        </section>
+
+        <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+          <h2 class="text-lg font-bold mb-4 text-brand-gold">Next step</h2>
+          <p class="text-neutral-300 text-sm mb-4">Copy a topic, then build a full DOC-id brief with the Daily Newsletter Prompt Generator.</p>
+          <a href="/tools/newsletter-prompt-generator-v2/" class="btn-primary inline-block w-full text-center">Open Prompt Generator v2 →</a>
+        </section>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="glass-card rounded-2xl p-6 border border-brand-gold/20">
+      <h2 class="text-xl font-bold mb-6 text-brand-gold">Frequently asked questions</h2>
+      <div class="space-y-4">
+        {faqs.map(f => (
+          <details class="group bg-neutral-900/50 rounded-xl border border-neutral-800">
+            <summary class="p-4 cursor-pointer font-medium text-neutral-200 flex justify-between items-center">{f.q}<span class="text-brand-gold group-open:rotate-180 transition-transform">▼</span></summary>
+            <p class="p-4 pt-0 text-neutral-400">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <AgentCodeBlock
+    toolName="Newsletter Topic Finder"
+    toolPath="/tools/newsletter-topic-finder/"
+    description="Return newsletter topic ideas by category for Hermes Dispatch."
+    scriptPath="/hermes-tools/newsletter_topic_finder.py"
+    locked={false}
+  />
+
+  <script is:inline define:vars={{ categories, siteTools }}>
+    function $(id) { return document.getElementById(id); }
+
+    const toolMap = {
+      "ai-hardware": ["VRAM Calculator", "GPU Comparison", "GPU Benchmark Comparator", "GPU Recommender", "Mini PC Comparison", "Mini PC Recommender", "Agent Hardware Sizer", "Local LLM ROI Calculator", "Tokens-per-Watt Calc", "AI Hardware Deal Tracker"],
+      "ai-agents": ["Agent Hardware Sizer", "Agent Hosting Cost Comparator", "Agent Benchmark Selector", "Agent Memory / RAG Cost Calc v2", "Agent Marketplace Fee Comparator", "Agent Routing / Gateway Cost Comparator", "Agent Observability Cost Comparator", "MCP Server Cost Estimator", "Browser Use Cost Estimator", "AI Voice Agent Cost Calculator", "AI Image Generation Cost Calculator", "No-Code Agent Builder Selector", "Open Source LLM Selector", "Inference Engine Selector v2"],
+      "crypto-pivot": ["Miner Pivot Calculator", "Hashrate → Inference Converter", "Crypto Tax Loss Harvester", "Staking vs Inference Yield"],
+      "investing-startups": ["Startup Runway Calculator", "Affiliate Revenue Estimator", "AI Hardware Deal Tracker", "Local LLM ROI Calculator"],
+      "answer-engines": ["Answer Engine Citation Tracker", "Newsletter Topic Finder", "Daily Newsletter Prompt Generator"]
+    };
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function renderCategory(cat) {
+      $('categoryIcon').textContent = cat.icon;
+      $('categoryName').textContent = cat.name;
+      $('categoryAudience').textContent = cat.audience;
+
+      const topics = shuffle(cat.sample_topics).slice(0, 10);
+      $('topicList').innerHTML = topics.map(t => `
+        <li class="flex items-start gap-3 group">
+          <span class="text-brand-gold mt-0.5">›</span>
+          <button type="button" class="topic-copy text-left text-neutral-200 hover:text-brand-gold transition-colors" data-topic="${t.replace(/"/g, '&quot;')}">${t}</button>
+        </li>
+      `).join('');
+
+      $('angleList').innerHTML = cat.angles.map(a => `<li>${a}</li>`).join('');
+      $('mustIncludeList').innerHTML = cat.must_include.map(m => `<li>${m}</li>`).join('');
+
+      const relevant = toolMap[cat.slug] || [];
+      const tools = siteTools.filter(t => relevant.includes(t.name));
+      $('toolList').innerHTML = tools.map(t => `
+        <a href="${t.path}" class="block p-2 rounded-lg bg-neutral-900/50 hover:bg-neutral-800 border border-neutral-800 transition-colors text-neutral-300 hover:text-brand-gold">
+          ${t.name}
+        </a>
+      `).join('');
+
+      document.querySelectorAll('.category-btn').forEach((btn, i) => {
+        const isActive = JSON.parse(btn.dataset.category).slug === cat.slug;
+        btn.classList.toggle('bg-brand-gold', isActive);
+        btn.classList.toggle('text-neutral-950', isActive);
+        btn.classList.toggle('border-brand-gold', isActive);
+        btn.classList.toggle('bg-neutral-800', !isActive);
+        btn.classList.toggle('text-neutral-200', !isActive);
+        btn.classList.toggle('border-neutral-700', !isActive);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      let currentCategory = categories[0];
+      renderCategory(currentCategory);
+
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentCategory = JSON.parse(btn.dataset.category);
+          renderCategory(currentCategory);
+        });
+      });
+
+      $('refreshBtn').addEventListener('click', () => renderCategory(currentCategory));
+
+      $('topicList').addEventListener('click', function(e) {
+        const target = e.target.closest('.topic-copy');
+        if (!target) return;
+        const topic = target.dataset.topic;
+        navigator.clipboard.writeText(topic).then(() => {
+          $('copyFeedback').classList.remove('hidden');
+          setTimeout(() => $('copyFeedback').classList.add('hidden'), 2000);
+        });
+      });
+    });
+  </script>
+</Layout>
