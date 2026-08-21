@@ -12,7 +12,7 @@ agent_score: 82
 tags: [mini pc, apple silicon, local llm, ollama]
 source: "https://www.apple.com/mac-mini/"
 attribution: "Based on public specs and community Ollama benchmarks."
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 ---
 
 ## What it is

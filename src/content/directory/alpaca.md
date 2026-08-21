@@ -27,7 +27,7 @@ faq_schema:
     strategies and agent-based trading experiments in the U.S.
 review: null
 verdict: Best free brokerage API for paper trading and algorithmic strategy development.
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 schema_type: SoftwareApplication
 applicationCategory: FinanceApplication
 operatingSystem: Web, Python SDK

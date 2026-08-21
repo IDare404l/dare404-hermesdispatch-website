@@ -15,7 +15,7 @@ affiliate_tags:
 - llm
 verdict: Best budget 20GB GPU for VRAM-hungry local models when CUDA lock-in is not
   required.
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 applicationCategory: Hardware
 operatingSystem: ''
 softwareVersion: ''

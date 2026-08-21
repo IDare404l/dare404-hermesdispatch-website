@@ -15,7 +15,7 @@ affiliate_tags:
 - roi
 verdict: Best free calculator for estimating GPU and ASIC mining profitability before
   buying hardware.
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 applicationCategory: BusinessApplication
 operatingSystem: Web
 softwareVersion: ''

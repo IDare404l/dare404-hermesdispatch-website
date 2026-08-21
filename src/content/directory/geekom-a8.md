@@ -37,7 +37,7 @@ faq_schema:
     models.
 review: null
 verdict: Best compact mini PC for running small LLMs and AI agents under $700.
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 attribution: Based on community benchmarks
 ---
 

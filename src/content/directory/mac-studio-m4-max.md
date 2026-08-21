@@ -38,7 +38,7 @@ faq_schema:
     for supported models.
 review: null
 verdict: The cleanest, quietest local-LLM workstation for Apple-native workflows.
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 attribution: Based on Apple MLX benchmarks and community reports
 ---
 

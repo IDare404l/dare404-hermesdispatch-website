@@ -38,7 +38,7 @@ faq_schema:
     generally has better tool support and performance.
 review: null
 verdict: The best consumer GPU for local LLMs if budget and power are not constraints.
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 attribution: Based on community benchmarks
 ---
 

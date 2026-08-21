@@ -14,7 +14,7 @@ affiliate_tags:
 - exchange
 - trading
 verdict: Good starting point for US traders moving from basic exchange to API trading.
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 applicationCategory: FinanceApplication
 operatingSystem: Web, iOS, Android
 softwareVersion: ''

@@ -14,7 +14,7 @@ affiliate_tags:
 - broker
 - api
 verdict: Best for low-cost, regulated API trading across stocks, options, and futures.
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 applicationCategory: FinanceApplication
 operatingSystem: Web, Windows, macOS, iOS, Android
 softwareVersion: ''

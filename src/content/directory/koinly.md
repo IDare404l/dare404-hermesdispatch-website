@@ -15,7 +15,7 @@ affiliate_tags:
 - reporting
 verdict: Best automated crypto tax tool for miners and traders with many exchange
   connections.
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 applicationCategory: FinanceApplication
 operatingSystem: Web
 softwareVersion: ''

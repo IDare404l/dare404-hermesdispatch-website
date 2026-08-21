@@ -12,7 +12,7 @@ agent_score: 93
 tags: [mini pc, amd, strix halo, local llm, oculink]
 source: "https://www.gmktec.com/"
 attribution: "Based on public specs and community Ollama benchmarks."
-last_verified: '2026-08-03'
+last_verified: '2026-08-21'
 ---
 
 ## What it is
