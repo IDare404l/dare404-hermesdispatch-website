@@ -3,26 +3,49 @@
 Site: https://hermesdispatch.dev
 Topics: local LLMs, AI hardware, GPU cost math, crypto-miner pivots, no-code agents, AI affiliate deals
 
-## AI Tools (19)
+## AI Tools (43)
+- /tools/agent-benchmark-selector/
 - /tools/agent-hardware-sizer/
 - /tools/agent-hosting-cost-comparator/
+- /tools/agent-marketplace-fee-comparator/
+- /tools/agent-memory-cost-calculator/
+- /tools/agent-memory-cost-calculator-v2/
+- /tools/agent-observability-cost-comparator/
+- /tools/agent-routing-cost-comparator/
+- /tools/ai-agent-compliance-checker/
 - /tools/ai-hardware-deal-tracker/
+- /tools/ai-image-generation-cost-calculator/
+- /tools/ai-pc-build-configurator/
+- /tools/ai-startup-cost-calculator/
+- /tools/ai-voice-agent-cost-calculator/
+- /tools/answer-engine-citation-tracker/
+- /tools/browser-use-cost-estimator/
+- /tools/context-window-cheat-sheet/
 - /tools/crypto-staking-vs-inference-yield/
 - /tools/crypto-tax-loss-harvester/
+- /tools/gpu-benchmark-comparator/
 - /tools/gpu-cloud-vs-buy-calculator/
 - /tools/gpu-power-cooling-sizer/
 - /tools/hardware-resale-estimator/
 - /tools/hashrate-to-inference-converter/
 - /tools/inference-engine-selector/
 - /tools/inference-engine-selector-v2/
+- /tools/llm-cost-calculator/
 - /tools/local-llm-roi-calculator/
+- /tools/mcp-server-cost-estimator/
 - /tools/miner-pivot-calculator/
 - /tools/mini-pc-recommender/
+- /tools/newsletter-prompt-generator/
+- /tools/newsletter-prompt-generator-v2/
+- /tools/newsletter-topic-finder/
 - /tools/no-code-agent-builder-selector/
 - /tools/open-source-llm-selector/
 - /tools/quantization-advisor/
+- /tools/rig-repurposing-guide/
+- /tools/startup-runway-calculator/
 - /tools/tokens-per-watt-calculator/
 - /tools/vram-calculator/
+- /tools/webpage-tts-cost-estimator/
 
 ## Agent scripts (Hermes-compatible)
 - /hermes-tools/local_llm_tokens_per_watt.py
