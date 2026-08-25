@@ -213,7 +213,7 @@ const productLinks: Record<string, { slug: string; label: string; url: string }>
             '<div class="text-right md:text-right flex flex-row md:flex-col items-center md:items-end gap-3">',
             '<span class="text-lg font-mono text-brand-gold">' + item.price + '</span>',
             '<a href="' + link + '"',
-            'target="_blank" rel="noopener noreferrer"',
+            'target="_blank" rel="noopener noreferrer sponsored"',
             'class="px-4 py-2 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold text-sm font-medium hover:bg-brand-gold/20 transition">' + label + ' →</a>',
             '</div>',
             '</div>'
@@ -227,9 +227,17 @@ const productLinks: Record<string, { slug: string; label: string; url: string }>
     })();
   </script>
 
-  
-
-  
+  <!-- Affiliate disclosure -->
+  <section class="max-w-3xl mx-auto px-4 pb-8">
+    <div class="glass-card rounded-xl p-4 text-center border border-amber-500/20 bg-amber-500/5">
+      <p class="text-xs text-amber-400">
+        <svg class="w-4 h-4 inline-block mr-1 align-text-bottom" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        FTC Disclosure: Recommended hardware links use our Amazon Associates tag (<code class="text-amber-300">dare404-20</code>). We may earn if you buy. Price to you is unchanged.
+      </p>
+    </div>
+  </section>
 
   <AgentCodeBlock
     toolName="Agent Hardware Sizer"
