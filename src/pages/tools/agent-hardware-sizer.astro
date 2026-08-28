@@ -125,8 +125,10 @@ const productLinks: Record<string, { slug: string; label: string; url: string }>
     </div>
   </section>
 
+  <script is:inline set:html={`window.productLinks = ${JSON.stringify(productLinks)};`}></script>
   <script is:inline>
     (function() {
+      var productLinks = window.productLinks || {};
       var speedBtns = document.querySelectorAll('.speed-btn');
       var selectedSpeed = 'comfortable';
       var sizeBtn = document.getElementById('size-btn');
