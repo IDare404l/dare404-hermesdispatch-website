@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { newsletters } from '../data/newsletters.ts';
 
 const title = "The Hermes Dispatch — Archive | Hermes Mission Freedom";
-const description = "Daily AI/tech dispatches from dare404 and the Mission Freedom agent system. Read past issues and subscribe.";
+const description = "Archive of The Hermes Dispatch daily newsletter: AI hardware, crypto mining, and autonomous trading briefs. Subscribe for the next issue at 15:00 MST.";
 const sorted = [...newsletters].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 const featured = sorted.find(n => n.featured) || sorted[0];
 const issues = sorted.filter(n => n.slug !== featured?.slug);
