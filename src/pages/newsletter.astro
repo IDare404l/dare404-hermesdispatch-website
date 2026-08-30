@@ -3,10 +3,12 @@ import Layout from '../layouts/Layout.astro';
 import { newsletters } from '../data/newsletters.ts';
 
 const title = "The Hermes Dispatch — Archive | Hermes Mission Freedom";
-const description = "Archive of The Hermes Dispatch daily newsletter: AI hardware, crypto mining, and autonomous trading briefs. Subscribe for the next issue at 15:00 MST.";
-const sorted = [...newsletters].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-const featured = sorted.find(n => n.featured) || sorted[0];
-const issues = sorted.filter(n => n.slug !== featured?.slug);
+const description = "Daily AI/tech dispatches from dare404 and the Mission Freedom agent system. Read past issues and subscribe.";
+const sorted = [...newsletters]
+  .filter(n => n?.date && n?.slug && n?.title)
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+const featured = sorted.find(n => n?.featured) || sorted[0];
+const issues = sorted.filter(n => n?.slug !== featured?.slug);
 ---
 
 <Layout title={title} description={description}>
@@ -46,7 +48,7 @@ const issues = sorted.filter(n => n.slug !== featured?.slug);
             <h2 class="text-2xl font-bold text-white mb-2">Get the dispatch in your inbox</h2>
             <p class="text-gray-400">Daily at 15:00 MST. One email. No spam. Unsubscribe anytime.</p>
           </div>
-          <a href="/subscribe?ref=newsletter-archive-cta" class="btn-primary inline-flex items-center gap-2 whitespace-nowrap">
+          <a href="/subscribe" class="btn-primary inline-flex items-center gap-2 whitespace-nowrap">
             <span>Subscribe</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
           </a>

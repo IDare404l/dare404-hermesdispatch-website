@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { newsletters } from '../../data/newsletters';
 
-const sorted = [...newsletters].filter(n => n.published).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+const sorted = [...newsletters].filter(n => n?.published).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 const latest = sorted[0];
 const title = latest?.title || 'Latest Newsletter';
 const html = latest?.content || '';

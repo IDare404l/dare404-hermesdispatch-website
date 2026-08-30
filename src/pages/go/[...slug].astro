@@ -23,11 +23,10 @@ try {
     const count = parseInt(current || '0', 10) + 1;
     await kv.put(key, String(count));
     const eventKey = `clicks:${dateStr}:${slug}:events`;
-    const event = JSON.stringify({ slug, source, url: safeUrl, ts: new Date().toISOString() });
-    const events = await kv.get(eventKey) || '[]';
-    const eventsArr = JSON.parse(events);
-    eventsArr.push(event);
-    await kv.put(eventKey, JSON.stringify(eventsArr.slice(-50)));
+    const eventsRaw = await kv.get(eventKey) || '[]';
+    const eventsArr = JSON.parse(eventsRaw);
+    eventsArr.push({ slug, source, url: safeUrl, ts: new Date().toISOString() });
+    await kv.put(eventKey, JSON.stringify(eventsArr.slice(-100)));
   }
 } catch (e) {
   console.error('Click logging error:', e);

@@ -4,7 +4,9 @@ import { getNewsletterBySlug, newsletters } from '../../data/newsletters.ts';
 import { marked } from 'marked';
 
 export function getStaticPaths() {
-  return newsletters.map(n => ({ params: { slug: n.slug }, props: { newsletter: n } }));
+  return newsletters
+    .filter(n => n?.slug)
+    .map(n => ({ params: { slug: n.slug }, props: { newsletter: n } }));
 }
 
 const { newsletter } = Astro.props;

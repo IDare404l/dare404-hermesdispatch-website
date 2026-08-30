@@ -6,75 +6,48 @@ const description = "Free tools for AI builders, crypto miners, and investors. C
 
 const categories = [
   {
-    name: "AI Tools",
-    description: "Calculators, comparators, and builders for local AI, agents, and LLM infrastructure.",
+    name: "Directory & Commerce",
+    description: "Curated hardware, software, and exchange listings with affiliate links.",
     tools: [
-      { name: "AI Agent Routing / Gateway Cost Comparator", path: "/tools/agent-routing-cost-comparator/", description: "Compare AI gateway and LLM routing costs across Cloudflare, Portkey, Helicone, LiteLLM, Braintrust, Zuplo, TrueFoundry, Kong, and self-hosted options. Estimate gateway fees, caching savings, routing savings, and margin pricing.", tags: ["AI agents", "gateway", "routing", "LLM", "cost", "caching", "Portkey", "Cloudflare"], highlight: true },
-      { name: "AI Agent MCP Server Cost Estimator", path: "/tools/mcp-server-cost-estimator/", description: "Estimate the cost of running Model Context Protocol (MCP) servers for AI agents. Compare managed hosting, self-hosted cloud, and local options with LLM, tool API, egress, and engineering costs.", tags: ["AI agents", "MCP", "Model Context Protocol", "cost", "hosting", "tools"], highlight: true },
-      { name: "AI Agent Observability / APM Cost Comparator", path: "/tools/agent-observability-cost-comparator/", description: "Compare AI agent observability and APM costs across Langfuse, LangSmith, Arize, Laminar, Helicone, Datadog, Braintrust, AgentOps, Honeycomb, and Pydantic Logfire. Estimate monthly, per-trace, and per-span spend with scenario presets.", tags: ["AI agents", "observability", "APM", "Langfuse", "LangSmith", "Datadog", "cost"], highlight: true },
-      { name: "AI Agent Browser Use / Computer Use Cost Estimator", path: "/tools/browser-use-cost-estimator/", description: "Estimate browser-infrastructure, LLM, screenshot, proxy, and retry costs for AI browser agents and computer-use agents. Add margin pricing per task.", tags: ["AI agents", "browser", "computer use", "Browserbase", "Skyvern", "cost"], highlight: true },
-      { name: "AI Voice Agent Cost Calculator", path: "/tools/ai-voice-agent-cost-calculator/", description: "Estimate Twilio + Vapi + Retell + Deepgram + ElevenLabs + LLM costs for AI voice agents. Add margin pricing per minute or per call.", tags: ["AI agents", "voice", "cost", "Twilio", "Vapi", "STT", "TTS"], highlight: true },
-      { name: "AI Image Generation Cost Calculator", path: "/tools/ai-image-generation-cost-calculator/", description: "Compare image generation costs across Midjourney, DALL·E, Ideogram, Fireworks, FLUX.1, Stability AI, and self-hosted GPUs. Includes prompting, review, upscaling, and local-hardware cost.", tags: ["AI", "image generation", "DALL·E", "Midjourney", "FLUX", "cost", "GPU"], highlight: true },
-      { name: "LLM VRAM Calculator", path: "/tools/vram-calculator/", description: "Estimate GPU memory for any model size and quantization.", tags: ["VRAM", "LLM", "GPU"] },
-      { name: "GPU Benchmark Comparator", path: "/tools/gpu-benchmark-comparator/", description: "Compare NVIDIA H100, H200, A100, B200, GB200 and AMD MI300X on benchmarks, memory, TFLOPS, VRAM, TDP, and cost.", tags: ["GPU", "benchmarks", "H100", "B200", "MI300X"], highlight: true },
+      { name: "AI Hardware Directory", path: "/directory/", description: "Curated GPUs, mini PCs, wallets, miners, and exchanges.", tags: ["directory", "affiliate"], highlight: true },
+      { name: "AI Hardware Deal Tracker", path: "/tools/ai-hardware-deal-tracker/", description: "Watch prices on GPUs, mini PCs, CPUs, RAM, and SSDs for AI builds.", tags: ["deals", "GPU", "mini PC", "hardware"], highlight: true },
+      { name: "GPU Benchmark Comparator", path: "/tools/gpu-benchmark-comparator/", description: "Compare NVIDIA H100, H200, A100, B200, GB200 and AMD MI300X on benchmarks, memory, TFLOPS, VRAM, TDP, and cost.", tags: ["GPU", "benchmarks", "H100", "B200", "MI300X"] },
       { name: "GPU Comparison Table", path: "/compare/gpus/", description: "Sort local-LLM benchmarks by tokens/sec, VRAM, TDP, and price.", tags: ["GPU", "benchmarks", "LLM"] },
       { name: "Mini PC for AI Comparison", path: "/compare/mini-pcs/", description: "Mac Mini M4 vs Beelink GTR9 Pro, GMKtec EVO-X2, GEEKOM A8. Sort by RAM, bandwidth, tok/s.", tags: ["mini PC", "AI", "compare"] },
-      { name: "GPU Recommender", path: "/compare/recommend/", description: "Pick a GPU by model size, budget, and power constraints.", tags: ["GPU", "recommender"] },
-      { name: "Mini PC Recommender", path: "/tools/mini-pc-recommender/", description: "Pick the best compact AI workstation by model size, budget, and noise tolerance.", tags: ["mini PC", "recommender"] },
+      { name: "Affiliate Link Revenue Estimator", path: "/tools/affiliate-revenue-estimator/", description: "Estimate affiliate revenue from clicks, CTR, conversion rate, AOV, commission rate, returns, and network fees.", tags: ["affiliate", "revenue", "monetization", "RPM"] },
+    ]
+  },
+  {
+    name: "Top AI Tools",
+    description: "Most-used calculators and recommenders for local AI builders.",
+    tools: [
       { name: "Agent Hardware Sizer", path: "/tools/agent-hardware-sizer/", description: "Find the exact mini PC, GPU, and RAM config for local LLMs and AI agents.", tags: ["hardware", "sizing", "mini PC", "GPU"], highlight: true },
-      { name: "Local LLM ROI Calculator", path: "/tools/local-llm-roi-calculator/", description: "Compare 3-year total cost of ownership for local GPU vs cloud API.", tags: ["ROI", "TCO", "local LLM", "GPU"] },
-      { name: "Local LLM Tokens-per-Watt Calculator", path: "/tools/tokens-per-watt-calculator/", description: "Compare GPU and mini-PC efficiency for local LLM inference. See tokens per kWh and break-even against cloud APIs.", tags: ["local LLM", "efficiency", "GPU", "power", "tokens per watt"] },
+      { name: "LLM VRAM Calculator", path: "/tools/vram-calculator/", description: "Estimate GPU memory for any model size and quantization.", tags: ["VRAM", "LLM", "GPU"], highlight: true },
+      { name: "Local LLM ROI Calculator", path: "/tools/local-llm-roi-calculator/", description: "Compare 3-year total cost of ownership for local GPU vs cloud API.", tags: ["ROI", "TCO", "local LLM", "GPU"], highlight: true },
       { name: "GPU Cloud Rental vs Buy Calculator", path: "/tools/gpu-cloud-vs-buy-calculator/", description: "Compare hourly cloud GPU rental against buying local hardware.", tags: ["GPU", "cloud", "rental", "buy", "TCO"] },
-      { name: "AI Agent Hosting Cost Comparator", path: "/tools/agent-hosting-cost-comparator/", description: "Compare self-hosted, cloud GPU rental, and managed marketplace hosting costs for AI agents.", tags: ["AI agents", "hosting", "cost", "cloud GPU", "marketplace", "self-hosted"] },
-      { name: "LLM Cost Calculator", path: "/tools/llm-cost-calculator/", description: "Compare API vs local GPU inference cost per 1M tokens across OpenAI, Anthropic, Google, Groq, and self-hosted options.", tags: ["LLM", "cost", "API", "local GPU", "tokens", "compare"], highlight: true },
-      { name: "AI Agent Stack Builder", path: "/tools/agent-stack-builder/", description: "Pick an AI agent use case and get a complete component stack with LLM, framework, hosting, and cost estimate.", tags: ["AI agents", "stack", "builder", "LLM", "framework", "cost"] },
-      { name: "AI PC Build Configurator", path: "/tools/ai-pc-build-configurator/", description: "Choose an AI PC build by budget and use case: entry-level, enthusiast, pro workstation, silent home server, or Mac Studio route.", tags: ["AI PC", "build", "GPU", "hardware", "configurator"] },
-      { name: "Answer Engine Citation Tracker", path: "/tools/answer-engine-citation-tracker/", description: "Track whether your pages appear as citations in AI answer engines and large language model summaries.", tags: ["AEO", "citations", "answer engine", "LLM", "tracker"] },
-      { name: "AI Startup Cost Calculator", path: "/tools/ai-startup-cost-calculator/", description: "Estimate first-year burn for an AI agent startup across compute, API, tools, hosting, and labor.", tags: ["startup", "cost", "AI", "burn", "runway", "MVP"] },
-      { name: "Rig Repurposing Guide", path: "/tools/rig-repurposing-guide/", description: "Turn a crypto-mining rig or old workstation into a local LLM inference server or AI agent host.", tags: ["rig", "repurpose", "mining", "GPU", "local LLM", "upcycle"] },
-      { name: "Local LLM Inference Engine Selector v2", path: "/tools/inference-engine-selector-v2/", description: "Weighted scoring for Ollama, vLLM, SGLang, TensorRT-LLM, MLX, ExLlamaV2, KTransformers, and more. Pick by GPU, model size, quantization, batch size, and priority.", tags: ["LLM", "inference", "engine", "backend", "Ollama", "vLLM", "SGLang", "MLX", "selector"], highlight: true },
-      { name: "Local LLM Inference Engine Selector", path: "/tools/inference-engine-selector/", description: "Pick the best local LLM backend for your model, hardware, OS, and use case: Ollama, llama.cpp, vLLM, TensorRT-LLM, SGLang, MLX, and more.", tags: ["LLM", "inference", "engine", "backend", "Ollama", "vLLM", "llama.cpp", "MLX"] },
+      { name: "Local LLM Inference Engine Selector", path: "/tools/inference-engine-selector-v2/", description: "Weighted scoring for Ollama, vLLM, SGLang, TensorRT-LLM, MLX, ExLlamaV2, KTransformers, and more.", tags: ["LLM", "inference", "engine", "backend", "Ollama", "vLLM", "SGLang", "MLX", "selector"], highlight: true },
       { name: "Local LLM Quantization Advisor", path: "/tools/quantization-advisor/", description: "Pick the right quantization level and format for a local LLM based on your GPU VRAM, quality tolerance, context length, and backend.", tags: ["LLM", "quantization", "GGUF", "VRAM", "Q4_K_M", "AWQ", "GPTQ", "INT8", "advisor"] },
-      { name: "No-Code AI Agent Builder Selector", path: "/tools/no-code-agent-builder-selector/", description: "Pick the best no-code or low-code AI agent builder for your use case, budget, hosting, and team.", tags: ["AI agents", "no-code", "low-code", "builder", "selector", "n8n", "Zapier", "Relevance AI"] },
-      { name: "AI Agent Performance Benchmark Selector", path: "/tools/agent-benchmark-selector/", description: "Pick the right benchmark for your AI agent: coding, reasoning, web, desktop, multi-agent, and domain-specific evals.", tags: ["AI agents", "benchmarks", "SWE-bench", "GAIA", "HumanEval", "evals", "selector"] },
-      { name: "AI Model Context Window Cheat Sheet", path: "/tools/context-window-cheat-sheet/", description: "Compare LLM context windows and max output token limits across OpenAI, Anthropic, Google, DeepSeek, Meta, Qwen, Mistral, Cohere, and xAI.", tags: ["LLM", "context window", "tokens", "models", "cheat sheet"] },
-      { name: "AI Agent Privacy / Compliance Checker", path: "/tools/ai-agent-compliance-checker/", description: "Check which privacy, security, and AI regulations apply to your agent based on jurisdiction, data types, industry, and features.", tags: ["AI agents", "compliance", "GDPR", "SOC2", "privacy", "checker"] },
-      { name: "AI Agent Memory / RAG Cost Calculator v2", path: "/tools/agent-memory-cost-calculator-v2/", description: "Estimate vector DB, embedding, reranker, long-term memory, and change-data-capture (CDC) costs for AI agent memory and RAG.", tags: ["AI agents", "RAG", "vector DB", "embeddings", "memory", "CDC", "long-term memory", "cost"], highlight: true },
-      { name: "AI Agent Memory / RAG Cost Calculator", path: "/tools/agent-memory-cost-calculator/", description: "Estimate vector DB and embedding costs for AI agent memory and RAG.", tags: ["AI agents", "RAG", "vector DB", "embeddings", "memory", "cost"] },
-      { name: "AI Agent Marketplace Fee Comparator", path: "/tools/agent-marketplace-fee-comparator/", description: "Compare take rates, fees, and net payout across AI agent marketplaces.", tags: ["AI agents", "marketplace", "fees", "revenue", "payout"] },
-      { name: "Webpage to Audio / TTS Cost Estimator", path: "/tools/webpage-tts-cost-estimator/", description: "Estimate cost and audio duration for turning a webpage into speech with OpenAI, ElevenLabs, Google Cloud, Amazon Polly, Azure, and self-hosted TTS.", tags: ["TTS", "audio", "webpage", "cost", "OpenAI", "ElevenLabs", "voice"] },
-      { name: "GPU Power Supply & Cooling Sizer", path: "/tools/gpu-power-cooling-sizer/", description: "Calculate PSU wattage, PCIe/EPS cables, heat output, and case airflow for multi-GPU AI or mining rigs.", tags: ["GPU", "PSU", "power", "cooling", "airflow", "AI PC", "mining", "hardware"] },
       { name: "Open Source LLM Selector for Agents", path: "/tools/open-source-llm-selector/", description: "Pick the best open-weight model for an AI agent use case: coding, reasoning, RAG, tool use, vision, multilingual, or cost-sensitive workloads.", tags: ["LLM", "open source", "agents", "model selection", "Llama", "Qwen", "Mistral", "DeepSeek"] },
-      { name: "AI Hardware Resale Value Estimator", path: "/tools/hardware-resale-estimator/", description: "Estimate resale value, net proceeds, and recovery percentage for GPUs, mini PCs, CPUs, RAM, and storage used in AI builds.", tags: ["hardware", "resale", "GPU", "mini PC", "depreciation", "recovery"] },
+      { name: "AI Agent Memory / RAG Cost Calculator", path: "/tools/agent-memory-cost-calculator-v2/", description: "Estimate vector DB, embedding, reranker, long-term memory, and change-data-capture (CDC) costs for AI agent memory and RAG.", tags: ["AI agents", "RAG", "vector DB", "embeddings", "memory", "CDC", "long-term memory", "cost"] },
     ]
   },
   {
     name: "Crypto Tools",
     description: "Mining, pivot, and tax tools for crypto-native operators moving into AI.",
     tools: [
-      { name: "Miner Pivot Calculator", path: "/tools/miner-pivot-calculator/", description: "Compare crypto mining profit vs local LLM inference revenue for your GPU.", tags: ["crypto", "mining", "inference", "pivot"] },
-      { name: "Crypto Tax Loss Harvesting Calculator", path: "/tools/crypto-tax-loss-harvester/", description: "Estimate how much you can save by harvesting crypto losses against gains and income.", tags: ["crypto", "taxes", "harvesting", "portfolio"] },
+      { name: "Miner Pivot Calculator", path: "/tools/miner-pivot-calculator/", description: "Compare crypto mining profit vs local LLM inference revenue for your GPU.", tags: ["crypto", "mining", "inference", "pivot"], highlight: true },
       { name: "GPU Hashrate to Inference Capacity Converter", path: "/tools/hashrate-to-inference-converter/", description: "Convert crypto-mining hashrate into estimated local LLM inference capacity and power cost.", tags: ["crypto", "mining", "hashrate", "LLM", "inference", "GPU"] },
       { name: "Crypto Staking vs AI Inference Yield Calculator", path: "/tools/crypto-staking-vs-inference-yield/", description: "Compare passive staking APY against active GPU AI inference rental yield for the same capital.", tags: ["crypto", "staking", "AI inference", "GPU", "yield", "passive income"] },
+      { name: "Crypto Tax Loss Harvesting Calculator", path: "/tools/crypto-tax-loss-harvester/", description: "Estimate how much you can save by harvesting crypto losses against gains and income.", tags: ["crypto", "taxes", "harvesting", "portfolio"] },
     ]
   },
   {
-    name: "Investing Tools",
-    description: "Cost, revenue, and portfolio tools for AI, crypto, and trading investors.",
+    name: "Content & Ops Tools",
+    description: "Internal tools for producing the dispatch and managing the site.",
     tools: [
-      { name: "AI Hardware Deal Tracker", path: "/tools/ai-hardware-deal-tracker/", description: "Watch prices on GPUs, mini PCs, CPUs, RAM, and SSDs for AI builds.", tags: ["deals", "GPU", "mini PC", "hardware"] },
-      { name: "Affiliate Link Revenue Estimator", path: "/tools/affiliate-revenue-estimator/", description: "Estimate affiliate revenue from clicks, CTR, conversion rate, AOV, commission rate, returns, and network fees.", tags: ["affiliate", "revenue", "monetization", "RPM"] },
+      { name: "Newsletter Topic Finder", path: "/tools/newsletter-topic-finder/", description: "Find newsletter topic ideas for AI hardware, AI agents, crypto-to-AI pivots, investing, and answer-engine optimization.", tags: ["newsletter", "topics", "ideas", "DOC-id", "content"], highlight: true },
+      { name: "Daily Newsletter Prompt Generator", path: "/tools/newsletter-prompt-generator-v2/", description: "Build a complete DOC-id brief with hook styles, output formats, embedded Hermes Dispatch tool links, sponsor slots, answer-engine optimization, and local draft history.", tags: ["newsletter", "prompt", "AI writing", "DOC-id", "content", "markdown", "social"] },
       { name: "Startup Runway Calculator", path: "/tools/startup-runway-calculator/", description: "Calculate months of cash, zero-cash date, and fundraising timing for bootstrapped, seed, and AI agent startups.", tags: ["startup", "runway", "burn", "fundraising", "cash"] },
-      { name: "Daily Newsletter Prompt Generator", path: "/tools/newsletter-prompt-generator/", description: "Generate a DOC-id ready prompt draft for the day's Hermes Dispatch issue. Pick category, tone, topic, word count, and copy the structured prompt.", tags: ["newsletter", "prompt", "AI writing", "DOC-id", "content"] },
-      { name: "Daily Newsletter Prompt Generator v2", path: "/tools/newsletter-prompt-generator-v2/", description: "Build a complete DOC-id brief with hook styles, output formats, embedded Hermes Dispatch tool links, sponsor slots, answer-engine optimization, and local draft history.", tags: ["newsletter", "prompt", "AI writing", "DOC-id", "content", "markdown", "social"], highlight: true },
-      { name: "Newsletter Topic Finder", path: "/tools/newsletter-topic-finder/", description: "Find newsletter topic ideas for AI hardware, AI agents, crypto-to-AI pivots, investing, and answer-engine optimization. Copy a topic into the prompt generator.", tags: ["newsletter", "topics", "ideas", "DOC-id", "content"], highlight: true },
-    ]
-  },
-  {
-    name: "Directory",
-    description: "Curated hardware, software, and exchange listings.",
-    tools: [
-      { name: "AI Hardware Directory", path: "/directory/", description: "Curated GPUs, mini PCs, wallets, miners, and exchanges.", tags: ["directory", "affiliate"] },
     ]
   },
 ];

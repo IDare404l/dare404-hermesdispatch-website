@@ -3,35 +3,63 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
-  const auth = context.request.headers.get('Authorization');
-  const expected = `Bearer ${context.locals.runtime.env?.ADMIN_TOKEN || ''}`;
-  if (auth !== expected) {
+  const url = new URL(context.request.url);
+  const days = parseInt(url.searchParams.get('days') || '7', 10);
+  const password = url.searchParams.get('password') || '';
+  const authHeader = context.request.headers.get('Authorization') || '';
+
+  const runtime = context.locals.runtime;
+  const adminToken = runtime.env?.ADMIN_TOKEN || '';
+
+  // Allow either Bearer token header or ?password query param
+  const isAuth = authHeader === `Bearer ${adminToken}` || password === adminToken;
+  if (!isAuth) {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  const url = new URL(context.request.url);
-  const days = parseInt(url.searchParams.get('days') || '7', 10);
-  const kv = context.locals.runtime.env?.CLICKS_KV || context.locals.runtime.env?.SUBSCRIBERS_KV;
+  const kv = runtime.env?.CLICKS_KV || runtime.env?.SUBSCRIBERS_KV;
   if (!kv) {
     return Response.json({ error: 'No KV binding available' }, { status: 500 });
   }
 
   const now = new Date();
-  const results: Record<string, number> = {};
+  const clicksByDay: Record<string, Record<string, number>> = {};
+  const slugTotals: Record<string, number> = {};
+  const sourceTotals: Record<string, number> = {};
+
   for (let i = 0; i < days; i++) {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().split('T')[0];
-    const keys = await kv.list({ prefix: `clicks:${dateStr}:` });
-    for (const key of keys.keys) {
-      if (key.name.startsWith(`clicks:${dateStr}:`) && !key.name.endsWith(':events')) {
-        const slug = key.name.split(':').pop() || 'unknown';
+    const prefix = `clicks:${dateStr}:`;
+    let cursor: string | undefined;
+    do {
+      const listResult = await kv.list({ prefix, cursor });
+      for (const key of listResult.keys) {
+        if (key.name.endsWith(':events')) continue;
+        const parts = key.name.split(':');
+        const slug = parts.slice(2).join(':') || 'unknown';
+        const source = parts[2] || 'unknown';
         const val = await kv.get(key.name);
         const count = parseInt(val || '0', 10);
-        results[slug] = (results[slug] || 0) + count;
+        clicksByDay[dateStr] = clicksByDay[dateStr] || {};
+        clicksByDay[dateStr][slug] = (clicksByDay[dateStr][slug] || 0) + count;
+        slugTotals[slug] = (slugTotals[slug] || 0) + count;
+        sourceTotals[source] = (sourceTotals[source] || 0) + count;
       }
-    }
+      cursor = listResult.list_complete ? undefined : listResult.cursor;
+    } while (cursor);
   }
 
-  return Response.json({ days, clicks_by_slug: results, total: Object.values(results).reduce((a, b) => a + b, 0) });
+  const sortedSlugs = Object.entries(slugTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 50);
+
+  return Response.json({
+    days,
+    total: Object.values(slugTotals).reduce((a, b) => a + b, 0),
+    clicks_by_slug: Object.fromEntries(sortedSlugs),
+    clicks_by_day: clicksByDay,
+    sources: sourceTotals
+  });
 }
