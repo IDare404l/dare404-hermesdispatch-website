@@ -86,7 +86,7 @@ const faqSchema = {
                 const ctaUrl = product.referral_link || product.amazon_link || '';
                 const slug = product.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'product';
                 return (
-                  <a href={`/go/${slug}/?url=${encodeURIComponent(ctaUrl)}&source=invest-compare`} target="_blank" rel="noopener noreferrer"
+                  <a href={`/go/${slug}/?url=${encodeURIComponent(ctaUrl)}&source=invest-compare`} target="_blank" rel="noopener noreferrer sponsored"
                     class="inline-block px-4 py-1.5 rounded-lg bg-brand-gold/10 border border-brand-gold/30 text-brand-gold hover:bg-brand-gold/20 transition text-xs font-medium">
                     Try →
                   </a>

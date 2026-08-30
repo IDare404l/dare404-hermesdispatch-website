@@ -56,6 +56,7 @@ export async function GET(context: APIContext) {
     { path: '/tools/mini-pc-recommender/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/newsletter-prompt-generator/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/newsletter-prompt-generator-v2/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/newsletter-topic-finder/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/no-code-agent-builder-selector/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/open-source-llm-selector/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/quantization-advisor/', changefreq: 'weekly', priority: 0.8 },
@@ -63,6 +64,12 @@ export async function GET(context: APIContext) {
     { path: '/tools/tokens-per-watt-calculator/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/vram-calculator/', changefreq: 'weekly', priority: 0.8 },
     { path: '/tools/webpage-tts-cost-estimator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/llm-cost-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/agent-stack-builder/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/ai-pc-build-configurator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/answer-engine-citation-tracker/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/ai-startup-cost-calculator/', changefreq: 'weekly', priority: 0.8 },
+    { path: '/tools/rig-repurposing-guide/', changefreq: 'weekly', priority: 0.8 },
   ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
