@@ -1,63 +1,133 @@
 ---
 export interface Props {
-  toolName?: string;
-  toolPath?: string;
+  title?: string;
+  description?: string;
   cta?: string;
-  requestTypes?: string[];
+  source?: string;
 }
 
-const { toolName = "this tool", toolPath = "/", cta = "Get a quote", requestTypes = ["Sourcing help", "Installation help", "Consulting"] } = Astro.props;
+const {
+  title = "Want the agent playbook for your business?",
+  description = "Tell us what you're building and we'll send a one-page guide with the exact hardware, models, and skills that fit your budget.",
+  cta = "Send my guide",
+  source = "lead-capture"
+} = Astro.props;
+
+const sourceParam = encodeURIComponent(source);
 ---
 
-<div class="lead-capture mt-6 p-4 rounded-xl border border-cyan-400/30 bg-cyan-400/5" data-tool-path={toolPath}>
-  <h3 class="text-cyan-400 font-semibold mb-2">{cta}</h3>
-  <p class="text-slate-300 text-sm mb-4">Need help with {toolName}? Send a request and a partner will reply within 24 hours.</p>
-  <form class="space-y-3">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <input type="text" name="name" placeholder="Name" required class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm" />
-      <input type="email" name="email" placeholder="Email" required class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm" />
+<div class="lead-capture-component rounded-2xl border border-brand-gold/20 bg-brand-gold/5 p-6 md:p-8">
+  <h3 class="text-xl font-bold text-white mb-2">{title}</h3>
+  <p class="text-text-secondary text-sm mb-6">{description}</p>
+
+  <form
+    class="lead-form space-y-4 max-w-md"
+    data-source={source}
+  >
+    <div>
+      <label class="block text-xs text-gray-400 mb-1" for={`lead-name-${source}`}>Name</label>
+      <input
+        id={`lead-name-${source}`}
+        type="text"
+        name="name"
+        required
+        placeholder="Your name"
+        class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition"
+      />
     </div>
-    <select name="request_type" required class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm">
-      <option value="">What do you need?</option>
-      {requestTypes.map(t => <option value={t}>{t}</option>)}
-    </select>
-    <textarea name="message" placeholder="Details (optional)" rows="3" class="w-full bg-slate-950 border border-slate-600 rounded px-3 py-2 text-white text-sm"></textarea>
-    <button type="submit" class="px-4 py-2 rounded bg-cyan-400 text-slate-900 font-medium text-sm hover:bg-cyan-300 transition">Send request</button>
+    <div>
+      <label class="block text-xs text-gray-400 mb-1" for={`lead-email-${source}`}>Email</label>
+      <input
+        id={`lead-email-${source}`}
+        type="email"
+        name="email"
+        required
+        placeholder="you@example.com"
+        class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition"
+      />
+    </div>
+    <div>
+      <label class="block text-xs text-gray-400 mb-1" for={`lead-interest-${source}`}>What are you building?</label>
+      <select
+        id={`lead-interest-${source}`}
+        name="request_type"
+        required
+        class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white focus:outline-none focus:border-brand-gold transition"
+      >
+        <option value="">Select one...</option>
+        <option value="local-llm-rig">Local LLM rig</option>
+        <option value="agent-newsletter">Agent-run newsletter</option>
+        <option value="crypto-mining-pivot">Crypto mining → AI pivot</option>
+        <option value="trading-automation">Trading automation</option>
+        <option value="hire-hermes">Hire Hermes for a project</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs text-gray-400 mb-1" for={`lead-message-${source}`}>Message (optional)</label>
+      <textarea
+        id={`lead-message-${source}`}
+        name="message"
+        rows="3"
+        placeholder="Optional details..."
+        class="w-full px-4 py-3 rounded-xl bg-brand-card border border-brand-border text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold transition"
+      ></textarea>
+    </div>
+    <button type="submit" class="btn-primary w-full flex items-center justify-center gap-2">
+      <span class="btn-text">{cta}</span>
+    </button>
   </form>
-  <p class="status text-sm mt-2 hidden"></p>
+
+  <div class="lead-success hidden mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm">
+    ✅ Message sent. We'll reply within 1–2 business days.
+  </div>
+  <div class="lead-error hidden mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+    ⚠️ Something went wrong. Please try again.
+  </div>
 </div>
 
-<script>
-  document.querySelectorAll('.lead-capture').forEach(container => {
-    const form = container.querySelector('form');
-    const status = container.querySelector('.status');
-    const toolPath = container.dataset.toolPath;
+<script is:inline>
+(function() {
+  document.querySelectorAll('.lead-capture-component').forEach(function(wrapper) {
+    var form = wrapper.querySelector('.lead-form');
+    if (!form) return;
+    var success = wrapper.querySelector('.lead-success');
+    var error = wrapper.querySelector('.lead-error');
+    var btn = form.querySelector('button[type="submit"]');
+    var btnText = btn.querySelector('.btn-text');
 
-    form?.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
-      const formData = new FormData(form);
-      const body = {
-        tool_path: toolPath,
+      var formData = new FormData(form);
+      var payload = {
+        tool_path: window.location.pathname,
         name: formData.get('name'),
         email: formData.get('email'),
         request_type: formData.get('request_type'),
-        message: formData.get('message')
+        message: formData.get('message') || ''
       };
 
-      try {
-        const res = await fetch('/api/lead-capture/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const json = await res.json();
-        status.textContent = json.ok ? 'Request sent. A partner will reply shortly.' : 'Failed to send. Please try again.';
-        status.className = 'status text-sm mt-2 ' + (json.ok ? 'text-emerald-400' : 'text-red-400');
-        if (json.ok) form.reset();
-      } catch (err) {
-        status.textContent = 'Failed to send. Please try again.';
-        status.className = 'status text-sm mt-2 text-red-400';
-      }
+      btn.disabled = true;
+      if (btnText) btnText.textContent = 'Sending...';
+
+      fetch('/api/lead-capture/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function(r) {
+        if (r.ok) {
+          form.style.display = 'none';
+          success.classList.remove('hidden');
+        } else {
+          throw new Error('Server error ' + r.status);
+        }
+      }).catch(function(err) {
+        console.error('Lead capture error:', err);
+        error.classList.remove('hidden');
+        btn.disabled = false;
+        if (btnText) btnText.textContent = form.getAttribute('data-btn-text') || 'Send';
+      });
     });
   });
+})();
 </script>

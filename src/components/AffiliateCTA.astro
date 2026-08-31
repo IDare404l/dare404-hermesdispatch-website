@@ -1,0 +1,72 @@
+---
+export interface Props {
+  vertical?: 'rig' | 'mine' | 'ledger' | 'general';
+  class?: string;
+}
+
+const { vertical = 'general', class: className = '' } = Astro.props;
+
+const picks: Record<string, { title: string; items: { name: string; slug: string; tag: string }[] }> = {
+  rig: {
+    title: 'Rig picks this week',
+    items: [
+      { name: 'Beelink SER7 Pro', slug: 'beelink-ser7', tag: 'Best value mini PC' },
+      { name: 'Geekom A8', slug: 'geekom-a8', tag: 'More headroom' },
+      { name: 'Corsair 64GB DDR5', slug: 'corsair-64gb-ddr5', tag: 'RAM upgrade' }
+    ]
+  },
+  mine: {
+    title: 'Mine picks this week',
+    items: [
+      { name: 'Ledger Nano X', slug: 'ledger-nano-x', tag: 'Cold storage' },
+      { name: 'Bitmain Antminer S21', slug: 'antminer-s21', tag: 'ASIC' },
+      { name: 'Kraken Pro', slug: 'kraken-pro', tag: 'Exchange' }
+    ]
+  },
+  ledger: {
+    title: 'Ledger picks this week',
+    items: [
+      { name: 'Ledger Nano X', slug: 'ledger-nano-x', tag: 'Hardware wallet' },
+      { name: 'Koinly', slug: 'koinly', tag: 'Tax software' },
+      { name: 'TradingView Pro', slug: 'tradingview', tag: 'Charts' }
+    ]
+  },
+  general: {
+    title: 'Featured picks',
+    items: [
+      { name: 'Beelink SER7 Pro', slug: 'beelink-ser7', tag: 'Local LLM value' },
+      { name: 'Ledger Nano X', slug: 'ledger-nano-x', tag: 'Secure crypto' },
+      { name: 'Koinly', slug: 'koinly', tag: 'Tax automation' }
+    ]
+  }
+};
+
+const data = picks[vertical];
+import { getPartnerUrl } from '../data/partners';
+---
+
+<div class={`affiliate-cta-component rounded-2xl border border-brand-gold/20 bg-gradient-to-br from-brand-gold/5 to-transparent p-6 ${className}`}>
+  <div class="flex items-center gap-2 mb-4">
+    <span class="text-brand-gold text-lg">★</span>
+    <h3 class="text-lg font-bold text-white">{data.title}</h3>
+    <span class="ml-auto text-xs text-gray-500">Affiliate links — price unchanged</span>
+  </div>
+
+  <div class="grid sm:grid-cols-3 gap-3">
+    {data.items.map((item) => {
+      const url = getPartnerUrl(item.slug);
+      return (
+        <a
+          href={url ? `/go/?url=${encodeURIComponent(url)}&source=affiliate-cta-${vertical}` : `/directory`}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          class="block p-4 rounded-xl bg-brand-card border border-brand-border hover:border-brand-gold/40 transition group"
+        >
+          <p class="text-xs text-brand-gold mb-1">{item.tag}</p>
+          <p class="text-sm font-semibold text-white group-hover:text-brand-gold transition">{item.name}</p>
+          <p class="text-xs text-gray-500 mt-2">View price →</p>
+        </a>
+      );
+    })}
+  </div>
+</div>

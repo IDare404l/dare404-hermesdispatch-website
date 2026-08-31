@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { getNewsletterBySlug, newsletters } from '../../data/newsletters.ts';
+import AffiliateCTA from '../../components/AffiliateCTA.astro';
+import LeadCapture from '../../components/LeadCapture.astro';
 import { marked } from 'marked';
 
 export function getStaticPaths() {
@@ -51,6 +53,11 @@ const issueUrl = `https://hermesdispatch.dev/newsletter/${newsletter.slug}/`;
         <div set:html={html} />
       </article>
 
+      <!-- Affiliate CTA -->
+      <div class="mb-12">
+        <AffiliateCTA vertical="general" />
+      </div>
+
       <!-- Subscribe CTA -->
       <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-8 mb-12">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -63,6 +70,16 @@ const issueUrl = `https://hermesdispatch.dev/newsletter/${newsletter.slug}/`;
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
           </a>
         </div>
+      </div>
+
+      <!-- Lead Capture -->
+      <div class="max-w-2xl mx-auto">
+        <LeadCapture
+          title="Want this applied to your own stack?"
+          description="Tell us what you're building and we'll reply with a one-page hardware + tooling recommendation."
+          cta="Get my recommendation"
+          source="newsletter-issue"
+        />
       </div>
 
       <!-- Issue Article schema -->

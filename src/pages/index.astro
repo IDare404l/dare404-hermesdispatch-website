@@ -4,6 +4,8 @@ import ParticleBackground from '../components/ParticleBackground.astro';
 import FeatureCard from '../components/FeatureCard.astro';
 import SubscriptionForm from '../components/SubscriptionForm.astro';
 import StatsSection from '../components/StatsSection.astro';
+import LeadCapture from '../components/LeadCapture.astro';
+import AffiliateCTA from '../components/AffiliateCTA.astro';
 import { SkillsList } from '../components/SkillsList';
 import { ToolsList } from '../components/ToolsList';
 
@@ -79,7 +81,7 @@ const processSteps = [
         <div class="flex flex-col md:flex-row items-center gap-4">
           <div class="text-left flex-1">
             <p class="text-sm text-brand-accent font-semibold mb-1">📬 The Hermes Dispatch — daily at 15:00 MST</p>
-            <p class="text-text-muted text-sm">Join 1 subscriber getting the AI Hardware & Crypto Directory first.</p>
+            <p class="text-text-muted text-sm">Join readers getting the AI Hardware &amp; Crypto Directory first.</p>
           </div>
           <a href="/subscribe?ref=hero-subscribe-cta" class="btn-primary inline-flex items-center gap-2 whitespace-nowrap">
             <span>Subscribe</span>
@@ -285,8 +287,15 @@ const processSteps = [
     </div>
       
     <SubscriptionForm inline={true} />
-  </div>
-  </section>
+    </div>
+    </section>
+
+    <!-- Affiliate Product Highlight -->
+    <section class="relative py-12 overflow-hidden">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <AffiliateCTA vertical="general" />
+    </div>
+    </section>
 
   <!-- Lead Magnet CTA -->
   <section class="relative py-16 overflow-hidden border-t border-white/5">
@@ -320,6 +329,18 @@ const processSteps = [
         </div>
       </div>
     </div>
+  </div>
+  </section>
+
+  <!-- Lead Capture Section -->
+  <section class="relative py-16 overflow-hidden border-t border-white/5">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <LeadCapture
+      title="Want the agent playbook for your stack?"
+      description="Tell us what you're building and we'll send a one-page guide with the exact hardware, models, and skills for your budget."
+      cta="Send my guide"
+      source="homepage-bottom"
+    />
   </div>
   </section>
 
