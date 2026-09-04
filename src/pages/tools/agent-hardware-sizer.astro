@@ -126,6 +126,19 @@ const productLinks: Record<string, { slug: string; label: string; url: string }>
     </div>
   </section>
 
+  <!-- Lead magnet CTA: AI Agent Stack Builder checklist -->
+  <section class="max-w-3xl mx-auto px-4 pb-8">
+    <div class="glass-card rounded-2xl p-8 border border-brand-gold/20 bg-brand-gold/5 text-center">
+      <h2 class="text-2xl font-bold text-white mb-2">Want the exact rig spec for your agent?</h2>
+      <p class="text-gray-400 mb-6">Get the AI Agent Stack Builder — a printable checklist with the hardware, models, and cost estimates we use to run Hermes agents locally.</p>
+      <a href="/tools/agent-stack-builder/?ref=agent-hardware-sizer-lead-magnet" class="btn-primary inline-flex items-center gap-2">
+        Build your agent stack →
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+      <p class="text-xs text-gray-500 mt-4">Free tool. No email required. Affiliate links included; price to you is unchanged.</p>
+    </div>
+  </section>
+
   <script is:inline set:html={`window.productLinks = ${JSON.stringify(productLinks)};`}></script>
   <script is:inline>
     (function() {
