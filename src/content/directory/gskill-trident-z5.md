@@ -6,6 +6,7 @@ image: https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80
 name_full: G.Skill Trident Z5 RGB 64GB DDR5-6000 Kit
 price: $199
 source: https://www.gskill.com/product/165/390/1653910/
+amazon_link: https://www.amazon.com/s?k=G.Skill+Trident+Z5+64GB+DDR5&ref=nb_sb_noss&tag=dare404-20
 referral_link: ''
 why_use: Fast DDR5 memory for AI inference rigs; 64GB supports large context windows
   and model loading.

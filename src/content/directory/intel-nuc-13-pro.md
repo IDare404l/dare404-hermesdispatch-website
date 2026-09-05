@@ -6,6 +6,7 @@ image: https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&q=80
 name_full: Intel NUC 13 Pro Kit
 price: $480
 source: https://www.intel.com/content/www/us/en/products/details/nuc/mini-pcs.html
+amazon_link: https://www.amazon.com/s?k=Intel+NUC+13+Pro&ref=nb_sb_noss&tag=dare404-20
 referral_link: ''
 why_use: Compact, reliable mini PC for AI agent hosting, home servers, and lightweight
   inference workloads.

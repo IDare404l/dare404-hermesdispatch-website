@@ -6,6 +6,7 @@ image: https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=600&q=80
 name_full: Bitmain Antminer S19 XP 140TH/s
 price: $2,400
 source: https://shop.bitmain.com/product/detail/antminer-s19-xp
+amazon_link: https://www.amazon.com/s?k=Antminer+S19+XP&ref=nb_sb_noss&tag=dare404-20
 referral_link: ''
 why_use: Previous-generation Bitcoin ASIC with proven reliability; often available
   used at lower prices.

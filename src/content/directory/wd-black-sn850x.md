@@ -6,6 +6,7 @@ image: https://images.unsplash.com/photo-1563212034-a3c52118cce2?w=600&q=80
 name_full: WD Black SN850X 2TB NVMe SSD
 price: $129
 source: https://www.westerndigital.com/products/internal-drives/wd-black-sn850x-nvme-ssd
+amazon_link: https://www.amazon.com/s?k=WD+Black+SN850X+2TB&ref=nb_sb_noss&tag=dare404-20
 referral_link: ''
 why_use: Fast NVMe storage for loading large model files quickly and caching inference
   context.

@@ -6,7 +6,7 @@ image: https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=600&q=80
 name_full: Kraken Pro Crypto Exchange
 price: Free
 source: https://pro.kraken.com
-referral_link: ''
+referral_link: https://kraken.com/?ref=dare404
 why_use: Advanced trading interface with strong security record, staking, and deep
   liquidity.
 affiliate_tags:

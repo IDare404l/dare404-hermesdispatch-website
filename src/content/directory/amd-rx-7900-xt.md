@@ -6,6 +6,7 @@ image: https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&q=80
 name_full: AMD Radeon RX 7900 XT 20GB
 price: $899
 source: https://www.amd.com/en/products/graphics/desktops/radeon/7000-series/amd-radeon-rx-7900-xt.html
+amazon_link: https://www.amazon.com/s?k=AMD+Radeon+RX+7900+XT&ref=nb_sb_noss&tag=dare404-20
 referral_link: ''
 why_use: 20GB of VRAM under $1,000, making it a strong budget alternative to NVIDIA
   for local LLM inference.
